@@ -19,10 +19,14 @@ namespace Contagion.Managers
     {
         public static HumanResistanceManager Instance { get; private set; }
 
-        [Header("국가 등급별 봉쇄 트리거 (plagueVisibility 임계값)")]
+        [Header("국가 등급별 봉쇄 트리거 (plagueVisibility 임계값 — '국경' 폐쇄 기준값)")]
         [SerializeField, Tooltip("선진국은 빠르게 봉쇄")] private float highDevLockdownThreshold = 0.5f;
         [SerializeField, Tooltip("개발도상국은 느리게 봉쇄")] private float midDevLockdownThreshold = 0.7f;
         // 저개발국(Low)은 설계 문서 5절에 따라 봉쇄 트리거 없음
+
+        [Header("국경 폐쇄 순차화 (나무위키 기준: 공항 > 국경 > 항구, Docs/PlagueIncReference.md 5절)")]
+        [SerializeField, Tooltip("위 임계값 기준으로 공항은 이만큼 일찍, 항구는 이만큼 늦게 닫힘")]
+        private float sequentialClosureMargin = 0.1f;
 
         [Header("국가 등급별 최대 연구 기여도 (healthFunding)")]
         [SerializeField] private float highDevMaxFunding = 1.0f;
@@ -43,10 +47,17 @@ namespace Contagion.Managers
 
         private WorldDataManager Data => WorldDataManager.Instance;
         private ResistanceStage _lastStage = ResistanceStage.NoAwareness;
+        private WorldMortalityStage _lastMortalityStage = WorldMortalityStage.Stable;
         private readonly Dictionary<string, CountryCollapseStage> _lastCollapseStage = new Dictionary<string, CountryCollapseStage>();
 
         /// <summary>저항 단계가 바뀔 때만 발행 — 뉴스 피드(Step 7)에서 활용 예정.</summary>
         public event Action<ResistanceStage> OnResistanceStageChanged;
+
+        /// <summary>
+        /// 전 세계 사망률 기준 위험도 단계가 바뀔 때만 발행. 나무위키 "세계를 위협"/"인류 멸종 임박" 문구
+        /// 세분화 (Docs/PlagueIncReference.md 2절) — OnResistanceStageChanged(전염 확산 축)와 별개 축이다.
+        /// </summary>
+        public event Action<WorldMortalityStage> OnMortalityStageChanged;
 
         private void Awake()
         {
@@ -85,6 +96,15 @@ namespace Contagion.Managers
                 OnResistanceStageChanged?.Invoke(stage);
             }
 
+            var mortalityStage = state.GetMortalityStage();
+            if (mortalityStage != _lastMortalityStage)
+            {
+                Debug.Log($"[HumanResistanceManager] 세계 사망률 위험도 변경: {_lastMortalityStage} -> {mortalityStage} " +
+                    $"(사망률={(state.totalPopulation > 0 ? (float)state.deadCount / state.totalPopulation : 0f):P2})");
+                _lastMortalityStage = mortalityStage;
+                OnMortalityStageChanged?.Invoke(mortalityStage);
+            }
+
             if (Data == null) return;
             foreach (var country in Data.Countries)
                 ApplyPolicy(country, state, stage);
@@ -97,10 +117,10 @@ namespace Contagion.Managers
             switch (country.developmentLevel)
             {
                 case DevelopmentLevel.High:
-                    if (visibility >= highDevLockdownThreshold) CloseBorders(country);
+                    ApplySequentialClosure(country, visibility, highDevLockdownThreshold);
                     break;
                 case DevelopmentLevel.Mid:
-                    if (visibility >= midDevLockdownThreshold) CloseBorders(country);
+                    ApplySequentialClosure(country, visibility, midDevLockdownThreshold);
                     break;
                 case DevelopmentLevel.Low:
                     // 저개발국: 봉쇄 없음 (설계 문서 5절) — 국경 상태를 건드리지 않는다.
@@ -151,7 +171,9 @@ namespace Contagion.Managers
                     break;
             }
 
-            country.healthFunding = funding;
+            // 국가별 치료 자금 투자 한계치 — 자연재해 등으로 깎였을 수 있음 (Docs/PlagueIncReference.md 4절,
+            // EventManager.ApplyNaturalDisaster). 매 틱 계산된 funding을 이 상한선으로 다시 한 번 클램프한다.
+            country.healthFunding = Mathf.Min(funding, country.healthFundingCap);
 
             // 완전한 무정부 상태: 감염자가 없어도 치안 붕괴로 소량 추가 사망 발생 (원본 게임 특유의 룰).
             if (collapseStage == CountryCollapseStage.FullAnarchy && country.LivingPopulation > 0)
@@ -174,14 +196,35 @@ namespace Contagion.Managers
             }
         }
 
-        private void CloseBorders(Country country)
+        /// <summary>
+        /// 나무위키 기준 국경 폐쇄 우선순위 — 항상 공항 먼저, 그다음 국경, 마지막에 항구 순으로 닫힌다
+        /// (Docs/PlagueIncReference.md 5절). 기존엔 하나의 임계값을 넘으면 세 개를 동시에 닫았는데,
+        /// baseThreshold를 기준으로 공항은 sequentialClosureMargin만큼 일찍, 항구는 그만큼 늦게 닫히도록
+        /// 3단계로 쪼갰다 — "항구는 아직 열려 있으니 배로 파고들 시간이 있다" 같은 원본 특유의 긴장감 재현.
+        /// </summary>
+        private void ApplySequentialClosure(Country country, float visibility, float baseThreshold)
         {
-            if (!country.isBorderClosed)
-                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 국경/공항/항구 봉쇄");
+            float airportThreshold = Mathf.Max(0f, baseThreshold - sequentialClosureMargin);
+            float borderThreshold = baseThreshold;
+            float portThreshold = Mathf.Min(1f, baseThreshold + sequentialClosureMargin);
 
-            country.isBorderClosed = true;
-            country.isAirportOpen = false;
-            country.isPortOpen = false;
+            if (country.isAirportOpen && visibility >= airportThreshold)
+            {
+                country.isAirportOpen = false;
+                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 공항 폐쇄 (1순위, visibility={visibility:F2} >= {airportThreshold:F2})");
+            }
+
+            if (!country.isBorderClosed && visibility >= borderThreshold)
+            {
+                country.isBorderClosed = true;
+                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 국경 폐쇄 (2순위, visibility={visibility:F2} >= {borderThreshold:F2})");
+            }
+
+            if (country.isPortOpen && visibility >= portThreshold)
+            {
+                country.isPortOpen = false;
+                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 항구 폐쇄 (3순위, visibility={visibility:F2} >= {portThreshold:F2})");
+            }
         }
     }
 }

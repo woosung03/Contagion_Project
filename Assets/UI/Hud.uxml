@@ -13,6 +13,7 @@
                 <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
                 <ui:Label name="day-label" text="Day 0" class="stat-label" />
                 <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />
+                <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
             </ui:VisualElement>
             <ui:VisualElement name="tabs-row" class="tabs-row">
                 <ui:Button name="tab-transmission" text="전파" class="tab-button" />

@@ -23,6 +23,11 @@
     color: rgb(140, 210, 255);
 }
 
+.news-scroll .news-entry--flavor {
+    color: rgb(210, 210, 210);
+    -unity-font-style: italic;
+}
+
 .map-spacer {
     flex-grow: 1;
 }
@@ -50,6 +55,10 @@
 
 .stat-label--phase {
     color: rgb(255, 210, 90);
+}
+
+.stat-label--mortality {
+    color: rgb(255, 120, 120);
 }
 
 .tabs-row {

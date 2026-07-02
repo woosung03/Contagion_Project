@@ -94,4 +94,18 @@ namespace Contagion.Data
         FullAnarchy,     // 완전한 무정부 상태 (95% 이상) — 정부 몰락, 연구 중단, 치안 붕괴로 추가 사망
         Extinct          // 국가 소멸 (100%)
     }
+
+    /// <summary>
+    /// 세계 전체 사망률 기준 위험도 단계. 나무위키 Plague Inc./상태 문서의 "세계를 위협(사망 1~20%)" /
+    /// "인류 멸종 임박(사망 20%+)" 문구를 반영 (Docs/PlagueIncReference.md 2절).
+    /// 기존 ResistanceStage(plagueVisibility 기준, 인류의 대응 단계)와는 별개 축이다 — 이쪽은
+    /// "얼마나 퍼졌는지가 아니라 얼마나 많이 죽었는지"만 본다. 둘을 조합해 UI에 노출한다.
+    /// </summary>
+    public enum WorldMortalityStage
+    {
+        Stable,             // 사망률 0% — 안정적
+        EmergingThreat,     // 사망률 0% 초과 ~ 1% 미만 — 위협 시작
+        WorldThreatened,    // 사망률 1% 이상 ~ 20% 미만 — 세계를 위협
+        ExtinctionImminent  // 사망률 20% 이상 — 인류 멸종 임박
+    }
 }

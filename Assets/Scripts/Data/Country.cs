@@ -28,6 +28,14 @@ namespace Contagion.Data
         [UnityEngine.Range(0f, 1f)] public float healthFunding;        // 치료제 기여도
         [UnityEngine.Range(0f, 1f)] public float governmentStability = 1f; // 0=무정부, 1=안정
 
+        /// <summary>
+        /// 치료 자금 투자 한계치 (0~1). 기본 1(제한 없음) — 나무위키 "자연재해로 사망자가 나면 그 나라의
+        /// 치료 자금 투자 한계치 자체가 낮아진다"를 반영 (Docs/PlagueIncReference.md 4절). 자연재해 이벤트가
+        /// 뜬 국가는 이 값이 영구적으로 깎이고, HumanResistanceManager.ApplyPolicy()가 healthFunding을
+        /// 계산한 뒤 이 상한선으로 다시 한 번 클램프한다.
+        /// </summary>
+        [UnityEngine.Range(0f, 1f)] public float healthFundingCap = 1f;
+
         // 국가 간 전파용 연결 그래프 (국가 id 목록)
         public List<string> neighborCountryIds = new List<string>();   // 육상 국경 인접국
         public List<string> airRouteCountryIds = new List<string>();   // 항공 노선 연결국
@@ -99,6 +107,7 @@ namespace Contagion.Data
                 isPortOpen = isPortOpen,
                 isBorderClosed = isBorderClosed,
                 healthFunding = healthFunding,
+                healthFundingCap = healthFundingCap,
                 governmentStability = governmentStability,
                 neighborCountryIds = new List<string>(neighborCountryIds),
                 airRouteCountryIds = new List<string>(airRouteCountryIds),

@@ -47,5 +47,18 @@ namespace Contagion.Data
             if (plagueVisibility < 0.8f) return ResistanceStage.NationalEmergency;
             return ResistanceStage.WorldCollapse;
         }
+
+        /// <summary>
+        /// 전 세계 사망률(deadCount / totalPopulation) 기준 위험도 단계. 나무위키 "세계를 위협"/
+        /// "인류 멸종 임박" 문구 반영 (Docs/PlagueIncReference.md 2절). GetResistanceStage()와 별개 축.
+        /// </summary>
+        public WorldMortalityStage GetMortalityStage()
+        {
+            if (totalPopulation <= 0 || deadCount <= 0) return WorldMortalityStage.Stable;
+            float deathRatio = (float)deadCount / totalPopulation;
+            if (deathRatio >= 0.2f) return WorldMortalityStage.ExtinctionImminent;
+            if (deathRatio >= 0.01f) return WorldMortalityStage.WorldThreatened;
+            return WorldMortalityStage.EmergingThreat;
+        }
     }
 }

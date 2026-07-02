@@ -19,6 +19,7 @@ namespace Contagion.UI
         private Label _dnaLabel;
         private Label _dayLabel;
         private Label _phaseLabel;
+        private Label _worldStatusLabel;
         private Button _tabTransmission;
         private Button _tabSymptom;
         private Button _tabAbility;
@@ -37,6 +38,7 @@ namespace Contagion.UI
             _dnaLabel = root.Q<Label>("dna-label");
             _dayLabel = root.Q<Label>("day-label");
             _phaseLabel = root.Q<Label>("phase-label");
+            _worldStatusLabel = root.Q<Label>("world-status-label");
 
             _tabTransmission = root.Q<Button>("tab-transmission");
             _tabSymptom = root.Q<Button>("tab-symptom");
@@ -86,7 +88,21 @@ namespace Contagion.UI
             _cureLabel.text = $"치료제: {state.cureProgress * 100f:F1}%";
             _dnaLabel.text = $"DNA: {state.dnaPoints:N0}";
             _dayLabel.text = $"Day {state.currentDay}";
+
+            // 사망률 기준 위험도 텍스트 세분화 (Docs/PlagueIncReference.md 2절) — 사망자가 아예 없는
+            // Stable 상태에서는 굳이 표시하지 않고(평시엔 빈 문자열), 위협 단계에 들어서야 노출한다.
+            var mortalityStage = state.GetMortalityStage();
+            _worldStatusLabel.text = mortalityStage == WorldMortalityStage.Stable ? "" : MortalityStageLabel(mortalityStage);
         }
+
+        private static string MortalityStageLabel(WorldMortalityStage stage) => stage switch
+        {
+            WorldMortalityStage.Stable => "",
+            WorldMortalityStage.EmergingThreat => "위협 시작",
+            WorldMortalityStage.WorldThreatened => "세계를 위협",
+            WorldMortalityStage.ExtinctionImminent => "인류 멸종 임박",
+            _ => stage.ToString()
+        };
 
         private void HandlePhaseChanged(GamePhase phase)
         {

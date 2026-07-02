@@ -10,7 +10,13 @@ namespace Contagion.Managers
     public enum NewsEventCategory
     {
         Positive, // 병원체 유리
-        Negative  // 인류 유리
+        Negative, // 인류 유리
+
+        /// <summary>
+        /// 게임 효과 없는 플레이버 텍스트 전용 이벤트 (올림픽/월드컵 등). 나무위키 "게임성에 큰 영향은
+        /// 없고 텍스트 다양성용" (Docs/PlagueIncReference.md 4절) — 뉴스 피드 다양성 목적으로만 존재.
+        /// </summary>
+        Flavor
     }
 
     /// <summary>NewsFeed UI(Step 8)가 구독해 화면에 표시할 뉴스 한 건.</summary>
@@ -52,6 +58,9 @@ namespace Contagion.Managers
         [SerializeField] private NewsEventSettings naturalDisaster = new NewsEventSettings { triggerChance = 0.12f, cooldownDays = 8 };
         [SerializeField, Range(0f, 1f)] private float naturalDisasterMinInfectionRatio = 0.05f;
         [SerializeField, Range(0f, 1f)] private float naturalDisasterSurgeRatio = 0.2f; // 대상국 감염 가능 인구 중 급증 비율
+        [SerializeField, Range(0f, 1f), Tooltip("나무위키: 재해로 사망자가 나면 그 나라의 치료 자금 투자 " +
+            "한계치 자체가 영구적으로 낮아진다 (Docs/PlagueIncReference.md 4절)")]
+        private float naturalDisasterFundingCapPenalty = 0.15f;
 
         [SerializeField] private NewsEventSettings politicalInstability = new NewsEventSettings { triggerChance = 0.1f, cooldownDays = 12 };
         [SerializeField, Range(0f, 1f)] private float politicalInstabilityMinVisibility = 0.3f;
@@ -81,6 +90,16 @@ namespace Contagion.Managers
         private float executionMaxInfectionRatioOfCountry = 0.05f;
         [SerializeField, Range(0f, 1f)] private float executionMinReductionRatio = 0.3f;
         [SerializeField, Range(0f, 1f)] private float executionMaxReductionRatio = 1.0f;
+
+        [Header("플레이버 이벤트 (게임 효과 없음, 텍스트 다양성용, Docs/PlagueIncReference.md 4절)")]
+        [SerializeField] private NewsEventSettings flavorEvent = new NewsEventSettings { triggerChance = 0.08f, cooldownDays = 20 };
+        [SerializeField] private string[] flavorEventTexts =
+        {
+            "[속보] 전 세계인의 이목이 하계 올림픽 개막식으로 쏠렸습니다.",
+            "[속보] 월드컵 예선 경기 결과로 전 세계가 떠들썩합니다.",
+            "[속보] 유명 팝스타의 월드투어 콘서트가 각국에서 매진 행렬을 이어가고 있습니다.",
+            "[속보] 국제 우주정거장에서 새로운 실험 결과가 발표되었습니다.",
+        };
 
         private readonly Dictionary<string, int> _lastTriggeredDay = new Dictionary<string, int>();
         private readonly HashSet<string> _firedOnce = new HashSet<string>();
@@ -147,6 +166,9 @@ namespace Contagion.Managers
             TryTrigger("execution_or_bombing", executionOrBombing, state,
                 state.plagueVisibility >= executionMinVisibility,
                 () => ApplyExecutionOrBombing(data));
+
+            TryTrigger("flavor_event", flavorEvent, state, true,
+                () => ApplyFlavorEvent());
         }
 
         private void TryTrigger(string id, NewsEventSettings settings, WorldState state, bool conditionMet,
@@ -177,9 +199,17 @@ namespace Contagion.Managers
             long surge = (long)(country.SusceptibleCount * naturalDisasterSurgeRatio);
             surge = Math.Clamp(surge, 1, country.SusceptibleCount);
             country.infectedCount += surge;
+
+            // 나무위키: 재해로 사망자가 나면 그 나라의 치료 자금 투자 한계치가 영구적으로 낮아진다
+            // (Docs/PlagueIncReference.md 4절) — HumanResistanceManager.ApplyPolicy가 이 상한선으로
+            // healthFunding을 매 틱 다시 클램프하므로, 여기서는 캡 자체만 낮추면 자연스럽게 반영된다.
+            float oldCap = country.healthFundingCap;
+            country.healthFundingCap = Mathf.Max(0f, country.healthFundingCap - naturalDisasterFundingCapPenalty);
             data.NotifyCountryChanged(country);
 
-            RaiseNews(NewsEventCategory.Positive, $"[속보] {country.name}에서 대규모 자연재해 발생 — 감염이 급격히 확산되고 있습니다.");
+            Debug.Log($"[EventManager] {country.name} 치료 자금 투자 한계치 감소: {oldCap:F2} -> {country.healthFundingCap:F2}");
+            RaiseNews(NewsEventCategory.Positive,
+                $"[속보] {country.name}에서 대규모 자연재해 발생 — 감염이 급격히 확산되고 의료 인프라 투자 여력이 줄어들고 있습니다.");
             return true;
         }
 
@@ -267,6 +297,19 @@ namespace Contagion.Managers
 
             RaiseNews(NewsEventCategory.Negative,
                 $"[속보] {country.name} 정부, 감염자 처형 및 지역 폭격 단행 — 감염자 수가 급감하고 국경이 전면 봉쇄되었습니다.");
+            return true;
+        }
+
+        /// <summary>
+        /// 게임 효과가 전혀 없는 플레이버 텍스트 이벤트 — 올림픽/월드컵 등 뉴스 피드 다양성용.
+        /// 조건 없이(항상 true) 확률/쿨다운만으로 발동한다. (Docs/PlagueIncReference.md 4절)
+        /// </summary>
+        private bool ApplyFlavorEvent()
+        {
+            if (flavorEventTexts == null || flavorEventTexts.Length == 0) return false;
+
+            string text = flavorEventTexts[UnityEngine.Random.Range(0, flavorEventTexts.Length)];
+            RaiseNews(NewsEventCategory.Flavor, text);
             return true;
         }
 
