@@ -1633,7 +1633,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.GameDataBootstrapper
   countryDatabase: {fileID: 11400000, guid: 15d4b56ad98e03d43b6c74d3efdb5f8a, type: 2}
   selectedPathogen: {fileID: 11400000, guid: f1e5a5fcf1e868e47bd4a5f8d7aabe68, type: 2}
-  upgradeTreeDatabase: {fileID: 11400000, guid: 0eebdc29cbf6fbb4196100c625fcb570, type: 2}
+  upgradeTreeDatabase: {fileID: 0}
   startingCountryId: KOR
   startingInfectedCount: 100
 --- !u!114 &2050405921
@@ -1726,6 +1726,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.UpgradeManager
   tree: []
+  categoryCostEscalationPerUnlock: 0.15
 --- !u!114 &2050405924
 MonoBehaviour:
   m_ObjectHideFlags: 0

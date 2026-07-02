@@ -47,6 +47,10 @@ namespace Contagion.UI
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
 
+            // 트리 캔버스가 화면보다 넓다(27노드 3열 배치) — 세로만 스크롤되던 기본값으론 가로쪽
+            // 노드들이 잘려서 안 보이므로 양방향 스크롤로 전환 (모바일 좁은 화면에서 특히 중요).
+            _nodeScroll.mode = ScrollViewMode.VerticalAndHorizontal;
+
             _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
             _buyButton.RegisterCallback<ClickEvent>(_ => HandleBuyClicked());
             _adBonusButton.RegisterCallback<ClickEvent>(_ => HandleAdBonusClicked());
