@@ -106,8 +106,14 @@ namespace Contagion.Managers
 
         private void Play(AudioClip clip)
         {
-            if (clip == null || _sfxSource == null) return;
+            if (_sfxSource == null) return;
+            if (clip == null)
+            {
+                Debug.Log("[AudioManager] 재생 훅은 호출됐지만 AudioClip이 비어있어 재생 생략 — 인스펙터에 클립을 연결하면 재생됨.");
+                return;
+            }
             _sfxSource.PlayOneShot(clip);
+            Debug.Log($"[AudioManager] 재생: {clip.name}");
         }
     }
 }

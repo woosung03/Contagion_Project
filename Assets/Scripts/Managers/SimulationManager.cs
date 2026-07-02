@@ -76,6 +76,19 @@ namespace Contagion.Managers
         private void Start()
         {
             _data = WorldDataManager.Instance;
+
+            if (GameManager.Instance != null)
+            {
+                Debug.Log($"[SimulationManager] 난이도={GameManager.Instance.CurrentDifficulty}, " +
+                    $"확산배율={GameManager.Instance.GetDifficultySpreadMultiplier():F2}, " +
+                    $"치료속도배율={GameManager.Instance.GetDifficultyResearchMultiplier():F2}");
+            }
+            else
+            {
+                Debug.LogWarning("[SimulationManager] GameManager.Instance가 없음 — 난이도 배율이 전부 1.0으로 적용됨. " +
+                    "씬에 GameManager 오브젝트가 있는지 확인.");
+            }
+
             if (autoStart) StartSimulation();
         }
 

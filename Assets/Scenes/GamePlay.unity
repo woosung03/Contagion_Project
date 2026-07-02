@@ -692,6 +692,7 @@ MonoBehaviour:
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 1}
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
+  colorTransitionSpeed: 3
 --- !u!61 &735204845
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -847,6 +848,7 @@ MonoBehaviour:
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 1}
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
+  colorTransitionSpeed: 3
 --- !u!61 &773079964
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -967,6 +969,156 @@ Transform:
   m_Children: []
   m_Father: {fileID: 660003738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &883301162
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 883301165}
+  - component: {fileID: 883301164}
+  - component: {fileID: 883301163}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &883301163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 883301162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c1cad22f12747d499afc5bf6f426f2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.AudioManager
+  dnaCollectClip: {fileID: 0}
+  milestoneClip: {fileID: 0}
+  newsPositiveClip: {fileID: 0}
+  newsNegativeClip: {fileID: 0}
+  victoryClip: {fileID: 0}
+  defeatClip: {fileID: 0}
+  musicSource: {fileID: 0}
+  backgroundMusicClip: {fileID: 0}
+--- !u!82 &883301164
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 883301162}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!4 &883301165
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 883301162}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.21089, y: -0.6323, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1230783505
 GameObject:
   m_ObjectHideFlags: 0
@@ -1071,6 +1223,7 @@ MonoBehaviour:
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 1}
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
+  colorTransitionSpeed: 3
 --- !u!61 &1568159515
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1226,6 +1379,7 @@ MonoBehaviour:
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 1}
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
+  colorTransitionSpeed: 3
 --- !u!61 &1713983935
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1529,6 +1683,14 @@ MonoBehaviour:
     cooldownDays: 999
   vaccineTrialMinCureProgress: 0.6
   vaccineTrialCureProgressJump: 0.1
+  executionOrBombing:
+    enabled: 1
+    triggerChance: 0.1
+    cooldownDays: 15
+  executionMinVisibility: 0.35
+  executionMaxInfectionRatioOfCountry: 0.05
+  executionMinReductionRatio: 0.3
+  executionMaxReductionRatio: 1
 --- !u!114 &2050405922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1548,6 +1710,9 @@ MonoBehaviour:
   lowDevMaxFunding: 0.05
   worldCollapseFundingMultiplier: 0.3
   worldCollapseStabilityDecayPerTick: 0.01
+  disorderFundingMultiplier: 0.6
+  nearAnarchyFundingMultiplier: 0.25
+  fullAnarchyUnrestDeathRate: 0.01
 --- !u!114 &2050405923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1676,3 +1841,4 @@ SceneRoots:
   - {fileID: 543881993}
   - {fileID: 660003738}
   - {fileID: 643170212}
+  - {fileID: 883301165}

@@ -26,6 +26,8 @@ namespace Contagion.Gameplay
         private SpriteRenderer _renderer;
         private Color _targetColor;
         private bool _hasTarget;
+        private float _lastLoggedInfectionBand = -1f;
+        private float _lastLoggedDeadBand = -1f;
 
         public string CountryId => countryId;
 
@@ -38,7 +40,14 @@ namespace Contagion.Gameplay
         private void Start()
         {
             if (WorldMap.Instance != null)
+            {
                 WorldMap.Instance.RegisterCountryView(this);
+                Debug.Log($"[CountryView] {countryId} WorldMap에 등록됨");
+            }
+            else
+            {
+                Debug.LogWarning($"[CountryView] {countryId} — WorldMap.Instance가 없어 등록 실패. WorldMap 오브젝트가 씬에 있는지 확인.");
+            }
         }
 
         private void OnDestroy()
@@ -62,6 +71,16 @@ namespace Contagion.Gameplay
 
             _targetColor = color;
             _hasTarget = true;
+
+            // 매 틱 스팸 방지 — 감염률/사망률이 10%p 단위로 바뀔 때만 로그
+            float infectionBand = Mathf.Round(infectionRatio * 10f) / 10f;
+            float deadBand = Mathf.Round(deadRatio * 10f) / 10f;
+            if (!Mathf.Approximately(infectionBand, _lastLoggedInfectionBand) || !Mathf.Approximately(deadBand, _lastLoggedDeadBand))
+            {
+                _lastLoggedInfectionBand = infectionBand;
+                _lastLoggedDeadBand = deadBand;
+                Debug.Log($"[CountryView] {countryId} 목표색 갱신 — 감염률={infectionRatio:P0}, 사망률={deadRatio:P0}, 목표색={color}");
+            }
         }
 
         private void Update()

@@ -43,6 +43,14 @@ namespace Contagion.Gameplay
                     meshRenderer.material = font.material;
                     meshRenderer.sortingOrder = 100;
                 }
+                Debug.Log($"[FloatingTextEffect] 생성됨: \"{text}\" at {position} (font={font.name}, " +
+                    "URP 프로젝트에서는 이 텍스트가 콘솔엔 찍히는데 화면엔 안 보일 수 있음 — 그 경우 " +
+                    "레거시 Font 셰이더가 URP에서 렌더링 안 되는 문제이니 알려줄 것)");
+            }
+            else
+            {
+                Debug.LogWarning($"[FloatingTextEffect] \"{text}\" 생성은 됐지만 내장 폰트(LegacyRuntime.ttf/Arial.ttf)를 " +
+                    "못 찾아서 텍스트가 안 보일 것임 — Unity 버전 문제일 수 있음.");
             }
 
             var effect = go.AddComponent<FloatingTextEffect>();

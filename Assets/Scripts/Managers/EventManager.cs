@@ -273,6 +273,7 @@ namespace Contagion.Managers
         private void RaiseNews(NewsEventCategory category, string text)
         {
             int day = WorldDataManager.Instance?.State.currentDay ?? 0;
+            Debug.Log($"[EventManager] Day {day} [{category}] {text}");
             OnNewsEvent?.Invoke(new NewsEvent(category, text, day));
         }
     }

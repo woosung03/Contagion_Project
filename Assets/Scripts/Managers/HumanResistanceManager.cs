@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Contagion.Data;
 using UnityEngine;
 
@@ -42,6 +43,7 @@ namespace Contagion.Managers
 
         private WorldDataManager Data => WorldDataManager.Instance;
         private ResistanceStage _lastStage = ResistanceStage.NoAwareness;
+        private readonly Dictionary<string, CountryCollapseStage> _lastCollapseStage = new Dictionary<string, CountryCollapseStage>();
 
         /// <summary>저항 단계가 바뀔 때만 발행 — 뉴스 피드(Step 7)에서 활용 예정.</summary>
         public event Action<ResistanceStage> OnResistanceStageChanged;
@@ -78,6 +80,7 @@ namespace Contagion.Managers
             var stage = state.GetResistanceStage();
             if (stage != _lastStage)
             {
+                Debug.Log($"[HumanResistanceManager] 세계 저항 단계 변경: {_lastStage} -> {stage} (visibility={state.plagueVisibility:F2})");
                 _lastStage = stage;
                 OnResistanceStageChanged?.Invoke(stage);
             }
@@ -125,7 +128,16 @@ namespace Contagion.Managers
 
             // 국가별 개별 붕괴 단계 — 특정 국가만 이미 궤멸했어도 그 나라의 연구 기여도가 따로 줄어들도록.
             // (전 세계 공통 ResistanceStage와 별개로 국가 자체 사망률만 본다. Docs/PlagueIncReference.md 1절)
-            switch (country.GetCollapseStage())
+            var collapseStage = country.GetCollapseStage();
+
+            if (!_lastCollapseStage.TryGetValue(country.id, out var lastCollapseStage) || lastCollapseStage != collapseStage)
+            {
+                _lastCollapseStage[country.id] = collapseStage;
+                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 붕괴 단계 변경: " +
+                    $"{lastCollapseStage} -> {collapseStage} (사망률={(country.population > 0 ? (float)country.deadCount / country.population : 0f):P1})");
+            }
+
+            switch (collapseStage)
             {
                 case CountryCollapseStage.Disorder:
                     funding *= disorderFundingMultiplier;
@@ -142,13 +154,21 @@ namespace Contagion.Managers
             country.healthFunding = funding;
 
             // 완전한 무정부 상태: 감염자가 없어도 치안 붕괴로 소량 추가 사망 발생 (원본 게임 특유의 룰).
-            if (country.GetCollapseStage() == CountryCollapseStage.FullAnarchy && country.LivingPopulation > 0)
+            if (collapseStage == CountryCollapseStage.FullAnarchy && country.LivingPopulation > 0)
             {
                 long unrestDeaths = (long)(country.LivingPopulation * fullAnarchyUnrestDeathRate);
                 if (unrestDeaths > 0)
                 {
                     unrestDeaths = Math.Min(unrestDeaths, country.LivingPopulation);
                     country.deadCount += unrestDeaths;
+
+                    // deadCount가 늘면 LivingPopulation(=population-deadCount)이 줄어드는데, infectedCount는
+                    // 여기서 손대지 않았으니 그대로 두면 "감염자 수 > 생존 인구"가 되어 감염률이 100%를 넘는
+                    // 버그가 생긴다(치안붕괴로 죽은 사람 중 일부는 원래 감염자였다고 보는 게 합리적이므로
+                    // infectedCount도 새 LivingPopulation을 넘지 않게 같이 깎아준다).
+                    country.infectedCount = Math.Min(country.infectedCount, country.LivingPopulation);
+
+                    Debug.Log($"[HumanResistanceManager] {country.name} 완전 무정부 상태 — 치안붕괴 사망 +{unrestDeaths}");
                     Data?.NotifyCountryChanged(country);
                 }
             }
@@ -156,6 +176,9 @@ namespace Contagion.Managers
 
         private void CloseBorders(Country country)
         {
+            if (!country.isBorderClosed)
+                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 국경/공항/항구 봉쇄");
+
             country.isBorderClosed = true;
             country.isAirportOpen = false;
             country.isPortOpen = false;
