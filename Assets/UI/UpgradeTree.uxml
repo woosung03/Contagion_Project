@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="UpgradeTree.uss" />
+    <ui:VisualElement name="upgrade-root" class="upgrade-root">
+        <ui:VisualElement name="upgrade-header" class="upgrade-header">
+            <ui:Label name="dna-label" text="DNA: 0" class="upgrade-header__dna" />
+            <ui:Button name="ad-bonus-button" text="광고 보고 DNA +10" class="upgrade-header__ad-bonus" />
+            <ui:Button name="close-button" text="닫기" class="upgrade-header__close" />
+        </ui:VisualElement>
+
+        <ui:ScrollView name="node-scroll" class="node-scroll" />
+
+        <ui:VisualElement name="detail-panel" class="detail-panel">
+            <ui:Label name="detail-title" text="노드를 선택하세요" class="detail-panel__title" />
+            <ui:Label name="detail-desc" text="" class="detail-panel__desc" />
+            <ui:Button name="buy-button" text="구매" class="detail-panel__buy" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

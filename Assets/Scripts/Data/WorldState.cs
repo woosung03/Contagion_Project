@@ -1,0 +1,51 @@
+using System;
+
+namespace Contagion.Data
+{
+    /// <summary>
+    /// 전역 세계 상태. 설계 문서 3.1절.
+    /// </summary>
+    [Serializable]
+    public class WorldState
+    {
+        public long totalPopulation;      // 전 세계 총 인구
+        public long infectedCount;        // 현재 감염자 수
+        public long deadCount;            // 누적 사망자 수
+        [UnityEngine.Range(0f, 1f)] public float cureProgress;       // 치료제 개발 진행률 (0~1)
+        [UnityEngine.Range(0f, 1f)] public float plagueVisibility;   // 전염병 노출도 (0~1)
+        public int dnaPoints;             // 플레이어 보유 DNA 포인트
+        public int currentDay;            // 경과 일수
+
+        public void AddDna(int amount) => dnaPoints = Math.Max(0, dnaPoints + amount);
+
+        public bool SpendDna(int amount)
+        {
+            if (dnaPoints < amount) return false;
+            dnaPoints -= amount;
+            return true;
+        }
+
+        /// <summary>승리 조건: 전 세계 인구 전멸. 설계 문서 1절.</summary>
+        public bool IsHumanityExtinct => deadCount >= totalPopulation && totalPopulation > 0;
+
+        /// <summary>
+        /// 패배 조건: 감염자 0명 + 생존자 존재. 설계 문서 1절 원문은 "(치료제 완성 후 박멸)"이라고
+        /// 부연하지만, 이는 보통 그렇게 된다는 서술이지 조건은 아니다 — cureProgress와 무관하게
+        /// 감염자가 0이 되고 생존자가 있으면 패배로 처리한다. cureProgress < 1인 상태에서 병원체가
+        /// 스스로 소멸(전파력 부족으로 자연 소멸)해도 플레이어 입장에선 동일한 패배이기 때문.
+        /// (예전엔 cureProgress >= 1f도 같이 요구해서, 마지막 생존자 1명이 남고 병원체가 이미
+        /// 자연 소멸한 상태에서 cureProgress가 100%가 아니면 영원히 게임이 안 끝나는 버그가 있었음.)
+        /// </summary>
+        public bool IsPathogenEradicated => infectedCount <= 0 && deadCount < totalPopulation;
+
+        /// <summary>plagueVisibility 값을 5개 구간으로 분류. 설계 문서 5절.</summary>
+        public ResistanceStage GetResistanceStage()
+        {
+            if (plagueVisibility < 0.2f) return ResistanceStage.NoAwareness;
+            if (plagueVisibility < 0.4f) return ResistanceStage.DiseaseReported;
+            if (plagueVisibility < 0.6f) return ResistanceStage.PublicHealthEmergency;
+            if (plagueVisibility < 0.8f) return ResistanceStage.NationalEmergency;
+            return ResistanceStage.WorldCollapse;
+        }
+    }
+}

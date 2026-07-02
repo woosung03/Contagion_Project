@@ -1,0 +1,41 @@
+.ending-root {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+}
+
+.ending-title {
+    color: white;
+    font-size: 36px;
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+}
+
+.ending-detail {
+    color: rgb(220, 220, 220);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.ending-score {
+    color: rgb(255, 210, 90);
+    font-size: 22px;
+    -unity-font-style: bold;
+    margin-bottom: 24px;
+}
+
+.ending-buttons {
+    flex-direction: row;
+}
+
+.ending-button {
+    width: 160px;
+    height: 48px;
+    margin: 0 8px;
+}
+
+.ending-button--revive {
+    background-color: rgb(120, 80, 200);
+}

@@ -1,0 +1,40 @@
+.ranking-root {
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    width: 300px;
+    margin-left: -150px;
+    background-color: rgba(15, 15, 25, 0.95);
+    border-radius: 8px;
+    padding: 20px;
+    align-items: stretch;
+}
+
+.ranking-title {
+    color: white;
+    font-size: 22px;
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+}
+
+.ranking-row {
+    color: rgb(255, 210, 90);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.ranking-note {
+    color: rgb(180, 180, 180);
+    font-size: 12px;
+    white-space: normal;
+    margin-bottom: 12px;
+}
+
+.ranking-button {
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.ranking-button--secondary {
+    background-color: rgb(70, 70, 90);
+}

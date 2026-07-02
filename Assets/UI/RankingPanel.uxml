@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="RankingPanel.uss" />
+    <ui:VisualElement name="ranking-root" class="ranking-root">
+        <ui:Label name="ranking-title" text="랭킹" class="ranking-title" />
+        <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-row" />
+        <ui:Label name="note-label" text="" class="ranking-note" />
+        <ui:Button name="open-leaderboard-button" text="토스 리더보드 열기" class="ranking-button" />
+        <ui:Button name="close-button" text="닫기" class="ranking-button ranking-button--secondary" />
+    </ui:VisualElement>
+</ui:UXML>

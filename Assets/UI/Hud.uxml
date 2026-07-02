@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Hud.uss" />
+    <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
+        <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" />
+
+        <ui:VisualElement name="map-spacer" class="map-spacer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="bottom-bar" class="bottom-bar">
+            <ui:VisualElement name="stats-row" class="stats-row">
+                <ui:Label name="infected-label" text="감염자: 0" class="stat-label" />
+                <ui:Label name="dead-label" text="사망자: 0" class="stat-label" />
+                <ui:Label name="cure-label" text="치료제: 0%" class="stat-label" />
+                <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
+                <ui:Label name="day-label" text="Day 0" class="stat-label" />
+                <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />
+            </ui:VisualElement>
+            <ui:VisualElement name="tabs-row" class="tabs-row">
+                <ui:Button name="tab-transmission" text="전파" class="tab-button" />
+                <ui:Button name="tab-symptom" text="증상" class="tab-button" />
+                <ui:Button name="tab-ability" text="능력" class="tab-button" />
+                <ui:Button name="ranking-button" text="랭킹" class="tab-button tab-button--secondary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

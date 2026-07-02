@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="EndingScreen.uss" />
+    <ui:VisualElement name="ending-root" class="ending-root">
+        <ui:Label name="result-title" text="" class="ending-title" />
+        <ui:Label name="result-detail" text="" class="ending-detail" />
+        <ui:Label name="score-label" text="" class="ending-score" />
+        <ui:VisualElement name="ending-buttons" class="ending-buttons">
+            <ui:Button name="revive-button" text="광고 보고 부활" class="ending-button ending-button--revive" />
+            <ui:Button name="restart-button" text="다시 시작" class="ending-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

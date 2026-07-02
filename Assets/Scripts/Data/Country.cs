@@ -1,0 +1,91 @@
+using System;
+using System.Collections.Generic;
+
+namespace Contagion.Data
+{
+    /// <summary>
+    /// 국가 데이터. 설계 문서 3.2절.
+    /// airRouteCountryIds / seaRouteCountryIds / neighborCountryIds 는 설계 문서 4.1 "국가 간 전파"
+    /// 계산에 필요한 연결 그래프로, Step 9(ScriptableObject 데이터화) 전까지는 수동으로 채운다.
+    /// </summary>
+    [Serializable]
+    public class Country
+    {
+        public string id;
+        public string name;
+
+        public long population;
+        public long infectedCount;
+        public long deadCount;
+
+        public ClimateType climate;
+        public DevelopmentLevel developmentLevel;
+
+        public bool isAirportOpen = true;
+        public bool isPortOpen = true;
+        public bool isBorderClosed = false;
+
+        [UnityEngine.Range(0f, 1f)] public float healthFunding;        // 치료제 기여도
+        [UnityEngine.Range(0f, 1f)] public float governmentStability = 1f; // 0=무정부, 1=안정
+
+        // 국가 간 전파용 연결 그래프 (국가 id 목록)
+        public List<string> neighborCountryIds = new List<string>();   // 육상 국경 인접국
+        public List<string> airRouteCountryIds = new List<string>();   // 항공 노선 연결국
+        public List<string> seaRouteCountryIds = new List<string>();   // 해운 노선 연결국
+
+        /// <summary>사망자를 제외한 생존 인구.</summary>
+        public long LivingPopulation => Math.Max(0, population - deadCount);
+
+        /// <summary>아직 감염되지 않은 생존 인구 (감염 가능 대상).</summary>
+        public long SusceptibleCount => Math.Max(0, LivingPopulation - infectedCount);
+
+        /// <summary>
+        /// 국가 의료 수준 (0~1). 설계 문서 4.1의 countryHealthLevel / 4.2의 healthcareCapacity에 사용.
+        /// developmentLevel로부터 유도 — 설계 문서에 명시적 공식이 없어 합리적으로 매핑한 값.
+        /// </summary>
+        public float HealthLevel => developmentLevel switch
+        {
+            DevelopmentLevel.High => 0.8f,
+            DevelopmentLevel.Mid => 0.5f,
+            DevelopmentLevel.Low => 0.2f,
+            _ => 0.3f
+        };
+
+        /// <summary>
+        /// 치료제 연구 기여 배율. 설계 문서 4.3 researchMultiplier / 5절 "선진국: 높은 연구 기여도".
+        /// </summary>
+        public float ResearchMultiplier => developmentLevel switch
+        {
+            DevelopmentLevel.High => 1.5f,
+            DevelopmentLevel.Mid => 0.8f,
+            DevelopmentLevel.Low => 0.2f,
+            _ => 0.5f
+        };
+
+        /// <summary>
+        /// 깊은 복사본 생성. Step 9: CountryDatabase(ScriptableObject)는 "템플릿"이므로
+        /// 매 게임 시작 시 Clone해서 런타임 인스턴스를 만들어야 원본 자산이 오염되지 않는다.
+        /// </summary>
+        public Country Clone()
+        {
+            return new Country
+            {
+                id = id,
+                name = name,
+                population = population,
+                infectedCount = infectedCount,
+                deadCount = deadCount,
+                climate = climate,
+                developmentLevel = developmentLevel,
+                isAirportOpen = isAirportOpen,
+                isPortOpen = isPortOpen,
+                isBorderClosed = isBorderClosed,
+                healthFunding = healthFunding,
+                governmentStability = governmentStability,
+                neighborCountryIds = new List<string>(neighborCountryIds),
+                airRouteCountryIds = new List<string>(airRouteCountryIds),
+                seaRouteCountryIds = new List<string>(seaRouteCountryIds)
+            };
+        }
+    }
+}

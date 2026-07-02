@@ -1,0 +1,87 @@
+.upgrade-root {
+    flex-grow: 1;
+    background-color: rgba(10, 10, 20, 0.92);
+    padding: 16px;
+}
+
+.upgrade-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.upgrade-header__dna {
+    color: rgb(120, 220, 140);
+    font-size: 20px;
+    -unity-font-style: bold;
+}
+
+.upgrade-header__close {
+    width: 80px;
+}
+
+.upgrade-header__ad-bonus {
+    background-color: rgb(120, 80, 200);
+    color: white;
+    width: 160px;
+}
+
+.node-scroll {
+    flex-grow: 1;
+    margin-bottom: 12px;
+}
+
+.category-header {
+    color: rgb(255, 210, 90);
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.node-row {
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0.06);
+    margin-bottom: 4px;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.node-row--unlocked {
+    background-color: rgba(120, 220, 140, 0.25);
+}
+
+.node-row--selected {
+    border-left-width: 4px;
+    border-left-color: rgb(255, 210, 90);
+}
+
+.node-row__label {
+    color: white;
+    font-size: 14px;
+}
+
+.detail-panel {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.detail-panel__title {
+    color: white;
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.detail-panel__desc {
+    color: rgb(210, 210, 210);
+    font-size: 13px;
+    white-space: normal;
+    margin: 6px 0;
+}
+
+.detail-panel__buy {
+    height: 40px;
+}

@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ac8361dab6c6fe4283dfa12ee698cc8, type: 3}
+  m_Name: CountryDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.Data.CountryDatabase
+  countries:
+  - id: CHI
+    name: China
+    population: 100000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.911
+    governmentStability: 0.3
+    neighborCountryIds:
+    - KOR
+    airRouteCountryIds:
+    - KOR
+    - IND
+    - USA
+    seaRouteCountryIds:
+    - USA
+    - IND
+    - KOR
+  - id: IND
+    name: India
+    population: 150000
+    infectedCount: 0
+    deadCount: 0
+    climate: 3
+    developmentLevel: 0
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.943
+    governmentStability: 0.3
+    neighborCountryIds:
+    - CHI
+    airRouteCountryIds:
+    - CHI
+    - KOR
+    - USA
+    seaRouteCountryIds:
+    - KOR
+    - IND
+    - CHI
+  - id: USA
+    name: USA
+    population: 10000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.935
+    governmentStability: 0.67
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - CHI
+    - KOR
+    - IND
+    seaRouteCountryIds:
+    - KOR
+    - CHI
+    - IND
+  - id: KOR
+    name: korea
+    population: 51000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.927
+    governmentStability: 0.7
+    neighborCountryIds:
+    - CHI
+    airRouteCountryIds:
+    - CHI
+    - USA
+    - IND
+    seaRouteCountryIds:
+    - CHI
+    - USA
+    - IND
