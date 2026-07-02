@@ -40,27 +40,57 @@
     margin-bottom: 4px;
 }
 
-.node-row {
-    flex-direction: row;
-    justify-content: space-between;
-    background-color: rgba(255, 255, 255, 0.06);
-    margin-bottom: 4px;
-    padding: 6px 10px;
-    border-radius: 4px;
+/* 트리 좌표 배치 노드 (UpgradeTreeView — 세분화 항목: 좌표+연결선 시각화) */
+.tree-category-label {
+    color: rgb(255, 210, 90);
+    font-size: 15px;
+    -unity-font-style: bold;
 }
 
-.node-row--unlocked {
-    background-color: rgba(120, 220, 140, 0.25);
+.tree-node {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 4px 8px;
+    justify-content: center;
+    align-items: center;
 }
 
-.node-row--selected {
-    border-left-width: 4px;
-    border-left-color: rgb(255, 210, 90);
+.tree-node--transmission {
+    border-color: rgba(120, 190, 255, 0.4);
 }
 
-.node-row__label {
+.tree-node--symptom {
+    border-color: rgba(255, 140, 100, 0.4);
+}
+
+.tree-node--ability {
+    border-color: rgba(200, 140, 255, 0.4);
+}
+
+.tree-node--unlocked {
+    background-color: rgba(120, 220, 140, 0.28);
+    border-color: rgb(120, 220, 140);
+}
+
+.tree-node--selected {
+    border-width: 3px;
+    border-color: rgb(255, 210, 90);
+}
+
+.tree-node__label {
     color: white;
-    font-size: 14px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.tree-node__cost {
+    color: rgb(210, 210, 210);
+    font-size: 11px;
+    -unity-text-align: middle-center;
 }
 
 .detail-panel {
