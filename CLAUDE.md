@@ -126,6 +126,26 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   플레이테스트로 다시 조정할 것. 국가 수가 늘어나면(실제 서비스용 전체 국가) cureIncrease 합계 자체가 커지므로
   이 계수도 같이 재조정 필요.
 
+### Step 14 구현 메모 (기본 플레이 퀄리티 개선, 2026-07-03 추가)
+
+플레이테스트 완료 후 "모바일 플레이 기준으로 기본 플레이 퀄리티를 높이자"는 요청으로 코드만으로 가능한
+개선을 진행. 나무위키 백로그(Docs/PlagueIncReference.md) 중 2개(국가별 개별 붕괴 단계, 난이도별 확산
+보정)와 이벤트 1개(처형/폭격)를 반영하고, 피드백/손맛 관련 항목 3개를 추가했다.
+
+| 항목 | 파일 | 내용 |
+|------|------|------|
+| 국가별 개별 붕괴 단계 | `Data/Enums.cs`(`CountryCollapseStage`), `Data/Country.cs`(`GetCollapseStage()`), `Managers/HumanResistanceManager.cs` | 사망률 20/50/70/95/100% 임계값으로 국가별 상태 판정. 무질서(50%+)/무정부근접(70%+)은 `healthFunding`을 추가로 감쇠(0.6배/0.25배), 완전 무정부(95%+)는 연구 완전 중단 + 감염자가 없어도 매 틱 소량 치안붕괴 사망 발생 |
+| 난이도별 확산 보정 | `Managers/GameManager.cs`(`GetDifficultySpreadMultiplier()`), `Managers/SimulationManager.cs` | 기존엔 난이도가 치료 속도만 바꿨음. Casual 1.3배/Normal 1.0/Brutal 0.8/MegaBrutal 0.6배로 `newInfected` 계산에 곱해 고난이도에서 신중한 플레이가 의미 있어지도록 함 |
+| 처형/폭격 이벤트 | `Managers/EventManager.cs`(`ApplyExecutionOrBombing`) | 아직 감염 초기(국가 감염비율 5% 이하)인 국가를 노려 감염자 30~100% 삭감 + 국경/공항/항구 강제 봉쇄. 기존 6개 이벤트와 동일한 `TryTrigger` 패턴 재사용 |
+| 국가 색상 부드러운 전환 | `Gameplay/CountryView.cs` | 기존엔 매 틱 색이 즉시 바뀜(뚝뚝 끊김). `UpdateVisual()`은 목표색만 갱신하고 `Update()`에서 지수감쇠 Lerp로 부드럽게 전환 |
+| DNA 버블 피드백 | `Gameplay/DnaBubble.cs`, `Gameplay/FloatingTextEffect.cs`(신규) | 스폰 시 스케일 팝인 애니메이션(ease-out) 추가. 수집 시 "+N" 텍스트가 위로 떠오르며 페이드아웃 — Unity 내장 폰트(`LegacyRuntime.ttf`/`Arial.ttf`)로 런타임에 동적 생성해서 별도 에셋/프리팹 불필요 |
+| AudioManager 인프라 | `Managers/AudioManager.cs`(신규) | DNA 수집/마일스톤/뉴스 이벤트(긍정·부정)/승리/패배 시점에 훅이 걸린 사운드 매니저. `DnaBubble`에 정적 이벤트 `OnAnyCollected` 추가해 인스턴스 참조 없이 구독 가능. **AudioClip 필드는 전부 비어있음 — 실제 효과음 파일은 사용자가 직접 준비/임포트해야 함(코드로 생성 불가). 비어있어도 에러 없이 조용히 무시됨** |
+
+이 중 **AudioManager만 새 씬 오브젝트가 필요**하다 (아래 "씬/에셋 배선 필요" 참고). 나머지는 전부 기존에
+이미 씬에 배치된 컴포넌트(SimulationManager/GameManager/HumanResistanceManager/EventManager/
+CountryView/DnaBubble)의 코드만 확장한 것이라 추가 배선 없이 바로 적용된다 — 새로 추가된 인스펙터
+필드는 기본값으로 자동 채워지며, 밸런싱하고 싶으면 그때 조정하면 된다.
+
 ### 씬/에셋 배선 필요 (코드만으로는 안 되는 작업 — 다음에 진행할 부분)
 
 - `MainMenu` / `CountrySelect` / `GamePlay` 씬 생성 (현재 기본 씬만 존재)
@@ -139,6 +159,22 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - `CountryDatabase`/`PathogenDefinition`/`UpgradeTreeDatabase` 에셋 생성 (우클릭 > Create > Contagion > ...) 후
   실제 국가/병원체/트리 데이터 입력, `GameDataBootstrapper`에 연결
 - 앱인토스 SDK 설치(`Packages/manifest.json`) + 콘솔에서 게임 카테고리 등록 + 광고 그룹 생성
+- (Step 14) `AudioManager` 오브젝트 생성 + 스크립트 부착 + 효과음 에셋 준비 후 연결 (아래 순서 참고)
+
+---
+
+## 나무위키 참고 자료 (원본 게임 대비 보완 아이디어, 2026-07-03 추가)
+
+동아리 부장님이 아닌 사용자가 직접 원본 Plague Inc. 나무위키 문서(시스템/전략/이벤트/상태)를 링크로
+제공해 현재 구현과 비교 분석했다. 상세 내용은 `Docs/PlagueIncReference.md` 참고.
+
+**Step 14에서 반영 완료** (위 "Step 14 구현 메모" 참고):
+1. 국가별 사망률 기반 개별 붕괴 단계 (`Country.GetCollapseStage()` + `HumanResistanceManager`)
+2. 난이도별 전염성 보정 (`GameManager.GetDifficultySpreadMultiplier()`)
+3. 처형/폭격 이벤트 (`EventManager.ApplyExecutionOrBombing()`)
+
+**아직 반영 안 함** (우선순위 낮음, `Docs/PlagueIncReference.md` 참고): 세계 상태 텍스트 세분화, 국가별
+치료 자금 상한선, 국경 폐쇄 우선순위(공항>국경>항구 순차 폐쇄), 올림픽 등 플레이버 이벤트.
 
 ---
 

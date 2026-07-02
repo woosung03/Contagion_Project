@@ -73,6 +73,15 @@ namespace Contagion.Managers
         [SerializeField, Range(0f, 1f)] private float vaccineTrialMinCureProgress = 0.6f;
         [SerializeField, Range(0f, 1f)] private float vaccineTrialCureProgressJump = 0.1f;
 
+        [Header("처형/폭격 (인류 유리, 나무위키 기준 Docs/PlagueIncReference.md 4절)")]
+        [SerializeField, Tooltip("감염 초기 국가를 강제로 감염자 삭감 + 봉쇄시키는 강한 역풍 이벤트")]
+        private NewsEventSettings executionOrBombing = new NewsEventSettings { triggerChance = 0.1f, cooldownDays = 15 };
+        [SerializeField, Range(0f, 1f)] private float executionMinVisibility = 0.35f;
+        [SerializeField, Range(0f, 1f), Tooltip("대상국의 감염 비율이 이 값 이하일 때만 발동 — '아직 초기인 국가'만 노림")]
+        private float executionMaxInfectionRatioOfCountry = 0.05f;
+        [SerializeField, Range(0f, 1f)] private float executionMinReductionRatio = 0.3f;
+        [SerializeField, Range(0f, 1f)] private float executionMaxReductionRatio = 1.0f;
+
         private readonly Dictionary<string, int> _lastTriggeredDay = new Dictionary<string, int>();
         private readonly HashSet<string> _firedOnce = new HashSet<string>();
 
@@ -134,6 +143,10 @@ namespace Contagion.Managers
             TryTrigger("vaccine_trial_success", vaccineTrialSuccess, state,
                 state.cureProgress >= vaccineTrialMinCureProgress,
                 () => ApplyVaccineTrialSuccess(state), oneShot: true);
+
+            TryTrigger("execution_or_bombing", executionOrBombing, state,
+                state.plagueVisibility >= executionMinVisibility,
+                () => ApplyExecutionOrBombing(data));
         }
 
         private void TryTrigger(string id, NewsEventSettings settings, WorldState state, bool conditionMet,
@@ -226,6 +239,34 @@ namespace Contagion.Managers
         {
             state.cureProgress = Mathf.Clamp01(state.cureProgress + vaccineTrialCureProgressJump);
             RaiseNews(NewsEventCategory.Negative, "[속보] 백신 임상시험 성공 — 치료제 개발이 크게 진전되었습니다.");
+            return true;
+        }
+
+        /// <summary>
+        /// 원본 게임 특유의 강한 역풍 이벤트 — 아직 감염 초기인 국가를 노려 감염자를 대폭 삭감하고
+        /// 국경/공항/항구를 강제로 봉쇄한다. 섬나라에서 뜨면 사실상 그 나라는 재감염이 거의 불가능해져
+        /// 뉴스피드에 극적인 순간을 만들어준다. (Docs/PlagueIncReference.md 4절)
+        /// </summary>
+        private bool ApplyExecutionOrBombing(WorldDataManager data)
+        {
+            var candidates = data.Countries.Where(c =>
+                c.infectedCount > 0 && !c.isBorderClosed && c.LivingPopulation > 0 &&
+                (float)c.infectedCount / c.LivingPopulation <= executionMaxInfectionRatioOfCountry).ToList();
+            if (candidates.Count == 0) return false;
+
+            var country = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            float reductionRatio = UnityEngine.Random.Range(executionMinReductionRatio, executionMaxReductionRatio);
+            long reduced = (long)(country.infectedCount * reductionRatio);
+            reduced = Math.Clamp(reduced, 1, country.infectedCount);
+
+            country.infectedCount -= reduced;
+            country.isBorderClosed = true;
+            country.isAirportOpen = false;
+            country.isPortOpen = false;
+            data.NotifyCountryChanged(country);
+
+            RaiseNews(NewsEventCategory.Negative,
+                $"[속보] {country.name} 정부, 감염자 처형 및 지역 폭격 단행 — 감염자 수가 급감하고 국경이 전면 봉쇄되었습니다.");
             return true;
         }
 

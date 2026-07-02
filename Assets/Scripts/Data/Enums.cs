@@ -79,4 +79,19 @@ namespace Contagion.Data
         NationalEmergency,      // 국가 비상사태 (국경 봉쇄, 항공/항구 폐쇄)
         WorldCollapse           // 세계 붕괴 (무정부, 연구 감속)
     }
+
+    /// <summary>
+    /// 국가별 개별 붕괴 단계. 사망률(deadCount / population) 기준.
+    /// 나무위키 Plague Inc./상태 문서 참고 — 원본은 사망률 20/50/70/95/100%로 6단계를 나누고
+    /// 국가별로 개별 판정한다 (전 세계 공통 ResistanceStage와 별개). Docs/PlagueIncReference.md 1절 참고.
+    /// </summary>
+    public enum CountryCollapseStage
+    {
+        Normal,          // 평시 (사망률 20% 미만) — 연구 100% 가동
+        FullCollapse,    // 전면적 붕괴 (20% 이상) — 아직 연구 100% 가동, 혼란 시작
+        Disorder,        // 무질서 팽배 (50% 이상) — 연구 가동률 50~70%
+        NearAnarchy,     // 무정부상태 근접 (70% 이상) — 연구 가동률 20~30%
+        FullAnarchy,     // 완전한 무정부 상태 (95% 이상) — 정부 몰락, 연구 중단, 치안 붕괴로 추가 사망
+        Extinct          // 국가 소멸 (100%)
+    }
 }

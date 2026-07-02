@@ -19,14 +19,20 @@ namespace Contagion.Gameplay
         [SerializeField] private Color healthyColor = new Color(0.35f, 0.75f, 0.35f);
         [SerializeField] private Color infectedColor = new Color(0.9f, 0.75f, 0.15f);
         [SerializeField] private Color deadColor = new Color(0.55f, 0.1f, 0.1f);
+        [SerializeField, Tooltip("색이 목표값으로 전환되는 속도. 값이 클수록 빠르게(즉시에 가깝게) 바뀐다. " +
+            "틱마다 색이 뚝뚝 끊겨 바뀌는 대신 부드럽게 전환되도록 추가 — 기본 플레이 퀄리티 개선 항목.")]
+        private float colorTransitionSpeed = 3f;
 
         private SpriteRenderer _renderer;
+        private Color _targetColor;
+        private bool _hasTarget;
 
         public string CountryId => countryId;
 
         private void Awake()
         {
             _renderer = GetComponent<SpriteRenderer>();
+            _renderer.color = healthyColor; // 첫 UpdateVisual 전까지 흰색 스프라이트가 잠깐 보이는 걸 방지
         }
 
         private void Start()
@@ -41,11 +47,9 @@ namespace Contagion.Gameplay
                 WorldMap.Instance.UnregisterCountryView(this);
         }
 
-        /// <summary>WorldMap이 국가 상태 갱신 시 호출.</summary>
+        /// <summary>WorldMap이 국가 상태 갱신 시 호출 — 목표 색만 갱신하고 실제 적용은 Update()에서 보간한다.</summary>
         public void UpdateVisual(Country country)
         {
-            if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
-
             float infectionRatio = country.LivingPopulation > 0
                 ? (float)country.infectedCount / country.LivingPopulation
                 : 0f;
@@ -55,7 +59,17 @@ namespace Contagion.Gameplay
 
             Color color = Color.Lerp(healthyColor, infectedColor, Mathf.Clamp01(infectionRatio));
             color = Color.Lerp(color, deadColor, Mathf.Clamp01(deadRatio));
-            _renderer.color = color;
+
+            _targetColor = color;
+            _hasTarget = true;
+        }
+
+        private void Update()
+        {
+            if (!_hasTarget) return;
+            if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
+
+            _renderer.color = Color.Lerp(_renderer.color, _targetColor, 1f - Mathf.Exp(-colorTransitionSpeed * Time.deltaTime));
         }
 
         private void OnMouseDown()

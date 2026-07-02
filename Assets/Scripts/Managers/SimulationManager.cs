@@ -134,8 +134,13 @@ namespace Contagion.Managers
                 // --- 4.1 국내 전파 ---
                 float climateModifier = pathogen.GetEnvironmentResistance(country.climate);
                 float effectiveHealthLevel = country.HealthLevel * Mathf.Lerp(1f, country.governmentStability, 0.5f);
+                // 난이도별 확산 배율 (나무위키 기준, Docs/PlagueIncReference.md 3절) — 쉬움은 퍼지기 쉽고
+                // 어려움부터는 퍼지기 어려워 신중한 플레이가 요구된다. 이전엔 난이도가 치료 속도만 바꿔서
+                // 고난이도의 긴장감이 약했음.
+                float difficultySpreadMultiplier = GameManager.Instance != null
+                    ? GameManager.Instance.GetDifficultySpreadMultiplier() : 1f;
                 long newInfected = StochasticRound(preTickInfected * pathogen.infectivity * globalSpreadFactor
-                                           * (1f - effectiveHealthLevel) * climateModifier);
+                                           * difficultySpreadMultiplier * (1f - effectiveHealthLevel) * climateModifier);
                 newInfected = Math.Clamp(newInfected, 0, country.SusceptibleCount);
 
                 country.deadCount += newDeaths;

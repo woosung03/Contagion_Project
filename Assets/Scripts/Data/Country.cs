@@ -63,6 +63,24 @@ namespace Contagion.Data
         };
 
         /// <summary>
+        /// 국가별 개별 붕괴 단계. 나무위키 Plague Inc./상태 문서 기준 사망률 임계값
+        /// (Docs/PlagueIncReference.md 1절). 전 세계 공통 ResistanceStage와 별개로,
+        /// "국가 A는 이미 무정부 상태인데 국가 B는 멀쩡하다"를 개별적으로 표현하기 위함.
+        /// </summary>
+        public CountryCollapseStage GetCollapseStage()
+        {
+            if (population <= 0) return CountryCollapseStage.Normal;
+            float deathRatio = (float)deadCount / population;
+
+            if (deathRatio >= 1f) return CountryCollapseStage.Extinct;
+            if (deathRatio >= 0.95f) return CountryCollapseStage.FullAnarchy;
+            if (deathRatio >= 0.7f) return CountryCollapseStage.NearAnarchy;
+            if (deathRatio >= 0.5f) return CountryCollapseStage.Disorder;
+            if (deathRatio >= 0.2f) return CountryCollapseStage.FullCollapse;
+            return CountryCollapseStage.Normal;
+        }
+
+        /// <summary>
         /// 깊은 복사본 생성. Step 9: CountryDatabase(ScriptableObject)는 "템플릿"이므로
         /// 매 게임 시작 시 Clone해서 런타임 인스턴스를 만들어야 원본 자산이 오염되지 않는다.
         /// </summary>

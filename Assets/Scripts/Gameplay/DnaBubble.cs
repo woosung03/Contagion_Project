@@ -12,6 +12,11 @@ namespace Contagion.Gameplay
     [RequireComponent(typeof(CircleCollider2D))]
     public class DnaBubble : MonoBehaviour
     {
+        [SerializeField, Tooltip("스폰 시 작은 크기에서 원래 크기로 커지는 팝인 애니메이션 시간. " +
+            "기본 플레이 퀄리티 개선 항목 — 버블이 뿅 나타나는 손맛을 위함.")]
+        private float popInDuration = 0.25f;
+        [SerializeField] private Color collectTextColor = new Color(1f, 0.85f, 0.2f);
+
         public int DnaValue { get; private set; }
 
         /// <summary>플레이어가 탭해서 수집했을 때 발행.</summary>
@@ -19,7 +24,20 @@ namespace Contagion.Gameplay
         /// <summary>수명이 다해 수집되지 않고 사라질 때 발행.</summary>
         public event Action<DnaBubble> OnExpired;
 
+        /// <summary>
+        /// 인스턴스 이벤트와 별개로, 어떤 버블이든 수집되면 발행되는 정적 이벤트.
+        /// BubbleSpawner 인스턴스에 접근할 필요 없이 AudioManager 등이 바로 구독할 수 있게 하기 위함.
+        /// </summary>
+        public static event Action<int /*dnaValue*/> OnAnyCollected;
+
         private Coroutine _lifeRoutine;
+        private Coroutine _popRoutine;
+        private Vector3 _baseScale;
+
+        private void Awake()
+        {
+            _baseScale = transform.localScale;
+        }
 
         /// <summary>풀에서 꺼내져 활성화될 때 호출.</summary>
         public void Activate(int dnaValue, float lifetimeSeconds)
@@ -27,6 +45,25 @@ namespace Contagion.Gameplay
             DnaValue = dnaValue;
             if (_lifeRoutine != null) StopCoroutine(_lifeRoutine);
             _lifeRoutine = StartCoroutine(LifeTimer(lifetimeSeconds));
+
+            if (_popRoutine != null) StopCoroutine(_popRoutine);
+            transform.localScale = _baseScale * 0.2f;
+            _popRoutine = StartCoroutine(PopIn());
+        }
+
+        private IEnumerator PopIn()
+        {
+            float t = 0f;
+            Vector3 from = transform.localScale;
+            while (t < popInDuration)
+            {
+                t += Time.deltaTime;
+                float eased = 1f - Mathf.Pow(1f - Mathf.Clamp01(t / popInDuration), 3f); // ease-out cubic
+                transform.localScale = Vector3.LerpUnclamped(from, _baseScale, eased);
+                yield return null;
+            }
+            transform.localScale = _baseScale;
+            _popRoutine = null;
         }
 
         private IEnumerator LifeTimer(float seconds)
@@ -43,7 +80,16 @@ namespace Contagion.Gameplay
                 StopCoroutine(_lifeRoutine);
                 _lifeRoutine = null;
             }
+            if (_popRoutine != null)
+            {
+                StopCoroutine(_popRoutine);
+                _popRoutine = null;
+            }
+
+            FloatingTextEffect.Spawn(transform.position, $"+{DnaValue}", collectTextColor);
+
             OnCollected?.Invoke(this);
+            OnAnyCollected?.Invoke(DnaValue);
         }
 
         private void OnDisable()
@@ -52,6 +98,11 @@ namespace Contagion.Gameplay
             {
                 StopCoroutine(_lifeRoutine);
                 _lifeRoutine = null;
+            }
+            if (_popRoutine != null)
+            {
+                StopCoroutine(_popRoutine);
+                _popRoutine = null;
             }
         }
     }

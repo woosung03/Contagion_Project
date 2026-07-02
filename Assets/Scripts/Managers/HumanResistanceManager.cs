@@ -32,6 +32,14 @@ namespace Contagion.Managers
         [SerializeField] private float worldCollapseFundingMultiplier = 0.3f;
         [SerializeField] private float worldCollapseStabilityDecayPerTick = 0.01f;
 
+        [Header("국가별 개별 붕괴 단계 페널티 (나무위키 기준, Docs/PlagueIncReference.md 1절)")]
+        [SerializeField, Tooltip("무질서 팽배(사망률 50%+) 구간 연구 가동률")]
+        private float disorderFundingMultiplier = 0.6f;
+        [SerializeField, Tooltip("무정부상태 근접(사망률 70%+) 구간 연구 가동률")]
+        private float nearAnarchyFundingMultiplier = 0.25f;
+        [SerializeField, Tooltip("완전한 무정부 상태(사망률 95%+)에서 감염자가 없어도 매 틱 발생하는 치안붕괴 사망 비율")]
+        private float fullAnarchyUnrestDeathRate = 0.01f;
+
         private WorldDataManager Data => WorldDataManager.Instance;
         private ResistanceStage _lastStage = ResistanceStage.NoAwareness;
 
@@ -115,7 +123,35 @@ namespace Contagion.Managers
                 country.governmentStability = Mathf.Max(0f, country.governmentStability - worldCollapseStabilityDecayPerTick);
             }
 
+            // 국가별 개별 붕괴 단계 — 특정 국가만 이미 궤멸했어도 그 나라의 연구 기여도가 따로 줄어들도록.
+            // (전 세계 공통 ResistanceStage와 별개로 국가 자체 사망률만 본다. Docs/PlagueIncReference.md 1절)
+            switch (country.GetCollapseStage())
+            {
+                case CountryCollapseStage.Disorder:
+                    funding *= disorderFundingMultiplier;
+                    break;
+                case CountryCollapseStage.NearAnarchy:
+                    funding *= nearAnarchyFundingMultiplier;
+                    break;
+                case CountryCollapseStage.FullAnarchy:
+                case CountryCollapseStage.Extinct:
+                    funding = 0f;
+                    break;
+            }
+
             country.healthFunding = funding;
+
+            // 완전한 무정부 상태: 감염자가 없어도 치안 붕괴로 소량 추가 사망 발생 (원본 게임 특유의 룰).
+            if (country.GetCollapseStage() == CountryCollapseStage.FullAnarchy && country.LivingPopulation > 0)
+            {
+                long unrestDeaths = (long)(country.LivingPopulation * fullAnarchyUnrestDeathRate);
+                if (unrestDeaths > 0)
+                {
+                    unrestDeaths = Math.Min(unrestDeaths, country.LivingPopulation);
+                    country.deadCount += unrestDeaths;
+                    Data?.NotifyCountryChanged(country);
+                }
+            }
         }
 
         private void CloseBorders(Country country)

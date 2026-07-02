@@ -74,5 +74,20 @@ namespace Contagion.Managers
             Difficulty.MegaBrutal => 1.8f,
             _ => 1.0f
         };
+
+        /// <summary>
+        /// 난이도별 전염성(확산 속도) 배율. 나무위키 Plague Inc./시스템 문서 기준
+        /// (Docs/PlagueIncReference.md 3절) — 원본은 치료 속도뿐 아니라 확산 속도도 난이도별로 다르다.
+        /// 쉬움=퍼지기 쉬움(+보정), 어려움부터는 퍼지기 어려움(-보정)이라 신중한 플레이가 요구된다.
+        /// SimulationManager.RunTick()의 newInfected 계산에 globalSpreadFactor와 곱해서 사용.
+        /// </summary>
+        public float GetDifficultySpreadMultiplier() => difficulty switch
+        {
+            Difficulty.Casual => 1.3f,
+            Difficulty.Normal => 1.0f,
+            Difficulty.Brutal => 0.8f,
+            Difficulty.MegaBrutal => 0.6f,
+            _ => 1.0f
+        };
     }
 }
