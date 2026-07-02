@@ -51,6 +51,15 @@ namespace Contagion.Managers
             {
                 UpgradeManager.Instance.SetTree(upgradeTreeDatabase.CreateRuntimeInstances());
             }
+            else
+            {
+                // UpgradeTreeDatabase 에셋을 아직 만들지 않았어도 바로 플레이할 수 있도록,
+                // 코드로 정의된 27노드 세분화 트리(감염경로/증상/능력 각 9개)를 폴백으로 사용한다.
+                // (Docs/PlagueIncReference.md 참고, DefaultUpgradeTreeFactory 참고)
+                Debug.Log("[GameDataBootstrapper] upgradeTreeDatabase 미지정 — DefaultUpgradeTreeFactory의 " +
+                    "27노드 세분화 트리로 시작합니다.");
+                UpgradeManager.Instance.SetTree(DefaultUpgradeTreeFactory.BuildDefaultDetailedTree());
+            }
 
             SeedStartingInfection();
         }

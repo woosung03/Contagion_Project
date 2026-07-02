@@ -16,6 +16,12 @@ namespace Contagion.Managers
 
         [SerializeField] private List<UpgradeNode> tree = new List<UpgradeNode>();
 
+        [SerializeField, Range(0f, 1f), Tooltip("같은 카테고리에서 노드를 해금할 때마다 다음 노드 비용에 곱해지는 " +
+            "가산율. 나무위키 Plague Inc./시스템 문서 \"진화 시 다음 특성의 소모 DNA가 늘어난다\" 반영 " +
+            "(Docs/PlagueIncReference.md). 예: 0.15면 같은 카테고리에서 3개 해금 후 4번째 노드는 " +
+            "기본 비용의 1.45배(1 + 3*0.15)가 된다.")]
+        private float categoryCostEscalationPerUnlock = 0.15f;
+
         private Dictionary<string, UpgradeNode> _nodeLookup;
 
         /// <summary>전체 노드 목록 (읽기 전용) — UpgradeTreeView(Step 8)가 트리 렌더링에 사용.</summary>
@@ -58,12 +64,27 @@ namespace Contagion.Managers
 
         public bool IsUnlocked(string id) => GetNode(id)?.isUnlocked ?? false;
 
+        /// <summary>
+        /// 실제 구매 비용 — node.cost에 "같은 카테고리에서 이미 해금한 노드 수"만큼 가산율을 곱한다.
+        /// 나무위키 원본 게임 특유의 룰(Docs/PlagueIncReference.md 참고): 같은 계열을 계속 진화시킬수록
+        /// 다음 진화 비용이 비싸진다 — 한 카테고리만 몰아 찍기보다 세 카테고리를 골고루 찍도록 유도한다.
+        /// </summary>
+        public int GetEffectiveCost(UpgradeNode node)
+        {
+            if (node == null) return 0;
+            int unlockedInCategory = tree.Count(n => n.category == node.category && n.isUnlocked);
+            float multiplier = 1f + unlockedInCategory * categoryCostEscalationPerUnlock;
+            return Mathf.CeilToInt(node.cost * multiplier);
+        }
+
+        public int GetEffectiveCost(string id) => GetEffectiveCost(GetNode(id));
+
         /// <summary>선행 노드가 모두 해금됐고 DNA가 충분한지 확인.</summary>
         public bool CanUnlock(string id)
         {
             var node = GetNode(id);
             if (node == null || node.isUnlocked) return false;
-            if (Data == null || Data.State.dnaPoints < node.cost) return false;
+            if (Data == null || Data.State.dnaPoints < GetEffectiveCost(node)) return false;
             return node.prerequisites.All(IsUnlocked);
         }
 
@@ -72,11 +93,14 @@ namespace Contagion.Managers
         {
             if (!CanUnlock(id)) return false;
             var node = GetNode(id);
+            int effectiveCost = GetEffectiveCost(node);
 
-            if (!Data.State.SpendDna(node.cost)) return false;
+            if (!Data.State.SpendDna(effectiveCost)) return false;
             node.isUnlocked = true;
 
             ApplyEffectsToPathogen(node);
+
+            Debug.Log($"[UpgradeManager] {node.id} 해금 (실비용={effectiveCost}, 기본비용={node.cost})");
 
             Data.NotifyWorldStateChanged();
             OnNodeUnlocked?.Invoke(node);
