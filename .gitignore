@@ -68,3 +68,12 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Apps in Toss SDK - 자동 보호 패턴
+**/AITCredentials.asset
+**/AITCredentials.asset.meta
+ait-build/
+webgl/
+Assets/WebGLTemplates/
+Assets/StreamingAssets/build_info
+Assets/StreamingAssets/build_info.meta
