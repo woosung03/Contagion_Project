@@ -137,8 +137,18 @@ namespace Contagion.Gameplay
             _renderer.color = Color.Lerp(_renderer.color, _targetColor, 1f - Mathf.Exp(-colorTransitionSpeed * Time.deltaTime));
         }
 
-        private void OnMouseDown()
+        /// <summary>
+        /// 예전엔 OnMouseDown()에서 바로 클릭 처리했는데, Step 28에서 지도 좌우 드래그 스크롤을
+        /// 추가하면서 문제가 생겼다 — 지도를 스와이프하다가 손가락이 국가 위를 지나가면 누르는 순간
+        /// 바로 팝업이 열려버림. OnMouseUpAsButton(누른 채 이 콜라이더 위에서 뗄 때만 호출)으로
+        /// 바꾸고, WorldMapCameraController가 이번 누름 사이클에서 드래그 임계값을 넘었으면
+        /// WasDragging이 true가 되므로 그 경우엔 클릭을 무시한다.
+        /// </summary>
+        private void OnMouseUpAsButton()
         {
+            if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
+                return;
+
             WorldMap.Instance?.HandleCountryClicked(countryId);
         }
     }
