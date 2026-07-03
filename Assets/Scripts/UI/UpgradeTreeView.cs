@@ -18,16 +18,27 @@ namespace Contagion.UI
     /// 씬에 이 스크립트를 붙인 GameObject 3개(TransmissionTreeUI/SymptomTreeUI/AbilityTreeUI)를 만들고
     /// 각각 인스펙터에서 <see cref="category"/>만 다르게 지정한다 — UXML/USS는 동일한 UpgradeTree.uxml을
     /// 재사용(카테고리 제목만 코드에서 동적으로 채움). 전체 트리(27개)가 아니라 그 카테고리(9개)만
-    /// 필터링해서 그리므로, DefaultUpgradeTreeFactory가 부여한 절대 좌표(카테고리별로 x 40~1740까지
+    /// 필터링해서 그리므로, DefaultUpgradeTreeFactory가 부여한 절대 좌표(카테고리별로 x 40~1600까지
     /// 넓게 퍼져있음)를 그대로 쓰면 창 하나에 카테고리 하나만 있는데도 왼쪽에 큰 빈 여백이 생긴다 —
     /// RebuildTree()에서 그 카테고리의 최소 x값을 빼서 항상 0부터 시작하도록 보정한다.
+    ///
+    /// UI/UX 폴리싱 추가 — 창 3개가 버튼 3개로 따로 열리던 걸 "버튼 하나 + 좌우 화살표로 카테고리
+    /// 전환"하는 방식으로 바꿨다(HUD 탭이 3개→1개). 이 클래스 자체는 여전히 카테고리 하나만 담당하는
+    /// 그대로고(3개 GameObject 구조 유지 — 실제로 화면을 완전히 하나로 합치려면 UIDocument 3개를
+    /// 병합해야 하는데 리스크가 커서 보류), 대신 헤더에 이전/다음 버튼을 추가해 클릭 시
+    /// <see cref="OnPrevRequested"/>/<see cref="OnNextRequested"/> 이벤트만 쏜다. 실제 페이지 전환(현재
+    /// 보이는 창을 Hide()하고 다음 창을 Show())은 <see cref="Contagion.Managers.UIManager"/>가 담당 —
+    /// 같은 버튼 클릭 콜백 안에서 동시에 일어나므로 사용자 입장에서는 창이 하나이고 그 안에서
+    /// 좌우로 넘어가는 것처럼 보인다.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class UpgradeTreeView : MonoBehaviour
     {
-        private const float NodeWidth = 140f;
-        private const float NodeHeight = 60f;
-        private const float CanvasPadding = 80f;
+        // 열 간격을 180→140으로 줄인 DefaultUpgradeTreeFactory에 맞춰 노드 박스와 캔버스 여백도 축소
+        // (트리를 좀 더 작게 해달라는 피드백 + 참조 해상도 480px 폭 안에 가로로 다 들어가게 하기 위함).
+        private const float NodeWidth = 110f;
+        private const float NodeHeight = 50f;
+        private const float CanvasPadding = 48f;
         private const float TopOffset = 34f; // 카테고리 제목을 위한 상단 여백
 
         [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
@@ -42,6 +53,13 @@ namespace Contagion.UI
         private Button _buyButton;
         private Button _closeButton;
         private Button _adBonusButton;
+        private Button _prevButton;
+        private Button _nextButton;
+
+        /// <summary>헤더의 ◀ 버튼 클릭 — 실제 페이지 전환은 UIManager가 담당.</summary>
+        public event System.Action OnPrevRequested;
+        /// <summary>헤더의 ▶ 버튼 클릭 — 실제 페이지 전환은 UIManager가 담당.</summary>
+        public event System.Action OnNextRequested;
 
         private string _selectedNodeId;
 
@@ -60,6 +78,8 @@ namespace Contagion.UI
             _buyButton = root.Q<Button>("buy-button");
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
+            _prevButton = root.Q<Button>("prev-category-button");
+            _nextButton = root.Q<Button>("next-category-button");
 
             if (_categoryTitleLabel != null)
                 _categoryTitleLabel.text = CategoryLabel(category);
@@ -71,6 +91,8 @@ namespace Contagion.UI
             _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
             _buyButton.RegisterCallback<ClickEvent>(_ => HandleBuyClicked());
             _adBonusButton.RegisterCallback<ClickEvent>(_ => HandleAdBonusClicked());
+            _prevButton?.RegisterCallback<ClickEvent>(_ => OnPrevRequested?.Invoke());
+            _nextButton?.RegisterCallback<ClickEvent>(_ => OnNextRequested?.Invoke());
 
             Subscribe();
             Hide();

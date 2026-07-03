@@ -8,20 +8,20 @@
 
 .ending-title {
     color: white;
-    font-size: 36px;
+    font-size: 40px;
     -unity-font-style: bold;
     margin-bottom: 12px;
 }
 
 .ending-detail {
     color: rgb(220, 220, 220);
-    font-size: 16px;
+    font-size: 20px;
     margin-bottom: 8px;
 }
 
 .ending-score {
     color: rgb(255, 210, 90);
-    font-size: 22px;
+    font-size: 26px;
     -unity-font-style: bold;
     margin-bottom: 24px;
 }
@@ -31,8 +31,8 @@
 }
 
 .ending-button {
-    width: 160px;
-    height: 48px;
+    width: 180px;
+    height: 56px;
     margin: 0 8px;
 }
 

@@ -19,10 +19,14 @@ namespace Contagion.Managers
     {
         [SerializeField] private HudController hudController;
 
-        [Header("업그레이드 트리 — 카테고리별 완전히 별개의 창 3개 (UI/UX 폴리싱)")]
+        [Header("업그레이드 트리 — 카테고리별로 별개인 창 3개를 배열 순서(전파→증상→능력)로 페이징")]
         [SerializeField] private UpgradeTreeView transmissionTreeView;
         [SerializeField] private UpgradeTreeView symptomTreeView;
         [SerializeField] private UpgradeTreeView abilityTreeView;
+
+        /// <summary>인덱스 0=전파, 1=증상, 2=능력 — HUD "업그레이드" 버튼 하나로 열고 좌우 화살표로 순환.</summary>
+        private UpgradeTreeView[] _upgradePages;
+        private int _currentUpgradePageIndex;
 
         [SerializeField] private CountryPopupController countryPopupController;
         [SerializeField] private EndingScreenController endingScreenController;
@@ -59,12 +63,23 @@ namespace Contagion.Managers
 
         private void OnEnable()
         {
+            _upgradePages = new[] { transmissionTreeView, symptomTreeView, abilityTreeView };
+
             if (hudController != null)
             {
-                hudController.OnUpgradeTabClicked -= HandleUpgradeTabClicked;
-                hudController.OnUpgradeTabClicked += HandleUpgradeTabClicked;
+                hudController.OnUpgradeButtonClicked -= HandleUpgradeButtonClicked;
+                hudController.OnUpgradeButtonClicked += HandleUpgradeButtonClicked;
                 hudController.OnRankingClicked -= HandleRankingClicked;
                 hudController.OnRankingClicked += HandleRankingClicked;
+            }
+
+            foreach (var page in _upgradePages)
+            {
+                if (page == null) continue;
+                page.OnPrevRequested -= HandlePagePrevRequested;
+                page.OnPrevRequested += HandlePagePrevRequested;
+                page.OnNextRequested -= HandlePageNextRequested;
+                page.OnNextRequested += HandlePageNextRequested;
             }
 
             if (endingScreenController != null)
@@ -94,8 +109,18 @@ namespace Contagion.Managers
         {
             if (hudController != null)
             {
-                hudController.OnUpgradeTabClicked -= HandleUpgradeTabClicked;
+                hudController.OnUpgradeButtonClicked -= HandleUpgradeButtonClicked;
                 hudController.OnRankingClicked -= HandleRankingClicked;
+            }
+
+            if (_upgradePages != null)
+            {
+                foreach (var page in _upgradePages)
+                {
+                    if (page == null) continue;
+                    page.OnPrevRequested -= HandlePagePrevRequested;
+                    page.OnNextRequested -= HandlePageNextRequested;
+                }
             }
 
             if (endingScreenController != null)
@@ -139,28 +164,39 @@ namespace Contagion.Managers
         }
 
         /// <summary>
-        /// 전파/증상/능력 탭 3개가 전부 같은 창을 열어서 카테고리 구분이 안 된다는 피드백으로,
-        /// 카테고리별로 완전히 별개인 UpgradeTreeView 3개 중 해당하는 것만 열고 나머지 둘은 닫는다.
+        /// 전파/증상/능력 탭 3개가 각각 다른 창을 열던 걸 버튼 하나로 통합 — 마지막으로 보고 있던
+        /// 페이지(_currentUpgradePageIndex)를 그대로 열어준다(항상 전파부터 시작하지 않고, 능력 탭을
+        /// 보다가 닫았으면 다음에 열 때도 능력 탭부터 보이는 게 자연스러움).
         /// </summary>
-        private void HandleUpgradeTabClicked(Contagion.Data.UpgradeCategory category)
+        private void HandleUpgradeButtonClicked()
         {
             countryPopupController?.Hide();
+            ShowUpgradePage(_currentUpgradePageIndex);
+        }
 
-            transmissionTreeView?.Hide();
-            symptomTreeView?.Hide();
-            abilityTreeView?.Hide();
+        /// <summary>헤더의 ◀ 버튼 — 이전 카테고리로 순환 이동(맨 앞에서 누르면 맨 뒤로 돌아감).</summary>
+        private void HandlePagePrevRequested()
+        {
+            int count = _upgradePages.Length;
+            ShowUpgradePage((_currentUpgradePageIndex - 1 + count) % count);
+        }
 
-            switch (category)
+        /// <summary>헤더의 ▶ 버튼 — 다음 카테고리로 순환 이동(맨 뒤에서 누르면 맨 앞으로 돌아감).</summary>
+        private void HandlePageNextRequested()
+        {
+            int count = _upgradePages.Length;
+            ShowUpgradePage((_currentUpgradePageIndex + 1) % count);
+        }
+
+        /// <summary>지정한 인덱스의 UpgradeTreeView만 보이고 나머지 둘은 닫는다.</summary>
+        private void ShowUpgradePage(int index)
+        {
+            _currentUpgradePageIndex = index;
+            for (int i = 0; i < _upgradePages.Length; i++)
             {
-                case Contagion.Data.UpgradeCategory.Transmission:
-                    transmissionTreeView?.Show();
-                    break;
-                case Contagion.Data.UpgradeCategory.Symptom:
-                    symptomTreeView?.Show();
-                    break;
-                case Contagion.Data.UpgradeCategory.Ability:
-                    abilityTreeView?.Show();
-                    break;
+                if (_upgradePages[i] == null) continue;
+                if (i == index) _upgradePages[i].Show();
+                else _upgradePages[i].Hide();
             }
         }
 

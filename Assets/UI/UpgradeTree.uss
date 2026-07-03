@@ -4,28 +4,50 @@
     padding: 16px;
 }
 
+/* 전파/증상/능력 3창 통합 — 헤더를 2줄로 나눔: 위(◀ 제목 ▶ 내비게이션) / 아래(DNA·광고·닫기 액션).
+   한 줄에 다 넣으면(화살표 2개+제목+DNA+광고버튼+닫기버튼) 참조 해상도 480px 폭 안에서
+   제목이 들어갈 공간이 거의 안 남아 2줄로 분리했다. */
 .upgrade-header {
+    flex-direction: column;
+    margin-bottom: 8px;
+}
+
+.upgrade-header__nav {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.upgrade-header__actions {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
 }
 
 .upgrade-header__category-title {
     color: rgb(255, 210, 90);
-    font-size: 20px;
+    font-size: 24px;
     -unity-font-style: bold;
     flex-grow: 1;
+    -unity-text-align: middle-center;
 }
 
 .upgrade-header__dna {
     color: rgb(120, 220, 140);
-    font-size: 20px;
+    font-size: 24px;
     -unity-font-style: bold;
 }
 
 .upgrade-header__close {
     width: 80px;
+}
+
+.upgrade-header__arrow {
+    width: 52px;
+    height: 40px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    margin: 0 4px;
 }
 
 .upgrade-header__ad-bonus {
@@ -41,7 +63,7 @@
 
 .category-header {
     color: rgb(255, 210, 90);
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
     margin-top: 10px;
     margin-bottom: 4px;
@@ -50,7 +72,7 @@
 /* 트리 좌표 배치 노드 (UpgradeTreeView — 세분화 항목: 좌표+연결선 시각화) */
 .tree-category-label {
     color: rgb(255, 210, 90);
-    font-size: 15px;
+    font-size: 19px;
     -unity-font-style: bold;
 }
 
@@ -88,7 +110,7 @@
 
 .tree-node__label {
     color: white;
-    font-size: 12px;
+    font-size: 14px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;
@@ -96,7 +118,7 @@
 
 .tree-node__cost {
     color: rgb(210, 210, 210);
-    font-size: 11px;
+    font-size: 13px;
     -unity-text-align: middle-center;
 }
 
@@ -108,13 +130,13 @@
 
 .detail-panel__title {
     color: white;
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
 }
 
 .detail-panel__desc {
     color: rgb(210, 210, 210);
-    font-size: 13px;
+    font-size: 17px;
     white-space: normal;
     margin: 6px 0;
 }

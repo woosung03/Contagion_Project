@@ -2,10 +2,16 @@
     <Style src="UpgradeTree.uss" />
     <ui:VisualElement name="upgrade-root" class="upgrade-root">
         <ui:VisualElement name="upgrade-header" class="upgrade-header">
-            <ui:Label name="category-title-label" text="" class="upgrade-header__category-title" />
-            <ui:Label name="dna-label" text="DNA: 0" class="upgrade-header__dna" />
-            <ui:Button name="ad-bonus-button" text="광고 보고 DNA +10" class="upgrade-header__ad-bonus" />
-            <ui:Button name="close-button" text="닫기" class="upgrade-header__close" />
+            <ui:VisualElement name="upgrade-header__nav" class="upgrade-header__nav">
+                <ui:Button name="prev-category-button" text="◀" class="upgrade-header__arrow" />
+                <ui:Label name="category-title-label" text="" class="upgrade-header__category-title" />
+                <ui:Button name="next-category-button" text="▶" class="upgrade-header__arrow" />
+            </ui:VisualElement>
+            <ui:VisualElement name="upgrade-header__actions" class="upgrade-header__actions">
+                <ui:Label name="dna-label" text="DNA: 0" class="upgrade-header__dna" />
+                <ui:Button name="ad-bonus-button" text="광고 보고 DNA +10" class="upgrade-header__ad-bonus" />
+                <ui:Button name="close-button" text="닫기" class="upgrade-header__close" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:ScrollView name="node-scroll" class="node-scroll" />

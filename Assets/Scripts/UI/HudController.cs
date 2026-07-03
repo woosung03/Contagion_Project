@@ -7,8 +7,15 @@ using UnityEngine.UIElements;
 namespace Contagion.UI
 {
     /// <summary>
-    /// 메인 게임 화면 HUD. 설계 문서 7.1절 (하단 스탯 바 + 전파/증상/능력 탭 버튼).
+    /// 메인 게임 화면 HUD. 설계 문서 7.1절 (하단 스탯 바 + 업그레이드/랭킹 탭 버튼).
     /// 뉴스 피드 스크롤은 별도 NewsFeedController가 같은 UIDocument를 공유해 담당한다.
+    ///
+    /// UI/UX 폴리싱 — 원래 전파/증상/능력 탭 버튼 3개가 각각 별개의 창을 열었는데, 버튼 하나
+    /// ("업그레이드")로 통합하고 창 안에서 좌우 화살표로 카테고리를 넘기는 방식으로 바꿨다
+    /// (UpgradeTreeView의 prev/next 버튼 + UIManager의 페이징 로직 참고). 그래서 카테고리를
+    /// 지정하던 <c>OnUpgradeTabClicked(UpgradeCategory)</c> 이벤트가 인자 없는
+    /// <see cref="OnUpgradeButtonClicked"/>로 바뀌었다 — 어느 카테고리를 여는지는 UIManager가
+    /// "마지막으로 보던 페이지"를 기억해서 결정한다.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class HudController : MonoBehaviour
@@ -20,9 +27,7 @@ namespace Contagion.UI
         private Label _dayLabel;
         private Label _phaseLabel;
         private Label _worldStatusLabel;
-        private Button _tabTransmission;
-        private Button _tabSymptom;
-        private Button _tabAbility;
+        private Button _tabUpgrade;
         private Button _rankingButton;
 
         // 감염자/사망자/치료제 — 텍스트 라벨만으론 가시성이 떨어진다는 피드백으로 추가한 인라인
@@ -31,7 +36,7 @@ namespace Contagion.UI
         private HudSparkline _deadGraph;
         private HudSparkline _cureGraph;
 
-        public event Action<UpgradeCategory> OnUpgradeTabClicked;
+        public event Action OnUpgradeButtonClicked;
         public event Action OnRankingClicked;
 
         private void OnEnable()
@@ -46,18 +51,14 @@ namespace Contagion.UI
             _phaseLabel = root.Q<Label>("phase-label");
             _worldStatusLabel = root.Q<Label>("world-status-label");
 
-            _tabTransmission = root.Q<Button>("tab-transmission");
-            _tabSymptom = root.Q<Button>("tab-symptom");
-            _tabAbility = root.Q<Button>("tab-ability");
+            _tabUpgrade = root.Q<Button>("tab-upgrade");
             _rankingButton = root.Q<Button>("ranking-button");
 
             _infectedGraph = new HudSparkline(root.Q<VisualElement>("infected-graph"), new Color(1f, 0.67f, 0.35f));
             _deadGraph = new HudSparkline(root.Q<VisualElement>("dead-graph"), new Color(0.86f, 0.35f, 0.35f));
             _cureGraph = new HudSparkline(root.Q<VisualElement>("cure-graph"), new Color(0.47f, 0.86f, 0.55f));
 
-            _tabTransmission.RegisterCallback<ClickEvent>(_ => OnUpgradeTabClicked?.Invoke(UpgradeCategory.Transmission));
-            _tabSymptom.RegisterCallback<ClickEvent>(_ => OnUpgradeTabClicked?.Invoke(UpgradeCategory.Symptom));
-            _tabAbility.RegisterCallback<ClickEvent>(_ => OnUpgradeTabClicked?.Invoke(UpgradeCategory.Ability));
+            _tabUpgrade.RegisterCallback<ClickEvent>(_ => OnUpgradeButtonClicked?.Invoke());
             _rankingButton.RegisterCallback<ClickEvent>(_ => OnRankingClicked?.Invoke());
 
             Subscribe();

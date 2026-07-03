@@ -25,9 +25,7 @@
                 <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
             </ui:VisualElement>
             <ui:VisualElement name="tabs-row" class="tabs-row">
-                <ui:Button name="tab-transmission" text="전파" class="tab-button" />
-                <ui:Button name="tab-symptom" text="증상" class="tab-button" />
-                <ui:Button name="tab-ability" text="능력" class="tab-button" />
+                <ui:Button name="tab-upgrade" text="업그레이드" class="tab-button" />
                 <ui:Button name="ranking-button" text="랭킹" class="tab-button tab-button--secondary" />
             </ui:VisualElement>
         </ui:VisualElement>

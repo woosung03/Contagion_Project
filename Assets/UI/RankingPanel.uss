@@ -12,20 +12,20 @@
 
 .ranking-title {
     color: white;
-    font-size: 22px;
+    font-size: 26px;
     -unity-font-style: bold;
     margin-bottom: 12px;
 }
 
 .ranking-row {
     color: rgb(255, 210, 90);
-    font-size: 16px;
+    font-size: 20px;
     margin-bottom: 8px;
 }
 
 .ranking-note {
     color: rgb(180, 180, 180);
-    font-size: 12px;
+    font-size: 16px;
     white-space: normal;
     margin-bottom: 12px;
 }

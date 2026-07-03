@@ -11,7 +11,7 @@
 
 .mainmenu-title {
     color: white;
-    font-size: 28px;
+    font-size: 32px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     margin-bottom: 4px;
@@ -19,7 +19,7 @@
 
 .mainmenu-subtitle {
     color: rgb(200, 200, 200);
-    font-size: 15px;
+    font-size: 19px;
     -unity-text-align: middle-center;
     margin-bottom: 12px;
 }
@@ -46,13 +46,13 @@
 
 .pathogen-card__name {
     color: white;
-    font-size: 17px;
+    font-size: 21px;
     -unity-font-style: bold;
 }
 
 .pathogen-card__stats {
     color: rgb(180, 220, 255);
-    font-size: 13px;
+    font-size: 17px;
     margin-top: 4px;
 }
 
@@ -76,8 +76,8 @@
 /* 국기 아이콘 자리 — CountrySelectController.GetFlagTexture()가 Resources/Flags/{id}.png를 배경으로
    채운다. 텍스처를 못 찾으면(파일 누락 등) background-color만 남아 예전처럼 빈 사각형으로 보인다. */
 .country-row__flag {
-    width: 28px;
-    height: 20px;
+    width: 36px;
+    height: 26px;
     background-color: rgba(255, 255, 255, 0.15);
     border-radius: 2px;
     margin-right: 10px;
@@ -87,14 +87,14 @@
 
 .country-row__name {
     color: white;
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
     flex-grow: 1;
 }
 
 .country-row__meta {
     color: rgb(190, 190, 190);
-    font-size: 12px;
+    font-size: 16px;
 }
 
 .detail-panel {
@@ -107,26 +107,26 @@
 
 .detail-panel__title {
     color: rgb(255, 210, 90);
-    font-size: 18px;
+    font-size: 22px;
     -unity-font-style: bold;
 }
 
 .detail-panel__desc {
     color: rgb(210, 210, 210);
-    font-size: 13px;
+    font-size: 17px;
     white-space: normal;
     margin-top: 6px;
 }
 
 .mainmenu-next {
-    height: 44px;
-    font-size: 16px;
+    height: 56px;
+    font-size: 20px;
     -unity-font-style: bold;
     background-color: rgb(120, 220, 140);
     color: rgb(10, 30, 15);
 }
 
 .mainmenu-back {
-    height: 36px;
+    height: 46px;
     margin-bottom: 8px;
 }
