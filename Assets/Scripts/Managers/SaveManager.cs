@@ -77,6 +77,13 @@ namespace Contagion.Managers
             SaveGame();
         }
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// _lastAutoSaveDay가 이전 판의 큰 day 값을 들고 있으면 새 게임에서 자동 저장이 한참 지연된다
+        /// (치명적이진 않지만 — 재시작 직후 브라우저가 꺼지면 새 게임 진행이 저장 안 될 수 있음).
+        /// </summary>
+        public void ResetForNewGame() => _lastAutoSaveDay = -1;
+
         // 모바일 백그라운드 전환/종료 대응 (설계 문서 15절)
         private void OnApplicationPause(bool pauseStatus)
         {

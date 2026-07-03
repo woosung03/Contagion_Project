@@ -37,8 +37,16 @@ namespace Contagion.UI
             _reviveButton = root.Q<Button>("revive-button");
             _restartButton = root.Q<Button>("restart-button");
 
-            _reviveButton.RegisterCallback<ClickEvent>(_ => OnReviveRequested?.Invoke());
-            _restartButton.RegisterCallback<ClickEvent>(_ => OnRestartRequested?.Invoke());
+            _reviveButton.RegisterCallback<ClickEvent>(_ =>
+            {
+                Debug.Log("[FLOW][EndingScreenController] 부활 버튼 클릭됨.");
+                OnReviveRequested?.Invoke();
+            });
+            _restartButton.RegisterCallback<ClickEvent>(_ =>
+            {
+                Debug.Log("[FLOW][EndingScreenController] 재시작 버튼 클릭됨.");
+                OnRestartRequested?.Invoke();
+            });
 
             Subscribe();
             Hide();
@@ -61,6 +69,7 @@ namespace Contagion.UI
 
         private void HandleGameEnded(bool isVictory)
         {
+            Debug.Log($"[FLOW][EndingScreenController] HandleGameEnded — isVictory={isVictory} =====");
             GameManager.Instance?.SetPaused(true);
 
             int day = WorldDataManager.Instance?.State.currentDay ?? 0;

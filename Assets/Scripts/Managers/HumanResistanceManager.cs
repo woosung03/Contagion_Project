@@ -86,6 +86,19 @@ namespace Contagion.Managers
                 SimulationManager.Instance.OnTickCompleted -= HandleTick;
         }
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// _lastStage/_lastCollapseStage 등이 이전 판(예: WorldCollapse로 끝난 판) 값을 그대로 들고
+        /// 있는다 — 기능적으로 치명적이진 않지만(다음 틱에 바로 올바른 값으로 갱신됨), 리셋 안 하면
+        /// 새 게임 시작 직후 "WorldCollapse -> NoAwareness" 같은 혼란스러운 역행 로그/이벤트가 뜬다.
+        /// </summary>
+        public void ResetForNewGame()
+        {
+            _lastStage = ResistanceStage.NoAwareness;
+            _lastMortalityStage = WorldMortalityStage.Stable;
+            _lastCollapseStage.Clear();
+        }
+
         private void HandleTick(WorldState state)
         {
             var stage = state.GetResistanceStage();

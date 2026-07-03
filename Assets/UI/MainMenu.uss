@@ -1,0 +1,130 @@
+.mainmenu-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-grow: 1;
+    background-color: rgba(8, 8, 16, 0.97);
+    padding: 24px;
+}
+
+.mainmenu-title {
+    color: white;
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.mainmenu-subtitle {
+    color: rgb(200, 200, 200);
+    font-size: 15px;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+.mainmenu-list {
+    flex-grow: 1;
+    margin-bottom: 12px;
+}
+
+.pathogen-card {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.pathogen-card--selected {
+    border-width: 3px;
+    border-color: rgb(255, 210, 90);
+    background-color: rgba(255, 210, 90, 0.12);
+}
+
+.pathogen-card__name {
+    color: white;
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.pathogen-card__stats {
+    color: rgb(180, 220, 255);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.country-row {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    flex-direction: row;
+    align-items: center;
+}
+
+.country-row--selected {
+    border-width: 3px;
+    border-color: rgb(255, 210, 90);
+    background-color: rgba(255, 210, 90, 0.12);
+}
+
+/* 국기 아이콘 자리 — 아직 실제 국기 에셋 없음. 나중에 배경 이미지만 지정하면 됨(UI/UX 폴리싱 후속). */
+.country-row__flag {
+    width: 28px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.country-row__name {
+    color: white;
+    font-size: 16px;
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
+.country-row__meta {
+    color: rgb(190, 190, 190);
+    font-size: 12px;
+}
+
+.detail-panel {
+    background-color: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    min-height: 70px;
+}
+
+.detail-panel__title {
+    color: rgb(255, 210, 90);
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.detail-panel__desc {
+    color: rgb(210, 210, 210);
+    font-size: 13px;
+    white-space: normal;
+    margin-top: 6px;
+}
+
+.mainmenu-next {
+    height: 44px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    background-color: rgb(120, 220, 140);
+    color: rgb(10, 30, 15);
+}
+
+.mainmenu-back {
+    height: 36px;
+    margin-bottom: 8px;
+}

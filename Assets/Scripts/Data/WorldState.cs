@@ -16,6 +16,24 @@ namespace Contagion.Data
         public int dnaPoints;             // 플레이어 보유 DNA 포인트
         public int currentDay;            // 경과 일수
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 호출. totalPopulation/infectedCount/deadCount는 어차피
+        /// WorldDataManager.SetCountries() 직후 RecalculateWorldTotals()가 다시 계산하지만,
+        /// cureProgress/plagueVisibility/dnaPoints/currentDay는 그 계산에 포함되지 않아 별도로
+        /// 초기화하지 않으면 이전 판 값이 그대로 남는다(예: 치료제 100%로 이겼던 판 다음에 새 게임을
+        /// 시작해도 cureProgress가 1로 시작해 몇 틱 만에 즉시 종료돼버리는 버그).
+        /// </summary>
+        public void Reset()
+        {
+            totalPopulation = 0;
+            infectedCount = 0;
+            deadCount = 0;
+            cureProgress = 0f;
+            plagueVisibility = 0f;
+            dnaPoints = 0;
+            currentDay = 0;
+        }
+
         public void AddDna(int amount) => dnaPoints = Math.Max(0, dnaPoints + amount);
 
         public bool SpendDna(int amount)

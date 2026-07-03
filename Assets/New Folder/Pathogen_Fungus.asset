@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e775fb4b8f04b6148a5bc35439fb3fe1, type: 3}
-  m_Name: Pathogen_Bacteria
+  m_Name: Pathogen_Fungus
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Data.PathogenDefinition
-  displayName: "\uC138\uADE0"
-  flavorText: "\uAC00\uC7A5 \uAE30\uBCF8\uC801\uC778 \uBCD1\uC6D0\uCCB4. \uD2B9\uBCC4\uD55C \uAC15\uC810\uB3C4 \uC57D\uC810\uB3C4 \uC5C6\uB294 \uADE0\uD615 \uC7A1\uD78C \uD2B9\uC131\uC73C\uB85C, \uCC98\uC74C \uC2DC\uC791\uD558\uAE30\uC5D0 \uC801\uD569\uD558\uB2E4."
+  displayName: "곰팡이"
+  flavorText: "포자를 퍼뜨려 서서히 확산되는 병원체. 습한 기후에서 특히 강하지만 건조한 지역에서는 힘을 못 쓴다."
   data:
-    type: 0
-    infectivity: 0.3
-    severity: 0.2
-    lethality: 0.05
-    drugResistance: 0
+    type: 2
+    infectivity: 0.15
+    severity: 0.25
+    lethality: 0.1
+    drugResistance: 0.05
     environmentResistance:
     - climate: 3
-      resistance: 0.8
-    - climate: 1
       resistance: 1
+    - climate: 1
+      resistance: 0.7
     - climate: 2
-      resistance: 0.6
-    - climate: 0
       resistance: 0.4
+    - climate: 0
+      resistance: 0.2
     transmissionRoutes:
+    - 0
     - 1
-    - 2

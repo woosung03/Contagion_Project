@@ -105,6 +105,29 @@ namespace Contagion.Managers
             _tickRoutine = null;
         }
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// 씬을 리로드해도 살아남는데, _gameEnded가 true로 남아있으면 TickLoop()과
+        /// EvaluateEndConditions()가 매 프레임 조용히 스킵돼서 재시작한 새 게임의 틱이 영원히 멈춰있는
+        /// 치명적인 버그가 있었다. 마일스톤 기록(_lastInfectionMilestone/_lastDeathMilestone)도 이전 판
+        /// 수치가 남아있으면 새 게임에서 DNA 버블이 한참 동안 안 뜨는 문제가 있어 같이 비운다.
+        /// </summary>
+        public void ResetForNewGame()
+        {
+            _gameEnded = false;
+            _lastInfectionMilestone.Clear();
+            _lastDeathMilestone.Clear();
+        }
+
+        /// <summary>
+        /// 부활(패배 후 보상형 광고 시청 → 같은 판 이어가기, 설계 문서 13절)에서 호출. 완전히 새 게임을
+        /// 시작하는 게 아니라 "이 판을 계속 진행"하는 것이므로 마일스톤/국가 데이터는 건드리지 않고
+        /// EvaluateEndConditions()가 다시 틱을 스킵하지 않도록 종료 플래그만 푼다. 이걸 안 하면
+        /// UIManager.HandleReviveRequested가 GameManager.isPaused는 풀어도 TickLoop()의
+        /// "if (_gameEnded) continue;"에 계속 걸려 시뮬레이션이 영원히 멈춰있는 버그가 있었다.
+        /// </summary>
+        public void ClearGameEndedFlag() => _gameEnded = false;
+
         private IEnumerator TickLoop()
         {
             var wait = new WaitForSeconds(tickIntervalSeconds);

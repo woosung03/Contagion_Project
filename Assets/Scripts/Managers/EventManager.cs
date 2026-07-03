@@ -134,6 +134,19 @@ namespace Contagion.Managers
                 SimulationManager.Instance.OnTickCompleted -= HandleTick;
         }
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// _lastTriggeredDay(쿨다운 기준일)가 이전 판의 큰 day 값을 그대로 들고 있으면, 새 게임은
+        /// currentDay가 0부터 시작하므로 "currentDay - lastDay"가 한참 음수가 되어 사실상 모든 뉴스
+        /// 이벤트가 오랫동안 발동 안 하는 버그가 있었다. _firedOnce(백신 임상 성공 등 1회성 이벤트)도
+        /// 안 비우면 두 번째 판부터는 영원히 발동하지 않는다.
+        /// </summary>
+        public void ResetForNewGame()
+        {
+            _lastTriggeredDay.Clear();
+            _firedOnce.Clear();
+        }
+
         private void HandleTick(WorldState state)
         {
             var data = WorldDataManager.Instance;

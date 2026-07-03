@@ -11,6 +11,13 @@
     margin-bottom: 8px;
 }
 
+.upgrade-header__category-title {
+    color: rgb(255, 210, 90);
+    font-size: 20px;
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
 .upgrade-header__dna {
     color: rgb(120, 220, 140);
     font-size: 20px;

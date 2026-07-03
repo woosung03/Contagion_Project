@@ -25,6 +25,12 @@ namespace Contagion.UI
         private Button _tabAbility;
         private Button _rankingButton;
 
+        // 감염자/사망자/치료제 — 텍스트 라벨만으론 가시성이 떨어진다는 피드백으로 추가한 인라인
+        // 스파크라인 그래프 (HudSparkline.cs 참고).
+        private HudSparkline _infectedGraph;
+        private HudSparkline _deadGraph;
+        private HudSparkline _cureGraph;
+
         public event Action<UpgradeCategory> OnUpgradeTabClicked;
         public event Action OnRankingClicked;
 
@@ -44,6 +50,10 @@ namespace Contagion.UI
             _tabSymptom = root.Q<Button>("tab-symptom");
             _tabAbility = root.Q<Button>("tab-ability");
             _rankingButton = root.Q<Button>("ranking-button");
+
+            _infectedGraph = new HudSparkline(root.Q<VisualElement>("infected-graph"), new Color(1f, 0.67f, 0.35f));
+            _deadGraph = new HudSparkline(root.Q<VisualElement>("dead-graph"), new Color(0.86f, 0.35f, 0.35f));
+            _cureGraph = new HudSparkline(root.Q<VisualElement>("cure-graph"), new Color(0.47f, 0.86f, 0.55f));
 
             _tabTransmission.RegisterCallback<ClickEvent>(_ => OnUpgradeTabClicked?.Invoke(UpgradeCategory.Transmission));
             _tabSymptom.RegisterCallback<ClickEvent>(_ => OnUpgradeTabClicked?.Invoke(UpgradeCategory.Symptom));
@@ -88,6 +98,10 @@ namespace Contagion.UI
             _cureLabel.text = $"치료제: {state.cureProgress * 100f:F1}%";
             _dnaLabel.text = $"DNA: {state.dnaPoints:N0}";
             _dayLabel.text = $"Day {state.currentDay}";
+
+            _infectedGraph?.AddSample(state.infectedCount);
+            _deadGraph?.AddSample(state.deadCount);
+            _cureGraph?.AddSample(state.cureProgress * 100f);
 
             // 사망률 기준 위험도 텍스트 세분화 (Docs/PlagueIncReference.md 2절) — 사망자가 아예 없는
             // Stable 상태에서는 굳이 표시하지 않고(평시엔 빈 문자열), 위협 단계에 들어서야 노출한다.

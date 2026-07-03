@@ -12,6 +12,15 @@ namespace Contagion.UI
     /// 업그레이드 트리 화면. 설계 문서 7.2절.
     /// 예전엔 노드 좌표 데이터가 없어 카테고리별 리스트로 단순화했었는데, DefaultUpgradeTreeFactory가
     /// 각 노드에 좌표(position)를 부여하면서 실제 좌표 배치 + 선행조건 연결선(Painter2D)으로 교체했다.
+    ///
+    /// UI/UX 폴리싱 — 전파/증상/능력 탭 3개가 전부 같은 창(27노드가 한 캔버스에 다 있는 창)을 열어서
+    /// 카테고리 구분이 안 된다는 피드백으로, 이 컴포넌트를 "카테고리 하나만 담당" 하도록 바꿨다.
+    /// 씬에 이 스크립트를 붙인 GameObject 3개(TransmissionTreeUI/SymptomTreeUI/AbilityTreeUI)를 만들고
+    /// 각각 인스펙터에서 <see cref="category"/>만 다르게 지정한다 — UXML/USS는 동일한 UpgradeTree.uxml을
+    /// 재사용(카테고리 제목만 코드에서 동적으로 채움). 전체 트리(27개)가 아니라 그 카테고리(9개)만
+    /// 필터링해서 그리므로, DefaultUpgradeTreeFactory가 부여한 절대 좌표(카테고리별로 x 40~1740까지
+    /// 넓게 퍼져있음)를 그대로 쓰면 창 하나에 카테고리 하나만 있는데도 왼쪽에 큰 빈 여백이 생긴다 —
+    /// RebuildTree()에서 그 카테고리의 최소 x값을 빼서 항상 0부터 시작하도록 보정한다.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class UpgradeTreeView : MonoBehaviour
@@ -19,10 +28,14 @@ namespace Contagion.UI
         private const float NodeWidth = 140f;
         private const float NodeHeight = 60f;
         private const float CanvasPadding = 80f;
-        private const float TopOffset = 34f; // 카테고리 라벨을 위한 상단 여백
+        private const float TopOffset = 34f; // 카테고리 제목을 위한 상단 여백
+
+        [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
+        private UpgradeCategory category = UpgradeCategory.Transmission;
 
         private VisualElement _upgradeRoot;
         private Label _dnaLabel;
+        private Label _categoryTitleLabel;
         private ScrollView _nodeScroll;
         private Label _detailTitle;
         private Label _detailDesc;
@@ -40,6 +53,7 @@ namespace Contagion.UI
             var root = GetComponent<UIDocument>().rootVisualElement;
             _upgradeRoot = root.Q<VisualElement>("upgrade-root");
             _dnaLabel = root.Q<Label>("dna-label");
+            _categoryTitleLabel = root.Q<Label>("category-title-label");
             _nodeScroll = root.Q<ScrollView>("node-scroll");
             _detailTitle = root.Q<Label>("detail-title");
             _detailDesc = root.Q<Label>("detail-desc");
@@ -47,9 +61,12 @@ namespace Contagion.UI
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
 
-            // 트리 캔버스가 화면보다 넓다(27노드 3열 배치) — 세로만 스크롤되던 기본값으론 가로쪽
-            // 노드들이 잘려서 안 보이므로 양방향 스크롤로 전환 (모바일 좁은 화면에서 특히 중요).
-            _nodeScroll.mode = ScrollViewMode.VerticalAndHorizontal;
+            if (_categoryTitleLabel != null)
+                _categoryTitleLabel.text = CategoryLabel(category);
+
+            // 카테고리 하나(9노드, 3열×3티어)만 그리므로 이제 세로 스크롤만으로 충분 — 예전엔 27노드가
+            // 한 캔버스에 다 있어서(카테고리 3개를 가로로 나열) 양방향 스크롤이 필요했다.
+            _nodeScroll.mode = ScrollViewMode.Vertical;
 
             _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
             _buyButton.RegisterCallback<ClickEvent>(_ => HandleBuyClicked());
@@ -77,8 +94,8 @@ namespace Contagion.UI
             UpgradeManager.Instance.OnNodeUnlocked -= HandleNodeUnlocked;
         }
 
-        /// <summary>HUD 탭 버튼에서 호출. focusCategory는 스크롤 위치 참고용(선택 사항).</summary>
-        public void Show(UpgradeCategory? focusCategory = null)
+        /// <summary>HUD 탭 버튼에서 호출 — 이 창은 인스펙터에 지정된 <see cref="category"/> 하나만 그린다.</summary>
+        public void Show()
         {
             _upgradeRoot.style.display = DisplayStyle.Flex;
             RebuildTree();
@@ -96,9 +113,14 @@ namespace Contagion.UI
             _dnaLabel.text = $"DNA: {dna:N0}";
         }
 
+        /// <summary>이번 RebuildTree() 호출에서 이 카테고리 노드들의 x 최소값 — 0부터 시작하도록 빼주는 보정값.</summary>
+        private float _xOffset;
+
         /// <summary>
-        /// node.position 절대 좌표로 노드를 배치하고, 선행조건 간 연결선을 그린다.
-        /// 기본 플레이 퀄리티/세분화 개선 항목.
+        /// node.position 절대 좌표로 노드를 배치하고, 선행조건 간 연결선을 그린다. 이 카테고리(9개)만
+        /// 필터링해서 그리며, DefaultUpgradeTreeFactory의 절대 좌표(카테고리별로 40/640/1240부터 시작)를
+        /// 그대로 쓰면 창 하나에 한 카테고리만 있는데도 왼쪽에 큰 빈 여백이 생기므로 _xOffset을 빼서
+        /// 항상 x=0부터 시작하도록 보정한다.
         /// </summary>
         private void RebuildTree()
         {
@@ -111,18 +133,20 @@ namespace Contagion.UI
                 return;
             }
 
-            var nodes = UpgradeManager.Instance.Tree;
+            var nodes = UpgradeManager.Instance.Tree.Where(n => n.category == category).ToList();
             if (nodes.Count == 0)
             {
-                Debug.LogWarning("[UpgradeTreeView] 업그레이드 트리가 비어있습니다 — GameDataBootstrapper의 " +
-                    "SetTree 호출 여부 확인 (DefaultUpgradeTreeFactory 폴백이 정상이면 27개가 있어야 함).");
+                Debug.LogWarning($"[UpgradeTreeView] {category} 카테고리 노드가 없습니다 — GameDataBootstrapper의 " +
+                    "SetTree 호출 여부 확인 (DefaultUpgradeTreeFactory 폴백이 정상이면 카테고리당 9개가 있어야 함).");
                 return;
             }
+
+            _xOffset = nodes.Min(n => n.position.x);
 
             float maxX = 0f, maxY = 0f;
             foreach (var n in nodes)
             {
-                maxX = Mathf.Max(maxX, n.position.x + NodeWidth);
+                maxX = Mathf.Max(maxX, n.position.x - _xOffset + NodeWidth);
                 maxY = Mathf.Max(maxY, n.position.y + NodeHeight);
             }
             float canvasWidth = maxX + CanvasPadding;
@@ -141,23 +165,10 @@ namespace Contagion.UI
             connectionsLayer.generateVisualContent += DrawConnections;
             canvas.Add(connectionsLayer);
 
-            foreach (var category in new[] { UpgradeCategory.Transmission, UpgradeCategory.Symptom, UpgradeCategory.Ability })
-            {
-                var firstOfCategory = nodes.Where(n => n.category == category).OrderBy(n => n.position.x).FirstOrDefault();
-                if (firstOfCategory == null) continue;
-
-                var header = new Label(CategoryLabel(category));
-                header.AddToClassList("tree-category-label");
-                header.style.position = Position.Absolute;
-                header.style.left = firstOfCategory.position.x;
-                header.style.top = 4f;
-                canvas.Add(header);
-            }
-
             foreach (var node in nodes)
                 canvas.Add(CreateNodeElement(node));
 
-            Debug.Log($"[UpgradeTreeView] 트리 렌더링 완료 — 노드 {nodes.Count}개, 캔버스 크기 {canvasWidth}x{canvasHeight}");
+            Debug.Log($"[UpgradeTreeView] {category} 트리 렌더링 완료 — 노드 {nodes.Count}개, 캔버스 크기 {canvasWidth}x{canvasHeight}");
         }
 
         private VisualElement CreateNodeElement(UpgradeNode node)
@@ -169,7 +180,7 @@ namespace Contagion.UI
             if (node.id == _selectedNodeId) box.AddToClassList("tree-node--selected");
 
             box.style.position = Position.Absolute;
-            box.style.left = node.position.x;
+            box.style.left = node.position.x - _xOffset;
             box.style.top = node.position.y + TopOffset;
             box.style.width = NodeWidth;
             box.style.height = NodeHeight;
@@ -189,19 +200,21 @@ namespace Contagion.UI
             return box;
         }
 
-        /// <summary>선행조건 -> 노드 연결선. 선행 노드가 이미 해금됐으면 초록색 굵은 선, 아니면 흐린 회색 선.</summary>
+        /// <summary>선행조건 -> 노드 연결선. 선행 노드가 이미 해금됐으면 초록색 굵은 선, 아니면 흐린 회색 선.
+        /// 이 카테고리는 자체 완결형(선행조건이 전부 같은 카테고리 안에서만 걸림 — DefaultUpgradeTreeFactory
+        /// 참고)이라 카테고리로 필터링해도 연결선이 끊길 일은 없다.</summary>
         private void DrawConnections(MeshGenerationContext mgc)
         {
             if (UpgradeManager.Instance == null) return;
 
             var painter = mgc.painter2D;
-            foreach (var node in UpgradeManager.Instance.Tree)
+            foreach (var node in UpgradeManager.Instance.Tree.Where(n => n.category == category))
             {
                 if (node.prerequisites == null) continue;
                 foreach (var prereqId in node.prerequisites)
                 {
                     var prereq = UpgradeManager.Instance.GetNode(prereqId);
-                    if (prereq == null) continue;
+                    if (prereq == null || prereq.category != category) continue;
 
                     bool active = prereq.isUnlocked;
                     painter.strokeColor = active
@@ -209,8 +222,10 @@ namespace Contagion.UI
                         : new Color(1f, 1f, 1f, 0.2f);
                     painter.lineWidth = active ? 3f : 2f;
 
-                    Vector2 from = prereq.position + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
-                    Vector2 to = node.position + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
+                    Vector2 from = new Vector2(prereq.position.x - _xOffset, prereq.position.y)
+                        + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
+                    Vector2 to = new Vector2(node.position.x - _xOffset, node.position.y)
+                        + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
 
                     painter.BeginPath();
                     painter.MoveTo(from);

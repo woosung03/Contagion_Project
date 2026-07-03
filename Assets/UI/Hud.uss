@@ -40,6 +40,8 @@
 .stats-row {
     flex-direction: row;
     justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
     margin-bottom: 6px;
 }
 
@@ -47,6 +49,39 @@
     color: white;
     font-size: 14px;
     -unity-font-style: bold;
+}
+
+/* 감염자/사망자/치료제 — 텍스트만으론 가시성이 떨어진다는 피드백으로 추가한 인라인 스파크라인
+   그래프(HudSparkline.cs가 Painter2D로 직접 그림). 라벨 + 작은 그래프를 세로로 묶는다. */
+.stat-graph-item {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 6px;
+}
+
+.stat-graph-item__label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.stat-graph-item__label--infected {
+    color: rgb(255, 170, 90);
+}
+
+.stat-graph-item__label--dead {
+    color: rgb(220, 90, 90);
+}
+
+.stat-graph-item__label--cure {
+    color: rgb(120, 220, 140);
+}
+
+.stat-graph-item__graph {
+    width: 92px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
 }
 
 .stat-label--dna {

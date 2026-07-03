@@ -81,6 +81,17 @@ namespace Contagion.Managers
             NotifyWorldStateChanged();
         }
 
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// 씬을 리로드해도 살아남기 때문에, worldState의 누적 필드(cureProgress 등)를 명시적으로
+        /// 초기화하지 않으면 이전 판 값이 새 게임에 그대로 이어진다.
+        /// </summary>
+        public void ResetForNewGame()
+        {
+            worldState.Reset();
+            NotifyWorldStateChanged();
+        }
+
         public void NotifyCountryChanged(Country country) => OnCountryChanged?.Invoke(country);
 
         public void NotifyWorldStateChanged() => OnWorldStateChanged?.Invoke(worldState);

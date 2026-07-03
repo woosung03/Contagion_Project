@@ -15,7 +15,7 @@ MonoBehaviour:
   countries:
   - id: CHI
     name: China
-    population: 100000
+    population: 141000
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -25,19 +25,29 @@ MonoBehaviour:
     isBorderClosed: 0
     healthFunding: 0.911
     governmentStability: 0.3
+    healthFundingCap: 1
     neighborCountryIds:
-    - KOR
-    airRouteCountryIds:
-    - KOR
     - IND
+    - KOR
+    - RUS
+    airRouteCountryIds:
+    - GER
+    - IDN
+    - IND
+    - JPN
+    - KOR
+    - RUS
+    - UK
     - USA
     seaRouteCountryIds:
-    - USA
+    - IDN
     - IND
+    - JPN
     - KOR
+    - USA
   - id: IND
     name: India
-    population: 150000
+    population: 142800
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -47,19 +57,23 @@ MonoBehaviour:
     isBorderClosed: 0
     healthFunding: 0.943
     governmentStability: 0.3
+    healthFundingCap: 1
     neighborCountryIds:
     - CHI
     airRouteCountryIds:
     - CHI
-    - KOR
-    - USA
+    - EGY
+    - IDN
+    - SAU
+    - UK
     seaRouteCountryIds:
-    - KOR
-    - IND
     - CHI
+    - EGY
+    - IDN
+    - SAU
   - id: USA
     name: USA
-    population: 10000
+    population: 90000
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -69,15 +83,26 @@ MonoBehaviour:
     isBorderClosed: 0
     healthFunding: 0.935
     governmentStability: 0.67
-    neighborCountryIds: []
+    healthFundingCap: 1
+    neighborCountryIds:
+    - CAN
+    - MEX
     airRouteCountryIds:
+    - BRA
+    - CAN
     - CHI
+    - GER
+    - JPN
     - KOR
-    - IND
+    - MEX
+    - UK
     seaRouteCountryIds:
-    - KOR
+    - BRA
+    - CAN
     - CHI
-    - IND
+    - JPN
+    - MEX
+    - UK
   - id: KOR
     name: korea
     population: 51000
@@ -90,13 +115,337 @@ MonoBehaviour:
     isBorderClosed: 0
     healthFunding: 0.927
     governmentStability: 0.7
+    healthFundingCap: 1
     neighborCountryIds:
     - CHI
     airRouteCountryIds:
     - CHI
+    - IDN
+    - JPN
     - USA
-    - IND
     seaRouteCountryIds:
     - CHI
+    - JPN
+  - id: JPN
+    name: Japan
+    population: 45000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.9
+    governmentStability: 0.85
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - AUS
+    - CHI
+    - IDN
+    - KOR
     - USA
+    seaRouteCountryIds:
+    - CHI
+    - KOR
+    - USA
+  - id: IDN
+    name: Indonesia
+    population: 80000
+    infectedCount: 0
+    deadCount: 0
+    climate: 3
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.75
+    governmentStability: 0.5
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - AUS
+    - CHI
     - IND
+    - JPN
+    - KOR
+    seaRouteCountryIds:
+    - AUS
+    - CHI
+    - IND
+  - id: SAU
+    name: Saudi Arabia
+    population: 12000
+    infectedCount: 0
+    deadCount: 0
+    climate: 0
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.8
+    governmentStability: 0.6
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - EGY
+    - GER
+    - IND
+    - NGA
+    - UK
+    seaRouteCountryIds:
+    - EGY
+    - IND
+    - NGA
+  - id: GER
+    name: Germany
+    population: 35000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.92
+    governmentStability: 0.85
+    healthFundingCap: 1
+    neighborCountryIds:
+    - FRA
+    airRouteCountryIds:
+    - CHI
+    - FRA
+    - RUS
+    - SAU
+    - UK
+    - USA
+    seaRouteCountryIds:
+    - EGY
+    - FRA
+    - RUS
+    - UK
+  - id: UK
+    name: United Kingdom
+    population: 28000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.9
+    governmentStability: 0.8
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - CHI
+    - FRA
+    - GER
+    - IND
+    - NGA
+    - RSA
+    - SAU
+    - USA
+    seaRouteCountryIds:
+    - FRA
+    - GER
+    - NGA
+    - RSA
+    - USA
+  - id: FRA
+    name: France
+    population: 28000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.9
+    governmentStability: 0.75
+    healthFundingCap: 1
+    neighborCountryIds:
+    - GER
+    airRouteCountryIds:
+    - GER
+    - UK
+    seaRouteCountryIds:
+    - GER
+    - UK
+  - id: RUS
+    name: Russia
+    population: 60000
+    infectedCount: 0
+    deadCount: 0
+    climate: 2
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.7
+    governmentStability: 0.5
+    healthFundingCap: 1
+    neighborCountryIds:
+    - CHI
+    airRouteCountryIds:
+    - CHI
+    - GER
+    seaRouteCountryIds:
+    - GER
+  - id: NGA
+    name: Nigeria
+    population: 90000
+    infectedCount: 0
+    deadCount: 0
+    climate: 3
+    developmentLevel: 0
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.35
+    governmentStability: 0.35
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - EGY
+    - RSA
+    - SAU
+    - UK
+    seaRouteCountryIds:
+    - BRA
+    - RSA
+    - SAU
+    - UK
+  - id: EGY
+    name: Egypt
+    population: 45000
+    infectedCount: 0
+    deadCount: 0
+    climate: 0
+    developmentLevel: 0
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.55
+    governmentStability: 0.4
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - IND
+    - NGA
+    - SAU
+    seaRouteCountryIds:
+    - GER
+    - IND
+    - SAU
+  - id: RSA
+    name: South Africa
+    population: 25000
+    infectedCount: 0
+    deadCount: 0
+    climate: 1
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.6
+    governmentStability: 0.5
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - BRA
+    - NGA
+    - UK
+    seaRouteCountryIds:
+    - AUS
+    - BRA
+    - NGA
+    - UK
+  - id: BRA
+    name: Brazil
+    population: 85000
+    infectedCount: 0
+    deadCount: 0
+    climate: 3
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.7
+    governmentStability: 0.55
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - MEX
+    - RSA
+    - USA
+    seaRouteCountryIds:
+    - MEX
+    - NGA
+    - RSA
+    - USA
+  - id: MEX
+    name: Mexico
+    population: 50000
+    infectedCount: 0
+    deadCount: 0
+    climate: 0
+    developmentLevel: 1
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.65
+    governmentStability: 0.5
+    healthFundingCap: 1
+    neighborCountryIds:
+    - USA
+    airRouteCountryIds:
+    - BRA
+    - CAN
+    - USA
+    seaRouteCountryIds:
+    - BRA
+    - USA
+  - id: CAN
+    name: Canada
+    population: 15000
+    infectedCount: 0
+    deadCount: 0
+    climate: 2
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.92
+    governmentStability: 0.85
+    healthFundingCap: 1
+    neighborCountryIds:
+    - USA
+    airRouteCountryIds:
+    - MEX
+    - USA
+    seaRouteCountryIds:
+    - USA
+  - id: AUS
+    name: Australia
+    population: 10000
+    infectedCount: 0
+    deadCount: 0
+    climate: 0
+    developmentLevel: 2
+    isAirportOpen: 1
+    isPortOpen: 1
+    isBorderClosed: 0
+    healthFunding: 0.9
+    governmentStability: 0.85
+    healthFundingCap: 1
+    neighborCountryIds: []
+    airRouteCountryIds:
+    - IDN
+    - JPN
+    seaRouteCountryIds:
+    - IDN
+    - RSA

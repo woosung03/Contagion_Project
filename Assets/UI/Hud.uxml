@@ -7,9 +7,18 @@
 
         <ui:VisualElement name="bottom-bar" class="bottom-bar">
             <ui:VisualElement name="stats-row" class="stats-row">
-                <ui:Label name="infected-label" text="감염자: 0" class="stat-label" />
-                <ui:Label name="dead-label" text="사망자: 0" class="stat-label" />
-                <ui:Label name="cure-label" text="치료제: 0%" class="stat-label" />
+                <ui:VisualElement name="infected-stat" class="stat-graph-item">
+                    <ui:Label name="infected-label" text="감염자: 0" class="stat-graph-item__label stat-graph-item__label--infected" />
+                    <ui:VisualElement name="infected-graph" class="stat-graph-item__graph" />
+                </ui:VisualElement>
+                <ui:VisualElement name="dead-stat" class="stat-graph-item">
+                    <ui:Label name="dead-label" text="사망자: 0" class="stat-graph-item__label stat-graph-item__label--dead" />
+                    <ui:VisualElement name="dead-graph" class="stat-graph-item__graph" />
+                </ui:VisualElement>
+                <ui:VisualElement name="cure-stat" class="stat-graph-item">
+                    <ui:Label name="cure-label" text="치료제: 0%" class="stat-graph-item__label stat-graph-item__label--cure" />
+                    <ui:VisualElement name="cure-graph" class="stat-graph-item__graph" />
+                </ui:VisualElement>
                 <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
                 <ui:Label name="day-label" text="Day 0" class="stat-label" />
                 <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />

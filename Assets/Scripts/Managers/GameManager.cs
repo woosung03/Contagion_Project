@@ -15,7 +15,9 @@ namespace Contagion.Managers
 
         [SerializeField] private Difficulty difficulty = Difficulty.Normal;
         [SerializeField] private GamePhase currentPhase = GamePhase.Incubation;
-        [SerializeField] private bool isPaused;
+        [SerializeField, Tooltip("MainMenu/CountrySelect에서 병원체·발원국 선택을 마치고 GameDataBootstrapper.BeginGame()이 " +
+            "호출되기 전까지는 시뮬레이션이 돌아가면 안 되므로 기본값을 true로 시작한다.")]
+        private bool isPaused = true;
 
         public Difficulty CurrentDifficulty => difficulty;
         public GamePhase CurrentPhase => currentPhase;
@@ -37,6 +39,17 @@ namespace Contagion.Managers
         public void SetPaused(bool paused) => isPaused = paused;
 
         public void SetDifficulty(Difficulty newDifficulty) => difficulty = newDifficulty;
+
+        /// <summary>
+        /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 이 매니저는 DontDestroyOnLoad라
+        /// currentPhase가 Endgame으로 끝난 상태로 살아남는다 — 리셋 안 하면 재시작한 새 게임이
+        /// 처음부터 Endgame 페이즈로 시작해버린다. 일시정지는 MainMenu 표시 로직(UIManager.Start)이
+        /// 이미 별도로 처리하므로 여기서는 페이즈만 되돌린다.
+        /// </summary>
+        public void ResetForNewGame()
+        {
+            currentPhase = GamePhase.Incubation;
+        }
 
         /// <summary>
         /// SimulationManager의 매 틱 이후 호출된다. 설계 문서 10절의 서술적 기준을
