@@ -59,6 +59,7 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 | 20 | 재시작 후 CountrySelect 완전 먹통 버그 수정 (Bootstrap→SceneUICoordinator 분리) | `GamePlay.unity` |
 | 21 | HUD 스파크라인 그래프(감염자/사망자/치료제) + 업그레이드 트리 전파/증상/능력 3분할 창 | `HudSparkline.cs`(신규), `HudController.cs`, `UpgradeTreeView.cs`, `UIManager.cs`, `GamePlay.unity` |
 | 22 | 국기 아이콘 18개국 추가 | `Resources/Flags/*.png`(신규 18개), `CountrySelectController.cs`, `MainMenu.uss` |
+| 23 | 세계 지도 국가별 실제 실루엣 적용 (플레이스홀더 회색 사각형 → 실제 국가 모양) | `Resources/CountryShapes/*.png`(신규 18개), `Gameplay/CountryView.cs` |
 
 부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
 - `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.
@@ -70,9 +71,10 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 
 - `MainMenu` / `CountrySelect` / `GamePlay` 씬 생성 (현재 기본 씬만 존재 — 지금은 씬 하나에서 UIDocument
   패널을 켜고 끄는 방식으로 대체 중)
-- `WorldMap` 오브젝트 + 국가별 `CountryView` — 18개국 전부 씬 파일 직접 편집으로 배치 완료. **단, 전부
-  같은 플레이스홀더 스프라이트를 재사용한 상태라 실제 국가 모양 아트가 필요하면 사람이 Unity 에디터에서
-  스프라이트를 교체해야 함.**
+- `WorldMap` 오브젝트 + 국가별 `CountryView` — 18개국 전부 씬 파일 직접 편집으로 배치 완료. Step 23에서
+  실제 국가 실루엣으로 교체했음(스프라이트 하드코딩이 아니라 `Resources.Load` 런타임 로드 방식이라 Unity
+  에디터 GUI 조작 불필요). 지리적으로 정확한 위치 배치는 아님(Step 17 참고, 대륙별 추상 그리드) — 필요하면
+  Unity 에디터에서 각 국가 오브젝트를 드래그로 재배치 가능(`CountryView`는 `countryId` 문자열로만 동작).
 - `DnaBubble` 프리팹 제작 (SpriteRenderer + CircleCollider2D) 후 `BubbleSpawner.bubblePrefab`에 연결
 - `CountryDatabase`/`PathogenDefinition`/`UpgradeTreeDatabase`는 이미 에셋으로 존재하고 `GameDataBootstrapper`에
   연결돼 있음 — 추가 데이터 조정만 필요하면 그때그때 텍스트 편집으로 가능

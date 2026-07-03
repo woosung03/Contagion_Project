@@ -23,7 +23,14 @@ namespace Contagion.Gameplay
             "틱마다 색이 뚝뚝 끊겨 바뀌는 대신 부드럽게 전환되도록 추가 — 기본 플레이 퀄리티 개선 항목.")]
         private float colorTransitionSpeed = 3f;
 
+        [SerializeField, Tooltip("Resources/CountryShapes/{countryId} 실루엣 스프라이트를 로드했을 때 최종 " +
+            "표시 크기(월드 유닛, 긴 변 기준). 국가마다 원본 경위도 종횡비가 제각각이라 이 값 기준으로 " +
+            "균일 스케일을 계산한다 — 기존 플레이스홀더 사각형 크기(약 0.48)와 비슷하게 맞춰 지도 배치가 " +
+            "안 깨지도록 함.")]
+        private float shapeTargetSize = 0.45f;
+
         private SpriteRenderer _renderer;
+        private BoxCollider2D _collider;
         private Color _targetColor;
         private bool _hasTarget;
         private float _lastLoggedInfectionBand = -1f;
@@ -34,7 +41,46 @@ namespace Contagion.Gameplay
         private void Awake()
         {
             _renderer = GetComponent<SpriteRenderer>();
+            _collider = GetComponent<BoxCollider2D>();
             _renderer.color = healthyColor; // 첫 UpdateVisual 전까지 흰색 스프라이트가 잠깐 보이는 걸 방지
+            ApplyCountryShape();
+        }
+
+        /// <summary>
+        /// 비주얼 폴리싱 — 씬에 배치된 플레이스홀더 사각형 스프라이트를 Resources/CountryShapes/{countryId}.png
+        /// 실제 국가 실루엣으로 런타임 교체한다. Flags(Step 22)와 같은 방식으로 씬/에셋 파일에 스프라이트
+        /// GUID를 하드코딩하지 않고 경로 문자열로 로드 — Unity 에디터 없이도 텍스트(스크립트+이미지 파일
+        /// 추가)만으로 배선 가능. 이미지가 없으면 기존 플레이스홀더가 그대로 남는다.
+        ///
+        /// 프로젝트 기본 텍스처 임포트 프리셋이 Sprite(Multiple) 모드라 서브에셋 이름이 "{id}_0"이 되므로
+        /// (Step 22 국기 로딩 때 확인된 동작) Resources.Load&lt;Sprite&gt;(경로)는 실패할 수 있다 —
+        /// LoadAll로 서브에셋을 전부 가져와 첫 번째를 쓰는 방식이 spriteMode(Single/Multiple)에 관계없이 안전하다.
+        /// </summary>
+        private void ApplyCountryShape()
+        {
+            string path = $"CountryShapes/{countryId}";
+            var sprites = Resources.LoadAll<Sprite>(path);
+            Sprite shape = sprites != null && sprites.Length > 0 ? sprites[0] : Resources.Load<Sprite>(path);
+
+            if (shape == null)
+            {
+                Debug.LogWarning($"[CountryView] {countryId} — Resources/{path}.png를 찾지 못해 기존 플레이스홀더 스프라이트를 유지합니다.");
+                return;
+            }
+
+            _renderer.sprite = shape;
+
+            float longestLocal = Mathf.Max(shape.bounds.size.x, shape.bounds.size.y);
+            if (longestLocal > 0.0001f)
+            {
+                float scale = shapeTargetSize / longestLocal;
+                transform.localScale = new Vector3(scale, scale, 1f);
+            }
+
+            if (_collider != null)
+                _collider.size = shape.bounds.size; // 실제 실루엣 크기에 맞춰 클릭 판정 영역도 갱신
+
+            Debug.Log($"[CountryView] {countryId} 실제 국가 실루엣 스프라이트 적용 완료 (scale={transform.localScale.x:F2}).");
         }
 
         private void Start()
