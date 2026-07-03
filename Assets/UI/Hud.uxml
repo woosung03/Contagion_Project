@@ -26,6 +26,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="tabs-row" class="tabs-row">
                 <ui:Button name="tab-upgrade" text="업그레이드" class="tab-button" />
+                <ui:Button name="tab-country-status" text="국가현황" class="tab-button" />
                 <ui:Button name="ranking-button" text="랭킹" class="tab-button tab-button--secondary" />
             </ui:VisualElement>
         </ui:VisualElement>

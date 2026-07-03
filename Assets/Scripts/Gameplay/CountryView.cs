@@ -137,19 +137,11 @@ namespace Contagion.Gameplay
             _renderer.color = Color.Lerp(_renderer.color, _targetColor, 1f - Mathf.Exp(-colorTransitionSpeed * Time.deltaTime));
         }
 
-        /// <summary>
-        /// 예전엔 OnMouseDown()에서 바로 클릭 처리했는데, Step 28에서 지도 좌우 드래그 스크롤을
-        /// 추가하면서 문제가 생겼다 — 지도를 스와이프하다가 손가락이 국가 위를 지나가면 누르는 순간
-        /// 바로 팝업이 열려버림. OnMouseUpAsButton(누른 채 이 콜라이더 위에서 뗄 때만 호출)으로
-        /// 바꾸고, WorldMapCameraController가 이번 누름 사이클에서 드래그 임계값을 넘었으면
-        /// WasDragging이 true가 되므로 그 경우엔 클릭을 무시한다.
-        /// </summary>
-        private void OnMouseUpAsButton()
-        {
-            if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
-                return;
-
-            WorldMap.Instance?.HandleCountryClicked(countryId);
-        }
+        // Step 28-2: 국가를 탭해서 개별 팝업을 여는 인터랙션을 제거했다. 18개국이 화면보다 넓은
+        // 지도에 촘촘히 배치된 상태(Step 28)라 정확히 탭하기 어렵고, 지도를 스와이프하다 실수로
+        // 팝업이 열리는 문제(OnMouseDown→OnMouseUpAsButton 전환, Step 28)도 근본적으로는 이 상호작용
+        // 자체가 모바일에 안 맞았다. 대신 HUD의 "국가현황" 버튼으로 18개국 상태를 한 번에 보는
+        // CountryStatusPanel(Step 28-2 신규)을 추가했다 — Docs/DevLog.md Step 28-2 참고.
+        // CountryPopupController/CountryPopup.uxml은 코드는 남아있지만 더 이상 아무도 호출하지 않는다.
     }
 }

@@ -28,6 +28,7 @@ namespace Contagion.UI
         private Label _phaseLabel;
         private Label _worldStatusLabel;
         private Button _tabUpgrade;
+        private Button _countryStatusButton;
         private Button _rankingButton;
 
         // 감염자/사망자/치료제 — 텍스트 라벨만으론 가시성이 떨어진다는 피드백으로 추가한 인라인
@@ -37,6 +38,7 @@ namespace Contagion.UI
         private HudSparkline _cureGraph;
 
         public event Action OnUpgradeButtonClicked;
+        public event Action OnCountryStatusClicked;
         public event Action OnRankingClicked;
 
         private void OnEnable()
@@ -52,6 +54,7 @@ namespace Contagion.UI
             _worldStatusLabel = root.Q<Label>("world-status-label");
 
             _tabUpgrade = root.Q<Button>("tab-upgrade");
+            _countryStatusButton = root.Q<Button>("tab-country-status");
             _rankingButton = root.Q<Button>("ranking-button");
 
             _infectedGraph = new HudSparkline(root.Q<VisualElement>("infected-graph"), new Color(1f, 0.67f, 0.35f));
@@ -59,6 +62,7 @@ namespace Contagion.UI
             _cureGraph = new HudSparkline(root.Q<VisualElement>("cure-graph"), new Color(0.47f, 0.86f, 0.55f));
 
             _tabUpgrade.RegisterCallback<ClickEvent>(_ => OnUpgradeButtonClicked?.Invoke());
+            _countryStatusButton.RegisterCallback<ClickEvent>(_ => OnCountryStatusClicked?.Invoke());
             _rankingButton.RegisterCallback<ClickEvent>(_ => OnRankingClicked?.Invoke());
 
             Subscribe();

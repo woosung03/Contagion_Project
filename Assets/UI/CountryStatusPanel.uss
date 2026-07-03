@@ -1,0 +1,51 @@
+.status-root {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 90px;
+    bottom: 130px;
+    background-color: rgba(15, 15, 25, 0.97);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.status-title {
+    color: white;
+    font-size: 26px;
+    -unity-font-style: bold;
+    margin-bottom: 10px;
+}
+
+.status-scroll {
+    flex-grow: 1;
+}
+
+.status-row {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+}
+
+.status-row__name {
+    color: white;
+    font-size: 18px;
+    -unity-font-style: bold;
+}
+
+.status-row__detail {
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+    margin-top: 2px;
+    white-space: normal;
+}
+
+.status-row__detail--danger {
+    color: rgb(255, 140, 120);
+}
+
+.status-close {
+    height: 40px;
+    margin-top: 10px;
+    background-color: rgb(70, 70, 90);
+}

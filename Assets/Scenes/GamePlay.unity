@@ -195,7 +195,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.4
+  shapeTargetSize: 0.24
 --- !u!1 &113795132
 GameObject:
   m_ObjectHideFlags: 0
@@ -302,7 +302,7 @@ Transform:
   m_GameObject: {fileID: 847996045}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1, y: 2.47, z: 0}
+  m_LocalPosition: {x: -0.48, y: 1.52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -325,7 +325,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.51
+  shapeTargetSize: 0.3
 --- !u!61 &232393739
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -495,7 +495,7 @@ Transform:
   m_GameObject: {fileID: 694231255}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.4, y: 2.27, z: 0}
+  m_LocalPosition: {x: -0.19, y: 1.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -623,7 +623,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.35
+  shapeTargetSize: 0.21
 --- !u!114 &354823894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -641,7 +641,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.34
+  shapeTargetSize: 0.2
 --- !u!1 &357476235
 GameObject:
   m_ObjectHideFlags: 0
@@ -678,7 +678,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.41
+  shapeTargetSize: 0.25
 --- !u!212 &367847888
 SpriteRenderer:
   serializedVersion: 2
@@ -755,7 +755,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.62
+  shapeTargetSize: 0.37
 --- !u!114 &374570572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -773,7 +773,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.37
+  shapeTargetSize: 0.22
 --- !u!4 &401456527
 Transform:
   m_ObjectHideFlags: 0
@@ -783,7 +783,7 @@ Transform:
   m_GameObject: {fileID: 113795132}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.9, y: 3, z: 0}
+  m_LocalPosition: {x: 1.86, y: 1.84, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -863,7 +863,7 @@ Transform:
   m_GameObject: {fileID: 849316075}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: -1.22, z: 0}
+  m_LocalPosition: {x: 2.38, y: -0.68, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1050,7 +1050,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.33
+  shapeTargetSize: 0.2
 --- !u!4 &500308470
 Transform:
   m_ObjectHideFlags: 0
@@ -1060,7 +1060,7 @@ Transform:
   m_GameObject: {fileID: 538474652}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.5, y: -0.49, z: 0}
+  m_LocalPosition: {x: -0.24, y: -0.24, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1332,7 +1332,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.WorldMapCameraController
   targetCamera: {fileID: 519420031}
-  mapHalfWidth: 6.3
+  mapHalfWidth: 3.2
   dragThresholdPixels: 20
 --- !u!114 &520050473
 MonoBehaviour:
@@ -1351,7 +1351,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.52
+  shapeTargetSize: 0.31
 --- !u!1 &529259878
 GameObject:
   m_ObjectHideFlags: 0
@@ -1482,7 +1482,7 @@ Transform:
   m_GameObject: {fileID: 568447516}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.3, y: -3, z: 0}
+  m_LocalPosition: {x: 0.14, y: -1.74, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1497,7 +1497,7 @@ Transform:
   m_GameObject: {fileID: 661061320}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 6, y: 1.29, z: 0}
+  m_LocalPosition: {x: 2.86, y: 0.82, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1577,7 +1577,7 @@ Transform:
   m_GameObject: {fileID: 840805536}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.7, y: 2.87, z: 0}
+  m_LocalPosition: {x: -2.72, y: 1.76, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1705,7 +1705,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.37
+  shapeTargetSize: 0.22
 --- !u!114 &616101941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1723,7 +1723,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.38
+  shapeTargetSize: 0.22
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2216,7 +2216,7 @@ Transform:
   m_GameObject: {fileID: 529259878}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.8, y: -2.74, z: 0}
+  m_LocalPosition: {x: 2.76, y: -1.58, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2363,7 +2363,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.54
+  shapeTargetSize: 0.32
 --- !u!61 &735204845
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2478,7 +2478,7 @@ Transform:
   m_GameObject: {fileID: 735204843}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.35, y: 1.22, z: 0}
+  m_LocalPosition: {x: 2.07, y: 0.78, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2493,7 +2493,7 @@ Transform:
   m_GameObject: {fileID: 164067819}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.35, y: 0.49, z: 0}
+  m_LocalPosition: {x: 0.64, y: 0.34, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2594,7 +2594,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.32
+  shapeTargetSize: 0.19
 --- !u!61 &773079964
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2709,7 +2709,7 @@ Transform:
   m_GameObject: {fileID: 773079962}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.5, y: 1.29, z: 0}
+  m_LocalPosition: {x: 2.62, y: 0.82, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2875,7 +2875,7 @@ Transform:
   m_GameObject: {fileID: 357476235}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.65, y: -1.75, z: 0}
+  m_LocalPosition: {x: -1.74, y: -0.99, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2890,7 +2890,7 @@ Transform:
   m_GameObject: {fileID: 432808313}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6, y: 0.43, z: 0}
+  m_LocalPosition: {x: -2.86, y: 0.31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3230,7 +3230,7 @@ Transform:
   m_GameObject: {fileID: 657800697}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.8, y: 1.94, z: 0}
+  m_LocalPosition: {x: -0.38, y: 1.21, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3253,7 +3253,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.54
+  shapeTargetSize: 0.32
 --- !u!4 &954102935
 Transform:
   m_ObjectHideFlags: 0
@@ -3263,7 +3263,7 @@ Transform:
   m_GameObject: {fileID: 626191774}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 0.63, z: 0}
+  m_LocalPosition: {x: 0.29, y: 0.43, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3286,7 +3286,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.41
+  shapeTargetSize: 0.25
 --- !u!114 &996696794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3304,7 +3304,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.34
+  shapeTargetSize: 0.2
 --- !u!61 &997847753
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3458,7 +3458,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.54
+  shapeTargetSize: 0.32
 --- !u!61 &1568159515
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3573,7 +3573,7 @@ Transform:
   m_GameObject: {fileID: 1568159513}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.8, y: 1.48, z: 0}
+  m_LocalPosition: {x: -2.76, y: 0.93, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3615,7 +3615,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
-  shapeTargetSize: 0.44
+  shapeTargetSize: 0.26
 --- !u!61 &1713983935
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3730,7 +3730,7 @@ Transform:
   m_GameObject: {fileID: 1713983933}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.05, y: 0.36, z: 0}
+  m_LocalPosition: {x: 1.45, y: 0.27, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4256,6 +4256,7 @@ MonoBehaviour:
   symptomTreeView: {fileID: 3300000404}
   abilityTreeView: {fileID: 3300000504}
   countryPopupController: {fileID: 245050058}
+  countryStatusPanelController: {fileID: 5900000004}
   endingScreenController: {fileID: 511221707}
   rankingPanelController: {fileID: 1737611719}
   mainMenuController: {fileID: 3100000104}
@@ -4543,6 +4544,74 @@ MonoBehaviour:
   previewSafeBottom: 24
   previewSafeLeft: 0
   previewSafeRight: 0
+--- !u!1 &5900000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5900000002}
+  - component: {fileID: 5900000003}
+  - component: {fileID: 5900000004}
+  m_Layer: 5
+  m_Name: CountryStatusPanelUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5900000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5900000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5900000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5900000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: da1e200d22ea5964385c0686b12834de, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: c3a4d8f5e1b64a2c9f7d0e3a5b8c1d2e, type: 3}
+  m_SortingOrder: 1
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!114 &5900000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5900000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f4c1a7e3b8d40f5a6c2e9b1d7f3a5c0, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.CountryStatusPanelController
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4563,3 +4632,4 @@ SceneRoots:
   - {fileID: 3200000302}
   - {fileID: 3300000402}
   - {fileID: 3300000502}
+  - {fileID: 5900000002}

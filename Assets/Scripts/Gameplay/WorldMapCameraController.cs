@@ -29,9 +29,10 @@ namespace Contagion.Gameplay
         [SerializeField] private Camera targetCamera;
 
         [SerializeField, Tooltip("지도 전체 콘텐츠의 가로 절반 폭(월드 유닛) — 카메라가 이 범위를 " +
-            "벗어나 스크롤하지 못하게 클램프. DevLog Step 28 배치 기준 국가 중심 x범위가 -6~6이라 " +
-            "약간의 여백을 더해 6.3으로 설정.")]
-        private float mapHalfWidth = 6.3f;
+            "벗어나 스크롤하지 못하게 클램프. Step 28-3에서 남아공/호주가 여전히 하단 UI에 가려진다는 " +
+            "피드백으로 지도 전체를 0.7배 추가 축소, 국가 중심 x범위가 -2.86~2.86이라 여백을 더해 " +
+            "3.2로 설정(기존 4.4).")]
+        private float mapHalfWidth = 3.2f;
 
         [SerializeField, Tooltip("이 픽셀 이상 움직이면 드래그로 판정(국가 클릭 무시)")]
         private float dragThresholdPixels = 20f;

@@ -29,6 +29,7 @@ namespace Contagion.Managers
         private int _currentUpgradePageIndex;
 
         [SerializeField] private CountryPopupController countryPopupController;
+        [SerializeField] private CountryStatusPanelController countryStatusPanelController;
         [SerializeField] private EndingScreenController endingScreenController;
         [SerializeField] private RankingPanelController rankingPanelController;
 
@@ -69,6 +70,8 @@ namespace Contagion.Managers
             {
                 hudController.OnUpgradeButtonClicked -= HandleUpgradeButtonClicked;
                 hudController.OnUpgradeButtonClicked += HandleUpgradeButtonClicked;
+                hudController.OnCountryStatusClicked -= HandleCountryStatusClicked;
+                hudController.OnCountryStatusClicked += HandleCountryStatusClicked;
                 hudController.OnRankingClicked -= HandleRankingClicked;
                 hudController.OnRankingClicked += HandleRankingClicked;
             }
@@ -110,6 +113,7 @@ namespace Contagion.Managers
             if (hudController != null)
             {
                 hudController.OnUpgradeButtonClicked -= HandleUpgradeButtonClicked;
+                hudController.OnCountryStatusClicked -= HandleCountryStatusClicked;
                 hudController.OnRankingClicked -= HandleRankingClicked;
             }
 
@@ -171,7 +175,22 @@ namespace Contagion.Managers
         private void HandleUpgradeButtonClicked()
         {
             countryPopupController?.Hide();
+            countryStatusPanelController?.Hide();
             ShowUpgradePage(_currentUpgradePageIndex);
+        }
+
+        /// <summary>
+        /// HUD "국가현황" 버튼 — Step 28-2에서 국가 클릭 팝업을 대체해 추가. 18개국 상태를
+        /// 스크롤 리스트 하나로 보여준다(CountryStatusPanelController 참고). 업그레이드/랭킹
+        /// 패널과 마찬가지로 서로 배타적으로 열리도록 다른 패널을 먼저 닫는다.
+        /// </summary>
+        private void HandleCountryStatusClicked()
+        {
+            transmissionTreeView?.Hide();
+            symptomTreeView?.Hide();
+            abilityTreeView?.Hide();
+            rankingPanelController?.Hide();
+            countryStatusPanelController?.Show();
         }
 
         /// <summary>헤더의 ◀ 버튼 — 이전 카테고리로 순환 이동(맨 앞에서 누르면 맨 뒤로 돌아감).</summary>
@@ -205,6 +224,7 @@ namespace Contagion.Managers
             transmissionTreeView?.Hide();
             symptomTreeView?.Hide();
             abilityTreeView?.Hide();
+            countryStatusPanelController?.Hide();
             rankingPanelController?.Show();
         }
 

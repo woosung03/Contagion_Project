@@ -68,7 +68,9 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 | 25 | 모바일 UI 가시성 폴리싱 — PanelSettings 참조 해상도를 실기기 픽셀이 아닌 논리 해상도로 정정, 세계 지도 화면비 버그 수정, SafeAreaApplier(코드베이스 위키 드롭인) 7개 화면 적용, 전체 화면 font-size 상향(레퍼런스 해상도 정정 후에도 "글씨가 작다" 피드백 재확인돼 추가 대응) | `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity`, `Scripts/UI/SafeAreaApplier.cs`(신규), `Assets/UI/*.uss` |
 | 26 | 뉴스피드 영역 확대 + 업그레이드 트리 전파/증상/능력 3창을 버튼 1개+좌우 화살표 페이징으로 통합, 노드 크기/간격 축소 | `Assets/UI/Hud.uxml,uss`, `Assets/UI/UpgradeTree.uxml,uss`, `Scripts/UI/HudController.cs`, `Scripts/UI/UpgradeTreeView.cs`, `Scripts/Managers/UIManager.cs`, `Scripts/Data/DefaultUpgradeTreeFactory.cs` |
 | 27 | 세계 지도 18개국 위치를 실제 경도/위도 순서 기반 3×6 그리드로 재배치(동서/남북 상대 위치가 실제 지리와 비슷하게) + 국가 크기를 실제 면적 비례(sqrt 압축)로 차등화(러시아 최대~한국 최소) | `Assets/Scenes/GamePlay.unity` |
-| 28 | "한 화면에 다 보이기" 방식을 포기하고 지도를 실제 경도/위도 비율(가로로 김)에 가깝게 화면보다 넓게 배치 + 좌우 드래그 스크롤 추가(세로는 스크롤 없음) | `Scripts/Gameplay/WorldMapCameraController.cs`(신규), `Scripts/Gameplay/CountryView.cs`(OnMouseDown→OnMouseUpAsButton), `Assets/Scenes/GamePlay.unity` |
+| 28 | "한 화면에 다 보이기" 방식을 포기하고 지도를 실제 경도/위도 비율(가로로 김)에 가깝게 화면보다 넓게 배치 + 좌우 드래그 스크롤 추가(세로는 스크롤 없음), 이후 가로 스크롤 폭 0.8배 추가 압축(세로 무변경) | `Scripts/Gameplay/WorldMapCameraController.cs`(신규), `Scripts/Gameplay/CountryView.cs`(OnMouseDown→OnMouseUpAsButton), `Assets/Scenes/GamePlay.unity` |
+| 28-2 | 뉴스피드/하단바에 지도 양끝(러시아·남아공)이 가려지는 문제 수정(지도 좌표+크기 0.85배 균일 축소 + 세로 중심 보정) + 국가 클릭 팝업 인터랙션 제거, HUD "국가현황" 버튼 → 18개국 상태 스크롤 리스트 패널로 대체 | `Scripts/Gameplay/CountryView.cs`, `Assets/UI/CountryStatusPanel.uxml,uss`(신규), `Scripts/UI/CountryStatusPanelController.cs`(신규), `Assets/UI/Hud.uxml`, `Scripts/UI/HudController.cs`, `Scripts/Managers/UIManager.cs`, `Assets/Scenes/GamePlay.unity` |
+| 28-3 | 남아공·호주가 여전히 하단 UI에 가려진다는 피드백 — 지도 좌표+크기 0.7배 추가 축소(가로/세로 동일 비율) + 세로 중심을 위로 보정해 여유 마진 크게 확보 | `Scripts/Gameplay/WorldMapCameraController.cs`, `Assets/Scenes/GamePlay.unity` |
 
 부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
 - `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.
