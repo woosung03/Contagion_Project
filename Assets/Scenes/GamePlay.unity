@@ -195,6 +195,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!1 &113795132
 GameObject:
   m_ObjectHideFlags: 0
@@ -301,8 +302,8 @@ Transform:
   m_GameObject: {fileID: 847996045}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: 1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: 1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -324,6 +325,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &232393739
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -493,8 +495,8 @@ Transform:
   m_GameObject: {fileID: 694231255}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: 2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: 3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -621,6 +623,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!114 &354823894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -638,6 +641,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!1 &357476235
 GameObject:
   m_ObjectHideFlags: 0
@@ -674,6 +678,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!212 &367847888
 SpriteRenderer:
   serializedVersion: 2
@@ -750,6 +755,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!114 &374570572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -767,6 +773,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!4 &401456527
 Transform:
   m_ObjectHideFlags: 0
@@ -776,8 +783,8 @@ Transform:
   m_GameObject: {fileID: 113795132}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: 2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: 3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -856,8 +863,8 @@ Transform:
   m_GameObject: {fileID: 849316075}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: -1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: -1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -1043,6 +1050,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!4 &500308470
 Transform:
   m_ObjectHideFlags: 0
@@ -1052,8 +1060,8 @@ Transform:
   m_GameObject: {fileID: 538474652}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: -1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: -1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -1115,6 +1123,7 @@ GameObject:
   - component: {fileID: 511221706}
   - component: {fileID: 511221705}
   - component: {fileID: 511221707}
+  - component: {fileID: 3400000701}
   m_Layer: 5
   m_Name: EndingScreenUI
   m_TagString: Untagged
@@ -1326,6 +1335,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!1 &529259878
 GameObject:
   m_ObjectHideFlags: 0
@@ -1376,6 +1386,7 @@ GameObject:
   - component: {fileID: 543881992}
   - component: {fileID: 543881995}
   - component: {fileID: 543881994}
+  - component: {fileID: 3400000101}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -1455,8 +1466,8 @@ Transform:
   m_GameObject: {fileID: 568447516}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: -2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: -3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -1470,8 +1481,8 @@ Transform:
   m_GameObject: {fileID: 661061320}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: 0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: 0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -1550,8 +1561,8 @@ Transform:
   m_GameObject: {fileID: 840805536}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: 2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: 3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -1678,6 +1689,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!114 &616101941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1695,6 +1707,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -2187,8 +2200,8 @@ Transform:
   m_GameObject: {fileID: 529259878}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: -2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: -3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -2334,6 +2347,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &735204845
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2448,8 +2462,8 @@ Transform:
   m_GameObject: {fileID: 735204843}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: 0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: 0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -2463,8 +2477,8 @@ Transform:
   m_GameObject: {fileID: 164067819}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.85, y: -0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: -1.4, y: -0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -2564,6 +2578,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &773079964
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2678,8 +2693,8 @@ Transform:
   m_GameObject: {fileID: 773079962}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: 1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: 1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -2844,8 +2859,8 @@ Transform:
   m_GameObject: {fileID: 357476235}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: -2.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: -3.0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -2859,8 +2874,8 @@ Transform:
   m_GameObject: {fileID: 432808313}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: -1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: -1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -3199,8 +3214,8 @@ Transform:
   m_GameObject: {fileID: 657800697}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: 1.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: 1.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -3222,6 +3237,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!4 &954102935
 Transform:
   m_ObjectHideFlags: 0
@@ -3231,8 +3247,8 @@ Transform:
   m_GameObject: {fileID: 626191774}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.0, y: -0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 0, y: -0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -3254,6 +3270,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!114 &996696794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3271,6 +3288,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &997847753
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3328,6 +3346,7 @@ GameObject:
   - component: {fileID: 1230783507}
   - component: {fileID: 1230783506}
   - component: {fileID: 1230783508}
+  - component: {fileID: 3400000401}
   m_Layer: 5
   m_Name: TransmissionTreeUI
   m_TagString: Untagged
@@ -3423,6 +3442,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &1568159515
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3537,8 +3557,8 @@ Transform:
   m_GameObject: {fileID: 1568159513}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: 0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: 0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -3579,6 +3599,7 @@ MonoBehaviour:
   infectedColor: {r: 0.9, g: 0.75, b: 0.15, a: 1}
   deadColor: {r: 0.55, g: 0.1, b: 0.1, a: 1}
   colorTransitionSpeed: 3
+  shapeTargetSize: 0.45
 --- !u!61 &1713983935
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3693,8 +3714,8 @@ Transform:
   m_GameObject: {fileID: 1713983933}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.85, y: -0.5, z: 0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalPosition: {x: 1.4, y: -0.6, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 660003738}
@@ -4017,6 +4038,7 @@ GameObject:
   - component: {fileID: 3100000103}
   - component: {fileID: 3100000102}
   - component: {fileID: 3100000104}
+  - component: {fileID: 3400000201}
   m_Layer: 5
   m_Name: MainMenuUI
   m_TagString: Untagged
@@ -4085,6 +4107,7 @@ GameObject:
   - component: {fileID: 3100000203}
   - component: {fileID: 3100000202}
   - component: {fileID: 3100000204}
+  - component: {fileID: 3400000301}
   m_Layer: 5
   m_Name: CountrySelectUI
   m_TagString: Untagged
@@ -4185,7 +4208,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 39786538f7d5c6645806214e312d15ae, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.GameDataBootstrapper
   countryDatabase: {fileID: 11400000, guid: 15d4b56ad98e03d43b6c74d3efdb5f8a, type: 2}
   selectedPathogen: {fileID: 11400000, guid: f1e5a5fcf1e868e47bd4a5f8d7aabe68, type: 2}
@@ -4210,7 +4233,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36e76f891a2955545933a2e1df27130b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.UIManager
   hudController: {fileID: 543881995}
   transmissionTreeView: {fileID: 1230783508}
@@ -4233,6 +4256,7 @@ GameObject:
   - component: {fileID: 3300000402}
   - component: {fileID: 3300000403}
   - component: {fileID: 3300000404}
+  - component: {fileID: 3400000501}
   m_Layer: 5
   m_Name: SymptomTreeUI
   m_TagString: Untagged
@@ -4265,7 +4289,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: da1e200d22ea5964385c0686b12834de, type: 2}
   m_ParentUI: {fileID: 0}
@@ -4288,7 +4312,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35661c065167e4340a577cdf6da08216, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.UpgradeTreeView
   category: 1
   adBonusDna: 10
@@ -4303,6 +4327,7 @@ GameObject:
   - component: {fileID: 3300000502}
   - component: {fileID: 3300000503}
   - component: {fileID: 3300000504}
+  - component: {fileID: 3400000601}
   m_Layer: 5
   m_Name: AbilityTreeUI
   m_TagString: Untagged
@@ -4335,7 +4360,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: da1e200d22ea5964385c0686b12834de, type: 2}
   m_ParentUI: {fileID: 0}
@@ -4358,10 +4383,150 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35661c065167e4340a577cdf6da08216, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.UpgradeTreeView
   category: 2
   adBonusDna: 10
+--- !u!114 &3400000101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543881991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: hud-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100000101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: mainmenu-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100000201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: mainmenu-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1230783505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: upgrade-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3300000401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: upgrade-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3300000501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: upgrade-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
+--- !u!114 &3400000701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 511221704}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass: ending-root
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

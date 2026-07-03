@@ -65,6 +65,7 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 | 22 | 국기 아이콘 18개국 추가 | `Resources/Flags/*.png`(신규 18개), `CountrySelectController.cs`, `MainMenu.uss` |
 | 23 | 세계 지도 국가별 실제 실루엣 적용 (플레이스홀더 회색 사각형 → 실제 국가 모양) | `Resources/CountryShapes/*.png`(신규 18개), `Gameplay/CountryView.cs` |
 | 24 | 모바일 세로 화면(갤럭시 S25 울트라, 1440×3120, 19.5:9) 타겟팅 — 화면 회전 잠금, PanelSettings/Camera 세로 재조정, 지도 재배치 | `ProjectSettings/ProjectSettings.asset`, `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity` |
+| 25 | 모바일 UI 가시성 폴리싱 — PanelSettings 참조 해상도를 실기기 픽셀이 아닌 논리 해상도로 정정, 세계 지도 화면비 버그 수정, SafeAreaApplier(코드베이스 위키 드롭인) 7개 화면 적용 | `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity`, `Scripts/UI/SafeAreaApplier.cs`(신규) |
 
 부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
 - `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.
