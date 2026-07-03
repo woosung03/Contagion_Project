@@ -11,12 +11,18 @@ namespace Contagion.UI
     /// 발원 국가 선택 화면 (UI/UX 폴리싱 — CountrySelect). 설계 문서 2절 "발원 국가 선택".
     /// GameDataBootstrapper.AvailableCountries(18개 템플릿 목록)를 리스트로 그리고, 선택 후
     /// "시작" 누르면 UIManager가 GameDataBootstrapper.BeginGame()을 호출해 실제 플레이가 시작된다.
-    /// 국기 아이콘은 아직 실제 에셋이 없어 자리만 비워둠(추후 UI/UX 폴리싱 후속 작업에서 채울 슬롯 —
-    /// flag-icon 클래스가 붙은 빈 VisualElement로 만들어 나중에 배경 이미지만 USS로 지정하면 됨).
+    /// 국기 아이콘: <c>Assets/Resources/Flags/{countryId}.png</c>를 <see cref="Resources.Load"/>로
+    /// 런타임에 불러와 country-row__flag 슬롯의 배경으로 지정한다(씬/에셋 GUID를 직접 참조하지 않아도
+    /// 되는 방식이라 코드만으로 배선 가능). 파일이 없는 국가는 기존처럼 빈 사각형(placeholder)으로 남는다.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class CountrySelectController : MonoBehaviour
     {
+        // country.id(CHI/IND/USA...) -> Resources/Flags/{id}.png. 캐시해서 국가 목록을 다시 그릴 때마다
+        // (SelectCountry 등에서 RebuildList를 부르진 않지만, 재시작 시 새 인스턴스가 다시 로드하므로)
+        // 매번 Resources.Load를 반복 호출하지 않도록 한다.
+        private readonly Dictionary<string, Texture2D> _flagCache = new Dictionary<string, Texture2D>();
+
         private VisualElement _root;
         private ScrollView _countryList;
         private Label _detailTitle;
@@ -129,11 +135,15 @@ namespace Contagion.UI
             var row = new VisualElement();
             row.AddToClassList("country-row");
 
-            // 국기 아이콘 슬롯 — 지금은 빈 사각형(placeholder), 나중에 국기 에셋 들어오면
-            // USS에서 이 클래스에 backgroundImage만 지정하면 된다. countryId별 개별 배경은
-            // 국가 수만큼 USS 클래스를 늘리기보단 실제 에셋 준비 시 스프라이트 아틀라스로 재작업 예정.
+            // 국기 아이콘 슬롯 — Resources/Flags/{countryId}.png 로드해서 배경으로 지정.
+            // 국가마다 다른 이미지라 USS 클래스 하나로는 표현 불가능해서 코드에서 개별로 채운다.
             var flagSlot = new VisualElement();
             flagSlot.AddToClassList("country-row__flag");
+            var flagTex = GetFlagTexture(country.id);
+            if (flagTex != null)
+                flagSlot.style.backgroundImage = new StyleBackground(flagTex);
+            else
+                Debug.LogWarning($"[CountrySelectController] 국기 텍스처를 찾지 못했습니다: Resources/Flags/{country.id}.png — 빈 슬롯으로 표시됩니다.");
             row.Add(flagSlot);
 
             var name = new Label(country.name);
@@ -146,6 +156,21 @@ namespace Contagion.UI
 
             row.RegisterCallback<ClickEvent>(_ => SelectCountry(country, row));
             return row;
+        }
+
+        /// <summary>
+        /// Resources/Flags/{countryId}.png를 로드해 캐시한다. Resources.Load는 경로 문자열로 찾기 때문에
+        /// 씬/에셋 파일에 GUID를 직접 박아넣을 필요가 없다 — Unity 에디터가 없는 세션에서도 텍스처
+        /// 파일만 그 경로에 두면(및 프로젝트를 에디터로 한 번 열어 임포트되면) 바로 동작한다.
+        /// </summary>
+        private Texture2D GetFlagTexture(string countryId)
+        {
+            if (string.IsNullOrEmpty(countryId)) return null;
+            if (_flagCache.TryGetValue(countryId, out var cached)) return cached;
+
+            var tex = Resources.Load<Texture2D>($"Flags/{countryId}");
+            _flagCache[countryId] = tex; // 못 찾아도 null로 캐시해서 매 프레임 재조회하지 않음
+            return tex;
         }
 
         private void SelectCountry(Country country, VisualElement row)
