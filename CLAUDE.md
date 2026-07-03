@@ -27,6 +27,10 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - 코드 네임스페이스: `Contagion.Data`, `Contagion.Managers`, `Contagion.Gameplay`, `Contagion.UI`, `Contagion.Ads`, `Contagion.Ranking`, `Contagion.Utils`
 - 스크립트 위치: `Assets/Scripts/{Data, Managers, Gameplay, UI, Ads, Ranking, Utils}`
 - UI 에셋 위치: `Assets/UI/*.uxml`, `Assets/UI/*.uss` (UI Toolkit)
+- **타겟 화면**: 세로(Portrait) 고정, 갤럭시 S25 울트라 기준(1440×3120, 19.5:9). Step 24에서 확정 —
+  `PanelSettings.referenceResolution`/`ProjectSettings.defaultScreenOrientation`/`GamePlay.unity`의
+  Main Camera `orthographic size`(3.8)와 세계 지도 국가 배치가 전부 이 비율 기준으로 맞춰져 있음.
+  새 UI 화면/레이아웃 작업 시 가로 모드는 고려하지 않아도 됨(회전 잠김).
 
 ---
 
@@ -60,6 +64,7 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 | 21 | HUD 스파크라인 그래프(감염자/사망자/치료제) + 업그레이드 트리 전파/증상/능력 3분할 창 | `HudSparkline.cs`(신규), `HudController.cs`, `UpgradeTreeView.cs`, `UIManager.cs`, `GamePlay.unity` |
 | 22 | 국기 아이콘 18개국 추가 | `Resources/Flags/*.png`(신규 18개), `CountrySelectController.cs`, `MainMenu.uss` |
 | 23 | 세계 지도 국가별 실제 실루엣 적용 (플레이스홀더 회색 사각형 → 실제 국가 모양) | `Resources/CountryShapes/*.png`(신규 18개), `Gameplay/CountryView.cs` |
+| 24 | 모바일 세로 화면(갤럭시 S25 울트라, 1440×3120, 19.5:9) 타겟팅 — 화면 회전 잠금, PanelSettings/Camera 세로 재조정, 지도 재배치 | `ProjectSettings/ProjectSettings.asset`, `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity` |
 
 부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
 - `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.

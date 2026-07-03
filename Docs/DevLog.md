@@ -373,6 +373,59 @@ Step 22와 같은 방식으로 GitHub blob 페이지의 `"rawLines"` JSON 페이
 **라이선스 메모**: 국경 데이터 출처는 `github.com/johan/world.geo.json`(UNLICENSE — 퍼블릭 도메인에
 가까운 자유 사용 라이선스). 국가 경계선 자체도 저작물이 아니라 사실 정보라 상업 배포에 문제없음.
 
+## Step 24 구현 메모 (모바일 세로 화면 타겟팅 — 갤럭시 S25 울트라, 2026-07-03)
+
+사용자가 "실제 플레이 환경을 모바일로 하려고 한다, 화면 비율은 갤럭시 S25 울트라 기준"이라고 요청.
+S25 울트라 스펙(웹 검색으로 확인): 1440×3120px, 19.5:9. 확인해보니 프로젝트가 세로 모바일을 전혀
+고려하지 않은 상태였다 — `ProjectSettings.defaultScreenOrientation: 4`(자동 회전 전부 허용),
+기본 해상도 1920×1080(가로), `PanelSettings.referenceResolution: 1200×800`(가로 3:2), 세계 지도
+카메라(`orthographic size: 5`)와 Step 17~23에서 배치한 18개국 좌표(x:[-2.6,2.6] y:[-2.0,2.3], 가로로
+넓고 세로로 낮은 배치)까지 전부 가로/정사각 기준이었다.
+
+**세계 지도 화면 방식 결정**: "전체 지도 한눈에 보이기 / 좌우만 스크롤 / 자유 스크롤+핀치줌" 3안을
+제시했고, "전체 지도 한눈에"(스크롤 없이 화면에 다 들어오는 방식, 원작 Plague Inc.도 기본이 이 방식)로
+결정. 좌우 스크롤이나 자유 팬/줌은 터치 입력 코드가 추가로 필요해서 이번 스코프에서 제외.
+
+| 항목 | 파일 | 내용 |
+|------|------|------|
+| 화면 회전 잠금 | `ProjectSettings/ProjectSettings.asset` | `defaultScreenOrientation: 4`(AutoRotation)→`0`(Portrait 고정). `allowedAutorotateToPortraitUpsideDown`/`allowedAutorotateToLandscapeRight`/`allowedAutorotateToLandscapeLeft`도 전부 `1`→`0`으로 꺼서 혹시 나중에 orientation을 다시 Auto로 바꾸더라도 세로만 허용되게 안전장치. `defaultScreenWidth/Height`도 1920×1080→1440×3120(S25 울트라 실제 해상도)로 변경 |
+| UI Toolkit 세로 재조정 | `Assets/UI Toolkit/PanelSettings.asset` | `m_ReferenceResolution`을 1200×800(가로)→1440×3120(세로, S25 울트라 실해상도)로 변경. `m_ScreenMatchMode`(Match Width Or Height)/`m_Match`(0=너비 기준)는 그대로 유지 — 기준 해상도 자체가 이제 타겟 기기와 비율이 일치하므로 너비 기준 매칭이면 충분 |
+| 세계 지도 카메라/배치 세로 재설계 | `Assets/Scenes/GamePlay.unity` | 아래 상세 참고 |
+
+**세계 지도 재설계 계산**: 목표는 지도 바운딩 박스의 가로:세로 비율을 화면 비율(9:19.5 ≈ 0.4615)과
+맞춰서, 카메라 orthographic size 하나로 위아래/좌우 여백 없이 동시에 꽉 차게 만드는 것.
+- 18개국을 3열×6행 그리드로 재배치: x = {-0.85, 0, 0.85}, y = {2.5, 1.5, 0.5, -0.5, -1.5, -2.5}
+  (바운딩 박스 약 1.7×5.0, 인접 국가 간 최소 간격 0.85 — Step 23에서 정한 `shapeTargetSize`(0.45)
+  기준 실루엣 반지름 0.225보다 훨씬 여유 있어 겹침 없음). 대륙별로 위(북반구: 러시아/캐나다/독일)→
+  아래(남반구: 남아공/브라질/호주) 느슨한 흐름을 주되, Step 17부터 이미 추상적 그리드 배치였으므로
+  지리적 정확성은 그대로 포기.
+- 카메라 `orthographic size`: 5 → 3.8. 유도 과정 — 세로 시야 높이 = orthoSize×2, 가로 시야 폭 =
+  orthoSize×2×(화면가로/화면세로). 지도 바운딩 박스(가로 1.7~2.6, 세로 5.0~5.6 여유 포함 추정치)에
+  안전 마진(약 1.3~1.35배, HUD 상단 뉴스피드 90px+하단 스탯바 약 110px가 화면 일부를 반투명하게 가리는
+  것 + 노치/제스처 네비게이션 세이프 에어리어 감안)을 곱해서 역산.
+- 카메라 Transform 위치(0,0,-10)와 WorldMap 부모 오브젝트의 Transform(0,0,0, scale 1)은 이미 원점
+  기준이라 그대로 둠 — 새 그리드도 원점 대칭이라 카메라를 옮길 필요가 없었음.
+- **적용 방법**: `GamePlay.unity`는 텍스트 YAML이라 Python으로 18개 `CountryView` MonoBehaviour →
+  `m_GameObject` fileID → 그 GameObject의 컴포넌트 목록에서 타입 `!u!4`(Transform)를 찾아
+  `m_LocalPosition`만 치환하는 스크립트를 짜서 일괄 처리(Step 17의 수동 좌표 삽입보다 안전 — fileID를
+  틀릴 위험이 없음). Camera 컴포넌트(`!u!20`)의 `orthographic size`도 같은 스크립트에서 함께 치환.
+  **주의**: 이 씬 파일은 CRLF 줄바꿈인데 Python `open(..., 'w')` 기본 텍스트 모드로 그냥 쓰면 LF로
+  바뀌어서 diff가 파일 전체(4000줄+)로 부풀어 오르는 사고가 났었다 — 재작업 시 반드시 `\n`→`\r\n`
+  치환 후 바이너리 모드로 쓸 것(`ProjectSettings.asset`/`PanelSettings.asset`처럼 원래 LF인 파일도
+  있으니, 수정 전에 `file <경로>`로 원본 줄바꿈 방식부터 확인). 최종 diff는 국가 18개 위치 줄 +
+  카메라 사이즈 줄, 정확히 19줄만 바뀜.
+
+**전부 텍스트 편집만으로 완료 — Unity 에디터 GUI 조작 불필요.** Unity 에디터에서 확인할 것:
+1) Game 뷰를 세로(1440×3120 또는 9:19.5 비율)로 맞추고 재생 — 세계 지도 18개국이 위아래/좌우 여백
+   없이 화면에 꽉 차게 보이는지, 국가 클릭/색상 갱신이 여전히 정상인지.
+2) 실기기 또는 세로 비율 시뮬레이터에서 상단 뉴스피드(90px)/하단 스탯바(~110px)에 지도 위아래 끝이
+   얼마나 가려지는지 육안 확인 — 마진 계수(1.3~1.35배)는 추정치라 실제로 보면서 orthographic size를
+   미세 조정해야 할 수 있음(가려짐이 심하면 값을 줄이고, 위아래 빈 공간이 많이 남으면 값을 키울 것).
+3) Unity Game 뷰 해상도 프리셋 목록에 1440×3120이 없으면 "+" 버튼으로 직접 추가해야 함(이건
+   에디터 로컬 상태라 텍스트 편집으로 미리 넣어줄 수 없는 부분).
+4) 좌우 스크롤/자유 줌은 이번에 구현 안 함 — 나중에 필요해지면 카메라 드래그 팬 스크립트를 새로
+   추가하는 방향(예: `Gameplay/WorldMapCameraController.cs`류)으로 확장 가능.
+
 ---
 
 ## 설계 문서 대비 구현 시 내린 결정 상세 (요약은 CLAUDE.md 참고)
