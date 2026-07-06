@@ -27,109 +27,94 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - 코드 네임스페이스: `Contagion.Data`, `Contagion.Managers`, `Contagion.Gameplay`, `Contagion.UI`, `Contagion.Ads`, `Contagion.Ranking`, `Contagion.Utils`
 - 스크립트 위치: `Assets/Scripts/{Data, Managers, Gameplay, UI, Ads, Ranking, Utils}`
 - UI 에셋 위치: `Assets/UI/*.uxml`, `Assets/UI/*.uss` (UI Toolkit)
-- **타겟 화면**: 세로(Portrait) 고정, 갤럭시 S25 울트라 기준(1440×3120, 19.5:9). Step 24에서 확정 —
-  `PanelSettings.referenceResolution`/`ProjectSettings.defaultScreenOrientation`/`GamePlay.unity`의
-  Main Camera `orthographic size`(3.8)와 세계 지도 국가 배치가 전부 이 비율 기준으로 맞춰져 있음.
+- **타겟 화면**: 세로(Portrait) 고정, 갤럭시 S25 울트라 기준(1440×3120, 19.5:9). `PanelSettings.referenceResolution`/
+  `ProjectSettings.defaultScreenOrientation`/`GamePlay.unity`의 Main Camera가 전부 이 비율 기준으로 맞춰져 있음.
   새 UI 화면/레이아웃 작업 시 가로 모드는 고려하지 않아도 됨(회전 잠김).
+- 국가 48개(`Assets/New Folder/CountryDatabase.asset`), 병원체 6종, 업그레이드 트리 45노드(`DefaultUpgradeTreeFactory.cs`).
+  인구는 실제 인구/1000 스케일.
 
 ---
 
-## 진행 상황 (Step 1~22 전부 완료)
+## 완료된 주요 시스템 (Step 1~24)
 
-**단, Unity 에디터 GUI 작업(씬/프리팹/에셋 배치) 중 일부는 아직 미완 — 아래 "씬/에셋 배선 필요" 참고.**
-각 Step의 상세 배경·설계 결정 이유·버그 진단 과정은 전부 `Docs/DevLog.md`에 있음 (표는 요약만).
+각 시스템의 상세 구현 배경·설계 결정 이유·버그 진단 과정은 `Docs/DevLog.md`에서 Step 번호로 검색.
+
+- [x] 핵심 데이터/시뮬레이션 — `Pathogen`/`Country`/`WorldState`(Data), 틱 기반 감염·사망·치료제 진행 (`SimulationManager`), `WorldDataManager`, `GameManager`(페이즈/난이도/일시정지)
+- [x] 세계 지도 — `WorldMap`+`CountryView`(국가별 색상/클릭/실제 실루엣), DNA 버블 스포너+오브젝트 풀링(`BubbleSpawner`, `ObjectPool<T>`)
+- [x] 게임플레이 시스템 — `UpgradeManager`(DNA 트리), 인류 저항 AI(`HumanResistanceManager`), `EventManager`(뉴스피드 이벤트 6종 + 나무위키 백로그 반영: 붕괴단계/난이도 확산보정/처형·폭격 이벤트/자금 상한선/국경 폐쇄 순차화/플레이버 이벤트)
+- [x] UI Toolkit 전체 — HUD(스파크라인 그래프 포함)/업그레이드 트리(좌표+연결선 시각화)/국가 상태 패널/뉴스피드/엔딩/랭킹 패널
+- [x] 데이터화 — ScriptableObject(`CountryDatabase`/`PathogenDefinition`/`UpgradeTreeDatabase`) + `GameDataBootstrapper`가 씬 시작 시 주입
+- [x] 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드로 대체), 저장 시스템(로컬 폴백 + AIT Storage 훅)
+- [x] 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택)/`GamePlay` + 재시작 루프 안정화(DontDestroyOnLoad 매니저 전체 `ResetForNewGame()`)
+- [x] 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반) + 좌우 드래그 스크롤
+- [x] 모바일 UI 가시성 폴리싱(Step 25) — PanelSettings 참조 해상도 정정, 세계 지도 화면비 버그 수정, SafeAreaApplier 7개 화면 적용, 폰트 크기 상향
+- [x] UI 세부 폴리싱(Step 26) — 뉴스피드 영역 확대 + 업그레이드 트리 3분할 창을 버튼+화살표 페이징으로 통합, 노드 크기/간격 축소
+- [x] 세계 지도 재배치(Step 27) — 국가 위치를 경도/위도 기반 그리드로 재배치 + 국가 크기 면적 비례화
+- [x] 세계 지도 UX 개선(Step 28/28-2/28-3) — 지도를 화면보다 넓게 배치 + 좌우 드래그 스크롤, 국가 클릭 팝업 제거 → "국가현황" 스크롤 리스트 패널로 대체
+- [x] 글로벌 교통망 구축(Step 29~30-2) — 항공/해운 허브 30개(각 15개) 신규 구현, 유닛이 지도 위를 이동하며 도착 시 감염 전파(기존 추상 확률 롤 대체), 국가 18→48개/업그레이드 트리 27→45노드 확장, 해운 경유점을 `world_base.png` 육지 마스크 기반 A* 길찾기로 계산
+
+---
+
+## 최근 작업 (Step 30-3~30-5)
 
 | Step | 내용 | 파일 |
 |------|------|------|
-| 1 | 데이터 클래스 | `Data/Enums.cs`, `Data/Pathogen.cs`, `Data/Country.cs`, `Data/WorldState.cs`, `Data/UpgradeNode.cs` |
-| 2 | SimulationManager (틱 기반 감염/사망/치료제) | `Managers/SimulationManager.cs` |
-| 3 | WorldMap (국가 바인딩/색상/클릭) | `Gameplay/WorldMap.cs`, `Gameplay/CountryView.cs` |
-| 4 | UpgradeManager (DNA/트리) | `Managers/UpgradeManager.cs` |
-| 5 | BubbleSpawner (DNA 수집, 오브젝트 풀링) | `Gameplay/BubbleSpawner.cs`, `Gameplay/DnaBubble.cs`, `Utils/ObjectPool.cs` |
-| 6 | 인류 저항 AI | `Managers/HumanResistanceManager.cs` |
-| 7 | EventManager (뉴스 피드 + 6종 이벤트) | `Managers/EventManager.cs` |
-| 8 | UI 전체 연결 (HUD/업그레이드/국가팝업/뉴스피드/엔딩) | `UI/*.cs` + `Assets/UI/*.uxml,*.uss` + `Managers/UIManager.cs` |
-| 9 | ScriptableObject 데이터화 | `Data/PathogenDefinition.cs`, `Data/CountryDatabase.cs`, `Data/UpgradeTreeDatabase.cs`, `Managers/GameDataBootstrapper.cs` |
-| 10 | 보상형 광고 SDK 연동 | `Ads/TossFullScreenAd.cs`, `Ads/GameAds.cs` |
-| 11 | 랭킹 연동 (게임센터로 대체) | `Ranking/*.cs`, `Managers/RankingManager.cs` |
-| 12 | 랭킹 UI (로컬 PB + WebView로 축소) | `UI/RankingPanelController.cs` + `Assets/UI/RankingPanel.*` |
-| 13 | 저장 시스템 (로컬 폴백 + AIT Storage 훅) | `Managers/SaveManager.cs` |
-| 14 | 국가별 붕괴단계, 난이도별 확산보정, 처형/폭격 이벤트, 국가색상 부드러운 전환, DNA버블 연출, AudioManager 인프라 | `Enums.cs`, `Country.cs`, `HumanResistanceManager.cs`, `GameManager.cs`, `EventManager.cs`, `CountryView.cs`, `DnaBubble.cs`, `FloatingTextEffect.cs`(신규), `AudioManager.cs`(신규) |
-| 15 | 업그레이드 트리 27노드 세분화 + 좌표/연결선 시각화 + 비용 가산율 | `DefaultUpgradeTreeFactory.cs`(신규), `UpgradeNode.cs`, `UpgradeManager.cs`, `UpgradeTreeView.cs` |
-| 16 | 나무위키 백로그 잔여 4항목: 세계 사망률 텍스트, 국가별 자금 상한선, 국경 폐쇄 순차화, 플레이버 이벤트 | `Enums.cs`, `WorldState.cs`, `HumanResistanceManager.cs`, `Country.cs`, `EventManager.cs` |
-| 17 | 국가 4→18개, 병원체 1→6종 확장 + 신규 국가 CountryView 씬 배치 | `CountryDatabase.asset`, `Pathogen_*.asset`(신규 5개), `GamePlay.unity` |
-| 18 | MainMenu(병원체 선택)/CountrySelect(국가 선택) 화면 신규 + 게임 시작 플로우 게이팅 | `MainMenuController.cs`, `CountrySelectController.cs`, `GameManager.cs`, `GameDataBootstrapper.cs`, `UIManager.cs`, `GamePlay.unity` |
-| 19 | 게임 시작-끝-재시작 루프 안정화 (DontDestroyOnLoad 매니저 6개 `ResetForNewGame()`) | `SimulationManager.cs`, `WorldState.cs`, `WorldDataManager.cs`, `GameManager.cs`, `HumanResistanceManager.cs`, `EventManager.cs`, `SaveManager.cs` |
-| 20 | 재시작 후 CountrySelect 완전 먹통 버그 수정 (Bootstrap→SceneUICoordinator 분리) | `GamePlay.unity` |
-| 21 | HUD 스파크라인 그래프(감염자/사망자/치료제) + 업그레이드 트리 전파/증상/능력 3분할 창 | `HudSparkline.cs`(신규), `HudController.cs`, `UpgradeTreeView.cs`, `UIManager.cs`, `GamePlay.unity` |
-| 22 | 국기 아이콘 18개국 추가 | `Resources/Flags/*.png`(신규 18개), `CountrySelectController.cs`, `MainMenu.uss` |
-| 23 | 세계 지도 국가별 실제 실루엣 적용 (플레이스홀더 회색 사각형 → 실제 국가 모양) | `Resources/CountryShapes/*.png`(신규 18개), `Gameplay/CountryView.cs` |
-| 24 | 모바일 세로 화면(갤럭시 S25 울트라, 1440×3120, 19.5:9) 타겟팅 — 화면 회전 잠금, PanelSettings/Camera 세로 재조정, 지도 재배치 | `ProjectSettings/ProjectSettings.asset`, `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity` |
-| 25 | 모바일 UI 가시성 폴리싱 — PanelSettings 참조 해상도를 실기기 픽셀이 아닌 논리 해상도로 정정, 세계 지도 화면비 버그 수정, SafeAreaApplier(코드베이스 위키 드롭인) 7개 화면 적용, 전체 화면 font-size 상향(레퍼런스 해상도 정정 후에도 "글씨가 작다" 피드백 재확인돼 추가 대응) | `Assets/UI Toolkit/PanelSettings.asset`, `Assets/Scenes/GamePlay.unity`, `Scripts/UI/SafeAreaApplier.cs`(신규), `Assets/UI/*.uss` |
-| 26 | 뉴스피드 영역 확대 + 업그레이드 트리 전파/증상/능력 3창을 버튼 1개+좌우 화살표 페이징으로 통합, 노드 크기/간격 축소 | `Assets/UI/Hud.uxml,uss`, `Assets/UI/UpgradeTree.uxml,uss`, `Scripts/UI/HudController.cs`, `Scripts/UI/UpgradeTreeView.cs`, `Scripts/Managers/UIManager.cs`, `Scripts/Data/DefaultUpgradeTreeFactory.cs` |
-| 27 | 세계 지도 18개국 위치를 실제 경도/위도 순서 기반 3×6 그리드로 재배치(동서/남북 상대 위치가 실제 지리와 비슷하게) + 국가 크기를 실제 면적 비례(sqrt 압축)로 차등화(러시아 최대~한국 최소) | `Assets/Scenes/GamePlay.unity` |
-| 28 | "한 화면에 다 보이기" 방식을 포기하고 지도를 실제 경도/위도 비율(가로로 김)에 가깝게 화면보다 넓게 배치 + 좌우 드래그 스크롤 추가(세로는 스크롤 없음), 이후 가로 스크롤 폭 0.8배 추가 압축(세로 무변경) | `Scripts/Gameplay/WorldMapCameraController.cs`(신규), `Scripts/Gameplay/CountryView.cs`(OnMouseDown→OnMouseUpAsButton), `Assets/Scenes/GamePlay.unity` |
-| 28-2 | 뉴스피드/하단바에 지도 양끝(러시아·남아공)이 가려지는 문제 수정(지도 좌표+크기 0.85배 균일 축소 + 세로 중심 보정) + 국가 클릭 팝업 인터랙션 제거, HUD "국가현황" 버튼 → 18개국 상태 스크롤 리스트 패널로 대체 | `Scripts/Gameplay/CountryView.cs`, `Assets/UI/CountryStatusPanel.uxml,uss`(신규), `Scripts/UI/CountryStatusPanelController.cs`(신규), `Assets/UI/Hud.uxml`, `Scripts/UI/HudController.cs`, `Scripts/Managers/UIManager.cs`, `Assets/Scenes/GamePlay.unity` |
-| 28-3 | 남아공·호주가 여전히 하단 UI에 가려진다는 피드백 — 지도 좌표+크기 0.7배 추가 축소(가로/세로 동일 비율) + 세로 중심을 위로 보정해 여유 마진 크게 확보 | `Scripts/Gameplay/WorldMapCameraController.cs`, `Assets/Scenes/GamePlay.unity` |
-| 29 | 글로벌 교통망 신규 구현(사용자 제공 설계 문서) — 항공 15허브+해운 15허브, 비행기/배가 실제로 지도 위를 이동하며 경로선 표시, 도착 시 감염 전파(항공/해운 판정이 기존 SimulationManager 추상 확률 롤을 대체) | `Data/TransportHub.cs`(신규), `Data/DefaultTransportHubFactory.cs`(신규), `Gameplay/TransportUnit.cs`(신규), `Managers/TransportManager.cs`(신규), `Managers/SimulationManager.cs`, `Managers/GameDataBootstrapper.cs`, `Assets/Scenes/GamePlay.unity` |
-
-부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
-- `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.
-- `Managers/WorldDataManager.cs` — Country 리스트 + WorldState 저장소, 변경 이벤트 발행.
-- Step 13 완료 직후 초기 플레이테스트에서 버그 4건 발견/수정(정수 캐스팅 정지, 국가 간 전파 데이터
-  누락, 패배 조건 무한 대기, 치료제 조기 100%) — 상세는 `Docs/DevLog.md` "초기 플레이테스트 버그" 참고.
-
-### 씬/에셋 배선 필요 (코드만으로는 안 되는 작업 — 다음에 진행할 부분)
-
-- `MainMenu` / `CountrySelect` / `GamePlay` 씬 생성 (현재 기본 씬만 존재 — 지금은 씬 하나에서 UIDocument
-  패널을 켜고 끄는 방식으로 대체 중)
-- `WorldMap` 오브젝트 + 국가별 `CountryView` — 18개국 전부 씬 파일 직접 편집으로 배치 완료. Step 23에서
-  실제 국가 실루엣으로 교체했음(스프라이트 하드코딩이 아니라 `Resources.Load` 런타임 로드 방식이라 Unity
-  에디터 GUI 조작 불필요). 지리적으로 정확한 위치 배치는 아님(Step 17 참고, 대륙별 추상 그리드) — 필요하면
-  Unity 에디터에서 각 국가 오브젝트를 드래그로 재배치 가능(`CountryView`는 `countryId` 문자열로만 동작).
-- `DnaBubble` 프리팹 제작 (SpriteRenderer + CircleCollider2D) 후 `BubbleSpawner.bubblePrefab`에 연결
-- `CountryDatabase`/`PathogenDefinition`/`UpgradeTreeDatabase`는 이미 에셋으로 존재하고 `GameDataBootstrapper`에
-  연결돼 있음 — 추가 데이터 조정만 필요하면 그때그때 텍스트 편집으로 가능
-- 앱인토스 SDK 설치(`Packages/manifest.json`) + 콘솔에서 게임 카테고리 등록 + 광고 그룹 생성
-  — **한 번 시도했다가 되돌림**: manifest.json에 git 의존성을 추가했더니 SDK 에디터 툴링의 pnpm install이
-  `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`로 실패해 노이즈만 뿜어서 제거함. 게임 마지막 단계로 미루기로 한 상태.
-  재시도 시 SDK 패키지 캐시 폴더(`Library/PackageCache/im.toss.apps-in-toss-unity-sdk@.../`)에서
-  `pnpm install --no-frozen-lockfile` 수동 실행 또는 `pnpm-lock.yaml` 삭제 후 재설치 시도 (사람이 터미널에서
-  실행 필요 — Node/pnpm 로컬 설치 상태도 같이 확인).
-- `AudioManager` 오브젝트 생성 + 스크립트 부착 + 효과음 에셋 준비 후 연결 (에셋은 사람이 준비/임포트해야 함)
-- (선택) MainMenu 화면의 DNA+5 보상형 광고 버튼 — `GameAds.Rewarded` 재사용해서 붙이기만 하면 됨, 아직 미완료
+| 30-3 | **실제 플레이 첫 확인 피드백 반영**: (1) `BuildSeaWaypoints()` 키 10쌍이 `PairKey()` canonical 순서와 반대로 저장돼 조회 실패 → 해당 항로가 직선으로 대체돼 대륙 관통. 키 순서 전부 교정 + 누락된 SEA_PKL\|SEA_SHA 쌍 추가(25→26쌍). (2) 배/비행기 스프라이트 구분 안 되던 문제 — 비행기는 십자형(1.6:1)/파랑 계열, 배는 납작한 선체(4.4:1)/초록 계열로 실루엣·색상 분리 | `Data/DefaultTransportHubFactory.cs`, `Gameplay/TransportUnit.cs` |
+| 30-4 | "사우디-아랍 쪽 배가 사우디 위를 지나다닌다" 재지적 — SEA_JEA(제벨알리) 허브 오프셋이 실제로는 요르단/이스라엘 인접 내륙에 찍혀 있던 버그 발견. 오프셋을 페르시아만 연안으로 정정 + JEA 관련 3개 항로 재계산·재검증 | `Data/DefaultTransportHubFactory.cs` |
+| 30-5 | 감염 보유(빨간) 유닛 가시성을 위해 활성 유닛 수(24~180→10~70)/스프라이트 크기(pixelsPerUnit 70→150) 축소 + **26개 해운 항로 전수 재검증**(허브별 "가장 가까운 진짜 바다 지점" sea anchor 도입) — 로스앤젤레스항(SEA_LAX)이 메인 대양과 단절된 웅덩이에 있던 버그 발견·수정 포함. **사용자가 실제 플레이로 최종 확인 완료("문제 없는 것 같아")** | `Managers/TransportManager.cs`, `Gameplay/TransportUnit.cs`, `Data/DefaultTransportHubFactory.cs` |
 
 ---
 
-## 나무위키 참고 자료 (원본 게임 대비 보완 아이디어)
+## 다음에 할 일 (TODO)
 
-사용자가 원본 Plague Inc. 나무위키 문서(시스템/전략/이벤트/상태)를 근거로 제공한 백로그.
-`Docs/PlagueIncReference.md`의 항목은 Step 14 + Step 16으로 **전부 반영 완료**됐다. 상세는
-`Docs/DevLog.md`의 Step 14/16 항목 참고.
+- Step 30-5까지의 교통망 수정(유닛 수/크기, 26개 해운 항로, 배·비행기 구분)은 사용자가 실제
+  플레이로 확인 완료. 다음 세션 확인 사항:
+  1. 프로젝트 열어 컴파일 에러 없는지 확인 (정적 리뷰는 완료됐지만 실제 컴파일러 확인 아직 안 함)
+  2. `GamePlay` 씬 재생 → 콘솔에서 `[TransportManager] 허브 30개 좌표 해석 완료` 로그 확인
+  3. 새 인구 스케일(실제 인구/1000) 기준 DNA 버블 빈도/치료제 시작 확률/교통망 감염 확률 밸런스 재확인
+  4. (Step 30-5에서 발견, 당장 안 고치기로 함) 산투스항(SEA_SAN, 브라질)은 가장 가까운 바다 지점까지
+     거리가 다른 허브보다 좀 더 멀다(약 116px, 다른 허브는 대개 10~40px) — 화면 전체 대비로는 미미하니
+     눈에 띄게 어색할 때만 오프셋 개별 조정할 것.
+  5. (기존에 이미 알려진, 이번 수정과 무관한 별개 한계) 미국 내 여러 항공 허브(ATL/DFW 등)가 여전히
+     미국 국가 중심점 기준 작은 오프셋으로 정의돼 있어 실제 도시 위치가 아니라 지도 위 한 지점에
+     뭉쳐 보임(해운 허브 LAX/LGB는 Step 30-5에서 위치를 조정했지만 항공 허브는 그대로임) — 필요하면
+     각 허브에 국가 앵커 대신 직접 좌표를 부여하는 별도 작업으로 처리.
+
+### 씬/에셋 배선 필요 (코드만으로는 안 되는 작업)
+
+- `MainMenu`/`CountrySelect`/`GamePlay` 씬 분리 (현재 씬 하나에서 UIDocument 패널 on/off로 대체 중)
+- `DnaBubble` 프리팹 제작(SpriteRenderer + CircleCollider2D) 후 `BubbleSpawner.bubblePrefab`에 연결
+- 앱인토스 SDK 설치(`Packages/manifest.json`) — **한 번 시도했다가 되돌림**: git 의존성 추가 시 pnpm
+  lockfile 충돌(`ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`) 발생, 게임 마지막 단계로 미룸. 재시도 시 사람이
+  터미널에서 `pnpm install --no-frozen-lockfile` 수동 실행 필요.
+- `AudioManager` 오브젝트 생성 + 효과음 에셋 준비/연결 (에셋은 사람이 준비/임포트해야 함)
+- (선택) MainMenu의 DNA+5 보상형 광고 버튼 — `GameAds.Rewarded` 재사용해서 붙이기만 하면 됨
 
 ---
 
-## 설계 문서 대비 구현 시 내린 결정 (요약 — 상세 근거는 Docs/DevLog.md)
+## 튜닝 포인트 (설계 문서 미정의 계수 — 밸런싱 시 여기부터 조정)
 
 설계 문서 4절 공식에는 `spreadFactor`, `climateModifier`, `severityFactor`, `researchMultiplier`,
-`drugResistanceReduction` 등 정의되지 않은 계수가 여러 개 있다. 밸런싱 필요 시 여기부터 조정:
+`drugResistanceReduction` 등 정의되지 않은 계수가 여러 개 있다:
 
 - `climateModifier` = `Pathogen.GetEnvironmentResistance(country.climate)` (0~1, 미설정 시 기본 1=중립)
-- `countryHealthLevel` / `healthcareCapacity` = `Country.HealthLevel` (developmentLevel → Low 0.2 / Mid 0.5 / High 0.8)
+- `countryHealthLevel`/`healthcareCapacity` = `Country.HealthLevel` (developmentLevel → Low 0.2 / Mid 0.5 / High 0.8)
 - `researchMultiplier` = `Country.ResearchMultiplier` (Low 0.2 / Mid 0.8 / High 1.5)
 - `severityFactor` = `Pathogen.severity` 그대로 사용
 - `drugResistanceReduction` = `pathogen.drugResistance * drugResistanceCoefficient`(SimulationManager 인스펙터 값)
-- `spreadFactor`, 국가 간 전파 확률, DNA 마일스톤 간격, 저항 단계별 봉쇄 임계값은 모두
-  `SimulationManager` / `HumanResistanceManager` 인스펙터에 노출된 튜닝 값 — 플레이테스트로 조정할 것.
-- `environmentResistance`는 설계 문서 원안(`float[4]` 고정 순서)이 `Country.climate` enum 순서와 어긋나는
-  버그 유발 위험이 있어 `List<ClimateResistanceEntry>` (climate → resistance 매핑)로 변경했다.
-- 국가 수 확장(4→18개, Step 17)으로 `SimulationManager`의 `Cure Progress Coefficient`(기본 0.002)가
-  다시 커 보일 수 있음 — 치료제가 너무 빨리 100%를 찍으면 이 값부터 낮출 것.
+- `spreadFactor`, 국가 간 육상 전파 확률(`landBorderSpreadChance`), DNA 마일스톤 간격, 저항 단계별 봉쇄
+  임계값은 전부 `SimulationManager`/`HumanResistanceManager` 인스펙터 노출 값 — 플레이테스트로 조정.
+- 항공/해운 전파는 이제 `TransportManager` 인스펙터(`airArrivalInfectionChance`/`seaArrivalInfectionChance`/
+  `airSeedAmount`/`seaSeedAmount`/`infectionVisibilityScale` 등)에서 조정 — `SimulationManager`의
+  `airRouteSpreadChance`/`seaRouteSpreadChance`는 [미사용]으로 남겨둔 필드이니 헷갈리지 말 것.
+- 국가 수가 48개까지 늘어난 만큼 `SimulationManager`의 `Cure Progress Coefficient`(기본 0.002)가 다시
+  커 보일 수 있음 — 치료제가 너무 빨리 100%를 찍으면 이 값부터 낮출 것.
 
 ---
 
 ## 규칙
 
 - 이 프로젝트는 개발 대상이다 (참조 전용인 `C:\Game\codebase`와 다름). 자유롭게 수정한다.
-- 새 Step을 진행할 때마다 위 "진행 상황" 표에 **한 줄 요약만** 추가한다. 상세 구현 배경·버그 진단
+- 새 Step을 진행할 때마다 위 "최근 작업" 표에 **한 줄 요약만** 추가하고, 표가 5~6개 Step을 넘어가면
+  가장 오래된 Step을 "완료된 주요 시스템" 체크리스트로 압축 이동한다. 상세 구현 배경·버그 진단
   과정·설계 결정 이유는 `Docs/DevLog.md`에 적어서 이 파일이 계속 가볍게 유지되도록 한다.

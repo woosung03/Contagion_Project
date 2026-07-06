@@ -65,6 +65,14 @@ namespace Contagion.Gameplay
         public CountryView GetView(string countryId) =>
             _views.TryGetValue(countryId, out var view) ? view : null;
 
+        /// <summary>
+        /// 특정 국가에 속하지 않는 임의의 지점(예: 해상 항로 경유점)을 CountryView.DnaSpawnWorldPosition과
+        /// 같은 좌표계로 변환한다. CountryView는 항상 이 GameObject(WorldMap) 기준 로컬 (0,0,0)에 고정돼
+        /// 있으므로(dnaSpawnLocalOffset만 다름) transform.TransformPoint 결과가 CountryView 쪽과 동일하게
+        /// 나온다 — TransportManager가 말라카 해협/수에즈 운하 같은 경유점을 국가 앵커 없이 배치할 때 사용.
+        /// </summary>
+        public Vector3 ToWorldPosition(Vector2 localOffset) => transform.TransformPoint(localOffset);
+
         public void UnregisterCountryView(CountryView view)
         {
             if (view == null || string.IsNullOrEmpty(view.CountryId)) return;
