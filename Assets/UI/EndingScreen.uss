@@ -33,7 +33,7 @@
 .ending-button {
     width: 180px;
     height: 56px;
-    margin: 0 8px;
+    margin: 0 12px;
 }
 
 .ending-button--revive {

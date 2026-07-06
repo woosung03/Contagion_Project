@@ -18,7 +18,7 @@ namespace Contagion.Gameplay
         private Color _startColor;
 
         /// <summary>월드 좌표 position에 text를 표시하며 위로 떠오르는 이펙트를 즉시 생성한다.</summary>
-        public static FloatingTextEffect Spawn(Vector3 position, string text, Color color, float characterSize = 0.3f)
+        public static FloatingTextEffect Spawn(Vector3 position, string text, Color color, float characterSize = 0.15f)
         {
             var go = new GameObject($"FloatingText_{text}");
             go.transform.position = position;

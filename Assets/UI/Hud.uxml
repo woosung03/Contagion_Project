@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Hud.uss" />
     <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
-        <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" />
+        <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
 
         <ui:VisualElement name="map-spacer" class="map-spacer" picking-mode="Ignore" />
 

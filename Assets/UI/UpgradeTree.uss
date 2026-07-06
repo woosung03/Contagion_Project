@@ -1,7 +1,7 @@
 .upgrade-root {
     flex-grow: 1;
     background-color: rgba(10, 10, 20, 0.92);
-    padding: 16px;
+    padding: 20px;
 }
 
 /* 전파/증상/능력 3창 통합 — 헤더를 2줄로 나눔: 위(◀ 제목 ▶ 내비게이션) / 아래(DNA·광고·닫기 액션).
@@ -9,13 +9,13 @@
    제목이 들어갈 공간이 거의 안 남아 2줄로 분리했다. */
 .upgrade-header {
     flex-direction: column;
-    margin-bottom: 8px;
+    margin-bottom: 14px;
 }
 
 .upgrade-header__nav {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
 }
 
 .upgrade-header__actions {
@@ -44,10 +44,10 @@
 
 .upgrade-header__arrow {
     width: 52px;
-    height: 40px;
+    height: 48px;
     font-size: 20px;
     -unity-font-style: bold;
-    margin: 0 4px;
+    margin: 0 8px;
 }
 
 .upgrade-header__ad-bonus {
@@ -58,7 +58,7 @@
 
 .node-scroll {
     flex-grow: 1;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .category-header {
@@ -124,7 +124,7 @@
 
 .detail-panel {
     background-color: rgba(255, 255, 255, 0.08);
-    padding: 12px;
+    padding: 16px;
     border-radius: 6px;
 }
 
@@ -142,5 +142,5 @@
 }
 
 .detail-panel__buy {
-    height: 40px;
+    height: 48px;
 }

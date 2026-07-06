@@ -802,3 +802,45 @@ Unity 에디터에서 재확인할 것: 남아공·호주가 이번에도 가려
   실제 `Country.climate` enum 순서(Arid/Temperate/Cold/Humid)와 어긋나 인덱스 실수로 엉뚱한 기후 저항이
   적용될 위험이 컸다. 그래서 `List<ClimateResistanceEntry>`(climate enum → resistance 값 매핑)로 바꿔
   순서 의존성을 아예 없앴다.
+
+## Step 29 구현 메모 (글로벌 교통망 — 비행기/배 이동 + 항공/해운 전파 대체)
+
+사용자가 "Global Transport Network Design" 문서(항공 15허브 + 해운 15허브, 공유 이동/감염 로직,
+가중치 기반 랜덤 목적지 선택, 동시 활성 유닛 50~200개)를 직접 제공해 그대로 구현.
+
+- **신규 데이터**: `Data/TransportHub.cs`(TransportHubType enum, TransportRouteLink, TransportHub),
+  `Data/DefaultTransportHubFactory.cs`(항공 15 + 해운 15개 하드코딩, DefaultUpgradeTreeFactory와 같은
+  "코드 팩토리 폴백" 패턴).
+- **허브 좌표 문제**: 이 프로젝트 세계지도는 실제 위경도 투영이 아니라 대륙별 그리드 배치(Step 27/28)라
+  허브 도시에 정확한 지리 좌표를 줄 수 없다. 대신 각 허브를 대표 국가(countryId)에 연결해
+  `CountryView.DnaSpawnWorldPosition`(이미 지도 위 정확한 위치를 가리키는 기존 앵커)을 기준점으로 쓰고,
+  같은 국가에 허브가 여러 개(미국 5개, 중국 8개 등) 있을 때는 `localOffset`으로 살짝 흩어지게 배치했다.
+  허브 도시의 국가가 48개국에 없는 경우(UAE/네덜란드/벨기에/싱가포르 등은 독립국으로 미포함) 지리적으로
+  가장 가까운 대표국에 연결(두바이·제벨알리→사우디, 로테르담·안트베르펜·함부르크→독일, 싱가포르·
+  포트클랑→말레이시아, 홍콩→중국).
+- **TransportUnit.cs**: 비행기/배 공용 이동체. 프리팹 없이 런타임에 삼각형(비행기)/선체 모양(배) 텍스처를
+  코드로 직접 그려서 사용(FloatingTextEffect.cs와 같은 "에셋 임포트 불필요" 철학). Progress 0→1 보간 이동,
+  이동 방향으로 스프라이트 회전, 도착 시 OnArrived 이벤트 발행.
+- **TransportManager.cs**: DontDestroyOnLoad 싱글턴(다른 매니저와 같은 패턴), Bootstrap 오브젝트(fileID
+  2050405917)에 배치. 매 틱(`SimulationManager.OnTickCompleted` 구독) 활성 유닛 수를 세계 감염률 기반
+  목표치(최소 24 ~ 최대 180)로 채워 넣고, 허브 쌍마다 LineRenderer로 경로선을 1회 그린다(양방향 데이터가
+  중복이어도 안 겹치게 unordered-pair 키로 중복 제거). 유닛은 도착할 때마다 감염 판정을 굴리고(항공
+  35%/해운 15% — 항공은 고빈도·저물량, 해운은 저빈도·고물량이라는 설계 문서 취지 반영, 해운 성공 시
+  전파량은 더 크게), 3~6회 구간을 돈 뒤 풀로 반환된다.
+- **기존 시스템과의 충돌 정리**: `SimulationManager.SpreadBetweenCountries()`가 기존에 담당하던 "항공/해운
+  국가 간 확률적 전파"(매틱 추상 롤)를 제거하고 육상 국경(`landBorderSpreadChance`)만 남겼다 — 같은
+  개념(항공/해운 전파)을 눈에 보이는 실제 이동체로 대체한 것이므로 두 시스템을 동시에 돌리면 이중 적용된다.
+  `airRouteSpreadChance`/`seaRouteSpreadChance` 필드와 Country의 `airRouteCountryIds`/`seaRouteCountryIds`
+  데이터는 삭제하지 않고 남겨뒀다(다른 용도로 재활용 가능, 인스펙터에 "[미사용]" 툴팁 추가).
+- **씬 배선**: 새 스크립트 4개(`TransportHub.cs`/`DefaultTransportHubFactory.cs`/`TransportUnit.cs`/
+  `TransportManager.cs`) 전부 `.meta` 파일을 직접 생성해서(fileFormatVersion 2 + 랜덤 guid, 기존 175개
+  guid와 충돌 없음 확인) Unity 에디터 없이 텍스트 편집만으로 완결— CountryShapes PNG를 만들 때 썼던
+  것과 같은 방식. `GamePlay.unity`의 Bootstrap 오브젝트(fileID 2050405917)에 새 MonoBehaviour 컴포넌트
+  블록(fileID 994684355)을 추가하고 `m_Component` 목록에 등록. `GameDataBootstrapper.ResetPersistentManagersForNewGame()`에
+  `TransportManager.Instance?.ResetForNewGame()` 호출도 추가해 재시작 시 이전 판 유닛이 정리되도록 함.
+  **다른 Step들과 달리 이번엔 "씬/에셋 배선 필요" 항목이 없다** — 프리팹도, 수동 GameObject 배치도 필요 없음.
+- **미확인 리스크(Unity 에디터로 직접 확인 못 함)**: LineRenderer 머티리얼에 `Shader.Find("Sprites/Default")`를
+  썼다. CountryView/DnaBubble의 SpriteRenderer가 이미 문제없이 쓰는 셰이더라 재사용했지만, 혹시 선이 안
+  보이면(FloatingTextEffect.cs가 겪었던 "레거시 Font 셰이더가 URP에서 안 보임" 사례처럼) URP 2D 렌더러가
+  이 셰이더를 걸러내는 경우일 수 있다 — 그때는 `TransportManager.CreateRouteLine()`의 Shader.Find 대상을
+  `"Universal Render Pipeline/2D/Sprite-Unlit-Default"`로 바꿔볼 것.

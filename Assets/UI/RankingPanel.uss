@@ -1,12 +1,15 @@
+/* 모바일 팝업 패턴: 고정폭+음수 margin-left로 중앙 정렬하던 데스크톱 트릭 대신
+   좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다(참조 해상도 480×1040 기준
+   좌우 9% => 폭 약 82%). 스크롤바 없이 내용이 다 들어가도록 buy-button 등은
+   min-height로 터치 영역을 확보. */
 .ranking-root {
     position: absolute;
-    left: 50%;
-    top: 25%;
-    width: 300px;
-    margin-left: -150px;
+    left: 9%;
+    right: 9%;
+    top: 22%;
     background-color: rgba(15, 15, 25, 0.95);
     border-radius: 8px;
-    padding: 20px;
+    padding: 24px;
     align-items: stretch;
 }
 
@@ -31,8 +34,8 @@
 }
 
 .ranking-button {
-    height: 40px;
-    margin-bottom: 8px;
+    height: 48px;
+    margin-bottom: 12px;
 }
 
 .ranking-button--secondary {

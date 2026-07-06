@@ -60,7 +60,9 @@ namespace Contagion.Gameplay
             if (_pool == null) return;
 
             var view = WorldMap.Instance != null ? WorldMap.Instance.GetView(country.id) : null;
-            Vector3 basePos = view != null ? view.transform.position : Vector3.zero;
+            // Step 29: 모든 CountryView가 (0,0,0)에 겹쳐 있으므로(세계지도 오버레이 방식) 더 이상
+            // view.transform.position을 쓰면 안 되고, 국가별로 미리 계산해둔 스폰 앵커를 써야 한다.
+            Vector3 basePos = view != null ? view.DnaSpawnWorldPosition : Vector3.zero;
             Vector3 offset = (Vector3)(UnityEngine.Random.insideUnitCircle * spawnRadius);
 
             var bubble = _pool.Get();

@@ -34,7 +34,7 @@
 
 .bottom-bar {
     background-color: rgba(0, 0, 0, 0.75);
-    padding: 8px 12px;
+    padding: 14px 16px;
 }
 
 .stats-row {
@@ -42,7 +42,7 @@
     justify-content: space-between;
     align-items: flex-end;
     flex-wrap: wrap;
-    margin-bottom: 6px;
+    margin-bottom: 12px;
 }
 
 .stat-label {
@@ -56,7 +56,7 @@
 .stat-graph-item {
     flex-direction: column;
     align-items: flex-start;
-    margin-right: 6px;
+    margin-right: 12px;
 }
 
 .stat-graph-item__label {
@@ -103,8 +103,8 @@
 
 .tab-button {
     flex-grow: 1;
-    margin: 0 4px;
-    height: 40px;
+    margin: 0 8px;
+    height: 48px;
 }
 
 .tab-button--secondary {

@@ -1,12 +1,14 @@
+/* 참조 해상도 480×1040 기준 고정 px 인셋(24/90/130) 대신 %로 표현 — 다른 화면비/해상도에서도
+   비율이 깨지지 않는다(코드베이스 위키 uss-layout-engine "플랫폼 확장성: % 단위 선호"). */
 .status-root {
     position: absolute;
-    left: 24px;
-    right: 24px;
-    top: 90px;
-    bottom: 130px;
+    left: 5%;
+    right: 5%;
+    top: 8.5%;
+    bottom: 12.5%;
     background-color: rgba(15, 15, 25, 0.97);
     border-radius: 8px;
-    padding: 16px;
+    padding: 20px;
 }
 
 .status-title {
@@ -23,8 +25,8 @@
 .status-row {
     background-color: rgba(255, 255, 255, 0.06);
     border-radius: 4px;
-    padding: 6px 8px;
-    margin-bottom: 4px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
 }
 
 .status-row__name {
@@ -45,7 +47,7 @@
 }
 
 .status-close {
-    height: 40px;
-    margin-top: 10px;
+    height: 48px;
+    margin-top: 14px;
     background-color: rgb(70, 70, 90);
 }

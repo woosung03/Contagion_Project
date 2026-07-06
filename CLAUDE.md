@@ -71,6 +71,7 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 | 28 | "한 화면에 다 보이기" 방식을 포기하고 지도를 실제 경도/위도 비율(가로로 김)에 가깝게 화면보다 넓게 배치 + 좌우 드래그 스크롤 추가(세로는 스크롤 없음), 이후 가로 스크롤 폭 0.8배 추가 압축(세로 무변경) | `Scripts/Gameplay/WorldMapCameraController.cs`(신규), `Scripts/Gameplay/CountryView.cs`(OnMouseDown→OnMouseUpAsButton), `Assets/Scenes/GamePlay.unity` |
 | 28-2 | 뉴스피드/하단바에 지도 양끝(러시아·남아공)이 가려지는 문제 수정(지도 좌표+크기 0.85배 균일 축소 + 세로 중심 보정) + 국가 클릭 팝업 인터랙션 제거, HUD "국가현황" 버튼 → 18개국 상태 스크롤 리스트 패널로 대체 | `Scripts/Gameplay/CountryView.cs`, `Assets/UI/CountryStatusPanel.uxml,uss`(신규), `Scripts/UI/CountryStatusPanelController.cs`(신규), `Assets/UI/Hud.uxml`, `Scripts/UI/HudController.cs`, `Scripts/Managers/UIManager.cs`, `Assets/Scenes/GamePlay.unity` |
 | 28-3 | 남아공·호주가 여전히 하단 UI에 가려진다는 피드백 — 지도 좌표+크기 0.7배 추가 축소(가로/세로 동일 비율) + 세로 중심을 위로 보정해 여유 마진 크게 확보 | `Scripts/Gameplay/WorldMapCameraController.cs`, `Assets/Scenes/GamePlay.unity` |
+| 29 | 글로벌 교통망 신규 구현(사용자 제공 설계 문서) — 항공 15허브+해운 15허브, 비행기/배가 실제로 지도 위를 이동하며 경로선 표시, 도착 시 감염 전파(항공/해운 판정이 기존 SimulationManager 추상 확률 롤을 대체) | `Data/TransportHub.cs`(신규), `Data/DefaultTransportHubFactory.cs`(신규), `Gameplay/TransportUnit.cs`(신규), `Managers/TransportManager.cs`(신규), `Managers/SimulationManager.cs`, `Managers/GameDataBootstrapper.cs`, `Assets/Scenes/GamePlay.unity` |
 
 부가 인프라(설계 문서에 명시된 Core Manager이지만 Step 번호가 없어 배선 목적으로 최소 구현):
 - `Managers/GameManager.cs` — 페이즈(Incubation/Spread/Endgame) 판정, 난이도, 일시정지.

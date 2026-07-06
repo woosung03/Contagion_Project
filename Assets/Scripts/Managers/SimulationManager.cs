@@ -34,16 +34,46 @@ namespace Contagion.Managers
             "치료제 완성까지 걸리는 일수(틱 수)가 길어진다 — 원하는 게임 길이에 맞춰 플레이테스트로 조정할 것.")]
         private float cureProgressCoefficient = 0.002f;
 
+        [Header("치료제 연구 '시작' 판정 (절대 임계값 대신 매 틱 확률)")]
+        [SerializeField, Tooltip("아직 연구가 시작되지 않은 상태에서, 전 세계 감염자 수(명 단위 아님 — population과 " +
+            "동일 스케일) 1당 이 틱에 '발견되어 보도될' 확률이 이만큼 늘어난다. 감염자/사망자가 많아질수록 " +
+            "누적 확률이 아니라 매 틱 새로 굴리는 확률 자체가 커지는 방식이라, 초반엔 몇 틱을 버텨도 안 걸릴 수 " +
+            "있고 반대로 운 나쁘면(=피해가 커지기도 전에) 일찍 걸릴 수도 있다 — 현실의 '조기 발견/뒤늦은 발견' " +
+            "변동성을 재현.")]
+        private float cureStartChancePerInfected = 0.0005f;
+        [SerializeField, Tooltip("사망자는 감염자보다 훨씬 눈에 띄는 사건이라(뉴스/부검/장례 등으로 은폐가 어려움) " +
+            "1당 확률 기여도를 감염자보다 크게 잡았다.")]
+        private float cureStartChancePerDeath = 0.0025f;
+
         [Header("국가 간 전파 (설계 문서 4.1 - 확률적 이동)")]
-        [SerializeField, Range(0f, 1f)] private float airRouteSpreadChance = 0.05f;
-        [SerializeField, Range(0f, 1f)] private float seaRouteSpreadChance = 0.03f;
+        [SerializeField, Range(0f, 1f), Tooltip("[미사용] TransportManager가 항공 전파를 실제 이동체 도착 판정으로 " +
+            "대체하면서 더 이상 여기서 읽지 않는다 — 값은 남겨뒀지만(다른 용도로 재활용 가능) SpreadBetweenCountries()가" +
+            " 이 필드를 참조하지 않는다.")]
+        private float airRouteSpreadChance = 0.05f;
+        [SerializeField, Range(0f, 1f), Tooltip("[미사용] TransportManager가 해운 전파를 실제 이동체 도착 판정으로 " +
+            "대체하면서 더 이상 여기서 읽지 않는다.")]
+        private float seaRouteSpreadChance = 0.03f;
         [SerializeField, Range(0f, 1f)] private float landBorderSpreadChance = 0.08f;
         [SerializeField] private long seedInfectedAmount = 10;
 
-        [Header("DNA 마일스톤 (설계 문서 4.4)")]
-        [SerializeField] private long infectionMilestoneStep = 100_000;
-        [SerializeField] private long deathMilestoneStep = 10_000;
+        [Header("DNA 마일스톤 (설계 문서 4.4 — 원본 게임 방식: 국가별 최초 감염 1회 + 국가별 인구 대비 퍼센트 단위)")]
+        [SerializeField, Tooltip("국가에 감염자가 최초로 발생하는 순간 무조건 1회 지급되는 DNA 보상 — 절대값/퍼센트와" +
+            " 무관하게 항상 발동. 원본 게임의 '신규 감염 국가 발견' 보상.")]
+        private bool grantDnaOnFirstInfection = true;
+        [SerializeField, Range(0.01f, 1f), Tooltip("국가 인구 대비 감염자 비율이 이 값만큼 늘어날 때마다 DNA 지급 " +
+            "(예: 0.25 = 25%p마다). 이전엔 국가별 절대 감염자 수(예: 100,000명)를 기준으로 했는데, 국가마다 인구" +
+            " 규모 차이가 커서(최소 약 2.7만~최대 약 140만) 절대값 기준으로는 작은 나라는 마일스톤이 거의 안 뜨고" +
+            " 큰 나라만 계속 뜨는 문제가 있었다. 인구 대비 퍼센트로 바꾸면 국가 크기와 무관하게 동일한 빈도로 발동한다." +
+            " (0.1→0.25로 완화: 국가 48개 × 10%p 간격이라 버블이 너무 자주 뜬다는 피드백 반영 — 국가당 최대 발동" +
+            " 횟수가 10회→4회로 줄어든다.)")]
+        private float infectionMilestonePercentStep = 0.25f;
+        [SerializeField, Range(0.01f, 1f), Tooltip("국가 인구 대비 사망자 비율이 이 값만큼 늘어날 때마다 DNA 지급. 사망은" +
+            " 감염보다 드물고 무거운 사건이라(dnaPerDeathBubble 보상도 더 큼) 기본 간격을 감염보다 촘촘하게 잡되," +
+            " (0.05→0.15로 완화: 마찬가지로 버블 빈도 완화 — 국가당 최대 발동 횟수가 20회→약 6~7회로 줄어든다.)")]
+        private float deathMilestonePercentStep = 0.15f;
 
+        /// <summary>국가별로 "최초 감염 DNA"를 이미 지급했는지 — 게임당 국가마다 정확히 1회만 발동해야 한다.</summary>
+        private readonly HashSet<string> _firstInfectionGranted = new HashSet<string>();
         private readonly Dictionary<string, long> _lastInfectionMilestone = new Dictionary<string, long>();
         private readonly Dictionary<string, long> _lastDeathMilestone = new Dictionary<string, long>();
 
@@ -59,6 +89,9 @@ namespace Contagion.Managers
 
         /// <summary>매 틱 계산이 끝난 뒤 발행. HumanResistanceManager 등 후처리 로직이 구독.</summary>
         public event Action<WorldState> OnTickCompleted;
+
+        /// <summary>치료제 연구가 (확률 판정을 통과해) 실제로 시작되는 순간 딱 1회 발행 — NewsFeedController가 구독.</summary>
+        public event Action OnCureResearchStarted;
 
         private bool _gameEnded;
 
@@ -115,6 +148,7 @@ namespace Contagion.Managers
         public void ResetForNewGame()
         {
             _gameEnded = false;
+            _firstInfectionGranted.Clear();
             _lastInfectionMilestone.Clear();
             _lastDeathMilestone.Clear();
         }
@@ -194,13 +228,33 @@ namespace Contagion.Managers
             SpreadBetweenCountries(pathogen);
 
             // --- 4.3 치료제 개발 속도 ---
-            float cureIncrease = 0f;
-            foreach (var country in _data.Countries)
-                cureIncrease += country.healthFunding * country.ResearchMultiplier;
-            cureIncrease *= (1f + state.plagueVisibility * 0.5f);
-            cureIncrease *= GameManager.Instance != null ? GameManager.Instance.GetDifficultyResearchMultiplier() : 1f;
-            float drugResistanceReduction = pathogen.drugResistance * drugResistanceCoefficient;
-            state.cureProgress = Mathf.Clamp01(state.cureProgress + cureIncrease * cureProgressCoefficient - drugResistanceReduction);
+            // 원본 게임/현실의 실제 전염병처럼, 아직 발견되지 않은 질병을 미리 연구할 수는 없다. 이전엔
+            // plagueVisibility(=고정 임계값 0.2) 도달 여부로 한 번에 딱 끊어 판정했는데, 그러면 "감염자/사망자가
+            // 늘어날수록 발견 확률이 자연스럽게 올라간다"는 느낌이 없이 항상 같은 타이밍에 발견돼버린다.
+            // 대신 아직 연구가 안 시작된 동안은 매 틱 "이번에 발견될 확률"을 전 세계 감염자·사망자 수로부터
+            // 직접 계산해서 굴린다 — 피해 규모가 클수록 이번 틱에 걸릴 확률 자체가 커지는 방식.
+            if (!state.cureResearchStarted)
+            {
+                float discoveryChance = Mathf.Clamp01(
+                    state.infectedCount * cureStartChancePerInfected +
+                    state.deadCount * cureStartChancePerDeath);
+                if (UnityEngine.Random.value < discoveryChance)
+                {
+                    state.cureResearchStarted = true;
+                    OnCureResearchStarted?.Invoke();
+                }
+            }
+
+            if (state.cureResearchStarted)
+            {
+                float cureIncrease = 0f;
+                foreach (var country in _data.Countries)
+                    cureIncrease += country.healthFunding * country.ResearchMultiplier;
+                cureIncrease *= (1f + state.plagueVisibility * 0.5f);
+                cureIncrease *= GameManager.Instance != null ? GameManager.Instance.GetDifficultyResearchMultiplier() : 1f;
+                float drugResistanceReduction = pathogen.drugResistance * drugResistanceCoefficient;
+                state.cureProgress = Mathf.Clamp01(state.cureProgress + cureIncrease * cureProgressCoefficient - drugResistanceReduction);
+            }
 
             // 설계 문서 1절 패배 조건 "감염자 0명 + 생존자 존재 (치료제 완성 후 박멸)" —
             // 치료제가 100% 완성되는 순간 전 세계 감염자를 즉시 박멸한다. 문서에 별도 회복 공식이
@@ -223,19 +277,21 @@ namespace Contagion.Managers
             EvaluateEndConditions(state);
         }
 
-        /// <summary>4.1 "국가 간 전파" - 항공/해운/육상 경로를 통한 확률적 감염자 이동.</summary>
+        /// <summary>
+        /// 4.1 "국가 간 전파" - 육상 국경을 통한 확률적 감염자 이동.
+        /// 항공/해운 전파는 더 이상 여기서 추상적으로 굴리지 않는다 — TransportManager가 실제로 지도 위를
+        /// 이동하는 비행기/배(TransportUnit)로 시각화해서 그 도착 시점에 직접 감염을 옮긴다(사용자 제공
+        /// "Global Transport Network Design" 문서 반영). 두 시스템을 동시에 돌리면 항공/해운 전파가
+        /// 이중으로 적용되므로, airRouteSpreadChance/seaRouteSpreadChance 필드와 Country의
+        /// airRouteCountryIds/seaRouteCountryIds 데이터는 남아있지만(다른 용도로 재활용될 수 있어 삭제하지
+        /// 않음) 더 이상 여기서 읽지 않는다.
+        /// </summary>
         private void SpreadBetweenCountries(Pathogen pathogen)
         {
             foreach (var source in _data.Countries)
             {
                 if (source.infectedCount <= 0) continue;
                 float sourceRatio = source.LivingPopulation > 0 ? (float)source.infectedCount / source.LivingPopulation : 0f;
-
-                TrySpreadRoute(source, source.airRouteCountryIds, airRouteSpreadChance * sourceRatio,
-                    target => source.isAirportOpen && target.isAirportOpen);
-
-                TrySpreadRoute(source, source.seaRouteCountryIds, seaRouteSpreadChance * sourceRatio,
-                    target => source.isPortOpen && target.isPortOpen);
 
                 TrySpreadRoute(source, source.neighborCountryIds, landBorderSpreadChance * sourceRatio,
                     target => !source.isBorderClosed && !target.isBorderClosed);
@@ -276,18 +332,33 @@ namespace Contagion.Managers
 
         private void CheckMilestones(Country country)
         {
-            _lastInfectionMilestone.TryGetValue(country.id, out long lastInfected);
-            if (country.infectedCount / infectionMilestoneStep > lastInfected / infectionMilestoneStep)
+            // 최초 감염 — preTickInfected가 아니라 "이 국가에서 지금까지 한 번도 지급 안 했는지"로 판정한다.
+            // (국내 자연 확산으로 0→양수가 되는 경우뿐 아니라, SpreadBetweenCountries()로 항공/해운/육상
+            // 경로를 통해 다른 나라에서 막 전파돼 들어온 경우도 다음 틱의 이 루프에서 정확히 한 번 잡힌다.)
+            if (grantDnaOnFirstInfection && country.infectedCount > 0 && _firstInfectionGranted.Add(country.id))
             {
-                _lastInfectionMilestone[country.id] = country.infectedCount;
                 OnInfectionMilestone?.Invoke(country);
             }
-
-            _lastDeathMilestone.TryGetValue(country.id, out long lastDead);
-            if (country.deadCount / deathMilestoneStep > lastDead / deathMilestoneStep)
+            else if (country.population > 0)
             {
-                _lastDeathMilestone[country.id] = country.deadCount;
-                OnDeathMilestone?.Invoke(country);
+                long stepIndex = (long)((double)country.infectedCount / country.population / infectionMilestonePercentStep);
+                _lastInfectionMilestone.TryGetValue(country.id, out long lastStep);
+                if (stepIndex > lastStep)
+                {
+                    _lastInfectionMilestone[country.id] = stepIndex;
+                    OnInfectionMilestone?.Invoke(country);
+                }
+            }
+
+            if (country.population > 0)
+            {
+                long deathStepIndex = (long)((double)country.deadCount / country.population / deathMilestonePercentStep);
+                _lastDeathMilestone.TryGetValue(country.id, out long lastDeathStep);
+                if (deathStepIndex > lastDeathStep)
+                {
+                    _lastDeathMilestone[country.id] = deathStepIndex;
+                    OnDeathMilestone?.Invoke(country);
+                }
             }
         }
 

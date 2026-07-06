@@ -78,6 +78,7 @@ namespace Contagion.Managers
             worldState.plagueVisibility = loaded.plagueVisibility;
             worldState.dnaPoints = loaded.dnaPoints;
             worldState.currentDay = loaded.currentDay;
+            worldState.cureResearchStarted = loaded.cureResearchStarted;
             NotifyWorldStateChanged();
         }
 

@@ -2,7 +2,7 @@
     <Style src="CountryStatusPanel.uss" />
     <ui:VisualElement name="status-root" class="status-root">
         <ui:Label name="status-title" text="국가 현황" class="status-title" />
-        <ui:ScrollView name="status-scroll" class="status-scroll" mode="Vertical" />
+        <ui:ScrollView name="status-scroll" class="status-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
         <ui:Button name="close-button" text="닫기" class="status-close" />
     </ui:VisualElement>
 </ui:UXML>

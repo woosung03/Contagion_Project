@@ -115,6 +115,7 @@ namespace Contagion.Managers
             HumanResistanceManager.Instance?.ResetForNewGame();
             EventManager.Instance?.ResetForNewGame();
             SaveManager.Instance?.ResetForNewGame();
+            TransportManager.Instance?.ResetForNewGame();
         }
 
         /// <summary>

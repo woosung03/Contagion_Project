@@ -14,7 +14,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:ScrollView name="node-scroll" class="node-scroll" />
+        <ui:ScrollView name="node-scroll" class="node-scroll" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
 
         <ui:VisualElement name="detail-panel" class="detail-panel">
             <ui:Label name="detail-title" text="노드를 선택하세요" class="detail-panel__title" />

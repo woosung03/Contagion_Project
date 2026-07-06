@@ -6,7 +6,7 @@
     bottom: 0;
     flex-grow: 1;
     background-color: rgba(8, 8, 16, 0.97);
-    padding: 24px;
+    padding: 28px;
 }
 
 .mainmenu-title {
@@ -26,7 +26,7 @@
 
 .mainmenu-list {
     flex-grow: 1;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .pathogen-card {
@@ -35,7 +35,7 @@
     border-color: rgba(255, 255, 255, 0.15);
     border-radius: 6px;
     padding: 10px 14px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .pathogen-card--selected {
@@ -62,7 +62,7 @@
     border-color: rgba(255, 255, 255, 0.15);
     border-radius: 6px;
     padding: 8px 12px;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
     flex-direction: row;
     align-items: center;
 }
@@ -99,9 +99,9 @@
 
 .detail-panel {
     background-color: rgba(255, 255, 255, 0.08);
-    padding: 12px;
+    padding: 16px;
     border-radius: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     min-height: 70px;
 }
 
@@ -128,5 +128,5 @@
 
 .mainmenu-back {
     height: 46px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
 }

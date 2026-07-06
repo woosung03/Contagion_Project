@@ -17,6 +17,14 @@ namespace Contagion.Data
         public int currentDay;            // 경과 일수
 
         /// <summary>
+        /// 치료제 연구가 실제로 "시작"됐는지 — SimulationManager가 매 틱 감염자/사망자 수 기반 확률로
+        /// 판정해 한 번 true가 되면 그때부터 cureProgress가 오르기 시작한다(그 전엔 0에 고정).
+        /// 실제 전염병처럼 초반엔 아무도 모르다가 피해가 커질수록 "발견되어 보도될" 확률이 높아지는
+        /// 방식을 표현하기 위한 플래그.
+        /// </summary>
+        public bool cureResearchStarted;
+
+        /// <summary>
         /// 새 게임 시작(재시작 포함) 시 호출. totalPopulation/infectedCount/deadCount는 어차피
         /// WorldDataManager.SetCountries() 직후 RecalculateWorldTotals()가 다시 계산하지만,
         /// cureProgress/plagueVisibility/dnaPoints/currentDay는 그 계산에 포함되지 않아 별도로
@@ -32,6 +40,7 @@ namespace Contagion.Data
             plagueVisibility = 0f;
             dnaPoints = 0;
             currentDay = 0;
+            cureResearchStarted = false;
         }
 
         public void AddDna(int amount) => dnaPoints = Math.Max(0, dnaPoints + amount);

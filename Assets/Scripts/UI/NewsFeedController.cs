@@ -43,6 +43,12 @@ namespace Contagion.UI
                 HumanResistanceManager.Instance.OnMortalityStageChanged -= HandleMortalityStageChanged;
                 HumanResistanceManager.Instance.OnMortalityStageChanged += HandleMortalityStageChanged;
             }
+
+            if (SimulationManager.Instance != null)
+            {
+                SimulationManager.Instance.OnCureResearchStarted -= HandleCureResearchStarted;
+                SimulationManager.Instance.OnCureResearchStarted += HandleCureResearchStarted;
+            }
         }
 
         private void OnDisable()
@@ -54,6 +60,17 @@ namespace Contagion.UI
                 HumanResistanceManager.Instance.OnResistanceStageChanged -= HandleResistanceStageChanged;
                 HumanResistanceManager.Instance.OnMortalityStageChanged -= HandleMortalityStageChanged;
             }
+            if (SimulationManager.Instance != null)
+                SimulationManager.Instance.OnCureResearchStarted -= HandleCureResearchStarted;
+        }
+
+        /// <summary>
+        /// SimulationManager가 감염자/사망자 수 기반 확률 판정으로 질병 발견을 확정지은 순간 딱 1회 호출됨.
+        /// 그 전까진 cureProgress가 0에 고정돼 있다가 이 시점부터 실제로 오르기 시작한다.
+        /// </summary>
+        private void HandleCureResearchStarted()
+        {
+            AddEntry("[상황 변화] 정체불명의 질병이 세계 보건당국에 의해 공식 확인됨 — 치료제 연구가 시작됩니다.", "news-entry--negative");
         }
 
         private void HandleNewsEvent(NewsEvent evt)
