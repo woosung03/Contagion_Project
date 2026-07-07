@@ -27,15 +27,18 @@ namespace Contagion.Managers
         // 하는데, 기존 목표치(50~200)로는 지도 위에 배/비행기가 너무 많이 떠 있어서 어떤 게 빨간색인지
         // 눈에 잘 안 들어온다는 피드백을 받음. 최소/최대/틱당 스폰 수를 전부 절반 이하로 줄여
         // "빨간 유닛 하나가 눈에 띄는" 밀도로 낮췄다.
-        [Header("허브/유닛 규모 (Step 30-5: 감염 유닛 가시성 위해 하향 조정, 원래 목표 50~200→10~70)")]
+        // [Step 33] "여전히 비행기/배가 많은 듯" 피드백으로 한 번 더 절반가량 하향(10~70→5~35,
+        // 틱당 스폰 6→3). 틱 간격은 SimulationManager 기준 1초 고정이라, 이 값들이 그대로 "초당 최대
+        // 생성 수"이자 "정상 상태 유지 개체 수"가 된다.
+        [Header("허브/유닛 규모 (Step 33: 5~35, 원래 목표 50~200→10~70→5~35)")]
         [SerializeField, Tooltip("전염병이 전혀 퍼지지 않은 평시에도 떠 있는 최소 교통량 — 지도가 죽어보이지 않도록.")]
-        private int minActiveUnits = 10;
-        [SerializeField] private int maxActiveUnits = 70;
+        private int minActiveUnits = 5;
+        [SerializeField] private int maxActiveUnits = 35;
         [SerializeField, Tooltip("전 세계 감염률(0~1)에 이 배율을 곱해 목표 활성 유닛 수를 정한다 — 세계 인구 대비 " +
             "감염 비율은 대유행 중에도 대개 몇 % 수준이라, 그대로 쓰면 활성 유닛 목표가 거의 항상 최소치에 " +
             "머문다. 배율을 곱해 '어느 정도만 퍼져도 하늘길이 눈에 띄게 붐빈다'는 체감을 만든다.")]
         private float infectionVisibilityScale = 25f;
-        [SerializeField] private int maxSpawnPerTick = 6;
+        [SerializeField] private int maxSpawnPerTick = 3;
         [SerializeField] private int minHopsPerUnit = 3;
         [SerializeField] private int maxHopsPerUnit = 6;
 
@@ -48,6 +51,17 @@ namespace Contagion.Managers
         [SerializeField, Range(0f, 1f)] private float seaArrivalInfectionChance = 0.15f;
         [SerializeField] private long airSeedAmount = 10;
         [SerializeField] private long seaSeedAmount = 20;
+
+        // [Step 33] 사용자 피드백: "감염자가 있는 국가면 무조건 감염된 비행기/배가 나온다" — 기존
+        // IsCountryInfected()는 출발 허브의 대표 국가 infectedCount가 1명이라도 있으면 항상 true였다
+        // (버그는 아니고 설계상 "감염 여부"만 boolean으로 봤던 것). 인구 수천만~수억 국가에서 1명 감염
+        // 됐다고 모든 항공/해운편이 매번 carrier가 되는 건 비현실적이라는 지적 — 국가 감염 "비율"에
+        // 비례한 확률로 바꿔서, 초기/미미한 감염 단계에서는 carrier가 드물게만 나오고 감염이 널리
+        // 퍼질수록 점점 더 자주 나오도록 완화했다.
+        [SerializeField, Tooltip("출발 허브 대표 국가의 감염 비율(감염자/생존인구)에 이 배율을 곱해 해당 " +
+            "유닛이 carrier가 될 확률로 쓴다(1로 클램프). 예: 배율 25면 감염 비율 4%부터 사실상 항상 " +
+            "carrier, 0.1%면 2.5% 확률로만 carrier.")]
+        private float carrierChanceScale = 25f;
 
         [Header("경로선 시각화")]
         [SerializeField] private Color airRouteColor = new Color(0.55f, 0.85f, 1f, 0.18f);
@@ -160,6 +174,17 @@ namespace Contagion.Managers
             var resolved = new Dictionary<string, Vector3>();
             foreach (var hub in _hubs)
             {
+                // [Step 32] 항공 허브는 국가 앵커를 거치지 않고 WorldMap 절대 좌표를 바로 쓴다(실제 공항
+                // 위경도 기반 — DefaultTransportHubFactory.Air() 참고). 국가 View 준비 여부와 무관하게
+                // 좌표를 계산할 수 있지만, 그래도 대응 국가가 아직 등록되지 않았으면(다른 허브 대기 사유와
+                // 동일하게) 한 틱 더 기다린다 — isAirportOpen 등 게임 로직이 country를 참조하기 때문.
+                if (hub.useAbsoluteWorldOffset)
+                {
+                    if (WorldMap.Instance.GetView(hub.countryId) == null) return false;
+                    resolved[hub.id] = WorldMap.Instance.ToWorldPosition(hub.localOffset);
+                    continue;
+                }
+
                 var view = WorldMap.Instance.GetView(hub.countryId);
                 if (view == null) return false; // 아직 등록 안 된 국가가 있음 — 전부 준비될 때까지 대기
                 resolved[hub.id] = view.DnaSpawnWorldPosition + (Vector3)hub.localOffset;
@@ -270,7 +295,7 @@ namespace Contagion.Managers
             if (!_hubWorldPositions.TryGetValue(source.id, out var fromPos)) return;
             if (!_hubWorldPositions.TryGetValue(destination.id, out var toPos)) return;
 
-            bool isCarrier = IsCountryInfected(source.countryId);
+            bool isCarrier = RollIsCarrier(source.countryId);
             float speed = source.type == TransportHubType.Air ? airSpeed : seaSpeed;
             var path = BuildPathPoints(source, destination, fromPos, toPos);
 
@@ -312,7 +337,7 @@ namespace Contagion.Managers
                 return;
             }
 
-            bool isCarrier = IsCountryInfected(currentHub.countryId);
+            bool isCarrier = RollIsCarrier(currentHub.countryId);
             float speed = currentHub.type == TransportHubType.Air ? airSpeed : seaSpeed;
             var path = BuildPathPoints(currentHub, next, fromPos, toPos);
             unit.BeginLeg(currentHub.id, next.id, path, currentHub.type, speed, isCarrier);
@@ -340,10 +365,23 @@ namespace Contagion.Managers
             Debug.Log($"[TransportManager] {(isAir ? "항공편" : "선박")}이 {destination.name}에 감염 유입 (+{seed}).");
         }
 
-        private bool IsCountryInfected(string countryId)
+        /// <summary>
+        /// [Step 33] 예전엔 "감염자가 1명이라도 있으면 무조건 carrier"였다 — 인구 수천만 국가에 극초반
+        /// 몇 명만 감염돼도 그 나라를 오가는 모든 항공/해운편이 매번 빨간 carrier로 표시돼 비현실적으로
+        /// 보인다는 지적을 받아, 감염 "비율"에 비례한 확률로 바꿨다. 비율이 아주 낮으면 carrier가 드물게만
+        /// 나오고, 감염이 국가 전체로 퍼질수록 점점 더 자주(결국 거의 항상) carrier가 나온다.
+        /// </summary>
+        private bool RollIsCarrier(string countryId)
         {
             var country = WorldDataManager.Instance?.GetCountry(countryId);
-            return country != null && country.infectedCount > 0;
+            if (country == null || country.infectedCount <= 0) return false;
+
+            long livingPopulation = country.LivingPopulation;
+            if (livingPopulation <= 0) return false;
+
+            float infectionRatio = (float)country.infectedCount / livingPopulation;
+            float chance = Mathf.Clamp01(infectionRatio * carrierChanceScale);
+            return Random.value < chance;
         }
 
         /// <summary>같은 타입 허브 중 항로/뱃길이 열려 있는 곳만 가중치 기반으로 랜덤 선택.</summary>

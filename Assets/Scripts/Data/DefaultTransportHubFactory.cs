@@ -13,6 +13,25 @@ namespace Contagion.Data
     /// 로테르담·안트베르펜·함부르크→독일, 싱가포르·포트클랑→말레이시아, 홍콩→중국). 설계 문서 자체가
     /// "실제 교통량을 그대로 시뮬레이션하지 않고 게임적 가독성을 우선한다"고 명시하고 있어 이 정도
     /// 근사는 의도에 부합한다.
+    ///
+    /// [Step 32] 항공 허브 15개는 이제 country 앵커 상대 오프셋이 아니라 WorldMap 절대 좌표를 쓴다
+    /// (사용자 지적: "비행기 경로 출발/도착 지점이 공항이여야 하는데 어긋난 부분이 있다" — 미국/중국처럼
+    /// 한 나라에 허브가 여럿이면 기존 방식(국가 앵커 + 지도 위에서 눈대중으로 잡은 작은 오프셋)으로는
+    /// 실제 도시 간 거리를 표현할 수 없어 여러 공항이 한 점 근처에 뭉쳤다). 좌표 산출 방법:
+    /// 1) `Assets/Scenes/GamePlay.unity`에서 48개국 CountryView의 `dnaSpawnLocalOffset` 값을 추출.
+    /// 2) 그중 국경이 단순하고(군소 섬 산재 X) 실제 지리 중심 위경도를 신뢰성 있게 알 수 있는 39개국을
+    ///    골라 (실제 위경도) → (dnaSpawnLocalOffset) 최소제곱 선형 회귀(x=a*경도+b, y=c*위도+d)를 계산.
+    ///    이 지도가 등장방형(Plate Carrée) 투영이라는 건 Step 30에서 이미 확인된 사실이라 선형 피팅으로
+    ///    충분하다(회전/왜곡 없음). 결과: a=0.021614, b=-0.045251, c=0.025372, d=-0.285776, 잔차 표준편차
+    ///    x=0.056/y=0.025 유닛(전체 지도 폭 대비 1~2% 수준).
+    /// 3) 이 회귀식이 실제로 world_base.png 마스크와 맞는지 독립적으로 검증하기 위해, Step 30-4에서 픽셀
+    ///    단위로 직접 확인해 확정한 제벨알리 해운 허브 좌표(1.10,0.35 — 실제 페르시아만 연안)와 비교:
+    ///    회귀식으로 두바이 실제 위경도(25.2532N, 55.3657E)를 변환하면 (1.151,0.355)가 나와 거의 일치
+    ///    (오차 0.05 미만) — 회귀식 신뢰도 확인.
+    /// 4) 15개 공항의 실제 위경도(ATL/DFW/LAX/LHR/IST/DXB/DEL/ICN/HND/PVG/CAN/SIN/HKG/SYD/GRU)를 이
+    ///    회귀식에 대입해 절대 좌표를 계산, `Air(...)` 호출의 offset 인자로 그대로 사용.
+    /// 해운 허브(15개)는 Step 30-5에서 이미 A*+sea anchor로 실측 검증되고 사용자 플레이 확인까지 끝난
+    /// 상태라 이번 변경 대상에서 제외 — 계속 country 앵커 상대 오프셋 방식(`useAbsoluteWorldOffset=false`).
     /// </summary>
     public static class DefaultTransportHubFactory
     {
@@ -21,35 +40,46 @@ namespace Contagion.Data
             var hubs = new List<TransportHub>();
 
             // ================= 항공 허브 15개 =================
-            hubs.Add(Air("ATL", "애틀랜타", "USA", new Vector2(-0.25f, 0.15f),
+            // [Step 32] 좌표는 국가 앵커 기준 상대 오프셋이 아니라 WorldMap 절대 좌표(실제 공항 위경도
+            // 기반). 배경/근거는 이 클래스 상단 요약 주석 참고 — 요약하면 48개국 dnaSpawnLocalOffset
+            // 대 실제 위경도로 최소제곱 회귀를 돌려 x=경도*0.021614-0.045251, y=위도*0.025372-0.285776
+            // 변환식을 구하고, 각 공항의 실제 위경도를 그대로 대입했다. 이전 버전은 "국가 앵커 + 작은
+            // 오프셋(-0.25~0.25 수준)"이라 같은 나라 안 여러 공항(ATL/DFW/LAX, PVG/CAN/HKG 등)이 지도
+            // 위 한 점 근처에 뭉쳐 실제 도시(공항) 위치와 어긋나 보였다 — 이번 수정으로 해소.
+            hubs.Add(Air("ATL", "애틀랜타", "USA", new Vector2(-1.870f, 0.568f),
                 ("DFW", 9), ("LAX", 8), ("LHR", 9), ("GRU", 6)));
-            hubs.Add(Air("DFW", "댈러스", "USA", new Vector2(-0.05f, 0.05f),
+            hubs.Add(Air("DFW", "댈러스", "USA", new Vector2(-2.143f, 0.549f),
                 ("ATL", 9), ("LAX", 8), ("LHR", 7)));
-            hubs.Add(Air("LAX", "로스앤젤레스", "USA", new Vector2(0.2f, -0.1f),
+            hubs.Add(Air("LAX", "로스앤젤레스", "USA", new Vector2(-2.605f, 0.575f),
                 ("ATL", 8), ("DFW", 8), ("HND", 9), ("ICN", 6), ("SYD", 7), ("GRU", 5)));
-            hubs.Add(Air("LHR", "런던 히스로", "UK", new Vector2(0.1f, 0.1f),
+            hubs.Add(Air("LHR", "런던 히스로", "UK", new Vector2(-0.055f, 1.020f),
                 ("ATL", 9), ("DFW", 7), ("IST", 8), ("DXB", 8), ("DEL", 7)));
-            hubs.Add(Air("IST", "이스탄불", "TUR", new Vector2(0.15f, 0.1f),
+            hubs.Add(Air("IST", "이스탄불", "TUR", new Vector2(0.576f, 0.761f),
                 ("LHR", 8), ("DXB", 9), ("DEL", 6), ("CAN", 5)));
-            hubs.Add(Air("DXB", "두바이", "SAU", new Vector2(0.2f, -0.05f),
+            hubs.Add(Air("DXB", "두바이", "SAU", new Vector2(1.151f, 0.355f),
                 ("LHR", 8), ("IST", 9), ("DEL", 9), ("SIN", 9), ("HKG", 6)));
-            hubs.Add(Air("DEL", "델리", "IND", new Vector2(-0.15f, 0.2f),
+            hubs.Add(Air("DEL", "델리", "IND", new Vector2(1.621f, 0.439f),
                 ("LHR", 7), ("IST", 6), ("DXB", 9), ("SIN", 7), ("ICN", 5)));
-            hubs.Add(Air("ICN", "인천", "KOR", new Vector2(0.1f, 0.1f),
+            hubs.Add(Air("ICN", "인천", "KOR", new Vector2(2.688f, 0.665f),
                 ("HND", 10), ("PVG", 9), ("SIN", 8), ("DXB", 7), ("LAX", 6)));
-            hubs.Add(Air("HND", "도쿄 하네다", "JPN", new Vector2(-0.1f, 0.1f),
+            // [Step 32 후속] 회귀식 그대로 계산한 (2.976,0.616)은 world_base.png 알파채널로 확인해보니
+            // 도쿄만(灣) 입구 바다 위(사용자 지적: "일본만 살짝 오른쪽으로 치우쳐져서 바다에서 출발/도착")
+            // — 실제 하네다는 만 안쪽 매립지라 이 지도의 단순화된 해안선 해상도로는 정확히 못 찍는다.
+            // JPN.png 마스크에서 그 지점 기준 가장 가까운 "충분히 육지 안쪽"(해안선에서 12px+ 여유) 픽셀을
+            // 탐색해 (2.916,0.624)로 서쪽 30px(약 0.06유닛)만 당겨 미우라반도 쪽 육지 위로 옮김.
+            hubs.Add(Air("HND", "도쿄 하네다", "JPN", new Vector2(2.916f, 0.624f),
                 ("ICN", 10), ("PVG", 8), ("LAX", 9), ("SYD", 7)));
-            hubs.Add(Air("PVG", "상하이 푸둥", "CHI", new Vector2(0.25f, -0.15f),
+            hubs.Add(Air("PVG", "상하이 푸둥", "CHI", new Vector2(2.588f, 0.504f),
                 ("ICN", 9), ("HND", 8), ("HKG", 8), ("SIN", 7), ("CAN", 6)));
-            hubs.Add(Air("CAN", "광저우", "CHI", new Vector2(0.15f, -0.3f),
+            hubs.Add(Air("CAN", "광저우", "CHI", new Vector2(2.404f, 0.308f),
                 ("PVG", 6), ("HKG", 9), ("SIN", 7), ("IST", 5)));
-            hubs.Add(Air("SIN", "싱가포르 창이", "MAS", new Vector2(0.2f, -0.2f),
+            hubs.Add(Air("SIN", "싱가포르 창이", "MAS", new Vector2(2.202f, -0.251f),
                 ("ICN", 8), ("PVG", 8), ("DXB", 9), ("SYD", 8)));
-            hubs.Add(Air("HKG", "홍콩", "CHI", new Vector2(0.05f, -0.35f),
+            hubs.Add(Air("HKG", "홍콩", "CHI", new Vector2(2.417f, 0.280f),
                 ("PVG", 8), ("CAN", 9), ("DXB", 6), ("SYD", 6)));
-            hubs.Add(Air("SYD", "시드니", "AUS", new Vector2(0.1f, 0.1f),
+            hubs.Add(Air("SYD", "시드니", "AUS", new Vector2(3.222f, -1.147f),
                 ("LAX", 7), ("HND", 7), ("SIN", 8), ("HKG", 6)));
-            hubs.Add(Air("GRU", "상파울루", "BRA", new Vector2(0.1f, -0.1f),
+            hubs.Add(Air("GRU", "상파울루", "BRA", new Vector2(-1.050f, -0.880f),
                 ("ATL", 6), ("LAX", 5)));
 
             // ================= 해운 허브 15개 =================
@@ -99,18 +129,23 @@ namespace Contagion.Data
             return hubs;
         }
 
-        private static TransportHub Air(string id, string name, string countryId, Vector2 offset,
+        /// <summary>
+        /// [Step 32] worldOffset은 이제 countryId 앵커 기준 상대 오프셋이 아니라 WorldMap 절대 좌표다 —
+        /// 실제 공항의 위경도를 국가 앵커들과 같은 선형 변환(이 클래스 상단 요약 주석의 회귀식)으로
+        /// 미리 계산해 넣은 값. countryId는 게임 로직(대표 국가의 isAirportOpen 판정 등)에만 쓰인다.
+        /// </summary>
+        private static TransportHub Air(string id, string name, string countryId, Vector2 worldOffset,
             params (string target, float weight)[] links)
-            => Build(id, TransportHubType.Air, name, countryId, offset, links);
+            => Build(id, TransportHubType.Air, name, countryId, worldOffset, useAbsolute: true, links);
 
         private static TransportHub Sea(string id, string name, string countryId, Vector2 offset,
             params (string target, float weight)[] links)
-            => Build(id, TransportHubType.Sea, name, countryId, offset, links);
+            => Build(id, TransportHubType.Sea, name, countryId, offset, useAbsolute: false, links);
 
         private static TransportHub Build(string id, TransportHubType type, string name, string countryId,
-            Vector2 offset, (string target, float weight)[] links)
+            Vector2 offset, bool useAbsolute, (string target, float weight)[] links)
         {
-            var hub = new TransportHub(id, type, name, countryId, offset);
+            var hub = new TransportHub(id, type, name, countryId, offset, useAbsolute);
             foreach (var (target, weight) in links)
                 hub.connections.Add(new TransportRouteLink(target, weight));
             return hub;

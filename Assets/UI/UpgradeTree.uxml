@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Theme.uss" />
     <Style src="UpgradeTree.uss" />
     <ui:VisualElement name="upgrade-root" class="upgrade-root">
         <ui:VisualElement name="upgrade-header" class="upgrade-header">

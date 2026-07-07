@@ -36,12 +36,37 @@ namespace Contagion.Gameplay
             "모든 국가의 버블이 지도 중심 한 점에서 스폰된다.")]
         private Vector2 dnaSpawnLocalOffset;
 
+        [Header("감염 점(dot) 오버레이")]
+        [SerializeField, Tooltip("감염률에 따른 색상 얼룩만으로는 시각적 피드백이 약해서(특히 Step 34로 " +
+            "인구가 실제 수치 그대로라 초반엔 감염률이 오랫동안 0에 가깝게 보인다) 추가한 보강 장치. " +
+            "[Step 36] 국가당 점 개수(14~90)와 지름은 이제 InfectionDotDatabase가 국가 면적에 맞춰 " +
+            "미리 계산해둔 값을 그대로 쓴다 — 여기 있는 값은 그 위에 곱하는 안전 상한/배율일 뿐이다. " +
+            "실제로 이 상한에 걸릴 일은 없게(최대 90) 넉넉히 잡아뒀다.")]
+        private int maxInfectionDots = 128;
+        [SerializeField] private Color infectionDotColor = new Color(0.85f, 0.05f, 0.05f, 0.95f);
+        [SerializeField, Tooltip("InfectionDotDatabase가 국가별로 계산해둔 점 지름(전체 활성화 시 국가 " +
+            "면적의 약 70%를 덮도록 역산한 값)에 곱하는 배율. 1보다 크게/작게 잡으면 전체적으로 더 " +
+            "크게/작게 보인다 — 실플레이 후 전체적인 크기감을 튜닝할 때 이 값 하나만 조정하면 된다.")]
+        private float infectionDotDiameterScale = 1f;
+        [SerializeField, Tooltip("점이 나타나고 사라지는(스케일 0↔1) 전환 속도. colorTransitionSpeed와 " +
+            "같은 방식(Exp 감쇠)이지만 더 빠르게(값을 크게) 잡아서 '뿅' 하고 튀어나오는 느낌을 준다.")]
+        private float dotTransitionSpeed = 6f;
+        [SerializeField, Tooltip("감염 점 렌더링 정렬 순서. 국가 색상 얼룩(기본 0)보다 위, 교통 유닛(60, " +
+            "TransportUnit.cs 참고)보다 아래로 잡아뒀다.")]
+        private int dotSortingOrder = 50;
+
         private SpriteRenderer _renderer;
         private BoxCollider2D _collider;
         private Color _targetColor;
         private bool _hasTarget;
         private float _lastLoggedInfectionBand = -1f;
         private float _lastLoggedDeadBand = -1f;
+
+        private static Sprite _sharedInfectionDotSprite;
+        private Transform[] _dotTransforms;
+        private float[] _dotCurrentScale;
+        private int _targetActiveDotCount;
+        private float _resolvedDotDiameter;
 
         public string CountryId => countryId;
 
@@ -54,6 +79,93 @@ namespace Contagion.Gameplay
             _collider = GetComponent<BoxCollider2D>();
             _renderer.color = healthyColor; // 알파 0 — 첫 UpdateVisual 전까지 아무것도 안 보임(의도된 동작)
             ApplyCountryShape();
+            SetupInfectionDots();
+        }
+
+        /// <summary>
+        /// 국가 실루엣 내부에 미리 계산해둔 좌표(InfectionDotDatabase, Resources/InfectionDotPoints.json)에
+        /// 맞춰 점 오브젝트를 최대 maxInfectionDots개 만들어둔다. 처음엔 전부 scale 0(안 보임) 상태로
+        /// 대기하다가 UpdateVisual()이 감염률에 비례해 몇 개를 "활성"으로 표시할지 정하면 Update()에서
+        /// 그 개수만큼만 스케일을 0→1로 부드럽게 키운다. 좌표 자체가 이미 이 GameObject(CountryView, 항상
+        /// WorldMap 기준 로컬 (0,0,0)) 기준 로컬 오프셋이라 dnaSpawnLocalOffset과 동일한 방식으로
+        /// transform 계층만 맞으면 자동으로 지도 위 올바른 위치에 놓인다.
+        /// </summary>
+        private void SetupInfectionDots()
+        {
+            var layout = InfectionDotDatabase.GetLayout(countryId);
+            Vector2[] points = layout.Points;
+            int count = Mathf.Min(maxInfectionDots, points.Length);
+
+            // [Step 36] 지름은 국가마다 다르다(면적에 맞춰 오프라인에서 역산 — 큰 나라는 크고 많은 점,
+            // 작은 나라는 작고 적은 점). 데이터가 없는 국가는 0으로 둬도 count=0이라 아래에서 바로 반환.
+            _resolvedDotDiameter = layout.Diameter * infectionDotDiameterScale;
+
+            _dotTransforms = new Transform[count];
+            _dotCurrentScale = new float[count];
+
+            if (count == 0)
+            {
+                // 이 국가에 대한 사전계산 좌표가 없음(데이터 누락) — 조용히 스킵.
+                // 기존 색상 얼룩 피드백은 영향 없이 그대로 동작한다.
+                if (points.Length == 0)
+                    Debug.LogWarning($"[CountryView] {countryId} — InfectionDotPoints.json에 좌표가 없어 감염 점 오버레이를 건너뜁니다.");
+                return;
+            }
+
+            Sprite dotSprite = GetSharedInfectionDotSprite();
+
+            for (int i = 0; i < count; i++)
+            {
+                var dotObject = new GameObject($"InfectionDot_{i}");
+                dotObject.transform.SetParent(transform, false);
+                dotObject.transform.localPosition = new Vector3(points[i].x, points[i].y, 0f);
+                dotObject.transform.localScale = Vector3.zero; // 처음엔 안 보임
+
+                var dotRenderer = dotObject.AddComponent<SpriteRenderer>();
+                dotRenderer.sprite = dotSprite;
+                dotRenderer.color = infectionDotColor;
+                dotRenderer.sortingOrder = dotSortingOrder;
+
+                _dotTransforms[i] = dotObject.transform;
+                _dotCurrentScale[i] = 0f;
+            }
+        }
+
+        /// <summary>
+        /// 지름 1유닛짜리 부드러운 원형 스프라이트를 코드로 한 번만 생성해 모든 CountryView가 공유한다
+        /// (국가마다 텍스처를 새로 만들면 48개 * 32x32 텍스처가 낭비 — 모바일 메모리 절약을 위해 static
+        /// 캐시). 실제 표시 크기는 각 점 GameObject의 localScale(= _resolvedDotDiameter, 국가별로 다름)로
+        /// 조절한다.
+        /// </summary>
+        private static Sprite GetSharedInfectionDotSprite()
+        {
+            if (_sharedInfectionDotSprite != null) return _sharedInfectionDotSprite;
+
+            const int size = 32;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+
+            Vector2 center = new Vector2((size - 1) / 2f, (size - 1) / 2f);
+            float radius = size / 2f;
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), center);
+                    float alpha = Mathf.Clamp01(radius - dist); // 가장자리 1px 정도만 부드럽게(안티에일리어싱)
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                }
+            }
+            texture.SetPixels32(pixels);
+            texture.Apply();
+
+            // pixelsPerUnit = size → 기본 스프라이트 지름이 1유닛. localScale로 실제 지름을 맞춘다.
+            _sharedInfectionDotSprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+            return _sharedInfectionDotSprite;
         }
 
         /// <summary>
@@ -120,6 +232,16 @@ namespace Contagion.Gameplay
             _targetColor = color;
             _hasTarget = true;
 
+            // 감염 점 개수 갱신 — CeilToInt라 감염자가 단 1명이라도 있으면(infectionRatio가 아무리 작은
+            // 양수여도) 즉시 점이 하나 나타난다. 색상 얼룩은 비율에 선형 비례라 초반엔 거의 안 보이는
+            // 문제(이 기능을 추가한 이유)를 dot 쪽에서 보완한다.
+            if (_dotTransforms != null && _dotTransforms.Length > 0)
+            {
+                _targetActiveDotCount = infectionRatio <= 0f
+                    ? 0
+                    : Mathf.Clamp(Mathf.CeilToInt(infectionRatio * _dotTransforms.Length), 1, _dotTransforms.Length);
+            }
+
             // 매 틱 스팸 방지 — 감염률/사망률이 10%p 단위로 바뀔 때만 로그
             float infectionBand = Mathf.Round(infectionRatio * 10f) / 10f;
             float deadBand = Mathf.Round(deadRatio * 10f) / 10f;
@@ -137,6 +259,30 @@ namespace Contagion.Gameplay
             if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
 
             _renderer.color = Color.Lerp(_renderer.color, _targetColor, 1f - Mathf.Exp(-colorTransitionSpeed * Time.deltaTime));
+
+            UpdateInfectionDots();
+        }
+
+        /// <summary>인덱스 i &lt; _targetActiveDotCount인 점만 scale을 0→1로, 나머지는 1→0으로 부드럽게
+        /// 전환한다. colorTransitionSpeed와 같은 Exp 감쇠 lerp라 프레임레이트에 무관하게 일정한 속도로
+        /// 수렴한다.</summary>
+        private void UpdateInfectionDots()
+        {
+            if (_dotTransforms == null) return;
+
+            float t = 1f - Mathf.Exp(-dotTransitionSpeed * Time.deltaTime);
+            for (int i = 0; i < _dotTransforms.Length; i++)
+            {
+                float target = i < _targetActiveDotCount ? 1f : 0f;
+                if (Mathf.Approximately(_dotCurrentScale[i], target)) continue;
+
+                float next = Mathf.Lerp(_dotCurrentScale[i], target, t);
+                if (Mathf.Abs(next - target) < 0.01f) next = target; // 눈에 안 띄는 잔여값 스냅
+                _dotCurrentScale[i] = next;
+
+                float worldScale = next * _resolvedDotDiameter;
+                _dotTransforms[i].localScale = new Vector3(worldScale, worldScale, 1f);
+            }
         }
 
         // Step 28-2: 국가를 탭해서 개별 팝업을 여는 인터랙션을 제거했다. 지금은 국가들이 지도 위 실제

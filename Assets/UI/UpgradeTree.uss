@@ -1,7 +1,7 @@
 .upgrade-root {
     flex-grow: 1;
-    background-color: rgba(10, 10, 20, 0.92);
-    padding: 20px;
+    background-color: var(--color-bg-panel-alt);
+    padding: var(--space-xl);
 }
 
 /* 전파/증상/능력 3창 통합 — 헤더를 2줄로 나눔: 위(◀ 제목 ▶ 내비게이션) / 아래(DNA·광고·닫기 액션).
@@ -25,16 +25,16 @@
 }
 
 .upgrade-header__category-title {
-    color: rgb(255, 210, 90);
-    font-size: 24px;
+    color: var(--color-brand-gold);
+    font-size: var(--font-size-xl);
     -unity-font-style: bold;
     flex-grow: 1;
     -unity-text-align: middle-center;
 }
 
 .upgrade-header__dna {
-    color: rgb(120, 220, 140);
-    font-size: 24px;
+    color: var(--color-brand-dna);
+    font-size: var(--font-size-xl);
     -unity-font-style: bold;
 }
 
@@ -44,103 +44,103 @@
 
 .upgrade-header__arrow {
     width: 52px;
-    height: 48px;
-    font-size: 20px;
+    height: var(--touch-target-min);
+    font-size: var(--font-size-lg);
     -unity-font-style: bold;
-    margin: 0 8px;
+    margin: 0 var(--space-sm);
 }
 
 .upgrade-header__ad-bonus {
-    background-color: rgb(120, 80, 200);
-    color: white;
+    background-color: var(--color-brand-premium);
+    color: var(--color-text-primary);
     width: 160px;
 }
 
 .node-scroll {
     flex-grow: 1;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-lg);
 }
 
 .category-header {
-    color: rgb(255, 210, 90);
-    font-size: 20px;
+    color: var(--color-brand-gold);
+    font-size: var(--font-size-lg);
     -unity-font-style: bold;
     margin-top: 10px;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-xs);
 }
 
 /* 트리 좌표 배치 노드 (UpgradeTreeView — 세분화 항목: 좌표+연결선 시각화) */
 .tree-category-label {
-    color: rgb(255, 210, 90);
+    color: var(--color-brand-gold);
     font-size: 19px;
     -unity-font-style: bold;
 }
 
 .tree-node {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--color-surface);
     border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
     padding: 4px 8px;
     justify-content: center;
     align-items: center;
 }
 
 .tree-node--transmission {
-    border-color: rgba(120, 190, 255, 0.4);
+    border-color: var(--color-node-transmission);
 }
 
 .tree-node--symptom {
-    border-color: rgba(255, 140, 100, 0.4);
+    border-color: var(--color-node-symptom);
 }
 
 .tree-node--ability {
-    border-color: rgba(200, 140, 255, 0.4);
+    border-color: var(--color-node-ability);
 }
 
 .tree-node--unlocked {
     background-color: rgba(120, 220, 140, 0.28);
-    border-color: rgb(120, 220, 140);
+    border-color: var(--color-brand-dna);
 }
 
 .tree-node--selected {
     border-width: 3px;
-    border-color: rgb(255, 210, 90);
+    border-color: var(--color-border-selected);
 }
 
 .tree-node__label {
-    color: white;
-    font-size: 14px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;
 }
 
 .tree-node__cost {
-    color: rgb(210, 210, 210);
-    font-size: 13px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
     -unity-text-align: middle-center;
 }
 
 .detail-panel {
-    background-color: rgba(255, 255, 255, 0.08);
-    padding: 16px;
-    border-radius: 6px;
+    background-color: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
 }
 
 .detail-panel__title {
-    color: white;
-    font-size: 20px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
     -unity-font-style: bold;
 }
 
 .detail-panel__desc {
-    color: rgb(210, 210, 210);
+    color: var(--color-text-secondary);
     font-size: 17px;
     white-space: normal;
     margin: 6px 0;
 }
 
 .detail-panel__buy {
-    height: 48px;
+    height: var(--touch-target-min);
 }

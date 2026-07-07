@@ -38,6 +38,16 @@ namespace Contagion.Data
     /// 지도 양 끝을 넘나드는 항로를 직선으로 그으면 대륙 한가운데를 관통해버린다. 그래서 해운(및 일부
     /// 장거리 항공) 노선은 `DefaultTransportHubFactory`의 경유점(waypoint) 테이블을 거쳐 우회한다 —
     /// `TransportManager.BuildPathPoints()` 참고.
+    ///
+    /// [Step 32 추가] 위 설명은 "국가 앵커 + 작은 오프셋"이 국가 하나에 허브가 하나뿐일 때는 맞지만,
+    /// 미국(ATL/DFW/LAX)·중국(PVG/CAN/HKG)처럼 같은 나라에 허브가 여러 개면 문제가 된다 — 오프셋이
+    /// 실제 도시 간 거리(수천 km)를 표현하기엔 너무 작게 잡혀 있어서 여러 공항이 지도 위 한 점 근처에
+    /// 뭉쳐 보이고, 그 결과 출발/도착 지점이 실제 그 도시(공항) 자리가 아닌 엉뚱한 곳으로 어긋나 보였다.
+    /// 그래서 항공 허브는 `useAbsoluteWorldOffset=true`로 바꿔 국가 앵커를 아예 거치지 않고, 각 공항의
+    /// 실제 위경도를 국가 앵커들과 동일한 선형 변환(x=경도*0.021614-0.045251, y=위도*0.025372-0.285776 —
+    /// 48개국 dnaSpawnLocalOffset 대 실제 위경도 최소제곱 회귀로 도출, 잔차 표준편차 x:0.056/y:0.025 유닛)으로
+    /// 직접 좌표를 계산해 넣었다. 해운 허브는 Step 30-5에서 이미 실측 검증(A* + sea anchor)을 거쳐
+    /// 사용자 확인까지 끝난 상태라 이번 수정 대상에서 제외 — 여전히 country 앵커 상대 오프셋 방식 그대로.
     /// </summary>
     [Serializable]
     public class TransportHub
@@ -49,18 +59,30 @@ namespace Contagion.Data
         /// <summary>이 허브가 속한(감염 전파 대상이 되는) 국가 — CountryDatabase의 id와 일치해야 한다.</summary>
         public string countryId;
 
-        /// <summary>countryId의 DnaSpawnWorldPosition 기준 추가 오프셋(월드 유닛) — 같은 국가 내 여러 허브 분리용.</summary>
+        /// <summary>
+        /// localOffset의 해석 방식. false(기본, 해운 허브)면 countryId의 DnaSpawnWorldPosition 기준 추가
+        /// 오프셋(월드 유닛) — 같은 국가 내 여러 허브 분리용. true(항공 허브, Step 32)면 country 앵커와
+        /// 무관하게 WorldMap 원점 기준 절대 좌표(WorldMap.ToWorldPosition으로 직접 변환) — 실제 공항의
+        /// 위경도를 국가 앵커와 같은 스케일(DevLog Step 30 참고: x=경도·y=위도 비례, 등장방형 투영)로
+        /// 변환한 값이다. countryId는 이 경우에도 게임 로직(해당 대표 국가의 isAirportOpen 등)에는
+        /// 그대로 쓰이지만 좌표 계산에는 관여하지 않는다.
+        /// </summary>
+        public bool useAbsoluteWorldOffset;
+
+        /// <summary>useAbsoluteWorldOffset이 false면 countryId 앵커 기준 상대 오프셋, true면 WorldMap 절대 좌표.</summary>
         public Vector2 localOffset;
 
         public List<TransportRouteLink> connections = new List<TransportRouteLink>();
 
-        public TransportHub(string id, TransportHubType type, string displayName, string countryId, Vector2 localOffset)
+        public TransportHub(string id, TransportHubType type, string displayName, string countryId, Vector2 localOffset,
+            bool useAbsoluteWorldOffset = false)
         {
             this.id = id;
             this.type = type;
             this.displayName = displayName;
             this.countryId = countryId;
             this.localOffset = localOffset;
+            this.useAbsoluteWorldOffset = useAbsoluteWorldOffset;
         }
     }
 }

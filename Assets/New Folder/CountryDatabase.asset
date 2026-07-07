@@ -15,7 +15,7 @@ MonoBehaviour:
   countries:
   - id: CHI
     name: China
-    population: 1404890
+    population: 1412914089
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -60,7 +60,7 @@ MonoBehaviour:
     - VIE
   - id: IND
     name: India
-    population: 1417492
+    population: 1476625576
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -104,7 +104,7 @@ MonoBehaviour:
     - YEM
   - id: USA
     name: USA
-    population: 341785
+    population: 349035494
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -148,7 +148,7 @@ MonoBehaviour:
     - PER
   - id: KOR
     name: korea
-    population: 51111
+    population: 51600388
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -174,7 +174,7 @@ MonoBehaviour:
     - JPN
   - id: JPN
     name: Japan
-    population: 122810
+    population: 122427731
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -203,7 +203,7 @@ MonoBehaviour:
     - PHI
   - id: IDN
     name: Indonesia
-    population: 288315
+    population: 287886782
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -237,7 +237,7 @@ MonoBehaviour:
     - VIE
   - id: SAU
     name: Saudi Arabia
-    population: 35300
+    population: 35165787
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -278,7 +278,7 @@ MonoBehaviour:
     - YEM
   - id: GER
     name: Germany
-    population: 83497
+    population: 83644258
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -315,7 +315,7 @@ MonoBehaviour:
     - TUR
   - id: UK
     name: United Kingdom
-    population: 69487
+    population: 69931528
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -360,7 +360,7 @@ MonoBehaviour:
     - TUR
   - id: FRA
     name: France
-    population: 69082
+    population: 66746401
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -396,7 +396,7 @@ MonoBehaviour:
     - MAR
   - id: RUS
     name: Russia
-    population: 146028
+    population: 143394458
     infectedCount: 0
     deadCount: 0
     climate: 2
@@ -425,7 +425,7 @@ MonoBehaviour:
     - TUR
   - id: NGA
     name: Nigeria
-    population: 223800
+    population: 242431832
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -459,7 +459,7 @@ MonoBehaviour:
     - MAR
   - id: EGY
     name: Egypt
-    population: 108613
+    population: 120101175
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -500,7 +500,7 @@ MonoBehaviour:
     - YEM
   - id: RSA
     name: South Africa
-    population: 63101
+    population: 65453084
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -534,7 +534,7 @@ MonoBehaviour:
     - TAN
   - id: BRA
     name: Brazil
-    population: 213421
+    population: 213562666
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -568,7 +568,7 @@ MonoBehaviour:
     - PER
   - id: MEX
     name: Mexico
-    population: 131151
+    population: 132997658
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -595,7 +595,7 @@ MonoBehaviour:
     - PER
   - id: CAN
     name: Canada
-    population: 41472
+    population: 40467728
     infectedCount: 0
     deadCount: 0
     climate: 2
@@ -615,7 +615,7 @@ MonoBehaviour:
     - USA
   - id: AUS
     name: Australia
-    population: 27725
+    population: 27227096
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -635,7 +635,7 @@ MonoBehaviour:
     - RSA
   - id: PAK
     name: Pakistan
-    population: 241499
+    population: 259299791
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -661,7 +661,7 @@ MonoBehaviour:
     - SAU
   - id: BAN
     name: Bangladesh
-    population: 169829
+    population: 177818044
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -683,7 +683,7 @@ MonoBehaviour:
     - MYA
   - id: PHI
     name: Philippines
-    population: 114124
+    population: 117724471
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -708,7 +708,7 @@ MonoBehaviour:
     - VIE
   - id: DRC
     name: Democratic Republic of the Congo
-    population: 112832
+    population: 116452162
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -731,7 +731,7 @@ MonoBehaviour:
     - ANG
   - id: ETH
     name: Ethiopia
-    population: 111653
+    population: 138902185
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -753,7 +753,7 @@ MonoBehaviour:
     seaRouteCountryIds: []
   - id: VIE
     name: Vietnam
-    population: 102300
+    population: 102177431
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -779,7 +779,7 @@ MonoBehaviour:
     - THA
   - id: IRN
     name: Iran
-    population: 87134
+    population: 93168497
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -805,7 +805,7 @@ MonoBehaviour:
     - IND
   - id: TUR
     name: Turkey
-    population: 86092
+    population: 87926082
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -832,7 +832,7 @@ MonoBehaviour:
     - UK
   - id: TAN
     name: Tanzania
-    population: 68153
+    population: 72563780
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -858,7 +858,7 @@ MonoBehaviour:
     - IND
   - id: THA
     name: Thailand
-    population: 65826
+    population: 71559614
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -887,7 +887,7 @@ MonoBehaviour:
     - MYA
   - id: ITA
     name: Italy
-    population: 58932
+    population: 58926166
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -914,7 +914,7 @@ MonoBehaviour:
     - ESP
   - id: KEN
     name: Kenya
-    population: 53331
+    population: 58636412
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -940,7 +940,7 @@ MonoBehaviour:
     - IND
   - id: COL
     name: Colombia
-    population: 53057
+    population: 53936226
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -963,7 +963,7 @@ MonoBehaviour:
     - BRA
   - id: SDN
     name: Sudan
-    population: 51662
+    population: 53282719
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -986,7 +986,7 @@ MonoBehaviour:
     - SAU
   - id: MYA
     name: Myanmar
-    population: 51375
+    population: 55184819
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1013,7 +1013,7 @@ MonoBehaviour:
     - BAN
   - id: ESP
     name: Spain
-    population: 49687
+    population: 47850793
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -1040,7 +1040,7 @@ MonoBehaviour:
     - ALG
   - id: ALG
     name: Algeria
-    population: 47400
+    population: 48028334
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1063,7 +1063,7 @@ MonoBehaviour:
     - ITA
   - id: ARG
     name: Argentina
-    population: 46387
+    population: 46003734
     infectedCount: 0
     deadCount: 0
     climate: 1
@@ -1087,7 +1087,7 @@ MonoBehaviour:
     - PER
   - id: IRQ
     name: Iraq
-    population: 46119
+    population: 48007437
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1111,7 +1111,7 @@ MonoBehaviour:
     - SAU
   - id: UGA
     name: Uganda
-    population: 45905
+    population: 52761469
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1133,7 +1133,7 @@ MonoBehaviour:
     seaRouteCountryIds: []
   - id: AFG
     name: Afghanistan
-    population: 43844
+    population: 45047069
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1155,7 +1155,7 @@ MonoBehaviour:
     seaRouteCountryIds: []
   - id: ANG
     name: Angola
-    population: 38779
+    population: 40215179
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1181,7 +1181,7 @@ MonoBehaviour:
     - DRC
   - id: UZB
     name: Uzbekistan
-    population: 38383
+    population: 37724223
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1201,7 +1201,7 @@ MonoBehaviour:
     seaRouteCountryIds: []
   - id: POL
     name: Poland
-    population: 37281
+    population: 37843188
     infectedCount: 0
     deadCount: 0
     climate: 2
@@ -1226,7 +1226,7 @@ MonoBehaviour:
     - UK
   - id: MAR
     name: Morocco
-    population: 36828
+    population: 38762441
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1251,7 +1251,7 @@ MonoBehaviour:
     - USA
   - id: MAS
     name: Malaysia
-    population: 34374
+    population: 36385115
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1276,7 +1276,7 @@ MonoBehaviour:
     - IND
   - id: PER
     name: Peru
-    population: 34350
+    population: 34922148
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1302,7 +1302,7 @@ MonoBehaviour:
     - ARG
   - id: MOZ
     name: Mozambique
-    population: 34090
+    population: 36639851
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1325,7 +1325,7 @@ MonoBehaviour:
     - EGY
   - id: GHA
     name: Ghana
-    population: 33742
+    population: 35697557
     infectedCount: 0
     deadCount: 0
     climate: 3
@@ -1348,7 +1348,7 @@ MonoBehaviour:
     - BRA
   - id: YEM
     name: Yemen
-    population: 32685
+    population: 42961653
     infectedCount: 0
     deadCount: 0
     climate: 0
@@ -1368,4 +1368,4 @@ MonoBehaviour:
     seaRouteCountryIds:
     - SAU
     - EGY
-    - I
+    - IND

@@ -40,10 +40,10 @@ namespace Contagion.Managers
             "누적 확률이 아니라 매 틱 새로 굴리는 확률 자체가 커지는 방식이라, 초반엔 몇 틱을 버텨도 안 걸릴 수 " +
             "있고 반대로 운 나쁘면(=피해가 커지기도 전에) 일찍 걸릴 수도 있다 — 현실의 '조기 발견/뒤늦은 발견' " +
             "변동성을 재현.")]
-        private float cureStartChancePerInfected = 0.0005f;
+        private float cureStartChancePerInfected = 0.0000005f;
         [SerializeField, Tooltip("사망자는 감염자보다 훨씬 눈에 띄는 사건이라(뉴스/부검/장례 등으로 은폐가 어려움) " +
             "1당 확률 기여도를 감염자보다 크게 잡았다.")]
-        private float cureStartChancePerDeath = 0.0025f;
+        private float cureStartChancePerDeath = 0.0000025f;
 
         [Header("국가 간 전파 (설계 문서 4.1 - 확률적 이동)")]
         [SerializeField, Range(0f, 1f), Tooltip("[미사용] TransportManager가 항공 전파를 실제 이동체 도착 판정으로 " +
@@ -62,7 +62,7 @@ namespace Contagion.Managers
         private bool grantDnaOnFirstInfection = true;
         [SerializeField, Range(0.01f, 1f), Tooltip("국가 인구 대비 감염자 비율이 이 값만큼 늘어날 때마다 DNA 지급 " +
             "(예: 0.25 = 25%p마다). 이전엔 국가별 절대 감염자 수(예: 100,000명)를 기준으로 했는데, 국가마다 인구" +
-            " 규모 차이가 커서(최소 약 2.7만~최대 약 140만) 절대값 기준으로는 작은 나라는 마일스톤이 거의 안 뜨고" +
+            " 규모 차이가 커서(최소 약 2,700만~최대 약 14억) 절대값 기준으로는 작은 나라는 마일스톤이 거의 안 뜨고" +
             " 큰 나라만 계속 뜨는 문제가 있었다. 인구 대비 퍼센트로 바꾸면 국가 크기와 무관하게 동일한 빈도로 발동한다." +
             " (0.1→0.25로 완화: 국가 48개 × 10%p 간격이라 버블이 너무 자주 뜬다는 피드백 반영 — 국가당 최대 발동" +
             " 횟수가 10회→4회로 줄어든다.)")]

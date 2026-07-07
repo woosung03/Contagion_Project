@@ -4,22 +4,22 @@
     top: 30%;
     width: 320px;
     margin-left: -160px;
-    background-color: rgba(15, 15, 25, 0.95);
-    border-radius: 8px;
-    padding: 16px;
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
 }
 
 .popup-title {
-    color: white;
-    font-size: 24px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
     -unity-font-style: bold;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
 }
 
 .popup-row {
-    color: rgb(220, 220, 220);
-    font-size: 18px;
-    margin-bottom: 4px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
+    margin-bottom: var(--space-xs);
 }
 
 .popup-close {

@@ -5,26 +5,26 @@
 
 .news-scroll {
     height: 150px;
-    background-color: rgba(0, 0, 0, 0.55);
+    background-color: var(--color-bg-scrim-soft);
 }
 
 .news-scroll .news-entry {
-    color: white;
-    font-size: 18px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-md);
     padding: 2px 8px;
     white-space: normal;
 }
 
 .news-scroll .news-entry--positive {
-    color: rgb(255, 140, 120);
+    color: var(--color-status-danger);
 }
 
 .news-scroll .news-entry--negative {
-    color: rgb(140, 210, 255);
+    color: var(--color-status-info);
 }
 
 .news-scroll .news-entry--flavor {
-    color: rgb(210, 210, 210);
+    color: var(--color-text-secondary);
     -unity-font-style: italic;
 }
 
@@ -33,8 +33,8 @@
 }
 
 .bottom-bar {
-    background-color: rgba(0, 0, 0, 0.75);
-    padding: 14px 16px;
+    background-color: var(--color-bg-scrim-strong);
+    padding: 14px var(--space-lg);
 }
 
 .stats-row {
@@ -42,12 +42,12 @@
     justify-content: space-between;
     align-items: flex-end;
     flex-wrap: wrap;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .stat-label {
-    color: white;
-    font-size: 18px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-md);
     -unity-font-style: bold;
 }
 
@@ -60,40 +60,40 @@
 }
 
 .stat-graph-item__label {
-    font-size: 16px;
+    font-size: var(--font-size-sm);
     -unity-font-style: bold;
     margin-bottom: 2px;
 }
 
 .stat-graph-item__label--infected {
-    color: rgb(255, 170, 90);
+    color: var(--color-status-infected);
 }
 
 .stat-graph-item__label--dead {
-    color: rgb(220, 90, 90);
+    color: var(--color-status-dead);
 }
 
 .stat-graph-item__label--cure {
-    color: rgb(120, 220, 140);
+    color: var(--color-brand-dna);
 }
 
 .stat-graph-item__graph {
     width: 104px;
     height: 34px;
-    background-color: rgba(255, 255, 255, 0.06);
-    border-radius: 3px;
+    background-color: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
 }
 
 .stat-label--dna {
-    color: rgb(120, 220, 140);
+    color: var(--color-brand-dna);
 }
 
 .stat-label--phase {
-    color: rgb(255, 210, 90);
+    color: var(--color-brand-gold);
 }
 
 .stat-label--mortality {
-    color: rgb(255, 120, 120);
+    color: var(--color-status-danger);
 }
 
 .tabs-row {
@@ -103,11 +103,11 @@
 
 .tab-button {
     flex-grow: 1;
-    margin: 0 8px;
-    height: 48px;
+    margin: 0 var(--space-sm);
+    height: var(--touch-target-min);
 }
 
 .tab-button--secondary {
     flex-grow: 0.6;
-    background-color: rgb(70, 70, 90);
+    background-color: var(--color-button-secondary);
 }

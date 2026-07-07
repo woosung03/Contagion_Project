@@ -5,62 +5,62 @@
     right: 0;
     bottom: 0;
     flex-grow: 1;
-    background-color: rgba(8, 8, 16, 0.97);
+    background-color: var(--color-bg-root);
     padding: 28px;
 }
 
 .mainmenu-title {
-    color: white;
-    font-size: 32px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-display);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-xs);
 }
 
 .mainmenu-subtitle {
-    color: rgb(200, 200, 200);
+    color: var(--color-text-secondary);
     font-size: 19px;
     -unity-text-align: middle-center;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .mainmenu-list {
     flex-grow: 1;
-    margin-bottom: 16px;
+    margin-bottom: var(--space-lg);
 }
 
 .pathogen-card {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--color-surface);
     border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
     padding: 10px 14px;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .pathogen-card--selected {
     border-width: 3px;
-    border-color: rgb(255, 210, 90);
-    background-color: rgba(255, 210, 90, 0.12);
+    border-color: var(--color-border-selected);
+    background-color: var(--color-surface-selected);
 }
 
 .pathogen-card__name {
-    color: white;
+    color: var(--color-text-primary);
     font-size: 21px;
     -unity-font-style: bold;
 }
 
 .pathogen-card__stats {
-    color: rgb(180, 220, 255);
+    color: var(--color-text-info);
     font-size: 17px;
-    margin-top: 4px;
+    margin-top: var(--space-xs);
 }
 
 .country-row {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: var(--color-surface);
     border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-md);
     padding: 8px 12px;
     margin-bottom: 10px;
     flex-direction: row;
@@ -69,8 +69,8 @@
 
 .country-row--selected {
     border-width: 3px;
-    border-color: rgb(255, 210, 90);
-    background-color: rgba(255, 210, 90, 0.12);
+    border-color: var(--color-border-selected);
+    background-color: var(--color-surface-selected);
 }
 
 /* 국기 아이콘 자리 — CountrySelectController.GetFlagTexture()가 Resources/Flags/{id}.png를 배경으로
@@ -78,7 +78,7 @@
 .country-row__flag {
     width: 36px;
     height: 26px;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: var(--color-border);
     border-radius: 2px;
     margin-right: 10px;
     flex-shrink: 0;
@@ -86,47 +86,47 @@
 }
 
 .country-row__name {
-    color: white;
-    font-size: 20px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
     -unity-font-style: bold;
     flex-grow: 1;
 }
 
 .country-row__meta {
-    color: rgb(190, 190, 190);
-    font-size: 16px;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-body);
 }
 
 .detail-panel {
-    background-color: rgba(255, 255, 255, 0.08);
-    padding: 16px;
-    border-radius: 6px;
-    margin-bottom: 16px;
+    background-color: var(--color-surface);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
     min-height: 70px;
 }
 
 .detail-panel__title {
-    color: rgb(255, 210, 90);
+    color: var(--color-brand-gold);
     font-size: 22px;
     -unity-font-style: bold;
 }
 
 .detail-panel__desc {
-    color: rgb(210, 210, 210);
+    color: var(--color-text-secondary);
     font-size: 17px;
     white-space: normal;
     margin-top: 6px;
 }
 
 .mainmenu-next {
-    height: 56px;
-    font-size: 20px;
+    height: var(--touch-target-min);
+    font-size: var(--font-size-lg);
     -unity-font-style: bold;
-    background-color: rgb(120, 220, 140);
+    background-color: var(--color-brand-dna);
     color: rgb(10, 30, 15);
 }
 
 .mainmenu-back {
     height: 46px;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }

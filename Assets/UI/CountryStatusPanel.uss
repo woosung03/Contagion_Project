@@ -6,14 +6,14 @@
     right: 5%;
     top: 8.5%;
     bottom: 12.5%;
-    background-color: rgba(15, 15, 25, 0.97);
-    border-radius: 8px;
-    padding: 20px;
+    background-color: var(--color-bg-panel-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
 }
 
 .status-title {
-    color: white;
-    font-size: 26px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xxl);
     -unity-font-style: bold;
     margin-bottom: 10px;
 }
@@ -23,31 +23,31 @@
 }
 
 .status-row {
-    background-color: rgba(255, 255, 255, 0.06);
-    border-radius: 4px;
+    background-color: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
     padding: 8px 10px;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-sm);
 }
 
 .status-row__name {
-    color: white;
-    font-size: 18px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-md);
     -unity-font-style: bold;
 }
 
 .status-row__detail {
-    color: rgb(200, 200, 200);
-    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
     margin-top: 2px;
     white-space: normal;
 }
 
 .status-row__detail--danger {
-    color: rgb(255, 140, 120);
+    color: var(--color-status-danger);
 }
 
 .status-close {
-    height: 48px;
-    margin-top: 14px;
-    background-color: rgb(70, 70, 90);
+    height: var(--touch-target-min);
+    margin-top: var(--space-md);
+    background-color: var(--color-button-secondary);
 }

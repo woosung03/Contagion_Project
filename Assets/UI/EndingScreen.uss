@@ -1,29 +1,29 @@
 .ending-root {
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: var(--color-bg-scrim);
     align-items: center;
     justify-content: center;
 }
 
 .ending-title {
-    color: white;
-    font-size: 40px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-hero);
     -unity-font-style: bold;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .ending-detail {
-    color: rgb(220, 220, 220);
-    font-size: 20px;
-    margin-bottom: 8px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-sm);
 }
 
 .ending-score {
-    color: rgb(255, 210, 90);
-    font-size: 26px;
+    color: var(--color-brand-gold);
+    font-size: var(--font-size-xxl);
     -unity-font-style: bold;
-    margin-bottom: 24px;
+    margin-bottom: var(--space-xxl);
 }
 
 .ending-buttons {
@@ -33,9 +33,9 @@
 .ending-button {
     width: 180px;
     height: 56px;
-    margin: 0 12px;
+    margin: 0 var(--space-md);
 }
 
 .ending-button--revive {
-    background-color: rgb(120, 80, 200);
+    background-color: var(--color-brand-premium);
 }

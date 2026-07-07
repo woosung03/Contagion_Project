@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Theme.uss" />
     <Style src="MainMenu.uss" />
     <ui:VisualElement name="countryselect-root" class="mainmenu-root">
         <ui:Label text="발원 국가를 선택하세요" class="mainmenu-title" />

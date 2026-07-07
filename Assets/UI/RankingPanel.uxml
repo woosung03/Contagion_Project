@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Theme.uss" />
     <Style src="RankingPanel.uss" />
     <ui:VisualElement name="ranking-root" class="ranking-root">
         <ui:Label name="ranking-title" text="랭킹" class="ranking-title" />

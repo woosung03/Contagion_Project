@@ -7,37 +7,37 @@
     left: 9%;
     right: 9%;
     top: 22%;
-    background-color: rgba(15, 15, 25, 0.95);
-    border-radius: 8px;
-    padding: 24px;
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xxl);
     align-items: stretch;
 }
 
 .ranking-title {
-    color: white;
-    font-size: 26px;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xxl);
     -unity-font-style: bold;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .ranking-row {
-    color: rgb(255, 210, 90);
-    font-size: 20px;
-    margin-bottom: 8px;
+    color: var(--color-brand-gold);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-sm);
 }
 
 .ranking-note {
-    color: rgb(180, 180, 180);
-    font-size: 16px;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-body);
     white-space: normal;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-md);
 }
 
 .ranking-button {
-    height: 48px;
-    margin-bottom: 12px;
+    height: var(--touch-target-min);
+    margin-bottom: var(--space-md);
 }
 
 .ranking-button--secondary {
-    background-color: rgb(70, 70, 90);
+    background-color: var(--color-button-secondary);
 }

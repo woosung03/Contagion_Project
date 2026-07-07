@@ -72,7 +72,7 @@ namespace Contagion.Managers
 
         [Header("부정 이벤트 (인류 유리)")]
         [SerializeField] private NewsEventSettings whoEmergencyMeeting = new NewsEventSettings { triggerChance = 0.15f, cooldownDays = 10 };
-        [SerializeField] private long whoMeetingMinDeathCount = 50_000;
+        [SerializeField] private long whoMeetingMinDeathCount = 50_000_000; // 인구 스케일을 실제 인구 수 그대로(스케일 제거)로 바꾼 데 맞춰 1000배 상향
         [SerializeField, Range(0f, 1f)] private float whoMeetingCureProgressBonus = 0.03f;
 
         [SerializeField] private NewsEventSettings internationalCooperation = new NewsEventSettings { triggerChance = 0.12f, cooldownDays = 14 };
