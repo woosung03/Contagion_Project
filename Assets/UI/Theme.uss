@@ -83,4 +83,53 @@
 
     /* ---- 모바일 터치 타겟 최소 높이 ---- */
     --touch-target-min: 48px;
+
+    /* ---- 인터랙션 트랜지션 (box-shadow 미지원 — codebase 위키 css-to-uss-support.md 확인,
+       대신 scale/색상 트랜지션으로 눌림感·선택感을 표현) ---- */
+    --transition-fast: 0.1s;
+    --transition-normal: 0.18s;
+
+    /* ---- 카드/버튼 눌림(active) 상태 ---- */
+    --color-surface-hover: rgba(255, 255, 255, 0.12);
+    --color-border-hover: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================================
+   전역 인터랙션 피드백 — 모든 화면의 Button에 공통 적용.
+   터치 기기라 :hover는 잘 안 걸리지만(마우스 없음) 에디터/PC 확인용으로도 남겨두고,
+   실제 모바일 손맛은 :active(누르는 순간) scale 축소로 준다.
+   ============================================================ */
+Button {
+    transition-property: scale, opacity;
+    transition-duration: var(--transition-fast);
+    transition-timing-function: ease-out;
+}
+
+/* 개별 버튼(.mainmenu-next 등)이 지정한 배경색을 덮어쓰지 않도록 배경색은 건드리지 않고
+   scale만 눌림感을 준다 — 색이 있는 버튼(초록 다음/보라 프리미엄 등)에서도 항상 자연스럽게 동작. */
+Button:active {
+    scale: 0.96 0.96;
+}
+
+Button:disabled {
+    opacity: 0.5;
+}
+
+/* ---- 선택 가능한 카드류(병원체/국가/업그레이드 노드/상태 로우) 공통 트랜지션 ----
+   선택 시 border-color/background-color가 즉시 바뀌던 것을 부드럽게 — 클래스 하나로
+   7개 화면의 모든 카드형 요소에 동시 적용된다. */
+.pathogen-card,
+.country-row,
+.tree-node,
+.status-row {
+    transition-property: border-color, background-color;
+    transition-duration: var(--transition-normal);
+    transition-timing-function: ease-out;
+}
+
+.pathogen-card:hover,
+.country-row:hover,
+.tree-node:hover {
+    border-color: var(--color-border-hover);
+    background-color: var(--color-surface-hover);
 }

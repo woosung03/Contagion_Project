@@ -79,6 +79,10 @@ namespace Contagion.Managers
             worldState.dnaPoints = loaded.dnaPoints;
             worldState.currentDay = loaded.currentDay;
             worldState.cureResearchStarted = loaded.cureResearchStarted;
+            // [Step 54] 이 플래그를 안 옮기면 저장된 판을 불러올 때마다 hasEverBeenInfected가 false로
+            // 리셋돼, 로드 직후 감염자가 우연히 0인 프레임에 IsPathogenEradicated 게이트가 잘못 열려있는
+            // 상태가 된다 — 불러온 판은 이미 감염이 진행 중이었을 것이므로 그대로 복사해야 안전하다.
+            worldState.hasEverBeenInfected = loaded.hasEverBeenInfected;
             NotifyWorldStateChanged();
         }
 
@@ -110,6 +114,13 @@ namespace Contagion.Managers
             worldState.totalPopulation = pop;
             worldState.infectedCount = infected;
             worldState.deadCount = dead;
+
+            // [Step 54] 감염이 실제로 한 번이라도 관측되면 게이트를 켠다 — WorldState.IsPathogenEradicated가
+            // "발원 감염이 아직 안 심어진 새 게임 시작 직후"를 "치료제로 박멸됨"으로 착각하지 않도록 하는
+            // 플래그. GameDataBootstrapper.SeedStartingInfection()도 이 메서드를 호출하므로, 발원국에 처음
+            // 감염을 심는 시점에 자동으로 true가 된다(별도 배선 불필요).
+            if (infected > 0) worldState.hasEverBeenInfected = true;
+
             NotifyWorldStateChanged();
         }
     }

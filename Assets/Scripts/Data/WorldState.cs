@@ -25,6 +25,17 @@ namespace Contagion.Data
         public bool cureResearchStarted;
 
         /// <summary>
+        /// [Step 54] "게임 시작 버튼을 누르면 즉시 패배(광고 보고 부활/다시 시작) 화면이 뜬다" 버그 수정용
+        /// 플래그. 문제의 원인: <see cref="IsPathogenEradicated"/>가 "infectedCount &lt;= 0"만으로
+        /// 패배를 판정하는데, 이 조건은 "치료제 완성으로 병원체가 박멸된 상태"와 "아직 발원 감염이
+        /// 심어지기 전(=새 게임 막 시작 직후)"을 구분하지 못한다 — 둘 다 infectedCount가 0이기 때문.
+        /// 감염이 실제로 한 번이라도 기록된 적이 있어야만(RecalculateWorldTotals()가 감지) 그 뒤로
+        /// infectedCount가 0이 되는 걸 "박멸"로 인정하도록 게이트를 건다(cureResearchStarted와 같은
+        /// 패턴 — 절대값만으로는 "아직 시작 전"과 "끝난 후"를 구분 못 하는 문제에 항상 이 방식을 씀).
+        /// </summary>
+        public bool hasEverBeenInfected;
+
+        /// <summary>
         /// 새 게임 시작(재시작 포함) 시 호출. totalPopulation/infectedCount/deadCount는 어차피
         /// WorldDataManager.SetCountries() 직후 RecalculateWorldTotals()가 다시 계산하지만,
         /// cureProgress/plagueVisibility/dnaPoints/currentDay는 그 계산에 포함되지 않아 별도로
@@ -41,6 +52,7 @@ namespace Contagion.Data
             dnaPoints = 0;
             currentDay = 0;
             cureResearchStarted = false;
+            hasEverBeenInfected = false;
         }
 
         public void AddDna(int amount) => dnaPoints = Math.Max(0, dnaPoints + amount);
@@ -62,8 +74,13 @@ namespace Contagion.Data
         /// 스스로 소멸(전파력 부족으로 자연 소멸)해도 플레이어 입장에선 동일한 패배이기 때문.
         /// (예전엔 cureProgress >= 1f도 같이 요구해서, 마지막 생존자 1명이 남고 병원체가 이미
         /// 자연 소멸한 상태에서 cureProgress가 100%가 아니면 영원히 게임이 안 끝나는 버그가 있었음.)
+        ///
+        /// [Step 54] hasEverBeenInfected 게이트 추가 — "감염자 0명"은 발원 감염이 아직 심어지기 전
+        /// (새 게임 막 시작한 직후)에도 참이라, 게이트 없이는 게임 시작 버튼을 누르자마자 이 조건이
+        /// 바로 만족돼 즉시 패배 화면(광고 보고 부활/다시 시작)이 뜨는 버그가 있었다. 감염이 실제로
+        /// 한 번이라도 있었던 뒤에만(RecalculateWorldTotals가 감지) 그 이후 0이 되는 걸 "박멸"로 본다.
         /// </summary>
-        public bool IsPathogenEradicated => infectedCount <= 0 && deadCount < totalPopulation;
+        public bool IsPathogenEradicated => hasEverBeenInfected && infectedCount <= 0 && deadCount < totalPopulation;
 
         /// <summary>plagueVisibility 값을 5개 구간으로 분류. 설계 문서 5절.</summary>
         public ResistanceStage GetResistanceStage()

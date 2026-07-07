@@ -63,10 +63,24 @@ namespace Contagion.Managers
             "carrier, 0.1%면 2.5% 확률로만 carrier.")]
         private float carrierChanceScale = 25f;
 
+        // [Step 40] 원래 TransportUnit 자신의 인스펙터 필드였는데, TransportUnit은 프리팹 없이 코드로만
+        // 생성돼(AddComponent) 인스펙터에서 값을 바꿔도 Play 종료 시 사라졌다 — "이미지 크기를 어디서
+        // 조정하냐"는 질문에 답이 될, 실제로 저장되는 위치가 필요해서 TransportManager(씬에 실제로
+        // 존재하는 컴포넌트)로 옮겼다. 비행기/배 이모지 본체 크기 배율 — 1이 원본 텍스처 크기.
+        [SerializeField, Tooltip("비행기/배 이모지 본체 크기 배율(1=원본 텍스처 크기). 여기서 조정하면 " +
+            "다음 구간부터 즉시 반영되고 Play 종료 후에도 씬에 저장된다 — 이미지 파일 자체의 픽셀 크기나 " +
+            "Pixels Per Unit을 바꿀 필요 없음.")]
+        private float iconScale = 0.8f;
+
         [Header("경로선 시각화")]
-        [SerializeField] private Color airRouteColor = new Color(0.55f, 0.85f, 1f, 0.18f);
-        [SerializeField] private Color seaRouteColor = new Color(0.55f, 0.8f, 0.6f, 0.18f);
-        [SerializeField] private float routeLineWidth = 0.02f;
+        // [Step 48] "감염 점에 가려서 노선이 안 보인다" 재신고 — sortingOrder 자체는 재검증 결과
+        // 이미 올바르게 노선(30) > 핫스팟(10)이었다(레이어 순서 버그 아님). 실제 원인은 대비 문제였음:
+        // 알파 0.18짜리 얇은(0.02) 선이 alpha-blend되면 아래에 있는 크고 채도 높은 빨간 핫스팟이
+        // 82% 그대로 비쳐 보여서, 그리는 순서는 맞아도 육안으로는 "핫스팟한테 먹힌 것"처럼 보였다.
+        // 알파/두께를 올려 겹쳐도 선이 뚜렷하게 남도록 함.
+        [SerializeField] private Color airRouteColor = new Color(0.55f, 0.85f, 1f, 0.55f);
+        [SerializeField] private Color seaRouteColor = new Color(0.55f, 0.8f, 0.6f, 0.55f);
+        [SerializeField] private float routeLineWidth = 0.032f;
 
         private List<TransportHub> _hubs;
         private Dictionary<string, TransportHub> _hubLookup;
@@ -272,7 +286,9 @@ namespace Contagion.Managers
             line.SetPositions(path);
             line.startWidth = routeLineWidth;
             line.endWidth = routeLineWidth;
-            line.sortingOrder = 40;
+            // [Step 46] 레이어 순서 재정비 — 지도(0) < 감염 핫스팟(10) < 국가 오버레이(20) < 교통 노선(이 값,
+            // 30) < 교통 유닛(39~40). "비행기/배와 경로를 가장 위 그룹으로" 요청 반영, 예전 40에서 조정.
+            line.sortingOrder = 30;
             line.numCapVertices = 2;
 
             var color = type == TransportHubType.Air ? airRouteColor : seaRouteColor;
@@ -303,7 +319,7 @@ namespace Contagion.Managers
             unit.transform.SetParent(_unitsParent);
             unit.OnArrived -= HandleUnitArrived;
             unit.OnArrived += HandleUnitArrived;
-            unit.BeginLeg(source.id, destination.id, path, source.type, speed, isCarrier);
+            unit.BeginLeg(source.id, destination.id, path, source.type, speed, isCarrier, iconScale);
 
             _active.Add(unit);
             _remainingHops[unit] = Random.Range(minHopsPerUnit, maxHopsPerUnit + 1);
@@ -340,7 +356,7 @@ namespace Contagion.Managers
             bool isCarrier = RollIsCarrier(currentHub.countryId);
             float speed = currentHub.type == TransportHubType.Air ? airSpeed : seaSpeed;
             var path = BuildPathPoints(currentHub, next, fromPos, toPos);
-            unit.BeginLeg(currentHub.id, next.id, path, currentHub.type, speed, isCarrier);
+            unit.BeginLeg(currentHub.id, next.id, path, currentHub.type, speed, isCarrier, iconScale);
         }
 
         /// <summary>

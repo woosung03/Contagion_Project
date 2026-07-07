@@ -15,9 +15,16 @@ namespace Contagion.Gameplay
     {
         [SerializeField] private string resourcePath = "WorldMap/world_base";
 
+        [SerializeField, Tooltip("[Step 46] 전체 레이어 순서 중 가장 아래(바다/지도) — 국가 오버레이(20)," +
+            "감염 핫스팟(10), 교통 노선(30), 교통 유닛(39~40)이 전부 이 값보다 위에 오도록 잡혀 있다. " +
+            "이전엔 명시적으로 설정하지 않아 Editor 기본값(대개 0)에 의존했는데, '가시성 개선을 위해 " +
+            "레이어 순서를 명확히 해달라'는 요청으로 다른 레이어들과 함께 코드에서 직접 고정했다.")]
+        private int sortingOrder = 0;
+
         private void Awake()
         {
             var renderer = GetComponent<SpriteRenderer>();
+            renderer.sortingOrder = sortingOrder;
             var sprites = Resources.LoadAll<Sprite>(resourcePath);
             Sprite sprite = sprites != null && sprites.Length > 0 ? sprites[0] : Resources.Load<Sprite>(resourcePath);
 

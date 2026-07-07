@@ -102,7 +102,7 @@ namespace Contagion.UI
             _deadLabel.text = $"사망자: {state.deadCount:N0}";
             _cureLabel.text = $"치료제: {state.cureProgress * 100f:F1}%";
             _dnaLabel.text = $"DNA: {state.dnaPoints:N0}";
-            _dayLabel.text = $"Day {state.currentDay}";
+            _dayLabel.text = $"{state.currentDay}일차";
 
             _infectedGraph?.AddSample(state.infectedCount);
             _deadGraph?.AddSample(state.deadCount);

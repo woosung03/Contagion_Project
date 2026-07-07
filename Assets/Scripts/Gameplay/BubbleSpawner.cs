@@ -21,7 +21,11 @@ namespace Contagion.Gameplay
 
         [Header("버블 수명/스폰")]
         [SerializeField] private float bubbleLifetime = 6f;
-        [SerializeField] private float spawnRadius = 0.5f;
+        [SerializeField, Tooltip("[Step 42] 더 이상 실제 스폰 반경으로 쓰이지 않는다 — 국가마다 크기가 " +
+            "달라 고정값 하나로는 작은 나라에서 국경 밖으로 버블이 벗어나는 버그가 있었다(CountryView." +
+            "DnaSpawnScatterRadius가 국가별 반경을 대신 계산). CountryView 등록이 안 된 국가(이론상 " +
+            "발생 안 함)에 대한 최후 폴백으로만 남겨둠.")]
+        private float spawnRadius = 0.03f;
 
         private ObjectPool<DnaBubble> _pool;
 
@@ -62,8 +66,13 @@ namespace Contagion.Gameplay
             var view = WorldMap.Instance != null ? WorldMap.Instance.GetView(country.id) : null;
             // Step 29: 모든 CountryView가 (0,0,0)에 겹쳐 있으므로(세계지도 오버레이 방식) 더 이상
             // view.transform.position을 쓰면 안 되고, 국가별로 미리 계산해둔 스폰 앵커를 써야 한다.
-            Vector3 basePos = view != null ? view.DnaSpawnWorldPosition : Vector3.zero;
-            Vector3 offset = (Vector3)(UnityEngine.Random.insideUnitCircle * spawnRadius);
+            // Step 42: 국가 중심 근사치(DnaSpawnWorldPosition) 주변에 고정 반경으로 흩뿌리던 방식은
+            // 국가 크기 차이를 반영하지 못해 작은 나라에서 버블이 국경 밖에 스폰되는 버그가 있었다.
+            // GetRandomDnaSpawnWorldPosition()이 실루엣 내부가 보장된 감염 점 좌표를 재사용하고,
+            // DnaSpawnScatterRadius가 국가별로 알맞은(작은 나라는 작게) 산개 반경을 제공한다.
+            Vector3 basePos = view != null ? view.GetRandomDnaSpawnWorldPosition() : Vector3.zero;
+            float radius = view != null ? view.DnaSpawnScatterRadius : spawnRadius;
+            Vector3 offset = (Vector3)(UnityEngine.Random.insideUnitCircle * radius);
 
             var bubble = _pool.Get();
             bubble.transform.position = basePos + offset;

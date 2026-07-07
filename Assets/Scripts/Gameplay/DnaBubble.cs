@@ -16,6 +16,13 @@ namespace Contagion.Gameplay
             "기본 플레이 퀄리티 개선 항목 — 버블이 뿅 나타나는 손맛을 위함.")]
         private float popInDuration = 0.25f;
         [SerializeField] private Color collectTextColor = new Color(1f, 0.85f, 0.2f);
+        [SerializeField, Tooltip("[Step 47] 레이어 순서 정리 과정에서 발견 — 이 컴포넌트는 프리팹 " +
+            "(BubbleSpawner.bubblePrefab)이 아직 씬/에셋에 배선되지 않아(CLAUDE.md '씬/에셋 배선 필요' " +
+            "참고) 실제로 스폰되지 않는 상태지만, 나중에 프리팹이 만들어질 때 SpriteRenderer의 " +
+            "sortingOrder를 깜빡하고 기본값(0)으로 두면 지도(0)와 같은 레이어에 걸려 다른 요소에 가려질 " +
+            "수 있어 미리 방어적으로 추가해둠. 탭해서 수집하는 상호작용 요소라 교통 유닛(40)보다도 위에 " +
+            "두어 항상 보이고 클릭 가능하게 잡았다(FloatingTextEffect의 100보다는 아래).")]
+        private int sortingOrder = 45;
 
         public int DnaValue { get; private set; }
 
@@ -37,6 +44,9 @@ namespace Contagion.Gameplay
         private void Awake()
         {
             _baseScale = transform.localScale;
+
+            var spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null) spriteRenderer.sortingOrder = sortingOrder; // [Step 47]
         }
 
         /// <summary>풀에서 꺼내져 활성화될 때 호출.</summary>

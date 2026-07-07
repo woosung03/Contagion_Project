@@ -163,11 +163,13 @@ namespace Contagion.Managers
             // (전 세계 공통 ResistanceStage와 별개로 국가 자체 사망률만 본다. Docs/PlagueIncReference.md 1절)
             var collapseStage = country.GetCollapseStage();
 
+            // [Step 55] "이 부류 디버그 로그 지워줘" 요청으로 국가별 붕괴 단계 변경 로그를 제거했다 — 48개국이
+            // 각자 붕괴 단계가 바뀔 때마다 콘솔에 로그를 남겨 스팸이 심했다(CountryView의 목표색 갱신 로그를
+            // 지웠던 Step 54와 같은 종류의 요청). _lastCollapseStage 갱신 자체는 funding 배율 계산에 필요한
+            // 로직이라 그대로 유지하고, 로그 호출만 제거했다.
             if (!_lastCollapseStage.TryGetValue(country.id, out var lastCollapseStage) || lastCollapseStage != collapseStage)
             {
                 _lastCollapseStage[country.id] = collapseStage;
-                Debug.Log($"[HumanResistanceManager] {country.name}({country.id}) 붕괴 단계 변경: " +
-                    $"{lastCollapseStage} -> {collapseStage} (사망률={(country.population > 0 ? (float)country.deadCount / country.population : 0f):P1})");
             }
 
             switch (collapseStage)

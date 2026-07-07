@@ -14,6 +14,9 @@
     font-size: var(--font-size-xl);
     -unity-font-style: bold;
     margin-bottom: var(--space-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .popup-row {

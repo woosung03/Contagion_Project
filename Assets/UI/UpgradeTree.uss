@@ -81,9 +81,10 @@
     border-width: 2px;
     border-color: var(--color-border);
     border-radius: var(--radius-md);
-    padding: 4px 8px;
+    padding: 4px 6px;
     justify-content: center;
     align-items: center;
+    overflow: hidden; /* 한글 표시명이 길어져도 박스 밖으로 새지 않도록 하는 안전망 */
 }
 
 .tree-node--transmission {
@@ -110,10 +111,10 @@
 
 .tree-node__label {
     color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    white-space: normal;
+    white-space: normal; /* 한글 표시명이 두 단어(예: "다발성 장기부전 II")일 때 자연스럽게 줄바꿈 */
 }
 
 .tree-node__cost {
@@ -132,6 +133,7 @@
     color: var(--color-text-primary);
     font-size: var(--font-size-lg);
     -unity-font-style: bold;
+    white-space: normal;
 }
 
 .detail-panel__desc {

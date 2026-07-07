@@ -251,15 +251,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: IDN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.53, y: -0.3}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &113463489
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -358,15 +370,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ETH
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.84, y: -0.07}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &130670494
 Transform:
   m_ObjectHideFlags: 0
@@ -442,15 +466,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: BAN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.94, y: 0.32}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &135641283
 SpriteRenderer:
   serializedVersion: 2
@@ -903,15 +939,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: MOZ
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.74, y: -0.74}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &207185882
 Transform:
   m_ObjectHideFlags: 0
@@ -1052,15 +1100,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: AUS
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.9, y: -0.95}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &232393739
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1372,15 +1432,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: PAK
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.45, y: 0.48}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &266060551
 Transform:
   m_ObjectHideFlags: 0
@@ -1547,15 +1619,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ALG
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0, y: 0.43}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &317323187
 Transform:
   m_ObjectHideFlags: 0
@@ -1859,15 +1943,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: TAN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.73, y: -0.46}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &351171985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1882,15 +1978,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: FRA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -0.01, y: 0.9}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &354823894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1905,15 +2013,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: GER
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.15, y: 1.01}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &357476235
 GameObject:
   m_ObjectHideFlags: 0
@@ -1947,15 +2067,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: SAU
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.93, y: 0.33}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &361235256
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2062,15 +2194,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: MAS
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.54, y: -0.2}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &367847888
 SpriteRenderer:
   serializedVersion: 2
@@ -2144,15 +2288,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: RUS
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.69, y: 1.24}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &368985238
 Transform:
   m_ObjectHideFlags: 0
@@ -2182,15 +2338,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: EGY
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.6, y: 0.39}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &376096670
 SpriteRenderer:
   serializedVersion: 2
@@ -2264,15 +2432,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: MAR
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -0.24, y: 0.47}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &386057071
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2333,15 +2513,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: IRQ
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.89, y: 0.56}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &401456527
 Transform:
   m_ObjectHideFlags: 0
@@ -2476,15 +2668,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: VIE
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.32, y: 0.13}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &429586266
 SpriteRenderer:
   serializedVersion: 2
@@ -2558,15 +2762,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: AFG
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.36, y: 0.58}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &432808313
 GameObject:
   m_ObjectHideFlags: 0
@@ -2778,15 +2994,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: THA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.21, y: 0.09}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &481972841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2801,15 +3029,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: YEM
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.01, y: 0.12}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &481987287
 Transform:
   m_ObjectHideFlags: 0
@@ -2885,15 +3125,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: TUR
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.69, y: 0.71}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &487455490
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3032,15 +3284,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: UK
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -0.1, y: 1.08}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &496053931
 Transform:
   m_ObjectHideFlags: 0
@@ -3292,15 +3556,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ANG
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.34, y: -0.61}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -3453,15 +3729,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: BRA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -1.25, y: -0.57}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &529259878
 GameObject:
   m_ObjectHideFlags: 0
@@ -3747,15 +4035,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ITA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.2, y: 0.82}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &568447516
 GameObject:
   m_ObjectHideFlags: 0
@@ -3865,15 +4165,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: SDN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.61, y: 0.12}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &579095351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3888,15 +4200,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: GHA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -0.08, y: -0.09}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &579621982
 Transform:
   m_ObjectHideFlags: 0
@@ -4079,15 +4403,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: COL
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -1.71, y: -0.19}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &593721546
 SpriteRenderer:
   serializedVersion: 2
@@ -4222,15 +4558,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: NGA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.13, y: -0.05}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &605528047
 SpriteRenderer:
   serializedVersion: 2
@@ -4304,15 +4652,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: RSA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.49, y: -1.04}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -4634,15 +4994,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: UZB
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.26, y: 0.78}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &643170210
 GameObject:
   m_ObjectHideFlags: 0
@@ -5374,15 +5746,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: IRN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.12, y: 0.54}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &699655092
 GameObject:
   m_ObjectHideFlags: 0
@@ -5710,15 +6094,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: CHI
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.14, y: 0.64}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &735204845
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6024,15 +6420,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: PER
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -1.74, y: -0.53}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &773079962
 GameObject:
   m_ObjectHideFlags: 0
@@ -6066,15 +6474,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: KOR
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.66, y: 0.64}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &773079964
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6669,15 +7089,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: DRC
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.48, y: -0.37}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &818855474
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6692,15 +7124,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: POL
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.32, y: 1.04}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!1 &818966789
 GameObject:
   m_ObjectHideFlags: 0
@@ -7267,15 +7711,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: PHI
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.67, y: 0.11}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &875948016
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -7637,15 +8093,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ARG
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -1.44, y: -1.19}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &902650607
 Transform:
   m_ObjectHideFlags: 0
@@ -7808,15 +8276,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: CAN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -1.91, y: 1.16}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &953151598
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7831,15 +8311,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: ESP
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -0.13, y: 0.74}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!4 &954069733
 Transform:
   m_ObjectHideFlags: 0
@@ -7930,15 +8422,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: UGA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.68, y: -0.25}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &964019016
 SpriteRenderer:
   serializedVersion: 2
@@ -8046,15 +8550,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: MEX
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -2.32, y: 0.32}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &976247350
 SpriteRenderer:
   serializedVersion: 2
@@ -8128,15 +8644,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: MYA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.09, y: 0.25}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!212 &980730091
 SpriteRenderer:
   serializedVersion: 2
@@ -8229,15 +8757,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: KEN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 0.8, y: -0.28}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!114 &994684355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8257,12 +8797,13 @@ MonoBehaviour:
   minHopsPerUnit: 3
   maxHopsPerUnit: 6
   airSpeed: 2.4
-  seaSpeed: 0.6
+  seaSpeed: 0.5
   airArrivalInfectionChance: 0.35
   seaArrivalInfectionChance: 0.15
   airSeedAmount: 10
   seaSeedAmount: 20
   carrierChanceScale: 25
+  iconScale: 0.15
   airRouteColor: {r: 0.55, g: 0.85, b: 1, a: 0.18}
   seaRouteColor: {r: 0.55, g: 0.8, b: 0.6, a: 0.18}
   routeLineWidth: 0.02
@@ -8280,15 +8821,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: JPN
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 2.86, y: 0.63}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &997847753
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8439,15 +8992,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: USA
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: -2.13, y: 0.71}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &1568159515
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8601,15 +9166,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Gameplay.CountryView
   countryId: IND
   healthyColor: {r: 0.35, g: 0.75, b: 0.35, a: 0}
-  infectedColor: {r: 0.95, g: 0.65, b: 0.1, a: 0.65}
-  deadColor: {r: 0.55, g: 0.05, b: 0.05, a: 0.85}
+  infectedColor: {r: 0.6320754, g: 0.1175098, b: 0, a: 0.65}
+  deadColor: {r: 0, g: 0, b: 0, a: 0.85}
   colorTransitionSpeed: 3
   dnaSpawnLocalOffset: {x: 1.71, y: 0.29}
-  maxInfectionDots: 16
-  infectionDotColor: {r: 0.85, g: 0.05, b: 0.05, a: 0.95}
-  infectionDotDiameterScale: 1
+  dotsEnabled: 1
+  maxInfectionDots: 600
+  infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
+  infectionDotDiameterScale: 0.5
   dotTransitionSpeed: 6
-  dotSortingOrder: 50
+  dotSortingOrder: 10
+  hotspotsEnabled: 0
+  maxHotspotCount: 10
+  minHotspotCount: 3
+  hotspotCountDivisor: 1.5
+  hotspotSizeBoost: 1.5
+  maxHotspotDiameterFraction: 0.35
+  hotspotColor: {r: 0.85, g: 0.1, b: 0.1, a: 0.85}
+  hotspotTransitionSpeed: 4
+  hotspotSortingOrder: 50
+  countrySortingOrder: 20
+  minRevealedScaleFraction: 0.3
 --- !u!61 &1713983935
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -8967,12 +9544,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f8b15a6912f4d44d93459ec442b942e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.SimulationManager
-  tickIntervalSeconds: 5
+  tickIntervalSeconds: 0.1
   autoStart: 1
   globalSpreadFactor: 0.5
   visibilityGainRate: 0.02
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0006
+  cureProgressCoefficient: 0.0001
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05

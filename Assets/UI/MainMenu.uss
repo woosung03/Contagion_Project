@@ -48,6 +48,9 @@
     color: var(--color-text-primary);
     font-size: 21px;
     -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .pathogen-card__stats {
@@ -90,6 +93,10 @@
     font-size: var(--font-size-lg);
     -unity-font-style: bold;
     flex-grow: 1;
+    min-width: 0; /* flex row 안에서 형제(국기)에 밀려도 줄바꿈 대신 말줄임되도록 축소를 허용 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .country-row__meta {
@@ -109,6 +116,9 @@
     color: var(--color-brand-gold);
     font-size: 22px;
     -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .detail-panel__desc {

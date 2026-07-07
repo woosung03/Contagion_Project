@@ -328,8 +328,9 @@ namespace Contagion.Managers
 
         private void RaiseNews(NewsEventCategory category, string text)
         {
+            // 콘솔에 뉴스 이벤트마다 Debug.Log를 남기던 것을 제거 — 인게임 뉴스피드(NewsFeedController가
+            // 구독하는 OnNewsEvent)에는 영향 없음, 콘솔 스팸만 없앤 것.
             int day = WorldDataManager.Instance?.State.currentDay ?? 0;
-            Debug.Log($"[EventManager] Day {day} [{category}] {text}");
             OnNewsEvent?.Invoke(new NewsEvent(category, text, day));
         }
     }

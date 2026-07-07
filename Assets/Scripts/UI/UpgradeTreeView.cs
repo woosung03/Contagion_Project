@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Contagion.Ads;
@@ -36,10 +37,76 @@ namespace Contagion.UI
     {
         // 열 간격을 180→140으로 줄인 DefaultUpgradeTreeFactory에 맞춰 노드 박스와 캔버스 여백도 축소
         // (트리를 좀 더 작게 해달라는 피드백 + 참조 해상도 480px 폭 안에 가로로 다 들어가게 하기 위함).
-        private const float NodeWidth = 110f;
-        private const float NodeHeight = 50f;
+        // UI 퀄리티 개선 — 노드 라벨이 node.id(영문 스네이크케이스, 예: "trans_air1")를 그대로 표시해
+        // 텍스트가 박스 밖으로 삐져나오던 문제를 한글 표시명(NodeDisplayNames)으로 교체하면서,
+        // 두 단어(예: "유전자 변이 II")가 자연스럽게 줄바꿈되도록 박스를 살짝 키웠다(110x50 → 126x60).
+        // 열 간격(140)/카테고리 간격(240)/행 간격(110)이 전부 이 값보다 넉넉해 겹침은 없다.
+        private const float NodeWidth = 126f;
+        private const float NodeHeight = 60f;
         private const float CanvasPadding = 48f;
         private const float TopOffset = 34f; // 카테고리 제목을 위한 상단 여백
+
+        /// <summary>
+        /// UpgradeNode.id(영문 내부 식별자) → 한국어 표시명. DefaultUpgradeTreeFactory의 45개 노드에
+        /// 전부 대응한다 — 여기 없는 id는 DisplayName()이 원본 id로 폴백한다(신규 노드 추가 시 안전망).
+        /// 감염경로 3갈래(공기/수인성/접촉→곤충→혈액), 증상 3갈래(기침/발진/구토), 능력 3갈래
+        /// (변이→약물저항/은신→위장/구조강화→구조적내성) 각각의 진행 단계를 로마 숫자로 표기.
+        /// </summary>
+        private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
+        {
+            // 감염 경로
+            { "trans_air1", "공기 전파 I" },
+            { "trans_water1", "수인성 전파 I" },
+            { "trans_contact1", "접촉 전파 I" },
+            { "trans_air2", "공기 전파 II" },
+            { "trans_water2", "수인성 전파 II" },
+            { "trans_insect1", "곤충 매개 전파" },
+            { "trans_droplet1", "비말 전파" },
+            { "trans_animal1", "인수공통 전파" },
+            { "trans_blood1", "혈액 전파" },
+            { "trans_droplet2", "비말 전파 강화" },
+            { "trans_animal2", "인수공통 전파 강화" },
+            { "trans_blood2", "혈액 전파 강화" },
+            { "trans_advanced1", "광역 전파 I" },
+            { "trans_advanced2", "광역 전파 II" },
+            { "trans_global", "전지구적 전파" },
+            // 증상
+            { "sym_cough", "기침" },
+            { "sym_rash", "발진" },
+            { "sym_nausea", "구토감" },
+            { "sym_fever", "발열" },
+            { "sym_lesion", "피부 병변" },
+            { "sym_vomit", "구토" },
+            { "sym_pneumonia", "폐렴" },
+            { "sym_dermatitis", "피부염" },
+            { "sym_hemorrhage", "출혈" },
+            { "sym_respfailure", "호흡 부전" },
+            { "sym_necrosis", "조직 괴사" },
+            { "sym_sepsis", "패혈증" },
+            { "sym_multiorgan1", "다발성 장기부전 I" },
+            { "sym_multiorgan2", "다발성 장기부전 II" },
+            { "sym_organfailure", "전신 장기부전" },
+            // 능력
+            { "abl_mutation1", "유전자 변이 I" },
+            { "abl_stealth1", "은신 I" },
+            { "abl_hardening1", "구조 강화 I" },
+            { "abl_mutation2", "유전자 변이 II" },
+            { "abl_stealth2", "은신 II" },
+            { "abl_hardening2", "구조 강화 II" },
+            { "abl_resist1", "약물 저항 I" },
+            { "abl_camouflage1", "위장 I" },
+            { "abl_resist2", "구조적 내성 I" },
+            { "abl_resist3", "약물 저항 II" },
+            { "abl_camouflage2", "위장 II" },
+            { "abl_resist4", "구조적 내성 II" },
+            { "abl_superbug1", "슈퍼균주 I" },
+            { "abl_superbug2", "슈퍼균주 II" },
+            { "abl_finalevo", "최종 진화체" },
+        };
+
+        /// <summary>node.id → 한국어 표시명. 매핑에 없는 id는 원본 id로 폴백(신규 노드 누락 방지 안전망).</summary>
+        private static string DisplayName(string id) =>
+            NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
 
         [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
         private UpgradeCategory category = UpgradeCategory.Transmission;
@@ -207,7 +274,7 @@ namespace Contagion.UI
             box.style.width = NodeWidth;
             box.style.height = NodeHeight;
 
-            var label = new Label(node.id);
+            var label = new Label(DisplayName(node.id));
             label.AddToClassList("tree-node__label");
             box.Add(label);
 
@@ -263,7 +330,7 @@ namespace Contagion.UI
             var node = UpgradeManager.Instance?.GetNode(nodeId);
             if (node == null) return;
 
-            _detailTitle.text = node.id;
+            _detailTitle.text = DisplayName(node.id);
             _detailDesc.text = BuildDescription(node);
 
             bool canUnlock = UpgradeManager.Instance.CanUnlock(nodeId);
@@ -278,7 +345,7 @@ namespace Contagion.UI
             var sb = new StringBuilder();
             sb.Append($"기본 비용: {node.cost} DNA (실제 비용은 같은 카테고리 해금 수에 따라 증가)\n");
             if (node.prerequisites.Count > 0)
-                sb.Append($"선행 노드: {string.Join(", ", node.prerequisites)}\n");
+                sb.Append($"선행 노드: {string.Join(", ", node.prerequisites.Select(DisplayName))}\n");
             if (node.effects.Count > 0)
             {
                 sb.Append("효과: ");

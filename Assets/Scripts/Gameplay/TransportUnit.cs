@@ -40,6 +40,15 @@ namespace Contagion.Gameplay
     /// 스프라이트마다 pixelsPerUnit이 다르면(기존 이모지 260 vs Ship 1 2500) 같은 값이 완전히 다른 두께로
     /// 보이는 버그를 발견해 월드 유닛 고정값(outlineThicknessWorldUnits)으로 교체했다. 사용자가 이미
     /// iconScale을 직접 조정해뒀다고 밝혀서 그 값은 건드리지 않았다.
+    ///
+    /// [Step 40] "이미지 적용이 안 되는 것 같다"는 피드백으로 파일 무결성을 다시 점검하다가 두 가지를
+    /// 발견했다: (1) plane.png가 언젠가부터 32×32(원래 64×64)로 손상돼 있었고, ship.png/ship_outline.png는
+    /// 프로젝트에서 아예 사라져 있었다(Twemoji 소스에서 복구). (2) 이보다 더 근본적인 문제로, 본체
+    /// 스프라이트만 Pixels Per Unit을 조정하면(정상적인 이미지 크기 조정 방법) 짝을 이루는 윤곽선
+    /// 스프라이트와 렌더링 크기가 어긋나는 구조적 버그가 있었음을 확인 — 윤곽선의 로컬 스케일을 본체
+    /// 스프라이트의 실제 월드 크기에 맞춰 매번 재계산하도록 고쳐 어떤 조합의 텍스처 크기/PPU에서도
+    /// 항상 맞게 만들었다. iconScale도 TransportUnit 필드(프리팹이 없어 인스펙터 조정이 저장되지
+    /// 않던 문제)에서 TransportManager 인스펙터 필드로 옮겨 영구적으로 조정 가능하게 했다.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class TransportUnit : MonoBehaviour
@@ -53,9 +62,15 @@ namespace Contagion.Gameplay
 
         // Step 30-3에서 항공=파랑 계열/해운=초록 계열, carrier=주황/빨강으로 색상(hue) 자체를 확실히
         // 갈라놓았던 배색을 그대로 유지 — [Step 37]에선 halo에, [Step 38]부터는 윤곽선에 적용한다.
+        // [Step 48] SeaCarrierColor(구 0.85,0.12,0.12,1)가 CountryView.hotspotColor(0.85,0.1,0.1,0.5)와
+        // 사실상 같은 빨강이었다 — 배가 실제 이미지("Ship 1.png")라 본체는 흰색(무변화)이고 carrier 신호는
+        // 얇은 윤곽선(0.012 월드유닛) 색으로만 표시되는데, 그 얇은 빨간 선이 뒤에 있는 크고 채도 높은
+        // 빨간 핫스팟과 색이 겹쳐 시각적으로 묻혀버렸다("배가 감염 점에 가려 안 보인다"는 신고의 실제
+        // 원인 — sortingOrder는 배(40)가 핫스팟(10)보다 이미 위라 정상). 핫스팟 빨강과 확실히 구분되는
+        // 색상(마젠타)으로 교체.
         private static readonly Color AirCarrierColor = new Color(1f, 0.5f, 0f, 1f);
         private static readonly Color AirIdleColor = new Color(0.15f, 0.55f, 1f, 0.95f);
-        private static readonly Color SeaCarrierColor = new Color(0.85f, 0.12f, 0.12f, 1f);
+        private static readonly Color SeaCarrierColor = new Color(1f, 0.15f, 0.75f, 1f);
         private static readonly Color SeaIdleColor = new Color(0.1f, 0.65f, 0.4f, 0.95f);
 
         // [Step 37] 이모지 원본 그림이 기본적으로 향하는 방향 — FaceTravelDirection의 Atan2 회전
@@ -68,9 +83,11 @@ namespace Contagion.Gameplay
         // [Step 38] 8방향 윤곽선 오프셋 복사본의 회전각(도) — 등간격 45도씩.
         private static readonly float[] OutlineOffsetAngles = { 0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f };
 
-        [SerializeField, Tooltip("이모지 본체 크기 배율. Step 38에서 '비행기/배 이미지가 너무 크다'는 " +
-            "피드백을 받아 기본값을 1보다 살짝 작게 잡았다 — 전체 배율이라 아웃라인도 같이 줄어든다.")]
-        private float iconScale = 0.8f;
+        // [Step 40] iconScale은 더 이상 이 클래스의 인스펙터 필드가 아니다 — TransportUnit은 프리팹 없이
+        // 매번 코드로 생성돼(TransportManager.Awake의 AddComponent) 인스펙터에서 값을 조정해도 저장이
+        // 안 되는 문제가 있었다("이모지 크기 내가 직접 조정했다"고 했지만 Play 종료 시 리셋됨). 실제
+        // 저장되는 값은 TransportManager 인스펙터의 iconScale 필드로 옮기고, BeginLeg() 호출 시마다
+        // 파라미터로 전달받아 적용한다 — carrierChanceScale과 동일한 패턴.
 
         [SerializeField, Tooltip("색상 윤곽선 두께 — 월드 유닛 기준(고정값). [Step 39] 원래는 " +
             "'텍스처 픽셀 수 / 스프라이트 pixelsPerUnit'으로 계산했는데, 사용자가 새 배 이미지(Ship 1, " +
@@ -106,11 +123,15 @@ namespace Contagion.Gameplay
         private void Awake()
         {
             _renderer = GetComponent<SpriteRenderer>();
-            _renderer.sortingOrder = 60; // DNA 버블(연출) 아래, 국가 오버레이 위 정도의 어중간한 레이어 — 필요시 조정
+            // [Step 46] 레이어 순서 재정비 — 지도(0) < 감염 핫스팟(10) < 국가 오버레이(20) < 교통 노선(30)
+            // < 교통 유닛(이 값, 40). "비행기/배와 경로를 가장 위 레이어로" 요청 반영(예전 60에서 조정,
+            // DNA 버블은 이번 요청 범위 밖이라 손대지 않음 — 여전히 명시적 sortingOrder가 없어 기본값 0).
+            _renderer.sortingOrder = 40;
 
-            // [Step 38] 이모지 본체 크기를 살짝 줄임 — 자식(윤곽선 복사본)도 이 루트 transform 기준
-            // 로컬 좌표라 같이 축소돼 비율이 항상 맞는다.
-            transform.localScale = new Vector3(iconScale, iconScale, 1f);
+            // [Step 40] 본체 크기(icon scale) 적용을 Awake()에서 BeginLeg()로 옮겼다 — 이전엔 여기서
+            // 인스펙터 기본값(iconScale)을 한 번만 읽어 고정했는데, 오브젝트 풀로 재사용되는 유닛이라
+            // TransportManager의 최신 설정값을 매번 반영하지 못하는 문제가 있었다(TransportManager가
+            // carrierChanceScale처럼 인스펙터에 노출한 값을 실제로 쓰려면 매 구간마다 다시 읽어야 함).
 
             // [Step 38] carrier/idle 구분을 halo(반투명 원) 대신 이모지 실루엣을 따라가는 색상 윤곽선으로
             // 표현 — 실루엣 스프라이트를 8방향으로 몇 픽셀씩 어긋나게 겹쳐 그려서 본체 가장자리 바깥으로
@@ -123,7 +144,7 @@ namespace Contagion.Gameplay
                 var outlineObject = new GameObject($"Outline_{i}");
                 outlineObject.transform.SetParent(transform, false);
                 var outlineRenderer = outlineObject.AddComponent<SpriteRenderer>();
-                outlineRenderer.sortingOrder = 59; // 이모지 본체(60)보다 한 단계 아래
+                outlineRenderer.sortingOrder = 39; // [Step 46] 이모지 본체(40)보다 한 단계 아래(예전 59/60에서 조정)
                 _outlineRenderers[i] = outlineRenderer;
             }
         }
@@ -134,9 +155,14 @@ namespace Contagion.Gameplay
         /// path는 출발 허브부터 도착 허브까지(양 끝 포함) 순서대로 지나갈 지점들 — 최소 2개(직선).
         /// </summary>
         public void BeginLeg(string fromHubId, string toHubId, Vector3[] path,
-            TransportHubType hubType, float speed, bool isCarrier)
+            TransportHubType hubType, float speed, bool isCarrier, float iconScale)
         {
             if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
+
+            // [Step 40] 매 구간 시작마다 적용 — 오브젝트 풀로 재사용되는 유닛이라도 TransportManager
+            // 인스펙터에서 iconScale을 바꾸면 다음 구간부터 바로 반영된다(Awake에서 한 번만 고정하던
+            // 이전 방식은 풀링 특성상 인스펙터 변경이 반영 안 되는 문제가 있었다).
+            transform.localScale = new Vector3(iconScale, iconScale, 1f);
 
             CurrentHubId = fromHubId;
             DestinationHubId = toHubId;
@@ -169,6 +195,25 @@ namespace Contagion.Gameplay
                 : null;
             bool showOutline = _isEmojiSprite && outlineSprite != null;
             float offsetMagnitude = showOutline ? outlineThicknessWorldUnits : 0f;
+
+            // [Step 40] 윤곽선 스프라이트가 본체 스프라이트와 정확히 같은 텍스처 픽셀 크기/pixelsPerUnit을
+            // 공유한다고 가정했었는데(실루엣 PNG를 본체와 "동일 해상도"로 만들어뒀으니 당연히 맞을
+            // 거라 가정), 사용자가 Unity 에디터에서 본체 스프라이트만 Pixels Per Unit을 직접 조정하면
+            // (이미지 크기를 조정하는 정상적인 방법) 윤곽선 스프라이트는 그대로 남아 둘의 실제 렌더링
+            // 크기가 어긋나는 버그가 있었다(예: 비행기 본체 350 PPU vs 윤곽선 500 PPU — 윤곽선이 본체보다
+            // 작아져서 아예 안 보이거나, 반대 경우엔 본체보다 훨씬 크게 삐져나와 보임). 텍스처 픽셀
+            // 크기·pixelsPerUnit이 서로 달라도 항상 맞도록, 윤곽선의 로컬 스케일을 "본체의 실제 월드
+            // 크기 / 윤곽선 스프라이트 자체의 월드 크기" 비율로 매번 다시 계산해서 강제로 맞춘다.
+            Vector3 outlineLocalScale = Vector3.one;
+            if (showOutline)
+            {
+                Vector2 bodySize = _renderer.sprite.bounds.size;
+                Vector2 outlineNativeSize = outlineSprite.bounds.size;
+                float sx = outlineNativeSize.x > 0.0001f ? bodySize.x / outlineNativeSize.x : 1f;
+                float sy = outlineNativeSize.y > 0.0001f ? bodySize.y / outlineNativeSize.y : 1f;
+                outlineLocalScale = new Vector3(sx, sy, 1f);
+            }
+
             for (int i = 0; i < _outlineRenderers.Length; i++)
             {
                 var outlineRenderer = _outlineRenderers[i];
@@ -177,6 +222,7 @@ namespace Contagion.Gameplay
 
                 outlineRenderer.sprite = outlineSprite;
                 outlineRenderer.color = stateColor;
+                outlineRenderer.transform.localScale = outlineLocalScale;
                 float rad = OutlineOffsetAngles[i] * Mathf.Deg2Rad;
                 outlineRenderer.transform.localPosition =
                     new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * offsetMagnitude;
@@ -259,7 +305,10 @@ namespace Contagion.Gameplay
 
         /// <summary>[Step 39] Resources/TransportIcons/Ship 1.png(사용자 제공 고해상도 화물선) 로드 시도 —
         /// Multiple 스프라이트 모드라 LoadFirstSprite(LoadAll 기반)로 꺼낸다. 실패하면 기존 Twemoji
-        /// ship.png(🚢)로, 그것도 실패하면 절차적 선체형으로 순서대로 폴백.</summary>
+        /// ship.png(🚢)로, 그것도 실패하면 절차적 선체형으로 순서대로 폴백.
+        /// [Step 40] ship.png도 Resources.Load&lt;Sprite&gt;(Single 모드 전용)로는 못 찾는다는 걸 뒤늦게
+        /// 발견 — .meta를 열어보니 spriteMode:2(Multiple)로 이미 바뀌어 있었다(아마 사용자가 Sprite
+        /// Editor를 열어본 적이 있어서였을 것). "Ship 1"과 동일하게 LoadFirstSprite로 교체.</summary>
         private static Sprite GetSeaSprite()
         {
             if (_seaSprite != null) return _seaSprite;
@@ -268,7 +317,7 @@ namespace Contagion.Gameplay
                 _seaSpriteLoadAttempted = true;
                 _seaSprite = LoadFirstSprite("TransportIcons/Ship 1");
                 if (_seaSprite == null)
-                    _seaSprite = Resources.Load<Sprite>("TransportIcons/ship");
+                    _seaSprite = LoadFirstSprite("TransportIcons/ship");
                 _seaIsEmoji = _seaSprite != null;
                 if (_seaSprite == null)
                     Debug.LogWarning("[TransportUnit] TransportIcons/Ship 1.png, ship.png를 모두 찾지 못해 절차적 선체 도형으로 폴백합니다.");
@@ -296,7 +345,7 @@ namespace Contagion.Gameplay
             {
                 _seaOutlineSprite = LoadFirstSprite("TransportIcons/Ship 1_outline");
                 if (_seaOutlineSprite == null)
-                    _seaOutlineSprite = Resources.Load<Sprite>("TransportIcons/ship_outline");
+                    _seaOutlineSprite = LoadFirstSprite("TransportIcons/ship_outline"); // [Step 40] ship_outline.png도 Multiple 모드라 LoadFirstSprite 필요
             }
             return _seaOutlineSprite;
         }
