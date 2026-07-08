@@ -3,16 +3,213 @@
     flex-direction: column;
 }
 
-.news-scroll {
-    height: 150px;
+/* ============================================================
+   resource-strip — 최상단 초박형 단일 행(HTML 프로토타입 v2 기준).
+   기존 meta-row(DNA/일차/잠복기/위협단계)를 그대로 옮겨왔다 — 라벨
+   이름(dna-label 등)이 동일해 HudController.cs는 변경 없이 계속
+   동작한다. 프로토타입의 "아이콘+값을 헤어라인 구분선으로 나열"하는
+   밀도 있는 톤을 살리려 폰트를 줄이고 항목 사이는 구분선(sep)으로
+   나눴다(카드형 여백 대신).
+   ============================================================ */
+.resource-strip {
+    flex-direction: row;
+    align-items: center;
+    height: 34px;
+    padding: 0 var(--space-sm);
     background-color: var(--color-bg-scrim-soft);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-accent-glow-soft);
+}
+
+.resource-strip__sep {
+    width: 1px;
+    height: 16px;
+    background-color: var(--color-accent-glow-soft);
+    margin: 0 var(--space-sm);
+}
+
+.resource-strip__spacer {
+    flex-grow: 1;
+}
+
+/* [SF 전술 디스플레이] 숫자/아이콘 중심 표현 — 아이콘 폰트 글리프는 폰트 지원 여부를
+   실기기에서 검증할 수 없어(에디터 미접속) 리스크가 있다. 대신 이미 검증된
+   news-entry-dot과 동일한 "색상 사각 칩" 언어를 재사용해 라벨 앞에 작은 색상 칩을 붙인다. */
+.stat-chip-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.stat-chip {
+    width: 6px;
+    height: 6px;
+    margin-right: 4px;
+    background-color: var(--color-accent-glow);
+}
+
+.stat-chip--phase {
+    background-color: var(--color-brand-gold);
+}
+
+.stat-label {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 자릿수가 바뀌어도(예: 일차 두 자리->세 자리) 뒤 항목이 밀리지 않도록 최소한의 고정폭만 준다
+   (기존 meta-row의 "고정폭으로 흔들림 방지" 원칙 유지, 폭 자체는 좁아진 폰트에 맞춰 축소). */
+.stat-label--day {
+    width: 64px;
+}
+
+.stat-label--dna {
+    color: var(--color-brand-dna);
+    width: 76px;
+}
+
+.stat-label--phase {
+    color: var(--color-brand-gold);
+    width: 64px;
+}
+
+/* [SF 전술 디스플레이] WORLD STATUS 강조 — 항상 보이는 얇은 프레임(world-status-frame)으로
+   감싸 "상시 표시되는 상태 판독창" 느낌을 주고, 그 안의 world-status-label은 평시(Stable,
+   빈 문자열)엔 폭이 거의 0으로 줄어든다. 텍스트가 있을 때만(HudController.cs가
+   stat-label--mortality--active 클래스를 부여) 위험 강조 배경/테두리가 추가로 붙는다.
+   resource-strip 맨 끝(spacer 뒤)이라 폭이 줄어도 앞선 항목은 안 밀린다. */
+.world-status-frame {
+    flex-direction: row;
+    align-items: center;
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.world-status-frame__caption {
+    color: var(--color-text-tertiary);
+    font-size: 10px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin-right: var(--space-xs);
+}
+
+.stat-label--mortality {
+    color: var(--color-status-danger);
+    letter-spacing: 0.5px;
+}
+
+.stat-label--mortality--active {
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 140, 120, 0.18);
+    border-width: 1px;
+    border-color: var(--color-status-danger);
+}
+
+/* ============================================================
+   map-viewport — 지도 중심 영역(기존 map-spacer 개명, 역할 동일:
+   flex-grow로 화면 대부분을 차지하고 picking-mode Ignore라 빈 곳은
+   지도 클릭이 그대로 통과한다). event-dock/country-dock은 이 안에
+   절대배치로 얹혀서 지도 노출 면적을 최대한 지킨다.
+   ============================================================ */
+.map-viewport {
+    flex-grow: 1;
+    position: relative;
+}
+
+/* ---- event-dock: 좌상단 도킹(Event Dock). 기존 news-scroll을 감싼 컨테이너 —
+   news-scroll 자체 name/class는 그대로라 NewsFeedController.cs 변경 없음(단, AddEntry가
+   dot+label 구조로 바뀌었다 — 아래 news-entry-row 참고). ---- */
+.event-dock {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 168px;
+    background-color: var(--color-bg-panel);
+    padding: var(--space-xs);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.event-dock__header {
+    color: var(--color-accent-glow);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin-bottom: var(--space-xs);
+    padding-bottom: 3px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+/* [SF 전술 디스플레이] 모서리 컷팅 — USS는 clip-path/mask를 지원하지 않아(css-to-uss-support.md)
+   패널 배경 자체를 잘라낼 수 없다. 대신 DEFCON/Frostpunk류 UI에서 흔한 "코너 브래킷" 관례를
+   채택했다 — 패널 네 귀퉁이에 짧은 발광 대각선 틱을 얹어 "각진 모서리" 느낌을 낸다(배경 도형
+   자체는 그대로 사각형이라 레이아웃에는 영향 없음, picking-mode Ignore로 클릭 통과).
+   event-dock/country-dock처럼 position:absolute인 패널이 이 자식들의 위치 기준(anchor)이 된다. */
+.corner-cut {
+    position: absolute;
+    width: 13px;
+    height: 2px;
+    background-color: var(--color-accent-glow);
+}
+
+.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
+.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
+.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
+.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+
+.event-dock .news-scroll {
+    height: 130px;
+}
+
+.news-scroll {
+    background-color: transparent;
+}
+
+/* 이벤트 한 줄 = 심각도 점(news-entry-dot) + 텍스트(news-entry). 점 색상은
+   EventManager.NewsEventCategory(Positive/Negative/Flavor)를 그대로 재사용한다 —
+   데이터 구조 변경 없이 시각적 심각도 표시만 추가(NewsFeedController.AddEntry 참고). */
+.news-scroll .news-entry-row {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 2px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.news-scroll .news-entry-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 4px;
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.news-scroll .news-entry-dot--positive {
+    background-color: var(--color-status-danger);
+}
+
+.news-scroll .news-entry-dot--negative {
+    background-color: var(--color-status-info);
+}
+
+.news-scroll .news-entry-dot--flavor {
+    background-color: var(--color-text-tertiary);
 }
 
 .news-scroll .news-entry {
     color: var(--color-text-primary);
-    font-size: var(--font-size-md);
-    padding: 2px 8px;
+    font-size: var(--font-size-xs);
     white-space: normal;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .news-scroll .news-entry--positive {
@@ -28,41 +225,158 @@
     -unity-font-style: italic;
 }
 
-.map-spacer {
+/* ---- country-dock: 우상단 도킹(Country Dock, 신규). 상시 표시 — 선택 국가가 없으면
+   플레이스홀더("국가를 선택하세요" / "-") 그대로 남는다. 실제 값 갱신은 신규
+   CountryDockController.cs(WorldMap.OnCountryClicked + WorldDataManager.OnCountryChanged
+   구독)가 담당한다. ---- */
+.country-dock {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 140px;
+    background-color: var(--color-bg-panel);
+    padding: var(--space-xs);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.country-dock__header {
+    margin-bottom: var(--space-xs);
+    padding-bottom: 3px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.country-dock__name {
+    color: var(--color-accent-glow);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+    white-space: normal;
+}
+
+/* [전술 디스플레이] 행마다 옅은 격자선을 깔아 "판독 행(readout row)"처럼 보이게 한다.
+   USS는 :last-child를 지원하지 않아(css-to-uss-support.md) 마지막 행에도 동일하게 선이
+   남는데, 워낙 옅은 색(--color-grid-line)이라 시각적으로 문제되지 않는다. */
+.country-dock__row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 2px;
+    padding-bottom: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.country-dock__label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.3px;
+}
+
+.country-dock__value {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: 0.3px;
+}
+
+.country-dock__value--infected {
+    color: var(--color-status-infected);
+}
+
+.country-dock__value--dead {
+    color: var(--color-status-dead);
+}
+
+.country-dock__value--danger {
+    color: var(--color-status-danger);
+}
+
+/* ============================================================
+   population-bar — 통합 인구 상태 막대. 정상인/감염자/사망자를
+   하나의 스택형 막대로 표현한다. Painter2D 없이 3개 세그먼트의
+   flex-grow 비율(HudController.cs가 매 틱 대입)만으로 폭이 정해진다
+   — flex-basis:0이라 콘텐츠 크기와 무관하게 순수 비율로만 나뉜다.
+   기본값(healthy flex-grow:1, 나머지 0)은 HudController가 아직 값을
+   대입하기 전(첫 프레임) 대비 안전한 폴백이다.
+   ============================================================ */
+.population-bar {
+    flex-direction: column;
+    padding: var(--space-xs) var(--space-lg) 0;
+    background-color: var(--color-bg-scrim-strong);
+}
+
+.population-bar__track {
+    flex-direction: row;
+    height: 14px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--color-surface-soft);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.population-bar__segment {
+    height: 100%;
+    flex-basis: 0;
+    flex-shrink: 0;
+}
+
+.population-bar__segment--healthy {
+    background-color: var(--color-status-info);
     flex-grow: 1;
 }
 
-.bottom-bar {
-    background-color: var(--color-bg-scrim-strong);
-    padding: 14px var(--space-lg);
+.population-bar__segment--infected {
+    background-color: var(--color-status-infected);
+    flex-grow: 0;
 }
 
-.stats-row {
+.population-bar__segment--dead {
+    background-color: var(--color-status-dead);
+    flex-grow: 0;
+}
+
+.population-bar__summary {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    margin-top: 2px;
+}
+
+/* ============================================================
+   graph-panel — 확대된 통계 그래프(감염자/사망자/치료제). 기존
+   stats-row를 대체하되 엘리먼트 이름은 동일해 HudController.cs/
+   HudSparkline.cs 변경 없음. graph-frame이 배경+중앙 기준선을
+   담당하고, 실제 HudSparkline이 그리는 엘리먼트는 그 위를 절대배치로
+   채우는 투명 레이어다. 높이 34px -> 52px, 기준선 추가로 추세
+   판독성을 높였다.
+   ============================================================ */
+.graph-panel {
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-end;
-    flex-wrap: wrap;
-    margin-bottom: var(--space-md);
+    flex-wrap: nowrap;
+    background-color: var(--color-bg-scrim-strong);
+    padding: var(--space-sm) var(--space-lg) 0;
+    border-top-width: 1px;
+    border-top-color: var(--color-grid-line);
 }
 
-.stat-label {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-md);
-    -unity-font-style: bold;
-}
-
-/* 감염자/사망자/치료제 — 텍스트만으론 가시성이 떨어진다는 피드백으로 추가한 인라인 스파크라인
-   그래프(HudSparkline.cs가 Painter2D로 직접 그림). 라벨 + 작은 그래프를 세로로 묶는다. */
 .stat-graph-item {
     flex-direction: column;
     align-items: flex-start;
+    width: 190px;
     margin-right: 12px;
 }
 
 .stat-graph-item__label {
-    font-size: var(--font-size-sm);
+    width: 100%;
+    font-size: var(--font-size-body);
     -unity-font-style: bold;
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-graph-item__label--infected {
@@ -77,37 +391,78 @@
     color: var(--color-brand-dna);
 }
 
-.stat-graph-item__graph {
+.stat-graph-item__graph-frame {
+    position: relative;
     width: 104px;
-    height: 34px;
+    height: 52px;
     background-color: var(--color-surface-soft);
     border-radius: var(--radius-sm);
+    overflow: hidden;
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
 }
 
-.stat-label--dna {
-    color: var(--color-brand-dna);
+.stat-graph-item__baseline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background-color: var(--color-accent-glow-soft);
 }
 
-.stat-label--phase {
-    color: var(--color-brand-gold);
+/* [그래프 격자] 기존엔 50% 기준선 1개뿐이었다 — 위/아래 25%/75% 지점에 더 옅은 격자선을
+   추가해 추세 판독을 보조한다(반복 배경 이미지는 USS가 background-repeat를 지원하지 않아
+   불가능 — css-to-uss-support.md — 대신 정적 라인 2개를 UXML에 직접 배치). */
+.stat-graph-item__gridline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-grid-line);
 }
 
-.stat-label--mortality {
-    color: var(--color-status-danger);
+.stat-graph-item__gridline--upper {
+    top: 25%;
 }
 
-.tabs-row {
+.stat-graph-item__gridline--lower {
+    top: 75%;
+}
+
+.stat-graph-item__graph {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* ============================================================
+   action-strip — 하단 Action Strip(기존 tabs-row). 버튼 name/class
+   그대로라 UIManager.cs/HudController.cs 변경 없음.
+   ============================================================ */
+.action-strip {
     flex-direction: row;
     justify-content: space-between;
+    background-color: var(--color-bg-scrim-strong);
+    padding: var(--space-sm) var(--space-lg) 14px;
+    border-top-width: 1px;
+    border-top-color: var(--color-accent-glow-soft);
 }
 
+/* [DNA 그린 액센트 승격] 주 액션(업그레이드/국가현황)엔 발광 테두리를 줘 "주 기능"임을
+   드러내고, 보조 액션(랭킹)은 중립 테두리로 남겨 우선순위 차이를 시각적으로 구분한다. */
 .tab-button {
     flex-grow: 1;
     margin: 0 var(--space-sm);
     height: var(--touch-target-min);
+    border-width: 1px;
+    border-color: var(--color-accent-glow);
 }
 
 .tab-button--secondary {
     flex-grow: 0.6;
     background-color: var(--color-button-secondary);
+    border-color: var(--color-border);
 }

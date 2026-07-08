@@ -1,0 +1,155 @@
+using Contagion.Data;
+using Contagion.Gameplay;
+using Contagion.Managers;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace Contagion.UI
+{
+    /// <summary>
+    /// 우측 상단 "Country Dock" — 선택한 국가 정보를 지도 위에 상시 표시한다. HTML 프로토타입
+    /// v2(Frostpunk/HOI4 참고)의 country-dock을 실제 UI Toolkit HUD로 이식한 것.
+    ///
+    /// CountryPopupController(모달 팝업, Step 28-2 이후 클릭 트리거가 제거돼 죽은 코드)와 달리
+    /// 이 컨트롤러는 Hide()로 감추지 않는다 — 국가를 선택하지 않았을 때는 안내 문구/플레이스홀더로
+    /// 되돌아갈 뿐 패널 자체는 항상 보인다("상시 표시"). HudController/NewsFeedController와 같은
+    /// UIDocument(GameObject)에 붙는다 — Hud GameObject에 이 컴포넌트를 Add Component로 추가하는
+    /// 작업은 Unity 에디터에서 수동으로 해야 한다(unity-editor-task.md 참고).
+    ///
+    /// 데이터 바인딩 로직은 CountryPopupController.Populate()와 사실상 동일한 소스(Country.cs 필드)를
+    /// 쓴다. 항목: 인구/감염률/사망률/의료수준/국경(기후는 화면 공간 대비 우선순위가 낮아 생략) +
+    /// 붕괴단계/항공·항구 상태(국가현황 패널과 중복 정보를 줄이기 위해 이관).
+    /// </summary>
+    [RequireComponent(typeof(UIDocument))]
+    public class CountryDockController : MonoBehaviour
+    {
+        private Label _nameLabel;
+        private Label _populationValue;
+        private Label _infectedRateValue;
+        private Label _deadRateValue;
+        private Label _healthValue;
+        private Label _borderValue;
+        private Label _stageValue;
+        private Label _transportValue;
+
+        private string _shownCountryId;
+
+        private void OnEnable()
+        {
+            var root = GetComponent<UIDocument>().rootVisualElement;
+            _nameLabel = root.Q<Label>("country-dock-name");
+            _populationValue = root.Q<Label>("country-dock-population");
+            _infectedRateValue = root.Q<Label>("country-dock-infected-rate");
+            _deadRateValue = root.Q<Label>("country-dock-dead-rate");
+            _healthValue = root.Q<Label>("country-dock-health");
+            _borderValue = root.Q<Label>("country-dock-border");
+            // 국가현황 패널(전체 목록)과 정보 중복을 줄이기 위해 이관 — 붕괴단계/항공·항구 상태.
+            _stageValue = root.Q<Label>("country-dock-stage");
+            _transportValue = root.Q<Label>("country-dock-transport");
+
+            Subscribe();
+            ShowPlaceholder();
+        }
+
+        private void Start() => Subscribe();
+
+        private void Subscribe()
+        {
+            if (WorldMap.Instance != null)
+            {
+                WorldMap.Instance.OnCountryClicked -= HandleCountryClicked;
+                WorldMap.Instance.OnCountryClicked += HandleCountryClicked;
+            }
+
+            if (WorldDataManager.Instance != null)
+            {
+                WorldDataManager.Instance.OnCountryChanged -= HandleCountryChanged;
+                WorldDataManager.Instance.OnCountryChanged += HandleCountryChanged;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (WorldMap.Instance != null)
+                WorldMap.Instance.OnCountryClicked -= HandleCountryClicked;
+            if (WorldDataManager.Instance != null)
+                WorldDataManager.Instance.OnCountryChanged -= HandleCountryChanged;
+        }
+
+        private void HandleCountryClicked(Country country)
+        {
+            _shownCountryId = country.id;
+            Populate(country);
+        }
+
+        /// <summary>선택 중인 국가의 값이 매 틱 갱신될 때(다른 국가면 무시) 도킹 패널도 같이 갱신한다.</summary>
+        private void HandleCountryChanged(Country country)
+        {
+            if (country.id == _shownCountryId) Populate(country);
+        }
+
+        private void ShowPlaceholder()
+        {
+            _shownCountryId = null;
+            if (_nameLabel == null) return;
+
+            _nameLabel.text = "국가를 선택하세요";
+            _populationValue.text = "-";
+            _infectedRateValue.text = "-";
+            _deadRateValue.text = "-";
+            _healthValue.text = "-";
+            _borderValue.text = "-";
+            if (_stageValue != null) _stageValue.text = "-";
+            if (_transportValue != null) _transportValue.text = "-";
+        }
+
+        private void Populate(Country country)
+        {
+            float infectionRatio = country.LivingPopulation > 0
+                ? (float)country.infectedCount / country.LivingPopulation
+                : 0f;
+            float deadRatio = country.population > 0
+                ? (float)country.deadCount / country.population
+                : 0f;
+
+            _nameLabel.text = country.name;
+            _populationValue.text = $"{country.population:N0}";
+            _infectedRateValue.text = $"{infectionRatio * 100f:F1}%";
+            _deadRateValue.text = $"{deadRatio * 100f:F2}%";
+            _healthValue.text = DevLabel(country.developmentLevel);
+            _borderValue.text = country.isBorderClosed ? "폐쇄" : "개방";
+
+            if (_stageValue != null)
+            {
+                var stage = country.GetCollapseStage();
+                _stageValue.text = StageLabel(stage);
+                _stageValue.EnableInClassList("country-dock__value--danger", stage >= CountryCollapseStage.Disorder);
+            }
+
+            if (_transportValue != null)
+            {
+                _transportValue.text =
+                    $"{(country.isAirportOpen ? "항공 개방" : "항공 폐쇄")} · {(country.isPortOpen ? "항구 개방" : "항구 폐쇄")}";
+            }
+        }
+
+        private static string StageLabel(CountryCollapseStage stage) => stage switch
+        {
+            CountryCollapseStage.Normal => "평시",
+            CountryCollapseStage.FullCollapse => "붕괴 시작",
+            CountryCollapseStage.Disorder => "무질서",
+            CountryCollapseStage.NearAnarchy => "무정부 근접",
+            CountryCollapseStage.FullAnarchy => "완전 무정부",
+            CountryCollapseStage.Extinct => "소멸",
+            _ => stage.ToString()
+        };
+
+        private static string DevLabel(DevelopmentLevel level) => level switch
+        {
+            DevelopmentLevel.High => "높음",
+            DevelopmentLevel.Mid => "보통",
+            DevelopmentLevel.Low => "낮음",
+            _ => level.ToString()
+        };
+    }
+}

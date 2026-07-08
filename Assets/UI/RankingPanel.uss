@@ -1,14 +1,22 @@
 /* 모바일 팝업 패턴: 고정폭+음수 margin-left로 중앙 정렬하던 데스크톱 트릭 대신
-   좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다(참조 해상도 480×1040 기준
-   좌우 9% => 폭 약 82%). 스크롤바 없이 내용이 다 들어가도록 buy-button 등은
-   min-height로 터치 영역을 확보. */
+   좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다.
+
+   국가현황 패널(status-root)과 동일한 "부분 슬라이드 패널" 톤으로 맞췄다 — 좌우 인셋을
+   없애 전체 폭 바텀시트로 바꾸고, top을 42% / bottom을 12.5%로 고정해 화면 상단(지도)과
+   Hud 하단바(tabs-row)가 항상 함께 보이게 했다. 랭킹 콘텐츠는 국가현황만큼 길지 않아
+   바텀시트 안에서 위쪽에만 내용이 차고 아래는 여백으로 남을 수 있는데, 이는 두 패널의
+   시각적 일관성을 우선한 절충이다(내용이 짧다는 이유만으로 이 패널만 작은 중앙 카드로
+   남기면 두 패널을 오가며 이질감이 생긴다 — 필요하면 추후 내용 기준으로 높이를 auto로
+   되돌리는 것도 검토 가능, unity-editor-task.md 참고). 모서리는 위쪽만 둥글게. */
 .ranking-root {
     position: absolute;
-    left: 9%;
-    right: 9%;
-    top: 22%;
+    left: 0;
+    right: 0;
+    top: 42%;
+    bottom: 12.5%;
     background-color: var(--color-bg-panel);
-    border-radius: var(--radius-lg);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
     padding: var(--space-xxl);
     align-items: stretch;
 }

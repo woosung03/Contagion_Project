@@ -2663,3 +2663,147 @@ Step 53/54 변경과 직접 연결된다는 증거는 찾지 못했다.
 **파손 원인은 확정하지 못함**: 내가 Step 53에서 한 `sed -i` 편집(48개 `infectionDotDiameterScale: 1` → `0.5` 치환)은 (a) 손상된 구간을 전혀 건드리지 않았고(위 grep 근거), (b) 편집 직후 `grep -c`로 "48개 모두 0.5, 남은 1 없음"을 확인해 그 시점엔 파일이 정상이었다 — 그래서 이 손상이 그 편집 때문일 가능성은 낮다고 판단한다. 다만 100%는 배제 못 한다. 정황상 유니티 에디터 자체의 저장 중단(크래시, 디스크 쓰기 중 인터럽트 등)이 더 유력해 보인다. **재발 방지책으로 사용자에게 커밋을 자주 하도록 권장할 필요가 있음** — `git status` 확인 결과 이 파일 포함 수십 개 파일이 여러 Step에 걸쳐 커밋되지 않은 채 누적돼 있어서, 이번처럼 파일이 손상되면 git 히스토리가 유일한 복구 수단인데 그 히스토리 자체가 여러 Step만큼 오래된 상태였다(다행히 이번엔 손상 구간이 오래된 커밋과도 값이 일치해 복구 가능했지만, 항상 운이 좋으리라는 보장은 없다).
 
 **변경 파일**: `Assets/Scenes/GamePlay.unity`(파일 끝 508줄 복구, git HEAD 기준).
+
+## Step 57 구현 메모 (CountrySelect/MainMenu 상세 패널 텍스트 오버플로우 수정)
+
+**신고 증상**: 발원 국가 선택 화면에서 국가를 클릭하면 아래 `detail-panel`에 인구/기후/의료 수준 3줄
+텍스트가 나오는데, 인구가 나오는 줄(첫 줄)이 패널 박스 아래로 삐져나와 보임.
+
+**원인**: `MainMenu.uss`의 `.detail-panel`이 `min-height: 70px`만 지정돼 있었음 — 제목 라벨(22px,
+`detail-panel__title`)과 3줄짜리 desc 라벨(17px×3줄, `detail-panel__desc`) 실측 필요 높이는
+대략 제목 26px + margin-top 6px + desc 3줄 61px + 상하 패딩(`--space-lg` 16px×2=32px) ≈ 125px로
+70px보다 훨씬 큼. `.mainmenu-list`(국가 목록 ScrollView)가 `flex-grow: 1`만 있고 `flex-shrink`가
+없어(Yoga 기본값 관례상 0에 가깝게 동작) 국가를 선택해 desc가 빈 문자열→3줄로 바뀌는 순간
+detail-panel이 필요한 만큼 커지려 해도 옆 형제가 공간을 양보하지 못해 레이아웃이 안정적으로
+재계산되지 않고 텍스트가 박스 밖으로 삐져나오는 것으로 판단.
+
+**수정** (`Assets/UI/MainMenu.uss`, `MainMenu.uxml`/`CountrySelect.uxml` 공유 스타일이라 두 화면 모두 적용됨):
+- `.detail-panel`: `min-height` 70px → 140px(3줄 콘텐츠 실측치에 여유분 포함), `flex-shrink: 0` 명시
+  추가(목록이 공간을 양보하는 동안 패널 자체는 줄어들지 않도록).
+- `.mainmenu-list`: `flex-shrink: 1` 추가(패널이 커질 공간을 스크롤 목록 쪽에서 양보하도록 — 목록은
+  스크롤 가능이라 줄어들어도 콘텐츠 손실 없음).
+- `.mainmenu-back`/`.mainmenu-next`: `flex-shrink: 0` 명시 추가(레이아웃 재계산 중에도 터치 타겟
+  높이가 눌리지 않도록 방어적으로 고정).
+
+CountrySelectController.cs/MainMenuController.cs 등 C# 코드는 건드리지 않음 — 순수 USS 레이아웃
+수정. **실플레이 확인 필요**: 국가 선택 시 인구/기후/의료 수준 3줄이 패널 안에 온전히 들어오는지,
+목록이 자연스럽게 줄어드는지(스크롤은 계속 되는지), 뒤로/시작 버튼 높이가 그대로인지.
+
+**변경 파일**: `Assets/UI/MainMenu.uss`.
+
+## Step 58 구현 메모 (HUD 하단바 레이아웃 재배치 — 값 변경 시 흔들림 수정)
+
+**신고**: 감염자/사망자/치료제/DNA 데이터가 바뀌면 HUD가 좌우로 움직여서 가시성이 떨어진다는 지적 +
+레이아웃 재배치 요청(1번째 줄: 감염자/사망자/치료제, 2번째 줄: DNA/일차/잠복기/위협 시작, 3번째 줄:
+업그레이드/국가현황/랭킹).
+
+**원인**: 기존 `stats-row` 하나에 7개 요소(그래프 3개 + 라벨 4개)가 `justify-content: space-between`으로
+한 줄에 몰려 있었고, 각 요소 폭이 고정이 아니었음 — 특히 Step 34로 감염자/사망자가 수십억 단위까지
+자릿수가 늘어나는 `N0` 포맷 라벨, 치료제 %, DNA 값이 바뀔 때마다 요소 폭 자체가 변해 옆 요소들이
+좌우로 밀리는 것이 "UI가 움직인다"는 증상의 정체였음. 사용자가 요청한 레이아웃 재배치 자체가 자연히
+그래프 3개와 라벨 4개를 분리시켜 두 줄로 만들기 때문에, 시각적 안정화와 요청한 순서 배치를 함께
+해결할 수 있는 구조였음.
+
+**수정**:
+- `Hud.uxml`: `stats-row`(감염자/사망자/치료제 그래프 항목 3개)와 새 `meta-row`(DNA/일차/잠복기/위협
+  시작 라벨 4개)를 분리. `tabs-row`(업그레이드/국가현황/랭킹)는 기존 위치 그대로 3번째 줄 유지.
+- `Hud.uss`: `.stats-row`를 `space-between` → `flex-start`로 바꾸고 `.stat-graph-item`에 고정
+  `width: 190px`(수십억 단위 숫자도 흡수) 부여. `.meta-row`의 각 라벨(`stat-label--dna`/`--day`(신규)/
+  `--phase`/`--mortality`)에도 고정 폭을 줘 자릿수·유무(위협 시작 텍스트는 평시엔 빈 문자열)가 바뀌어도
+  다음 라벨이 밀리지 않도록 함. 라벨 텍스트가 고정 폭을 넘으면 밀림 대신 `overflow: hidden` +
+  `text-overflow: ellipsis`로 흡수.
+- `HudController.cs`는 요소를 이름으로 쿼리(`root.Q<Label>("...")`)하므로 UXML 트리 구조 변경과 무관하게
+  코드 수정 없이 그대로 동작 — C# 미변경.
+
+**실플레이 확인 필요**: (a) 감염자 수가 커져도(수십억 단위) `.stat-graph-item`(190px)이 텍스트를 다
+담는지 — 못 담으면 ellipsis로 잘리므로 폭을 늘릴 것, (b) 위협 단계 텍스트("위협 시작" 등)가 나타나거나
+사라질 때 옆 라벨이 흔들리지 않는지, (c) 세로 폭이 늘어난 하단바가 지도/뉴스피드 영역을 과하게
+침범하지 않는지.
+
+**변경 파일**: `Assets/UI/Hud.uxml`, `Assets/UI/Hud.uss`.
+
+## Step 59 구현 메모 (누락된 30개국 국기 텍스처 추가)
+
+**신고**: 콘솔에 `[CountrySelectController] 국기 텍스처를 찾지 못했습니다: Resources/Flags/PAK.png` 경고.
+
+**원인**: `Assets/Resources/Flags/`에 18개국 국기 파일만 있고 나머지 30개국(PAK 포함)이 누락돼
+`CountrySelectController.GetFlagTexture()`가 매번 경고 로그를 남기고 빈 슬롯을 그리고 있었음.
+`Assets/Resources/CountryShapes/`는 48개국 전부 있어서 국가 자체 데이터 누락 문제는 아니었고,
+순수하게 국기 이미지 에셋만 빠져 있었던 것으로 확인.
+
+**해결**: `CountryDatabase.asset`에서 48개국 id/영문명을 전수 추출해 오프라인 flagpy 라이브러리(실제
+국기 이미지가 라이브러리 내장, 네트워크 접근 불필요)로 누락 30개국의 실제 국기 PNG를 생성(가로 160px,
+기존 18개 파일과 동일 규격). 기존 파일과 동일한 `.meta`(TextureImporter, spriteMode 등) 포맷으로
+`.meta`도 함께 생성해 `Assets/Resources/Flags/`에 배치. 48/48 전수 확인 완료(PAK/TUR/DRC 등 육안 검증).
+
+순수 에셋 추가, 코드 미변경. **실플레이 확인 필요**: CountrySelect 화면에서 국기가 전부 정상 표시되는지,
+콘솔에 "국기 텍스처를 찾지 못했습니다" 경고가 더 이상 안 뜨는지.
+
+**변경 파일**: `Assets/Resources/Flags/*.png`, `Assets/Resources/Flags/*.png.meta`.
+
+## Step 60 구현 메모 (교통망 허브 공백 지역 16개 추가)
+
+**배경**: 기존 교통망(Step 29~30-5)은 항공/해운 허브 각 15개, 총 30개로 48개국 중 12개국만 허브를
+보유해 아프리카 전체·유럽 5개국(FRA/ITA/ESP/POL 등)·남미 3개국·북미 2개국·호주가 교통망에서 완전히
+소외되어 있었음.
+
+**작업**: 항공 허브 5개(ADD 아디스아바바/SVO 모스크바/LIM 리마/YYZ 토론토/MEX 멕시코시티) + 해운 허브
+11개(SEA_PSD/TNG/LOS/DUR/LEH/GOA/ALC/GDN/BUE/CTG/MEL)를 `DefaultTransportHubFactory.cs`에 신규
+추가. 허브 보유국이 12→28개로 확장됨. 좌표는 실제 공항/항구 위경도를 Step 32에서 구한 회귀식에
+대입한 절대좌표 사용(신규 해운 허브도 국가 앵커 오프셋 대신 `SeaAbs()`로 절대좌표 방식 적용). 신규
+해상 항로는 `world_base.png` 알파채널 기준 A*(다운샘플 factor 2)로 육지 미관통 전수 검증했다.
+
+**설계 제약**: 수에즈·파나마 운하는 이 해상도의 지도에 육지로만 그려져 있어(폭이 좁은 인공 수로라
+바다 픽셀 자체가 없음) 이집트↔중동, 콜롬비아/멕시코↔롱비치 직결 항로를 만들 수 없었음. 각 지역 내
+다른 허브를 거쳐 우회 연결되도록 설계했다.
+
+**검증 필요** (다음 세션, Unity 실플레이): (a) 신규 허브 16개가 지도 위 올바른 위치(육지는 공항,
+바다는 항구)에 뜨는지, (b) 신규 항로 15개 선이 육지를 관통하지 않는지, (c) 신규 국가(ETH/RUS/PER/
+CAN/MEX/EGY/MAR/NGA/RSA/FRA/ITA/ESP/POL/ARG/COL/AUS)에서 비행기/배가 정상적으로 뜨고 도착하는지.
+
+**변경 파일**: `DefaultTransportHubFactory.cs`.
+
+## Step 61 구현 메모 (국가현황 패널 렉 수정 — 유지 + 재작성)
+
+**신고**: `tab-country-status`(국가현황 패널) 열람 중 프레임 드랍 심함.
+
+**분석 과정**: 패널을 완전히 제거할지(Country Dock으로 대체) 먼저 검토했으나, 코드/설계상 두 UI는
+역할이 다름을 확인 — Country Dock은 "선택된 국가 1개 상세", 국가현황 패널은 "48개국 동시 비교"이며
+후자는 Dock이 구조적으로 대체 불가(단일 선택 구조). 또한 패널의 최초 도입 이유(Step 28-2 주석)가
+지도가 좁은 공간에 48개국이 촘촘히 배치돼 개별 탭이 어려운 문제의 우회책이기도 해서, 제거 시 소형
+국가 선택 경로 자체가 사라지는 부작용이 있음. → 패널은 유지하고 구현만 재작성하기로 결정.
+
+**원인**: `CountryStatusPanelController.Populate()`가 `WorldDataManager.OnCountryChanged` 이벤트를
+받을 때마다(패널이 열려 있는 동안) `ScrollView.Clear()` 후 48개 행 전체를 `VisualElement`/`Label`
+새로 생성해서 다시 그렸음. 이 이벤트는 `SimulationManager.cs`(~225행)가 매 틱 "감염 중이거나 인구가
+남은 국가마다" 개별 호출하므로(감염 확산 국가가 20~30개면 틱당 20~30회 발생), 국가 하나의 값만
+바뀌어도 리스트 전체(약 190개 UI 요소)를 그 배수만큼 반복 재생성하는 셈 — 사실상 O(국가 수²)에
+가까운 낭비가 패널이 열려 있는 매 틱 발생했음. Country Dock은 반대로 선택된 국가 1개의 Label
+텍스트만 갱신해서 렉이 없었음(대조군 역할).
+
+**수정**: `CountryStatusPanelController.cs`
+- 국가 id → 행 참조(`RowRefs`: Row/NameLabel/StatsLabel/FlagsLabel) 캐시 딕셔너리 추가.
+- `EnsureRowsBuilt()`: 딕셔너리가 비어 있을 때(최초 1회)만 `ScrollView.Clear()` + 48개 행 생성.
+  이후에는 재호출돼도 아무 것도 하지 않음.
+- `HandleCountryChanged(country)`: 패널이 열려 있으면 `EnsureRowsBuilt()` 후 **바뀐 국가 1개 행만**
+  `RefreshRow()`로 텍스트 갱신 — 전체 재생성(`Populate()`) 호출 제거. 갱신 1건당 비용이 O(48)→O(1).
+- `Populate()`(Show() 시 1회만 호출)는 그대로 전체 국가를 순회하며 `RefreshRow()` — 이 전체 순회는
+  패널을 열 때 딱 한 번뿐이라 비용 문제 없음.
+
+**부가 작업 (정보 중복 축소, B안 요소 일부 병합)**: 패널 고유 정보 중 Dock에 없던 붕괴단계/항공·항구
+상태를 Country Dock에도 추가해 "선택 국가의 세부 상태"는 Dock 하나로 완결되도록 함. 국가현황 패널은
+이제 "48개국 동시 비교"에만 집중.
+- `Hud.uxml`: `country-dock__body`에 `country-dock-stage`/`country-dock-transport` 라벨 행 2개 추가.
+- `Hud.uss`: `.country-dock__value--danger`(危 상태 강조색) 클래스 추가.
+- `CountryDockController.cs`: 두 라벨 바인딩 + `Populate()`에서 값 채움, `StageLabel()` 헬퍼 추가
+  (`CountryStatusPanelController`와 동일 매핑, 네임스페이스 공유 유틸로 뽑아내지 않고 중복 유지 —
+  기존 코드베이스 관례상 Dock/Panel 간 소규모 매핑 중복은 허용해온 패턴).
+
+**실플레이 확인 필요**: (a) 국가현황 패널을 연 채로 감염이 여러 국가에서 동시 진행 중일 때 프레임
+드랍이 실제로 해소됐는지(Unity Profiler로 패널 열림 상태에서 GC Alloc/틱당 UI 재빌드 확인 권장),
+(b) 48개 행이 최초 1회만 생성되고 이후 값만 갱신되는지 콘솔/프로파일러로 교차 확인, (c) Country
+Dock에 새로 추가된 "상태"/"항공·항구" 행 2개가 도킹 패널 폭 안에서 줄바꿈 없이 표시되는지,
+위험 상태(危) 색상이 다른 값 색상과 충돌하지 않는지.
+
+**변경 파일**: `Assets/Scripts/UI/CountryStatusPanelController.cs`,
+`Assets/Scripts/UI/CountryDockController.cs`, `Assets/UI/Hud.uxml`, `Assets/UI/Hud.uss`.

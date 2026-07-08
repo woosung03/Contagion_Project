@@ -2,34 +2,153 @@
     <Style src="Theme.uss" />
     <Style src="Hud.uss" />
     <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
-        <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
 
-        <ui:VisualElement name="map-spacer" class="map-spacer" picking-mode="Ignore" />
-
-        <ui:VisualElement name="bottom-bar" class="bottom-bar">
-            <ui:VisualElement name="stats-row" class="stats-row">
-                <ui:VisualElement name="infected-stat" class="stat-graph-item">
-                    <ui:Label name="infected-label" text="감염자: 0" class="stat-graph-item__label stat-graph-item__label--infected" />
-                    <ui:VisualElement name="infected-graph" class="stat-graph-item__graph" />
-                </ui:VisualElement>
-                <ui:VisualElement name="dead-stat" class="stat-graph-item">
-                    <ui:Label name="dead-label" text="사망자: 0" class="stat-graph-item__label stat-graph-item__label--dead" />
-                    <ui:VisualElement name="dead-graph" class="stat-graph-item__graph" />
-                </ui:VisualElement>
-                <ui:VisualElement name="cure-stat" class="stat-graph-item">
-                    <ui:Label name="cure-label" text="치료제: 0%" class="stat-graph-item__label stat-graph-item__label--cure" />
-                    <ui:VisualElement name="cure-graph" class="stat-graph-item__graph" />
-                </ui:VisualElement>
+        <!-- resource-strip: HTML 프로토타입 v2의 상단 Resource Strip. 기존 meta-row(dna-label/
+             day-label/phase-label/world-status-label)를 여기로 옮겼다 — 엘리먼트 이름이 그대로라
+             HudController.cs는 변경 없이 계속 동작한다. -->
+        <ui:VisualElement name="resource-strip" class="resource-strip">
+            <ui:Label name="day-label" text="0일차" class="stat-label stat-label--day" />
+            <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
+            <!-- [숫자/아이콘 중심 표현] dna-label/phase-label 앞에 색상 칩을 붙이려 Label을
+                 row 컨테이너로 감쌌다 — root.Q<Label>("dna-label")은 트리 깊이와 무관하게
+                 재귀 탐색하므로 HudController.cs는 변경 없음. -->
+            <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
+                <ui:VisualElement class="stat-chip" picking-mode="Ignore" />
                 <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
-                <ui:Label name="day-label" text="0일차" class="stat-label" />
+            </ui:VisualElement>
+            <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
+            <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
+                <ui:VisualElement class="stat-chip stat-chip--phase" picking-mode="Ignore" />
                 <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />
+            </ui:VisualElement>
+            <ui:VisualElement name="resource-strip-spacer" class="resource-strip__spacer" picking-mode="Ignore" />
+            <!-- [WORLD STATUS 강조] 상시 노출되는 얇은 프레임으로 감싸 "판독창"처럼 보이게
+                 한다. world-status-label 자체의 name/class는 그대로라 HudController.cs 변경 없음. -->
+            <ui:VisualElement name="world-status-frame" class="world-status-frame">
+                <ui:Label text="STATUS" class="world-status-frame__caption" />
                 <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
             </ui:VisualElement>
-            <ui:VisualElement name="tabs-row" class="tabs-row">
-                <ui:Button name="tab-upgrade" text="업그레이드" class="tab-button" />
-                <ui:Button name="tab-country-status" text="국가현황" class="tab-button" />
-                <ui:Button name="ranking-button" text="랭킹" class="tab-button tab-button--secondary" />
+        </ui:VisualElement>
+
+        <!-- map-viewport: 프로토타입의 "지도 중심 구조". 기존 map-spacer와 역할 동일(picking-mode
+             Ignore로 빈 영역은 지도 클릭이 그대로 통과, 이름만 프로토타입 용어로 변경 — 이 이름은
+             어떤 C# 스크립트도 Query하지 않으므로 이름 변경이 안전하다). event-dock/country-dock은
+             이 안에 절대배치로 얹혀 지도를 가리는 면적을 최소화한다. -->
+        <ui:VisualElement name="map-viewport" class="map-viewport" picking-mode="Ignore">
+
+            <!-- event-dock: 좌측 Event Dock. 기존 news-scroll을 도킹형 컨테이너로 재배치했다.
+                 news-scroll의 name/class는 그대로라 NewsFeedController.cs의 쿼리는 안 깨진다. -->
+            <ui:VisualElement name="event-dock" class="event-dock">
+                <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+                <ui:Label text="이벤트 로그" class="event-dock__header" />
+                <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+            </ui:VisualElement>
+
+            <!-- country-dock: 우측 Country Dock(신규). 선택된 국가를 상시 표시하고, 선택이 없으면
+                 안내 문구로 대체한다. 값 초기값은 전부 플레이스홀더 — 실제 바인딩은 신규
+                 CountryDockController.cs가 담당(별도 스크립트, Hud GameObject에 컴포넌트로 추가
+                 필요 — unity-editor-task.md 참고). -->
+            <ui:VisualElement name="country-dock" class="country-dock">
+                <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+                <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+                <ui:VisualElement name="country-dock-header" class="country-dock__header">
+                    <ui:Label name="country-dock-name" text="국가를 선택하세요" class="country-dock__name" />
+                </ui:VisualElement>
+                <ui:VisualElement name="country-dock-body" class="country-dock__body">
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="인구" class="country-dock__label" />
+                        <ui:Label name="country-dock-population" text="-" class="country-dock__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="감염률" class="country-dock__label" />
+                        <ui:Label name="country-dock-infected-rate" text="-" class="country-dock__value country-dock__value--infected" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="사망률" class="country-dock__label" />
+                        <ui:Label name="country-dock-dead-rate" text="-" class="country-dock__value country-dock__value--dead" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="의료수준" class="country-dock__label" />
+                        <ui:Label name="country-dock-health" text="-" class="country-dock__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="국경" class="country-dock__label" />
+                        <ui:Label name="country-dock-border" text="-" class="country-dock__value" />
+                    </ui:VisualElement>
+                    <!-- 국가현황 패널(전체 목록)과 중복 정보를 줄이기 위해 이관한 필드 —
+                         붕괴단계/항공·항구 상태. 국가현황 패널은 "48개국 동시 비교"만 담당하고
+                         선택한 국가의 세부 상태는 이제 Dock 하나로 완결된다. -->
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="상태" class="country-dock__label" />
+                        <ui:Label name="country-dock-stage" text="-" class="country-dock__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="country-dock__row">
+                        <ui:Label text="항공/항구" class="country-dock__label" />
+                        <ui:Label name="country-dock-transport" text="-" class="country-dock__value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!-- population-bar: 통합 인구 상태 막대(정상인/감염자/사망자를 하나의 스택형 막대로 표현).
+             Painter2D 없이 VisualElement 3개(healthy/infected/dead)의 flex-grow 비율만으로 그린다 —
+             HudController.cs가 WorldState.totalPopulation/infectedCount/deadCount 비율을 그대로
+             각 세그먼트의 style.flexGrow에 대입하면 Yoga 플렉스박스가 폭 분배를 알아서 처리한다.
+             기존 스파크라인(graph-panel)을 대체하지 않고 그 위에 별도 행으로 추가했다 — 이 막대는
+             "지금 이 순간의 비율", graph-panel은 "시간에 따른 추세"를 담당한다. -->
+        <ui:VisualElement name="population-bar" class="population-bar">
+            <ui:VisualElement name="population-bar-track" class="population-bar__track">
+                <ui:VisualElement name="population-bar-healthy" class="population-bar__segment population-bar__segment--healthy" picking-mode="Ignore" />
+                <ui:VisualElement name="population-bar-infected" class="population-bar__segment population-bar__segment--infected" picking-mode="Ignore" />
+                <ui:VisualElement name="population-bar-dead" class="population-bar__segment population-bar__segment--dead" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="population-bar-summary" text="감염 0.0% · 사망 0.00%" class="population-bar__summary" />
+        </ui:VisualElement>
+
+        <!-- graph-panel: 확대된 통계 그래프(감염자/사망자/치료제). 기존 stats-row를 대체하되
+             엘리먼트 이름은 동일해 HudController.cs/HudSparkline.cs 변경 없음. -->
+        <ui:VisualElement name="graph-panel" class="graph-panel">
+            <ui:VisualElement name="infected-stat" class="stat-graph-item">
+                <ui:Label name="infected-label" text="감염자: 0" class="stat-graph-item__label stat-graph-item__label--infected" />
+                <ui:VisualElement name="infected-graph-frame" class="stat-graph-item__graph-frame">
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--upper" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__baseline" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--lower" picking-mode="Ignore" />
+                    <ui:VisualElement name="infected-graph" class="stat-graph-item__graph" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="dead-stat" class="stat-graph-item">
+                <ui:Label name="dead-label" text="사망자: 0" class="stat-graph-item__label stat-graph-item__label--dead" />
+                <ui:VisualElement name="dead-graph-frame" class="stat-graph-item__graph-frame">
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--upper" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__baseline" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--lower" picking-mode="Ignore" />
+                    <ui:VisualElement name="dead-graph" class="stat-graph-item__graph" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="cure-stat" class="stat-graph-item">
+                <ui:Label name="cure-label" text="치료제: 0%" class="stat-graph-item__label stat-graph-item__label--cure" />
+                <ui:VisualElement name="cure-graph-frame" class="stat-graph-item__graph-frame">
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--upper" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__baseline" picking-mode="Ignore" />
+                    <ui:VisualElement class="stat-graph-item__gridline stat-graph-item__gridline--lower" picking-mode="Ignore" />
+                    <ui:VisualElement name="cure-graph" class="stat-graph-item__graph" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- action-strip: 하단 Action Strip(기존 tabs-row). 버튼 name/class 그대로라
+             UIManager.cs/HudController.cs 변경 없음. -->
+        <ui:VisualElement name="action-strip" class="action-strip">
+            <ui:Button name="tab-upgrade" text="업그레이드" class="tab-button" />
+            <ui:Button name="tab-country-status" text="국가현황" class="tab-button" />
+            <ui:Button name="ranking-button" text="랭킹" class="tab-button tab-button--secondary" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>

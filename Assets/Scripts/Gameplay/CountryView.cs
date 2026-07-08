@@ -558,11 +558,20 @@ namespace Contagion.Gameplay
             }
         }
 
-        // Step 28-2: 국가를 탭해서 개별 팝업을 여는 인터랙션을 제거했다. 지금은 국가들이 지도 위 실제
-        // 위치·크기 그대로라 예전보다 더 촘촘/작아서 탭 정확도 문제가 여전하다. 대신 HUD의 "국가현황"
-        // 버튼으로 18개국 상태를 한 번에 보는 CountryStatusPanel(Step 28-2 신규)을 쓴다 — DevLog 참고.
-        // CountryPopupController/CountryPopup.uxml은 코드는 남아있지만 더 이상 아무도 호출하지 않는다.
-        // BoxCollider2D도 같은 이유로 더 이상 클릭 판정에 쓰이지 않지만(RequireComponent만 유지),
-        // 제거하는 리스크보다 그대로 두는 게 안전하다고 판단해 남겨뒀다.
+        // Step 28-2에서 국가를 탭해서 개별 팝업을 여는 인터랙션을 제거했었다(지도 위 실제 위치·크기
+        // 그대로라 국가가 촘촘/작아서 탭 정확도 문제가 있었기 때문 — DevLog 참고). HUD 리디자인에서
+        // HTML 프로토타입의 "Country Dock"(상시 표시 국가 정보 패널)을 실제 UI Toolkit HUD로
+        // 이식하면서 트리거를 되살렸다 — CountryPopupController(모달 팝업)를 다시 쓰는 게 아니라
+        // 신규 CountryDockController.cs(Hud.uxml의 country-dock 요소를 상시 갱신)가 이 이벤트를
+        // 구독한다. WorldMapCameraController.WasDragging으로 지도 드래그 중 스친 클릭은 걸러내지만,
+        // Step 28-2가 지적한 "국가가 촘촘해 탭 정확도가 낮다"는 근본 문제 자체는 그대로이므로 실기기
+        // 플레이테스트로 오탭 빈도를 반드시 확인할 것(unity-editor-task.md 참고).
+        private void OnMouseUpAsButton()
+        {
+            if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
+                return;
+
+            WorldMap.Instance?.HandleCountryClicked(countryId);
+        }
     }
 }

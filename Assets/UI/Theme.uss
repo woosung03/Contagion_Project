@@ -92,6 +92,15 @@
     /* ---- 카드/버튼 눌림(active) 상태 ---- */
     --color-surface-hover: rgba(255, 255, 255, 0.12);
     --color-border-hover: rgba(255, 255, 255, 0.35);
+
+    /* ---- SF 전술 디스플레이 액센트 (Hud 전용 — DEFCON/Frostpunk 참고) ----
+       --color-brand-dna(rgb 120,220,140)는 텍스트용 톤이라 얇은 헤어라인/코너 브래킷에
+       그대로 쓰면 배경 대비 다소 탁하다. 더 채도 높고 밝은 변형을 별도로 둬 "발광 선"
+       느낌을 낸다. box-shadow/blur가 USS에서 미지원(css-to-uss-support.md)이라 실제 블러
+       번짐 대신 밝은 solid 색상 1px 라인으로 근사한다. */
+    --color-accent-glow: rgb(150, 255, 185);
+    --color-accent-glow-soft: rgba(150, 255, 185, 0.35);
+    --color-grid-line: rgba(150, 255, 185, 0.12);
 }
 
 /* ============================================================

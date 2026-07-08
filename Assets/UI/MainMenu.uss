@@ -26,6 +26,7 @@
 
 .mainmenu-list {
     flex-grow: 1;
+    flex-shrink: 1; /* detail-panel이 커질 때(국가 선택 시 3줄 텍스트) 공간을 양보하도록 */
     margin-bottom: var(--space-lg);
 }
 
@@ -109,7 +110,10 @@
     padding: var(--space-lg);
     border-radius: var(--radius-md);
     margin-bottom: var(--space-lg);
-    min-height: 70px;
+    /* 제목(22px) + desc 3줄(인구/기후/의료 수준, 17px) + 상하 패딩 32px을 담기에 70px는 부족해서
+       텍스트(특히 인구 줄)가 패널 박스 아래로 삐져나왔음 — 실측 필요 높이(~126px)에 여유를 더해 고정. */
+    min-height: 140px;
+    flex-shrink: 0; /* mainmenu-list가 공간을 양보하는 동안 이 패널 자체는 줄어들지 않도록 */
 }
 
 .detail-panel__title {
@@ -130,6 +134,7 @@
 
 .mainmenu-next {
     height: var(--touch-target-min);
+    flex-shrink: 0;
     font-size: var(--font-size-lg);
     -unity-font-style: bold;
     background-color: var(--color-brand-dna);
@@ -138,5 +143,6 @@
 
 .mainmenu-back {
     height: 46px;
+    flex-shrink: 0;
     margin-bottom: var(--space-md);
 }

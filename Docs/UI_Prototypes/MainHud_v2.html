@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Contagion Project — Main HUD Prototype v2 (Frostpunk/HOI4 지향)</title>
+<link rel="stylesheet" href="MainHud_v2.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       device-frame: 프리뷰 전용 래퍼(변환 대상 아님).
+       ============================================================ -->
+  <div class="device-frame">
+    <div class="hud-root">
+
+      <!-- ============================================================
+           resource-strip : v1의 top-bar + meta-row를 통합한 초박형
+           단일 행 리소스 바. HOI4 상단 리소스 바처럼 아이콘+숫자 쌍을
+           헤어라인 구분선으로만 나열 — 카드/배경박스 없음, 여백 최소.
+           ============================================================ -->
+      <div class="resource-strip">
+        <div class="resource-strip__item resource-strip__item--pathogen">
+          <span class="resource-strip__icon">🦠</span><span class="resource-strip__value">박테리아</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item">
+          <span class="resource-strip__icon">D</span><span class="resource-strip__value">17</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item resource-strip__item--dna">
+          <span class="resource-strip__icon">🧬</span><span class="resource-strip__value">24</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item resource-strip__item--infected">
+          <span class="resource-strip__icon">☣</span><span class="resource-strip__value">128.4M</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item resource-strip__item--dead">
+          <span class="resource-strip__icon">☠</span><span class="resource-strip__value">4.2M</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item resource-strip__item--cure">
+          <span class="resource-strip__icon">💉</span><span class="resource-strip__value">12%</span>
+        </div>
+        <span class="resource-strip__sep"></span>
+        <div class="resource-strip__item resource-strip__item--phase">
+          <span class="resource-strip__value">잠복기</span>
+        </div>
+
+        <div class="resource-strip__spacer"></div>
+
+        <span class="resource-strip__date">07.08</span>
+        <button class="icon-button-sm" aria-label="설정">⚙</button>
+      </div>
+
+      <!-- ============================================================
+           map-viewport : v1 대비 대폭 확대(플렉스 비중 상승). 이벤트
+           로그/국가 패널을 지도 위 코너에 "도킹"시켜 상시 노출하되,
+           지도 자체가 차지하는 화면 비중은 오히려 늘어난다 —
+           모바일 앱의 바텀시트 팝업 방식(v1의 select-hint-card) 대신
+           HOI4/Frostpunk의 "화면 가장자리에 붙는 상시 정보 패널" 방식.
+           ============================================================ -->
+      <div class="map-viewport">
+        <div class="map-placeholder">
+          <div class="map-placeholder__ocean"></div>
+
+          <span class="landmass landmass--eurasia"></span>
+          <span class="landmass landmass--africa"></span>
+          <span class="landmass landmass--namerica"></span>
+          <span class="landmass landmass--samerica"></span>
+          <span class="landmass landmass--australia"></span>
+
+          <span class="infection-dot infection-dot--origin" style="left:52%; top:34%;"></span>
+          <span class="infection-dot infection-dot--spreading" style="left:47%; top:31%;"></span>
+          <span class="infection-dot infection-dot--spreading" style="left:56%; top:38%;"></span>
+          <span class="infection-dot infection-dot--critical" style="left:23%; top:30%;"></span>
+        </div>
+
+        <!-- event-log-dock : 강화된 이벤트 패널. 화면 좌상단에 상시
+             도킹(화면 가장자리에 여백 없이 밀착) — v1의 얇은 뉴스
+             티커를 대체. 스크롤 가능한 다행 로그로 정보 밀도 상승. -->
+        <div class="event-log-dock">
+          <div class="event-log-dock__header">이벤트 로그</div>
+          <div class="event-log-dock__row">
+            <span class="event-log-dock__dot event-log-dock__dot--danger"></span>
+            <span class="event-log-dock__day">D17</span>
+            <span class="event-log-dock__text">한국 — 공항 검역 강화</span>
+          </div>
+          <div class="event-log-dock__row">
+            <span class="event-log-dock__dot event-log-dock__dot--info"></span>
+            <span class="event-log-dock__day">D16</span>
+            <span class="event-log-dock__text">WHO 긴급회의 소집</span>
+          </div>
+          <div class="event-log-dock__row">
+            <span class="event-log-dock__dot event-log-dock__dot--flavor"></span>
+            <span class="event-log-dock__day">D14</span>
+            <span class="event-log-dock__text">원인불명 발열 환자 급증 보고</span>
+          </div>
+          <div class="event-log-dock__row">
+            <span class="event-log-dock__dot event-log-dock__dot--flavor"></span>
+            <span class="event-log-dock__day">D12</span>
+            <span class="event-log-dock__text">최초 감염 지역 발원</span>
+          </div>
+        </div>
+
+        <!-- country-dock : 상시 표시 국가 패널. 화면 우측에 도킹.
+             선택된 국가가 없으면 세계 합계로 폴백 — v1의 모달성 안내
+             카드(select-hint-card)를 제거하고 이 자리에 상태 텍스트로
+             흡수했다. -->
+        <div class="country-dock">
+          <div class="country-dock__header">
+            <span class="country-dock__flag">🇰🇷</span>
+            <span class="country-dock__name">대한민국</span>
+          </div>
+          <div class="country-dock__row"><span class="country-dock__label">인구</span><span class="country-dock__value">51.7M</span></div>
+          <div class="country-dock__row"><span class="country-dock__label">감염률</span><span class="country-dock__value country-dock__value--infected">2.4%</span></div>
+          <div class="country-dock__row"><span class="country-dock__label">사망률</span><span class="country-dock__value country-dock__value--dead">0.08%</span></div>
+          <div class="country-dock__row"><span class="country-dock__label">의료수준</span><span class="country-dock__value">높음</span></div>
+          <div class="country-dock__row"><span class="country-dock__label">국경</span><span class="country-dock__value country-dock__value--warn">폐쇄</span></div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           graph-panel : 확대된 통계 그래프. v1 대비 그래프 높이를
+           약 2배로 키우고, 중간 기준선(baseline)을 추가해 추세를
+           더 읽기 쉽게 했다. 클래스명(stat-graph-item 등)은 v1과
+           동일하게 유지해 실제 HudSparkline.cs 연동 시 구조 변경이
+           최소화되도록 했다.
+           ============================================================ -->
+      <div class="graph-panel">
+        <div class="stat-graph-item">
+          <span class="stat-graph-item__label stat-graph-item__label--infected">감염자 128,402,110</span>
+          <div class="stat-graph-item__graph">
+            <span class="stat-graph-item__baseline"></span>
+            <span class="bar" style="height:20%"></span>
+            <span class="bar" style="height:32%"></span>
+            <span class="bar" style="height:28%"></span>
+            <span class="bar" style="height:44%"></span>
+            <span class="bar" style="height:58%"></span>
+            <span class="bar" style="height:70%"></span>
+            <span class="bar" style="height:86%"></span>
+            <span class="bar" style="height:100%"></span>
+          </div>
+        </div>
+
+        <div class="stat-graph-item">
+          <span class="stat-graph-item__label stat-graph-item__label--dead">사망자 4,208,553</span>
+          <div class="stat-graph-item__graph">
+            <span class="stat-graph-item__baseline"></span>
+            <span class="bar" style="height:10%"></span>
+            <span class="bar" style="height:14%"></span>
+            <span class="bar" style="height:18%"></span>
+            <span class="bar" style="height:22%"></span>
+            <span class="bar" style="height:30%"></span>
+            <span class="bar" style="height:38%"></span>
+            <span class="bar" style="height:46%"></span>
+            <span class="bar" style="height:55%"></span>
+          </div>
+        </div>
+
+        <div class="stat-graph-item">
+          <span class="stat-graph-item__label stat-graph-item__label--cure">치료제 12%</span>
+          <div class="stat-graph-item__graph">
+            <span class="stat-graph-item__baseline"></span>
+            <span class="bar" style="height:4%"></span>
+            <span class="bar" style="height:5%"></span>
+            <span class="bar" style="height:6%"></span>
+            <span class="bar" style="height:8%"></span>
+            <span class="bar" style="height:9%"></span>
+            <span class="bar" style="height:10%"></span>
+            <span class="bar" style="height:11%"></span>
+            <span class="bar" style="height:12%"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           action-strip : v1 tabs-row 대체. 버튼 높이 48px→30px(37.5%
+           축소), 폰트 축소, 버튼 사이 여백도 축소해 "탭 촘촘히 붙은
+           툴바" 느낌으로 — 모바일 앱의 넓은 하단 내비게이션 바 느낌 제거.
+           ============================================================ -->
+      <div class="action-strip">
+        <button class="action-button">업그레이드</button>
+        <button class="action-button">국가현황</button>
+        <button class="action-button action-button--secondary">랭킹</button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

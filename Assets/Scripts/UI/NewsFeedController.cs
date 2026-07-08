@@ -120,21 +120,43 @@ namespace Contagion.UI
             _ => stage.ToString()
         };
 
+        /// <summary>
+        /// [Event Dock 심각도 표시] 한 줄 = 심각도 점(news-entry-dot) + 텍스트(news-entry).
+        /// EventManager.NewsEventCategory(Positive/Negative/Flavor) 분류를 그대로 재사용해 점
+        /// 색상을 정한다 — extraClass(뉴스 텍스트 색상 클래스)에서 대응하는 점 클래스를 유도하므로
+        /// 이 메서드를 부르는 6개 호출부(HandleNewsEvent 등)는 전혀 바꿀 필요가 없다.
+        /// </summary>
         private void AddEntry(string text, string extraClass)
         {
             if (_newsScroll == null) return;
 
+            string dotClass = extraClass switch
+            {
+                "news-entry--positive" => "news-entry-dot--positive",
+                "news-entry--negative" => "news-entry-dot--negative",
+                _ => "news-entry-dot--flavor"
+            };
+
+            var row = new VisualElement();
+            row.AddToClassList("news-entry-row");
+
+            var dot = new VisualElement();
+            dot.AddToClassList("news-entry-dot");
+            dot.AddToClassList(dotClass);
+            row.Add(dot);
+
             var label = new Label(text);
             label.AddToClassList("news-entry");
             if (extraClass != null) label.AddToClassList(extraClass);
+            row.Add(label);
 
-            _newsScroll.Add(label);
+            _newsScroll.Add(row);
 
             var content = _newsScroll.contentContainer;
             while (content.childCount > MaxEntries)
                 content.RemoveAt(0);
 
-            _newsScroll.ScrollTo(label);
+            _newsScroll.ScrollTo(row);
         }
     }
 }

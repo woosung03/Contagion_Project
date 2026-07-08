@@ -1,13 +1,23 @@
 /* 참조 해상도 480×1040 기준 고정 px 인셋(24/90/130) 대신 %로 표현 — 다른 화면비/해상도에서도
-   비율이 깨지지 않는다(코드베이스 위키 uss-layout-engine "플랫폼 확장성: % 단위 선호"). */
+   비율이 깨지지 않는다(코드베이스 위키 uss-layout-engine "플랫폼 확장성: % 단위 선호").
+
+   기존엔 left/right 5%, top 8.5% / bottom 12.5%로 화면의 약 90%×79%를 덮는 근-전체화면
+   오버레이였다 — 국가현황을 보는 동안 지도가 거의 다 가려졌다. top을 42%로 내려 화면
+   상단 42%(지도 + Hud 상단 영역)는 항상 보이게 하고, bottom 12.5%는 그대로 유지해
+   Hud 하단바(bottom-bar, 특히 tabs-row)가 이 패널 아래 계속 노출·클릭 가능하도록 했다
+   (원래 bottom 12.5%도 Hud bottom-bar 높이를 피하려고 잡아둔 값으로 보여 그대로 살렸다).
+   좌우 인셋도 5%->0으로 넓혀 모바일 바텀시트 관례에 맞추고, 48개국 리스트 표시 폭도 늘렸다.
+   모서리는 위쪽만 둥글게(border-top-left/right-radius 각각 단일값 — USS는 4값 shorthand
+   border-radius를 지원하지 않으므로 코너별 프로퍼티로 분리) 시트임을 시각적으로 알린다. */
 .status-root {
     position: absolute;
-    left: 5%;
-    right: 5%;
-    top: 8.5%;
+    left: 0;
+    right: 0;
+    top: 42%;
     bottom: 12.5%;
     background-color: var(--color-bg-panel-strong);
-    border-radius: var(--radius-lg);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
     padding: var(--space-xl);
 }
 
