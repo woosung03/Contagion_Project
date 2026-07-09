@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Contagion.Ads;
 using Contagion.Data;
 using Contagion.Managers;
@@ -41,8 +40,10 @@ namespace Contagion.UI
         // 텍스트가 박스 밖으로 삐져나오던 문제를 한글 표시명(NodeDisplayNames)으로 교체하면서,
         // 두 단어(예: "유전자 변이 II")가 자연스럽게 줄바꿈되도록 박스를 살짝 키웠다(110x50 → 126x60).
         // 열 간격(140)/카테고리 간격(240)/행 간격(110)이 전부 이 값보다 넉넉해 겹침은 없다.
+        // UI_Design.md 11.3/11.7 — 노드가 라벨 2개(이름/비용)에서 code/이름/상태/비용 4줄 스택으로
+        // 바뀌면서 세로 공간이 더 필요해 60→78로 키웠다. 행 간격(110px)이 여유 있어 겹치지 않는다.
         private const float NodeWidth = 126f;
-        private const float NodeHeight = 60f;
+        private const float NodeHeight = 78f;
         private const float CanvasPadding = 48f;
         private const float TopOffset = 34f; // 카테고리 제목을 위한 상단 여백
 
@@ -113,15 +114,20 @@ namespace Contagion.UI
 
         private VisualElement _upgradeRoot;
         private Label _dnaLabel;
+        private Label _categoryCaptionLabel;
         private Label _categoryTitleLabel;
         private ScrollView _nodeScroll;
         private Label _detailTitle;
-        private Label _detailDesc;
+        private VisualElement _detailRows;
         private Button _buyButton;
         private Button _closeButton;
         private Button _adBonusButton;
         private Button _prevButton;
         private Button _nextButton;
+
+        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). RebuildTree()가 카테고리 내 티어/갈래
+        /// 순서로 정렬해서 채우고, 노드 박스와 상세 패널이 같은 값을 공유해서 쓴다(UI_Design.md 11.3).</summary>
+        private readonly Dictionary<string, string> _codeByNodeId = new Dictionary<string, string>();
 
         /// <summary>헤더의 ◀ 버튼 클릭 — 실제 페이지 전환은 UIManager가 담당.</summary>
         public event System.Action OnPrevRequested;
@@ -138,10 +144,11 @@ namespace Contagion.UI
             var root = GetComponent<UIDocument>().rootVisualElement;
             _upgradeRoot = root.Q<VisualElement>("upgrade-root");
             _dnaLabel = root.Q<Label>("dna-label");
+            _categoryCaptionLabel = root.Q<Label>("category-caption-label");
             _categoryTitleLabel = root.Q<Label>("category-title-label");
             _nodeScroll = root.Q<ScrollView>("node-scroll");
             _detailTitle = root.Q<Label>("detail-title");
-            _detailDesc = root.Q<Label>("detail-desc");
+            _detailRows = root.Q<VisualElement>("detail-rows");
             _buyButton = root.Q<Button>("buy-button");
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
@@ -150,6 +157,9 @@ namespace Contagion.UI
 
             if (_categoryTitleLabel != null)
                 _categoryTitleLabel.text = CategoryLabel(category);
+            // UI_Design.md 11.5 — 기존 한글 라벨(위 줄)은 그대로 두고 영문 LAB 캡션만 추가.
+            if (_categoryCaptionLabel != null)
+                _categoryCaptionLabel.text = CategoryCaption(category);
 
             // 카테고리 하나(9노드, 3열×3티어)만 그리므로 이제 세로 스크롤만으로 충분 — 예전엔 27노드가
             // 한 캔버스에 다 있어서(카테고리 3개를 가로로 나열) 양방향 스크롤이 필요했다.
@@ -230,6 +240,13 @@ namespace Contagion.UI
                 return;
             }
 
+            // UI_Design.md 11.3 — 노드 표시코드(TRANS-001 등)를 티어(y)→갈래(x) 순으로 부여.
+            // 신규 필드 없이 이번 RebuildTree() 호출마다 다시 계산하는 파생값이라 게임 로직과 무관.
+            _codeByNodeId.Clear();
+            var ordered = nodes.OrderBy(n => n.position.y).ThenBy(n => n.position.x).ToList();
+            for (int i = 0; i < ordered.Count; i++)
+                _codeByNodeId[ordered[i].id] = $"{CategoryPrefix(ordered[i].category)}-{(i + 1):000}";
+
             _xOffset = nodes.Min(n => n.position.x);
 
             float maxX = 0f, maxY = 0f;
@@ -260,12 +277,41 @@ namespace Contagion.UI
             Debug.Log($"[UpgradeTreeView] {category} 트리 렌더링 완료 — 노드 {nodes.Count}개, 캔버스 크기 {canvasWidth}x{canvasHeight}");
         }
 
+        /// <summary>UI_Design.md 11.2 — LOCKED/AVAILABLE/ACTIVE/MAXED 4단계를 기존 public API만
+        /// 읽기 전용으로 조회해서 계산한다. isUnlocked 필드/CanUnlock/prerequisites 어느 것도
+        /// 바꾸지 않으므로 해금 규칙(게임 로직)에는 영향이 없다 — 순수 표시용 파생값.</summary>
+        private static string DetermineState(UpgradeNode node)
+        {
+            if (node.isUnlocked)
+            {
+                // isLeaf: 이 노드를 선행조건으로 삼는 다음 노드가 하나도 없으면 그 갈래의 마지막
+                // 노드(=더 진행할 게 없음) — MAXED. 있으면 이미 해금됐지만 다음 단계가 남아있는
+                // ACTIVE.
+                bool isLeaf = !UpgradeManager.Instance.Tree.Any(n => n.prerequisites.Contains(node.id));
+                return isLeaf ? "maxed" : "active";
+            }
+
+            bool prereqsMet = node.prerequisites.All(pid => UpgradeManager.Instance.IsUnlocked(pid));
+            return prereqsMet ? "available" : "locked";
+        }
+
+        private static string StateCaption(string state) => state switch
+        {
+            "locked" => "LOCKED",
+            "available" => "AVAILABLE",
+            "active" => "ACTIVE",
+            "maxed" => "MAXED",
+            _ => state.ToUpperInvariant()
+        };
+
         private VisualElement CreateNodeElement(UpgradeNode node)
         {
+            string state = DetermineState(node);
+
             var box = new VisualElement();
             box.AddToClassList("tree-node");
             box.AddToClassList($"tree-node--{CategoryClass(node.category)}");
-            if (node.isUnlocked) box.AddToClassList("tree-node--unlocked");
+            box.AddToClassList($"tree-node--{state}");
             if (node.id == _selectedNodeId) box.AddToClassList("tree-node--selected");
 
             box.style.position = Position.Absolute;
@@ -274,12 +320,23 @@ namespace Contagion.UI
             box.style.width = NodeWidth;
             box.style.height = NodeHeight;
 
-            var label = new Label(DisplayName(node.id));
-            label.AddToClassList("tree-node__label");
-            box.Add(label);
+            // UI_Design.md 11.3 — "연구 모듈 카드": code / 이름 / STATUS / 비용(또는 완료 표시) 4줄.
+            string code = _codeByNodeId.TryGetValue(node.id, out var mappedCode) ? mappedCode : node.id;
+            var codeLabel = new Label(code);
+            codeLabel.AddToClassList("tree-node__code");
+            box.Add(codeLabel);
+
+            var nameLabel = new Label(DisplayName(node.id));
+            nameLabel.AddToClassList("tree-node__label");
+            box.Add(nameLabel);
+
+            var statusLabel = new Label($"STATUS : {StateCaption(state)}");
+            statusLabel.AddToClassList("tree-node__status");
+            box.Add(statusLabel);
 
             int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
-            var costLabel = new Label(node.isUnlocked ? "해금됨" : $"{effectiveCost} DNA");
+            string costText = state == "active" || state == "maxed" ? "UNLOCKED" : $"{effectiveCost} DNA";
+            var costLabel = new Label(costText);
             costLabel.AddToClassList("tree-node__cost");
             box.Add(costLabel);
 
@@ -289,9 +346,17 @@ namespace Contagion.UI
             return box;
         }
 
-        /// <summary>선행조건 -> 노드 연결선. 선행 노드가 이미 해금됐으면 초록색 굵은 선, 아니면 흐린 회색 선.
-        /// 이 카테고리는 자체 완결형(선행조건이 전부 같은 카테고리 안에서만 걸림 — DefaultUpgradeTreeFactory
-        /// 참고)이라 카테고리로 필터링해도 연결선이 끊길 일은 없다.</summary>
+        // UI_Design.md 11.6 — HUD 헤어라인/격자선과 동일 팔레트(Theme.uss --color-accent-glow /
+        // --color-grid-line). USS 변수를 C#에서 직접 읽을 수 없어 값은 수동 동기화 — 색상을 바꿀 땐
+        // 이 두 상수와 Theme.uss :root를 같이 고칠 것.
+        private static readonly Color ConnectionActiveColor = new Color(150f / 255f, 255f / 255f, 185f / 255f, 1f);
+        private static readonly Color ConnectionInactiveColor = new Color(150f / 255f, 255f / 255f, 185f / 255f, 0.16f);
+
+        /// <summary>선행조건 -> 노드 연결선. 선행 노드가 이미 해금됐으면 발광 굵은 선, 아니면 흐린
+        /// 격자선 톤. 이 카테고리는 자체 완결형(선행조건이 전부 같은 카테고리 안에서만 걸림 —
+        /// DefaultUpgradeTreeFactory 참고)이라 카테고리로 필터링해도 연결선이 끊길 일은 없다.
+        /// UI_Design.md 11.6 — 대각선 직선을 "회로도" 인상의 꺾은선(elbow)으로 바꾸고 양 끝에
+        /// 작은 포트 마커를 찍는다. 좌표 계산/선행조건 순회 로직은 기존과 동일, Painter2D 호출만 변경.</summary>
         private void DrawConnections(MeshGenerationContext mgc)
         {
             if (UpgradeManager.Instance == null) return;
@@ -306,53 +371,118 @@ namespace Contagion.UI
                     if (prereq == null || prereq.category != category) continue;
 
                     bool active = prereq.isUnlocked;
-                    painter.strokeColor = active
-                        ? new Color(0.4f, 0.9f, 0.5f, 0.85f)
-                        : new Color(1f, 1f, 1f, 0.2f);
+                    Color color = active ? ConnectionActiveColor : ConnectionInactiveColor;
+                    painter.strokeColor = color;
                     painter.lineWidth = active ? 3f : 2f;
 
                     Vector2 from = new Vector2(prereq.position.x - _xOffset, prereq.position.y)
                         + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
                     Vector2 to = new Vector2(node.position.x - _xOffset, node.position.y)
                         + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
+                    Vector2 elbow = new Vector2(to.x, from.y);
 
                     painter.BeginPath();
                     painter.MoveTo(from);
+                    painter.LineTo(elbow);
                     painter.LineTo(to);
                     painter.Stroke();
+
+                    DrawPort(painter, from, color);
+                    DrawPort(painter, to, color);
                 }
             }
         }
 
+        /// <summary>연결선 끝에 4px 정사각형 "포트/단자" 마커를 찍는다 — 국가현황 패널 news-entry-dot과
+        /// 같은 "점 하나로 위치를 찍는" 언어를 재사용(UI_Design.md 11.6).</summary>
+        private static void DrawPort(Painter2D painter, Vector2 center, Color color)
+        {
+            const float half = 2f; // 4px 정사각형
+            painter.fillColor = color;
+            painter.BeginPath();
+            painter.MoveTo(center + new Vector2(-half, -half));
+            painter.LineTo(center + new Vector2(half, -half));
+            painter.LineTo(center + new Vector2(half, half));
+            painter.LineTo(center + new Vector2(-half, half));
+            painter.ClosePath();
+            painter.Fill();
+        }
+
+        /// <summary>UI_Design.md 11.4 — "연구 분석 콘솔". 문자열 한 덩어리(BuildDescription())를
+        /// data-row 여러 줄로 분해했다. 읽는 데이터(cost/prerequisites/effects)는 기존과 동일,
+        /// 표시 방식만 바뀐다.</summary>
         private void SelectNode(string nodeId)
         {
             _selectedNodeId = nodeId;
             var node = UpgradeManager.Instance?.GetNode(nodeId);
             if (node == null) return;
 
-            _detailTitle.text = DisplayName(node.id);
-            _detailDesc.text = BuildDescription(node);
+            string state = DetermineState(node);
+            string code = _codeByNodeId.TryGetValue(node.id, out var mappedCode) ? mappedCode : node.id;
+            int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
+
+            _detailTitle.text = $"{CategoryEnglishName(node.category)} ANALYSIS";
+
+            _detailRows?.Clear();
+            AddDetailRow("코드", code);
+            AddDetailRow("명칭", DisplayName(node.id));
+
+            if (node.effects.Count > 0)
+            {
+                foreach (var effect in node.effects)
+                {
+                    string sign = effect.amount >= 0 ? "+" : "";
+                    AddDetailRow(EffectStatLabel(effect.statName), $"{sign}{effect.amount:0.##}");
+                }
+            }
+            else
+            {
+                AddDetailRow("효과", "없음");
+            }
+
+            if (node.prerequisites.Count > 0)
+                AddDetailRow("선행 노드", string.Join(", ", node.prerequisites.Select(DisplayName)));
+
+            AddDetailRow("DNA COST", node.isUnlocked ? "—" : effectiveCost.ToString());
+            AddDetailRow("STATUS", StateCaption(state), $"data-value--{state}");
 
             bool canUnlock = UpgradeManager.Instance.CanUnlock(nodeId);
             _buyButton.SetEnabled(canUnlock);
-            _buyButton.text = node.isUnlocked ? "이미 해금됨" : $"구매 ({UpgradeManager.Instance.GetEffectiveCost(node)} DNA)";
+            _buyButton.text = node.isUnlocked ? "이미 해금됨" : $"구매 ({effectiveCost} DNA)";
 
             RebuildTree();
         }
 
-        private static string BuildDescription(UpgradeNode node)
+        /// <summary>data-row 한 줄을 만들어 detail-rows 컨테이너에 추가한다(country-dock__row와
+        /// 동일 계약 — UI_Design.md 3절/11.4).</summary>
+        private void AddDetailRow(string label, string value, string valueStateClass = null)
         {
-            var sb = new StringBuilder();
-            sb.Append($"기본 비용: {node.cost} DNA (실제 비용은 같은 카테고리 해금 수에 따라 증가)\n");
-            if (node.prerequisites.Count > 0)
-                sb.Append($"선행 노드: {string.Join(", ", node.prerequisites.Select(DisplayName))}\n");
-            if (node.effects.Count > 0)
-            {
-                sb.Append("효과: ");
-                sb.Append(string.Join(", ", node.effects.Select(e => $"{e.statName} {(e.amount >= 0 ? "+" : "")}{e.amount:0.##}")));
-            }
-            return sb.ToString();
+            if (_detailRows == null) return;
+
+            var row = new VisualElement();
+            row.AddToClassList("data-row");
+
+            var labelEl = new Label(label);
+            labelEl.AddToClassList("data-label");
+            row.Add(labelEl);
+
+            var valueEl = new Label(value);
+            valueEl.AddToClassList("data-value");
+            if (!string.IsNullOrEmpty(valueStateClass)) valueEl.AddToClassList(valueStateClass);
+            row.Add(valueEl);
+
+            _detailRows.Add(row);
         }
+
+        /// <summary>node.effects의 statName -> 상세 패널 표시 라벨(영문 대문자, 탁티컬 콘솔 톤).</summary>
+        private static string EffectStatLabel(string statName) => statName switch
+        {
+            "infectivity" => "TRANSMISSION",
+            "severity" => "SEVERITY",
+            "lethality" => "LETHALITY",
+            "drugResistance" => "RESISTANCE",
+            _ => statName.ToUpperInvariant()
+        };
 
         private void HandleBuyClicked()
         {
@@ -392,5 +522,27 @@ namespace Contagion.UI
             UpgradeCategory.Ability => "ability",
             _ => "unknown"
         };
+
+        /// <summary>UI_Design.md 11.5 — 카테고리 영문 전체 명칭("연구 분석 콘솔" 헤더/LAB 캡션 공용).</summary>
+        private static string CategoryEnglishName(UpgradeCategory category) => category switch
+        {
+            UpgradeCategory.Transmission => "TRANSMISSION",
+            UpgradeCategory.Symptom => "SYMPTOM",
+            UpgradeCategory.Ability => "ADAPTATION",
+            _ => category.ToString().ToUpperInvariant()
+        };
+
+        /// <summary>UI_Design.md 11.3 — 노드 표시코드(TRANS-001 등) 접두어. CategoryEnglishName의
+        /// 축약형(카드 폭이 좁아 전체 단어 대신 5자 이내로 줄임).</summary>
+        private static string CategoryPrefix(UpgradeCategory category) => category switch
+        {
+            UpgradeCategory.Transmission => "TRANS",
+            UpgradeCategory.Symptom => "SYM",
+            UpgradeCategory.Ability => "ADAPT",
+            _ => "NODE"
+        };
+
+        /// <summary>UI_Design.md 11.5 — 헤더의 영문 LAB 캡션(기존 한글 category-title-label 위에 병기).</summary>
+        private static string CategoryCaption(UpgradeCategory category) => $"{CategoryEnglishName(category)} LAB";
     }
 }

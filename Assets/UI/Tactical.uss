@@ -1,0 +1,94 @@
+/* ============================================================
+   Tactical.uss — Tactical Design System 공용 스타일시트
+   HUD(Hud.uss event-dock/country-dock)와 UpgradeTree(UpgradeTree.uss, Step 62)에서
+   검증된 "감염병 통제센터 콘솔" 시각 언어(코너컷/판독 패널/data-row)를 화면 공용으로
+   승격한 파일. Docs/UI_Design.md 3절/18절 참고.
+
+   로드 순서: Theme.uss → Tactical.uss → 화면 전용 .uss
+   ============================================================ */
+
+.tactical-panel {
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+    border-radius: 0; /* 코너컷의 각진 인상과 둥근 모서리가 충돌해 tactical-panel은 항상 각짐 */
+}
+
+.tactical-panel__header {
+    padding-bottom: 3px;
+    margin-bottom: var(--space-xs);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.tactical-panel__title {
+    color: var(--color-accent-glow);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+}
+
+/* 코너컷 — Hud.uss/.corner-cut, UpgradeTree.uss/.corner-cut과 동일 값(발광 대각선 틱,
+   clip-path 미지원 대체재). 화면 간 톤을 맞추기 위해 크기/색상을 그대로 복제했다. */
+.corner-cut {
+    position: absolute;
+    width: 13px;
+    height: 2px;
+    background-color: var(--color-accent-glow);
+}
+
+.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
+.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
+.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
+.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+
+/* data-row/data-label/data-value — country-dock__row와 동일 계약(Hud.uss 참고).
+   화면 어디서나 "판독 행"으로 재사용. */
+.data-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.data-label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+}
+
+.data-value {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+}
+
+/* severity 색상 — Theme.uss --color-status-* 그대로 매핑(감염/사망/위험/정보). */
+.data-value--infected { color: var(--color-status-infected); }
+.data-value--dead      { color: var(--color-status-dead); }
+.data-value--danger    { color: var(--color-status-danger); }
+.data-value--info      { color: var(--color-status-info); }
+
+/* 판독/캡션 문법 — 화면 타이틀 위에 얹는 영문 대문자 캡션(UpgradeTree
+   upgrade-header__caption과 동일 톤). 화면별 .uss가 색상/자간 외의 배치만 조정. */
+.tactical-caption {
+    color: var(--color-accent-glow);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+    -unity-text-align: middle-center;
+}
+
+/* 리스트 행(48개 국가 등)용 좌측 accent bar — 코너컷 대신 쓰는 밀도 절약형 강조.
+   색상은 화면별 .uss가 상황(개발수준 등)에 맞는 색을 지정. */
+.accent-bar-row {
+    border-left-width: 4px;
+}
+
+/* data-row가 채워지는 빈 컨테이너 — UpgradeTree.uss의 동일 클래스와 같은 계약
+   (컨트롤러가 data-row를 Add하는 자리). CountrySelect/EndingScreen/Modal 공용. */
+.detail-rows {
+    margin: var(--space-sm) 0;
+}

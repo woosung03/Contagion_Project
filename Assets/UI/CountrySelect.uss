@@ -1,0 +1,23 @@
+/* CountrySelect 전용 스타일 — Docs/UI_Design.md 13절 "GLOBAL DEPLOYMENT TERMINAL".
+   country-row/detail-panel 자체 배경·레이아웃은 MainMenu.uss(공유)가 담당하고, 이 파일은
+   CountrySelect 화면 고유의 tactical 확장(개발수준 accent bar 색상, 캡션 여백)만 추가한다.
+   로드 순서: Theme.uss -> Tactical.uss -> MainMenu.uss -> CountrySelect.uss */
+
+.countryselect-caption {
+    margin-bottom: 2px;
+}
+
+/* country-row 좌측 accent bar — Tactical.uss의 .accent-bar-row(border-left-width:4px)와
+   조합해 국가의 의료 수준(developmentLevel)을 severity 색상으로 매핑(13절).
+   CountrySelectController.CreateCountryRow()가 developmentLevel에 따라 이 3종 중 하나를 부여한다. */
+.country-row--dev-high {
+    border-left-color: var(--color-status-info);
+}
+
+.country-row--dev-mid {
+    border-left-color: var(--color-text-secondary);
+}
+
+.country-row--dev-low {
+    border-left-color: var(--color-status-danger);
+}

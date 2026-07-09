@@ -19,7 +19,7 @@ namespace Contagion.UI
     {
         private VisualElement _endingRoot;
         private Label _resultTitle;
-        private Label _resultDetail;
+        private VisualElement _statsRows;
         private Label _scoreLabel;
         private Button _reviveButton;
         private Button _restartButton;
@@ -32,7 +32,7 @@ namespace Contagion.UI
             var root = GetComponent<UIDocument>().rootVisualElement;
             _endingRoot = root.Q<VisualElement>("ending-root");
             _resultTitle = root.Q<Label>("result-title");
-            _resultDetail = root.Q<Label>("result-detail");
+            _statsRows = root.Q<VisualElement>("stats-rows");
             _scoreLabel = root.Q<Label>("score-label");
             _reviveButton = root.Q<Button>("revive-button");
             _restartButton = root.Q<Button>("restart-button");
@@ -76,8 +76,22 @@ namespace Contagion.UI
             float score = ComputeFinalScore(isVictory, day);
 
             _resultTitle.text = isVictory ? "인류 전멸 — 승리" : "치료제 완성 — 패배";
-            _resultDetail.text = $"{day}일 경과";
             _scoreLabel.text = $"바이오하자드 점수: {score:N0}";
+
+            // 문단(N일 경과)뿐이던 결과 요약을 data-row 4줄(감염/사망/붕괴국/경과일)로 확장 —
+            // Docs/UI_Design.md 14절. GLOBAL INFECTED/DEATHS는 WorldDataManager.State 스냅샷 그대로,
+            // COLLAPSED NATIONS는 국가별 Country.GetCollapseStage()(이미 존재하는 함수)를
+            // 종료 시점에 순회 집계하는 표시 전용 계산이라 신규 게임 로직이 아니다.
+            long infected = WorldDataManager.Instance?.State.infectedCount ?? 0;
+            long dead = WorldDataManager.Instance?.State.deadCount ?? 0;
+            int collapsedNations = WorldDataManager.Instance?.Countries
+                .Count(c => c.GetCollapseStage() >= CountryCollapseStage.FullCollapse) ?? 0;
+
+            _statsRows?.Clear();
+            _statsRows?.Add(MakeStatRow("GLOBAL INFECTED", $"{infected:N0}", "data-value--infected"));
+            _statsRows?.Add(MakeStatRow("GLOBAL DEATHS", $"{dead:N0}", "data-value--dead"));
+            _statsRows?.Add(MakeStatRow("COLLAPSED NATIONS", $"{collapsedNations}", "data-value--danger"));
+            _statsRows?.Add(MakeStatRow("경과일", $"{day}일"));
 
             // 부활(광고)은 패배(치료제 완성으로 병원체가 진 상황)에서만 의미가 있다 — 설계 문서 13절.
             _reviveButton.style.display = isVictory ? DisplayStyle.None : DisplayStyle.Flex;
@@ -136,5 +150,23 @@ namespace Contagion.UI
             Difficulty.MegaBrutal => 3.0f,
             _ => 1.0f
         };
+
+        /// <summary>data-row 한 줄(라벨+값)을 만든다 — Tactical.uss data-row/data-label/data-value 계약.</summary>
+        private static VisualElement MakeStatRow(string label, string value, string valueClass = null)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("data-row");
+
+            var labelEl = new Label(label);
+            labelEl.AddToClassList("data-label");
+            row.Add(labelEl);
+
+            var valueEl = new Label(value);
+            valueEl.AddToClassList("data-value");
+            if (!string.IsNullOrEmpty(valueClass)) valueEl.AddToClassList(valueClass);
+            row.Add(valueEl);
+
+            return row;
+        }
     }
 }

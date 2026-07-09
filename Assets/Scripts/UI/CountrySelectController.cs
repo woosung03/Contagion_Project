@@ -26,7 +26,7 @@ namespace Contagion.UI
         private VisualElement _root;
         private ScrollView _countryList;
         private Label _detailTitle;
-        private Label _detailDesc;
+        private VisualElement _detailRows;
         private Button _backButton;
         private Button _startButton;
 
@@ -44,7 +44,7 @@ namespace Contagion.UI
             _root = root.Q<VisualElement>("countryselect-root");
             _countryList = root.Q<ScrollView>("country-list");
             _detailTitle = root.Q<Label>("detail-title");
-            _detailDesc = root.Q<Label>("detail-desc");
+            _detailRows = root.Q<VisualElement>("detail-rows");
             _backButton = root.Q<Button>("back-button");
             _startButton = root.Q<Button>("start-button");
 
@@ -59,7 +59,7 @@ namespace Contagion.UI
                 $"root={(_root != null ? "OK" : "NULL")}, " +
                 $"countryList={(_countryList != null ? "OK" : "NULL")}, " +
                 $"detailTitle={(_detailTitle != null ? "OK" : "NULL")}, " +
-                $"detailDesc={(_detailDesc != null ? "OK" : "NULL")}, " +
+                $"detailRows={(_detailRows != null ? "OK" : "NULL")}, " +
                 $"backButton={(_backButton != null ? "OK" : "NULL")}, " +
                 $"startButton={(_startButton != null ? "OK" : "NULL")}");
 
@@ -111,7 +111,7 @@ namespace Contagion.UI
             _selectedCountryId = null;
             _startButton.SetEnabled(false);
             _detailTitle.text = "";
-            _detailDesc.text = "";
+            _detailRows?.Clear();
 
             IReadOnlyList<Country> countries = GameDataBootstrapper.Instance?.AvailableCountries;
             if (countries == null || countries.Count == 0)
@@ -134,6 +134,8 @@ namespace Contagion.UI
         {
             var row = new VisualElement();
             row.AddToClassList("country-row");
+            row.AddToClassList("accent-bar-row"); // Docs/UI_Design.md 13절 — 48행 리스트라 코너컷 대신 좌측 accent bar
+            row.AddToClassList(DevAccentClass(country.developmentLevel));
 
             // 국기 아이콘 슬롯 — Resources/Flags/{countryId}.png 로드해서 배경으로 지정.
             // 국가마다 다른 이미지라 USS 클래스 하나로는 표현 불가능해서 코드에서 개별로 채운다.
@@ -183,9 +185,13 @@ namespace Contagion.UI
             row.AddToClassList("country-row--selected");
 
             _detailTitle.text = country.name;
-            _detailDesc.text = $"인구: {country.population:N0}\n" +
-                                $"기후: {ClimateLabel(country.climate)}\n" +
-                                $"의료 수준: {DevLabel(country.developmentLevel)}";
+
+            // 문단 한 덩어리(인구/기후/의료 수준)를 data-row 3줄로 분해 — Docs/UI_Design.md 13절.
+            // Country Dock(country-dock__row)과 동일한 문법이라 게임 시작 전/후 정보 표현이 통일된다.
+            _detailRows?.Clear();
+            _detailRows?.Add(MakeDetailRow("인구", $"{country.population:N0}"));
+            _detailRows?.Add(MakeDetailRow("기후", ClimateLabel(country.climate)));
+            _detailRows?.Add(MakeDetailRow("의료 수준", DevLabel(country.developmentLevel), DevValueClass(country.developmentLevel)));
 
             _startButton.SetEnabled(true);
         }
@@ -203,6 +209,41 @@ namespace Contagion.UI
             DevelopmentLevel.Low => "저개발국",
             _ => level.ToString()
         };
+
+        /// <summary>country-row 좌측 accent bar 색상 클래스 — 의료 수준을 severity로 재해석(13절).</summary>
+        private static string DevAccentClass(DevelopmentLevel level) => level switch
+        {
+            DevelopmentLevel.High => "country-row--dev-high",
+            DevelopmentLevel.Mid => "country-row--dev-mid",
+            DevelopmentLevel.Low => "country-row--dev-low",
+            _ => "country-row--dev-mid"
+        };
+
+        /// <summary>상세 패널의 "의료 수준" data-value 색상 클래스(Tactical.uss severity variant 재사용).</summary>
+        private static string DevValueClass(DevelopmentLevel level) => level switch
+        {
+            DevelopmentLevel.High => "data-value--info",
+            DevelopmentLevel.Low => "data-value--danger",
+            _ => null
+        };
+
+        /// <summary>data-row 한 줄(라벨+값)을 만든다 — Tactical.uss data-row/data-label/data-value 계약.</summary>
+        private static VisualElement MakeDetailRow(string label, string value, string valueClass = null)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("data-row");
+
+            var labelEl = new Label(label);
+            labelEl.AddToClassList("data-label");
+            row.Add(labelEl);
+
+            var valueEl = new Label(value);
+            valueEl.AddToClassList("data-value");
+            if (!string.IsNullOrEmpty(valueClass)) valueEl.AddToClassList(valueClass);
+            row.Add(valueEl);
+
+            return row;
+        }
 
         private static string ClimateLabel(ClimateType climate) => climate switch
         {

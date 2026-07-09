@@ -24,11 +24,25 @@
     align-items: center;
 }
 
+/* UI_Design.md 11.5 — 카테고리명 영문 LAB 캡션 + 기존 한글 라벨 2줄 병기용 래퍼.
+   flex-grow는 기존 category-title-label이 아니라 이 래퍼가 담당(가로 중앙 정렬 유지). */
+.upgrade-header__title-block {
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.upgrade-header__caption {
+    color: var(--color-accent-glow);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+}
+
 .upgrade-header__category-title {
     color: var(--color-brand-gold);
     font-size: var(--font-size-xl);
     -unity-font-style: bold;
-    flex-grow: 1;
     -unity-text-align: middle-center;
 }
 
@@ -61,6 +75,74 @@
     margin-bottom: var(--space-lg);
 }
 
+/* ============================================================
+   Tactical Display 공용 요소 (UI_Design.md 3절/11절) — HUD(event-dock/country-dock)에서
+   확립된 코너컷/판독 패널 문법을 UpgradeTree에 이식. 화면이 늘어나면 Tactical.uss로 승격해
+   중복을 없앨 예정(현재는 UpgradeTree 전용으로 로컬 정의, 클래스명은 승격을 염두에 두고
+   범용 이름을 그대로 사용 — 승격 시 이름 변경 불필요).
+   ============================================================ */
+.tactical-panel {
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.tactical-panel__header {
+    padding-bottom: 3px;
+    margin-bottom: var(--space-xs);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.tactical-panel__title {
+    color: var(--color-accent-glow);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+}
+
+/* 코너컷 — Hud.uss .corner-cut과 동일 값(발광 대각선 틱, clip-path 미지원 대체재).
+   화면 간 톤을 맞추기 위해 크기/색상을 그대로 복제했다. */
+.corner-cut {
+    position: absolute;
+    width: 13px;
+    height: 2px;
+    background-color: var(--color-accent-glow);
+}
+
+.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
+.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
+.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
+.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+
+/* data-row/data-label/data-value — country-dock__row와 동일 계약(11.4 상세 패널, 국가현황
+   패널·Country Dock과 동일한 "판독 행" 문법). */
+.data-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+.data-label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+}
+
+.data-value {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+}
+
+.data-value--locked    { color: var(--color-text-tertiary); }
+.data-value--available { color: var(--color-accent-glow); }
+.data-value--active     { color: var(--color-brand-dna); }
+.data-value--maxed      { color: var(--color-brand-gold); }
+
 .category-header {
     color: var(--color-brand-gold);
     font-size: var(--font-size-lg);
@@ -76,32 +158,57 @@
     -unity-font-style: bold;
 }
 
+/* UI_Design.md 11.3 — "연구 모듈 카드": 라벨 2개짜리 버튼에서 code/name/status/cost 4줄
+   세로 스택으로 전환. 카테고리 색은 전체 테두리에서 좌측 4px 바(accent bar)로 축소해
+   11.2 상태 테두리(잠금/대기/활성/완료)와 위계가 겹치지 않게 분리했다. */
 .tree-node {
     background-color: var(--color-surface);
-    border-width: 2px;
+    border-width: 1px;
+    border-left-width: 4px;
     border-color: var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    padding: 5px 7px;
+    flex-direction: column;
+    align-items: flex-start;
     justify-content: center;
-    align-items: center;
     overflow: hidden; /* 한글 표시명이 길어져도 박스 밖으로 새지 않도록 하는 안전망 */
 }
 
 .tree-node--transmission {
-    border-color: var(--color-node-transmission);
+    border-left-color: var(--color-node-transmission);
 }
 
 .tree-node--symptom {
-    border-color: var(--color-node-symptom);
+    border-left-color: var(--color-node-symptom);
 }
 
 .tree-node--ability {
-    border-color: var(--color-node-ability);
+    border-left-color: var(--color-node-ability);
 }
 
-.tree-node--unlocked {
-    background-color: rgba(120, 220, 140, 0.28);
-    border-color: var(--color-brand-dna);
+/* ---- 11.2 노드 상태 4단계 (LOCKED/AVAILABLE/ACTIVE/MAXED) ----
+   isUnlocked 하나뿐이던 기존 이분법을 대체 — UpgradeTreeView.CreateNodeElement()가
+   node.prerequisites/isUnlocked/leaf 여부를 읽기 전용으로 조회해 상태 하나를 계산하고
+   tree-node--{state} 클래스 하나만 부여한다(게임 로직 변경 없음, 표시만 세분화). */
+.tree-node--locked {
+    border-color: var(--color-border);
+    opacity: 0.7;
+}
+
+.tree-node--available {
+    border-color: var(--color-accent-glow-soft);
+}
+
+.tree-node--active {
+    border-color: var(--color-accent-glow);
+    border-width: 2px;
+    background-color: rgba(120, 220, 140, 0.12);
+}
+
+.tree-node--maxed {
+    border-color: var(--color-brand-gold);
+    border-width: 2px;
+    background-color: rgba(255, 210, 90, 0.10);
 }
 
 .tree-node--selected {
@@ -109,40 +216,61 @@
     border-color: var(--color-border-selected);
 }
 
+.tree-node__code {
+    width: 100%; /* align-items:flex-start라도 컨테이너 폭만큼 항상 차지하도록(줄바꿈 측정 안전망) */
+    color: var(--color-text-tertiary);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+}
+
 .tree-node__label {
+    width: 100%;
     color: var(--color-text-primary);
     font-size: var(--font-size-xs);
     -unity-font-style: bold;
-    -unity-text-align: middle-center;
     white-space: normal; /* 한글 표시명이 두 단어(예: "다발성 장기부전 II")일 때 자연스럽게 줄바꿈 */
 }
 
+.tree-node__status {
+    width: 100%;
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+    color: var(--color-text-tertiary);
+}
+
+.tree-node--locked .tree-node__status    { color: var(--color-text-tertiary); }
+.tree-node--available .tree-node__status { color: var(--color-accent-glow); }
+.tree-node--active .tree-node__status    { color: var(--color-brand-dna); }
+.tree-node--maxed .tree-node__status     { color: var(--color-brand-gold); }
+
+.tree-node--locked .tree-node__label,
+.tree-node--locked .tree-node__code {
+    color: var(--color-text-tertiary);
+}
+
 .tree-node__cost {
+    width: 100%;
     color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
-    -unity-text-align: middle-center;
 }
 
+/* UI_Design.md 11.4 — "연구 분석 콘솔". position:relative는 코너컷(position:absolute
+   자식)의 기준점 확보용. 둥근 모서리(radius-md)는 코너컷의 각진 인상과 충돌해 제거했다. */
 .detail-panel {
+    position: relative;
     background-color: var(--color-surface);
     padding: var(--space-lg);
-    border-radius: var(--radius-md);
-}
-
-.detail-panel__title {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-lg);
-    -unity-font-style: bold;
-    white-space: normal;
-}
-
-.detail-panel__desc {
-    color: var(--color-text-secondary);
-    font-size: 17px;
-    white-space: normal;
-    margin: 6px 0;
 }
 
 .detail-panel__buy {
     height: var(--touch-target-min);
+    margin-top: var(--space-sm);
+}
+
+/* detail-rows — data-row가 채워지는 컨테이너(SelectNode()가 채움, 기존 detail-panel__desc
+   문자열 한 덩어리를 대체). */
+.detail-rows {
+    margin: var(--space-sm) 0;
 }

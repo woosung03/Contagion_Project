@@ -3815,6 +3815,7 @@ GameObject:
   - component: {fileID: 543881992}
   - component: {fileID: 543881995}
   - component: {fileID: 543881994}
+  - component: {fileID: 543881996}
   - component: {fileID: 3400000101}
   m_Layer: 5
   m_Name: HUD
@@ -3886,6 +3887,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9af0e62b154126642b3b832108a83c1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.HudController
+--- !u!114 &543881996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 543881991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d2a5f4b33123845a800ef1995c3836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.CountryDockController
 --- !u!61 &544314452
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -9544,12 +9557,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f8b15a6912f4d44d93459ec442b942e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.SimulationManager
-  tickIntervalSeconds: 0.1
+  tickIntervalSeconds: 5
   autoStart: 1
   globalSpreadFactor: 0.5
   visibilityGainRate: 0.02
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0001
+  cureProgressCoefficient: 0.0004
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05
@@ -10312,22 +10325,4 @@ MonoBehaviour:
   sortingOrder: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
-  m_ObjectHideFlags: 0
-  m_Roots:
-  - {fileID: 519420032}
-  - {fileID: 619394802}
-  - {fileID: 2050405927}
-  - {fileID: 511221706}
-  - {fileID: 1230783507}
-  - {fileID: 245050057}
-  - {fileID: 1737611718}
-  - {fileID: 543881993}
-  - {fileID: 660003738}
-  - {fileID: 643170212}
-  - {fileID: 883301165}
-  - {fileID: 3100000103}
-  - {fileID: 3100000203}
-  - {fileID: 3200000302}
-  - {fileID: 3300000402}
-  - {fileID: 3300000502}
-  - {fileID: 5900000002}
+  m_ObjectH

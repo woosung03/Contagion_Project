@@ -9,6 +9,10 @@
     padding: 28px;
 }
 
+.mainmenu-caption {
+    margin-bottom: 2px;
+}
+
 .mainmenu-title {
     color: var(--color-text-primary);
     font-size: var(--font-size-display);
@@ -31,12 +35,11 @@
 }
 
 .pathogen-card {
+    position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
     background-color: var(--color-surface);
-    border-width: 2px;
-    border-color: var(--color-border);
-    border-radius: var(--radius-md);
     padding: 10px 14px;
     margin-bottom: var(--space-md);
+    /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지 않음 */
 }
 
 .pathogen-card--selected {
@@ -57,6 +60,12 @@
 .pathogen-card__stats {
     color: var(--color-text-info);
     font-size: 17px;
+    margin-top: var(--space-xs);
+}
+
+/* pathogen-card 전용 data-row 래퍼 — Tactical.uss의 범용 data-row/data-label/data-value를
+   4줄(전염력/중증도/치사율/내성)로 감싸는 컨테이너. MainMenuController.CreatePathogenCard() 참고. */
+.pathogen-card__stats-rows {
     margin-top: var(--space-xs);
 }
 
@@ -106,9 +115,10 @@
 }
 
 .detail-panel {
+    position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
     background-color: var(--color-surface);
     padding: var(--space-lg);
-    border-radius: var(--radius-md);
+    border-radius: 0; /* tactical-panel의 코너컷과 둥근 모서리가 충돌해 각짐으로 통일 */
     margin-bottom: var(--space-lg);
     /* 제목(22px) + desc 3줄(인구/기후/의료 수준, 17px) + 상하 패딩 32px을 담기에 70px는 부족해서
        텍스트(특히 인구 줄)가 패널 박스 아래로 삐져나왔음 — 실측 필요 높이(~126px)에 여유를 더해 고정. */

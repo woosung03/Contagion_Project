@@ -101,6 +101,11 @@
     --color-accent-glow: rgb(150, 255, 185);
     --color-accent-glow-soft: rgba(150, 255, 185, 0.35);
     --color-grid-line: rgba(150, 255, 185, 0.12);
+
+    /* ---- 자간 스케일 (Docs/UI_Design.md 2절/11.9 — Tactical Display 캡션/라벨 리듬 통일,
+       UpgradeTree부터 적용 시작, 이후 화면 확장 시 동일 토큰 재사용) ---- */
+    --tracking-caption: 1px;
+    --tracking-label: 0.5px;
 }
 
 /* ============================================================

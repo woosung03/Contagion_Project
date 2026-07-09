@@ -1,13 +1,22 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="MainMenu.uss" />
+    <Style src="CountrySelect.uss" />
     <ui:VisualElement name="countryselect-root" class="mainmenu-root">
+        <ui:Label text="GLOBAL DEPLOYMENT TERMINAL" class="countryselect-caption tactical-caption" />
         <ui:Label text="발원 국가를 선택하세요" class="mainmenu-title" />
         <ui:Label text="이 국가에서 병원체가 처음 발생합니다" class="mainmenu-subtitle" />
         <ui:ScrollView name="country-list" class="mainmenu-list" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
-        <ui:VisualElement name="detail-panel" class="detail-panel">
-            <ui:Label name="detail-title" text="" class="detail-panel__title" />
-            <ui:Label name="detail-desc" text="" class="detail-panel__desc" />
+        <ui:VisualElement name="detail-panel" class="detail-panel tactical-panel">
+            <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:VisualElement class="tactical-panel__header">
+                <ui:Label name="detail-title" text="" class="detail-panel__title" />
+            </ui:VisualElement>
+            <ui:VisualElement name="detail-rows" class="detail-rows" />
         </ui:VisualElement>
         <ui:Button name="back-button" text="뒤로" class="mainmenu-back" />
         <ui:Button name="start-button" text="시작" class="mainmenu-next" />

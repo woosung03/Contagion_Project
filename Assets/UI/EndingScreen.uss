@@ -13,17 +13,35 @@
     margin-bottom: var(--space-md);
 }
 
-.ending-detail {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-lg);
+/* Docs/UI_Design.md 14절 — "OPERATION REPORT" 영문 캡션, MainMenu 12절과 동일 표기 문법 */
+.ending-caption {
     margin-bottom: var(--space-sm);
+}
+
+/* 통계 판독 패널(GLOBAL INFECTED/DEATHS/COLLAPSED NATIONS/경과일) — tactical-panel과 병기,
+   position:relative는 코너컷(position:absolute 자식) 기준점 확보용. */
+.ending-stats-panel {
+    position: relative;
+    width: 280px;
+    background-color: var(--color-bg-panel);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+/* 최종 점수 강조 패널 — 통계 패널과 분리해 금색 테두리로 "최종 판정" 느낌을 별도로 준다. */
+.ending-score-panel {
+    position: relative;
+    border-color: var(--color-brand-gold);
+    background-color: var(--color-bg-panel);
+    padding: var(--space-md) var(--space-xl);
+    margin-bottom: var(--space-xxl);
+    align-items: center;
 }
 
 .ending-score {
     color: var(--color-brand-gold);
     font-size: var(--font-size-xxl);
     -unity-font-style: bold;
-    margin-bottom: var(--space-xxl);
 }
 
 .ending-buttons {

@@ -2807,3 +2807,99 @@ Dock에 새로 추가된 "상태"/"항공·항구" 행 2개가 도킹 패널 폭
 
 **변경 파일**: `Assets/Scripts/UI/CountryStatusPanelController.cs`,
 `Assets/Scripts/UI/CountryDockController.cs`, `Assets/UI/Hud.uxml`, `Assets/UI/Hud.uss`.
+
+## 참고: Step 57~61 요약 표 (CLAUDE.md에서 이동, 2026-07-09)
+
+CLAUDE.md 문서 분리 규칙 적용으로 "최근 작업" 표를 여기로 이동. 각 Step의 상세 배경은 위 해당
+Step 섹션 참고.
+
+| Step | 내용 | 파일 |
+|------|------|------|
+| 57 | 상세패널 오버플로우 수정 | MainMenu.uss |
+| 58 | HUD 3줄 레이아웃 개편 | Hud.uxml, Hud.uss |
+| 59 | 누락 국기 30개 추가 | Flags/*.png |
+| 60 | 핵심 공백 지역 허브 16개 추가 | DefaultTransportHubFactory.cs |
+| 61 | 국가현황 패널 렉 수정(행 캐싱, 전체재생성 제거) + Dock에 상태/항공·항구 추가 | CountryStatusPanelController.cs, CountryDockController.cs, Hud.uxml/uss |
+
+## Step 62 구현 메모 (UpgradeTree — Tactical Display 전환, UI_Design.md 11절 구현)
+
+**배경**: `Docs/UI_Design.md` 11절(UpgradeTree 심화 설계안)에서 세운 LOCKED/AVAILABLE/ACTIVE/
+MAXED 4단계 노드 상태, "연구 모듈 카드" 레이아웃, 연결선 회로도화, 상세 패널 "연구 분석 콘솔"화,
+카테고리 LAB 명명을 실제 파일(`UpgradeTree.uxml`/`UpgradeTree.uss`/`UpgradeTreeView.cs`)에 반영.
+핵심 플레이 루프(지도 관찰 ↔ 업그레이드 선택)상 HUD 다음으로 오래 보는 화면인데 HUD 리디자인
+(Step 57~61)과 시각 언어가 분리돼 있던 문제 해결.
+
+**원칙**: 게임 로직(해금 규칙/DNA 소모/효과 적용 — `UpgradeManager.CanUnlock`/`TryUnlock`/
+`GetEffectiveCost`, `UpgradeNode.isUnlocked`/`prerequisites`)은 전혀 건드리지 않았다. 4단계
+상태는 전부 기존 public API를 읽기 전용으로 조회해 매번 다시 계산하는 파생값(신규 필드 없음).
+
+**Theme.uss**: `--tracking-caption`(1px)/`--tracking-label`(0.5px) 자간 토큰 2개 추가(11.9) —
+다른 화면 확장 시에도 재사용할 공용 토큰.
+
+**UpgradeTree.uxml**:
+- 헤더의 `category-title-label`(기존 한글, 텍스트/로직 무변경)을 `upgrade-header__title-block`
+  으로 감싸고 그 위에 `category-caption-label`(영문 LAB 캡션, 신규) 추가 — 11.5.
+- `detail-panel`에 `tactical-panel` 클래스 + 코너컷 4개 추가.
+- `detail-desc`(단일 Label) 제거, `detail-rows`(빈 컨테이너)로 교체 — UpgradeTreeView.SelectNode()가
+  data-row를 여러 줄 채워 넣는 방식으로 전환(11.4/11.8).
+
+**UpgradeTree.uss**:
+- `.tactical-panel`/`.tactical-panel__header`/`.tactical-panel__title`/`.corner-cut`(4방향)/
+  `.data-row`/`.data-label`/`.data-value`(+ 상태별 색상 변형) 신규 — Hud.uss event-dock/
+  country-dock과 동일 값으로 복제(현재는 UpgradeTree 로컬 정의, 추후 화면이 늘면 Tactical.uss로
+  승격 예정, 클래스명은 승격을 염두에 두고 범용 이름 그대로 사용).
+- `.tree-node`: 라벨 2개 중앙정렬 박스 → code/이름/상태/비용 4줄 좌측정렬 스택으로 전환. 카테고리
+  색은 전체 테두리에서 좌측 4px accent bar로 축소.
+- `.tree-node--locked/--available/--active/--maxed` 4종 신규(기존 `.tree-node--unlocked`는
+  대체돼 제거) — 테두리색/두께/배경 틴트로 상태 구분(11.2).
+- `.detail-panel`에 `position: relative`(코너컷 기준점) 추가, `border-radius` 제거(코너컷의
+  각진 인상과 충돌).
+
+**UpgradeTreeView.cs**:
+- `DetermineState(node)`: `isUnlocked` bool 하나였던 이분법을 4단계로 세분화 —
+  `!isUnlocked && prerequisites 전부 해금` → available, 그 외 미해금 → locked,
+  `isUnlocked && 이 노드를 선행조건으로 삼는 다음 노드가 없음(leaf)` → maxed, 그 외 해금 → active.
+- `RebuildTree()`가 카테고리 노드를 티어(y)→갈래(x) 순으로 정렬해 `TRANS-001`류 코드를
+  `_codeByNodeId`에 매핑(노드 박스와 상세 패널이 공유).
+- `CreateNodeElement()`: 라벨 2개 생성 → code/이름/상태/비용 4개 Label 생성 + `tree-node--{state}`
+  클래스 부여로 재작성. `NodeHeight` 60→78(4줄 수용, 행 간격 110px 여유 있어 겹침 없음).
+- `DrawConnections()`: 대각선 1개(활성 녹색/비활성 회색 alpha 0.2) → 꺾은선(elbow, 중간점
+  경유) + 양 끝 4px 포트 마커. 색상은 Theme.uss `--color-accent-glow`/`--color-grid-line`과
+  동일 값으로 통일(USS 변수를 C#에서 직접 못 읽어 수동 동기화 — 주석에 명시).
+- `SelectNode()`/`BuildDescription()`: 문자열 한 덩어리 조립 → `AddDetailRow()`로 코드/명칭/
+  효과별 수치/선행노드/DNA COST/STATUS를 data-row 여러 줄로 분해. `BuildDescription()` 삭제(완전
+  대체), 미사용 `using System.Text;` 제거.
+- `CategoryLabel()`(기존 한글, 무변경) 옆에 `CategoryEnglishName()`/`CategoryPrefix()`/
+  `CategoryCaption()` 3개 신규 — 노드 코드 접두어·헤더 영문 캡션·상세 패널 "{CATEGORY} ANALYSIS"
+  타이틀에 사용.
+
+**실플레이 확인 필요** (Unity 에디터, 다음 세션): (a) 노드 4줄 텍스트가 78px 높이 안에서 잘리지
+않는지, 특히 두 단어 한글 표시명("다발성 장기부전 II") 줄바꿈 시, (b) LOCKED/AVAILABLE/ACTIVE/
+MAXED 색상이 실제 데이터로 4가지 다 나타나는지(특히 MAXED — 갈래 끝 노드 해금 시), (c) 코너컷이
+detail-panel 모서리에 올바르게 붙는지(position:relative 적용 확인), (d) 연결선 꺾은선/포트 마커가
+카테고리 3개(전파/증상/능력) 전부에서 겹침 없이 그려지는지, (e) 헤더 2줄(영문 캡션+한글 라벨)이
+좁은 폭에서 안 잘리는지.
+
+**변경 파일**: `Assets/UI/Theme.uss`, `Assets/UI/UpgradeTree.uxml`, `Assets/UI/UpgradeTree.uss`,
+`Assets/Scripts/UI/UpgradeTreeView.cs`.
+
+## Step 63 구현 메모 (Country Dock 무반응 버그 수정 — 씬 배선 누락)
+
+**증상**: 인게임 우측 상단 Country Dock이 항상 "국가를 선택하세요" + "-"만 표시하고 국가를
+눌러도 인구/감염률 등 데이터가 채워지지 않음.
+
+**원인**: `CountryDockController.cs`가 GamePlay 씬의 HUD GameObject에 붙어있지 않았다
+(unity-editor-task.md 1절의 수동 배선 작업이 미완료 상태였음). Hud.uxml의 기본 텍스트가
+플레이스홀더와 동일해서, 컨트롤러가 아예 없어도 겉보기엔 "플레이스홀더 상태"처럼 보이는 것이
+함정 — 실제로는 어떤 코드도 라벨을 갱신하지 않고 있었다. 진단은 스크립트 .meta의 GUID
+(`03d2a5f4b33123845a800ef1995c3836`)를 GamePlay.unity에서 grep해 0건임을 확인하는 방식으로 확정.
+
+**수정**: GamePlay.unity YAML 직접 편집 — HUD GameObject(fileID 543881991)의 m_Component
+목록에 새 항목을 추가하고, HudController 블록 뒤에 CountryDockController MonoBehaviour 블록
+(fileID 543881996, 씬 내 미사용 ID 확인함)을 삽입. CountryDockController는 직렬화 필드가 없어
+블록이 최소 형태로 충분하다.
+
+**남은 확인(QA)**: 에디터에서 씬 열림/Missing Script 여부, 국가 탭 시 데이터 채워짐, 틱 갱신,
+드래그 중 오선택 가드(WasDragging) — unity-editor-task.md 2~3절 체크리스트 그대로 유효.
+
+**변경 파일**: `Assets/Scenes/GamePlay.unity`, `Docs/unity-editor-task.md`.

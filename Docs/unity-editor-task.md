@@ -96,3 +96,13 @@
       재발 방지 차원에서 중요).
 - [ ] CLAUDE.md "최근 작업" 표에 이번 Step을 1줄로 추가하고, 상세 배경(왜 country-dock을
       되살렸는지, 국가 클릭 트리거 재도입의 리스크 등)은 DevLog.md에 옮겨 기록.
+
+## 8. 대기 중인 씬/에셋 배선 작업 (CLAUDE.md TODO에서 이동, 2026-07-09)
+
+Hud v2 패스와 무관한, 별도로 대기 중인 에디터 수동 작업 목록.
+
+- [ ] `MainMenu`/`CountrySelect`/`GamePlay` 씬 분리 (현재 씬 하나에서 UIDocument 패널 on/off로 대체 중)
+- [ ] `DnaBubble` 프리팹 제작 후 `BubbleSpawner.bubblePrefab`에 연결
+- [ ] 앱인토스 SDK 설치 — pnpm lockfile 충돌로 보류 중, 재시도 시 `pnpm install --no-frozen-lockfile` 수동 실행 필요
+- [ ] `AudioManager` 오브젝트 생성 + 효과음 에셋 준비/연결
+- [ ] (선택, 낮은 우선순위) MainMenu DNA+5 보상형 광고 버튼 — `GameAds.Rewarded` 재사용

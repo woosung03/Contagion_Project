@@ -79,19 +79,54 @@ namespace Contagion.UI
         {
             var card = new VisualElement();
             card.AddToClassList("pathogen-card");
+            card.AddToClassList("tactical-panel"); // Docs/UI_Design.md 12절 — 카드 6개뿐이라 코너컷 4개 전부 적용
+
+            card.Add(MakeCornerCut("tl"));
+            card.Add(MakeCornerCut("tr"));
+            card.Add(MakeCornerCut("bl"));
+            card.Add(MakeCornerCut("br"));
 
             var name = new Label(pathogen.DisplayName);
             name.AddToClassList("pathogen-card__name");
             card.Add(name);
 
-            var stats = new Label(
-                $"전염력 {StatBar(pathogen.Infectivity)}  중증도 {StatBar(pathogen.Severity)}  " +
-                $"치사율 {StatBar(pathogen.Lethality)}  내성 {StatBar(pathogen.DrugResistance)}");
-            stats.AddToClassList("pathogen-card__stats");
-            card.Add(stats);
+            // 스탯 4종을 한 Label에 몰아넣던 것을 data-row 4줄로 분해(12절) — 읽는 데이터는 동일.
+            var statsRows = new VisualElement();
+            statsRows.AddToClassList("pathogen-card__stats-rows");
+            statsRows.Add(MakeStatRow("전염력", StatBar(pathogen.Infectivity)));
+            statsRows.Add(MakeStatRow("중증도", StatBar(pathogen.Severity)));
+            statsRows.Add(MakeStatRow("치사율", StatBar(pathogen.Lethality)));
+            statsRows.Add(MakeStatRow("내성", StatBar(pathogen.DrugResistance)));
+            card.Add(statsRows);
 
             card.RegisterCallback<ClickEvent>(_ => SelectPathogen(pathogen, card));
             return card;
+        }
+
+        /// <summary>corner-cut 4방향 중 하나를 만든다(picking-mode Ignore로 클릭 통과, 장식 전용).</summary>
+        private static VisualElement MakeCornerCut(string direction)
+        {
+            var el = new VisualElement { pickingMode = PickingMode.Ignore };
+            el.AddToClassList("corner-cut");
+            el.AddToClassList($"corner-cut--{direction}");
+            return el;
+        }
+
+        /// <summary>data-row 한 줄(라벨+값)을 만든다 — Tactical.uss data-row/data-label/data-value 계약.</summary>
+        private static VisualElement MakeStatRow(string label, string value)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("data-row");
+
+            var labelEl = new Label(label);
+            labelEl.AddToClassList("data-label");
+            row.Add(labelEl);
+
+            var valueEl = new Label(value);
+            valueEl.AddToClassList("data-value");
+            row.Add(valueEl);
+
+            return row;
         }
 
         /// <summary>0~1 값을 5칸짜리 텍스트 막대로 대충 시각화 — 실제 그래픽 바는 비주얼/연출 단계에서.</summary>

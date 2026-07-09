@@ -1,10 +1,30 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="EndingScreen.uss" />
     <ui:VisualElement name="ending-root" class="ending-root">
         <ui:Label name="result-title" text="" class="ending-title" />
-        <ui:Label name="result-detail" text="" class="ending-detail" />
-        <ui:Label name="score-label" text="" class="ending-score" />
+        <ui:Label text="OPERATION REPORT" class="ending-caption tactical-caption" />
+
+        <ui:VisualElement name="ending-stats-panel" class="ending-stats-panel tactical-panel">
+            <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:VisualElement class="tactical-panel__header">
+                <ui:Label text="FINAL PANDEMIC ANALYSIS" class="tactical-panel__title" />
+            </ui:VisualElement>
+            <ui:VisualElement name="stats-rows" class="detail-rows" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ending-score-panel" class="ending-score-panel tactical-panel">
+            <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:Label name="score-label" text="" class="ending-score" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="ending-buttons" class="ending-buttons">
             <ui:Button name="revive-button" text="광고 보고 부활" class="ending-button ending-button--revive" />
             <ui:Button name="restart-button" text="다시 시작" class="ending-button" />

@@ -386,3 +386,23 @@ Step 13 저장 시스템 (앱인토스 userHashKey 기반)
 - 국가 지도는 **2D 폴리곤 또는 스프라이트** 방식 권장
 - DNA 버블은 **오브젝트 풀링** 필수 (성능)
 - 모바일 특성상 **세션 저장 필수** (백그라운드 종료 대응)
+
+---
+
+## 16. 튜닝 포인트 (실제 구현값 참고, CLAUDE.md에서 이동)
+
+밸런스 수치를 조정할 때 시작점으로 참고하는 실제 구현 파라미터 목록. 값 자체의 변경 히스토리나
+조정 이유는 `Docs/DevLog.md`에 있다.
+
+- `climateModifier` = `Pathogen.GetEnvironmentResistance(climate)`
+- `healthcareCapacity` = `Country.HealthLevel` (Low 0.2 / Mid 0.5 / High 0.8)
+- `researchMultiplier` = `Country.ResearchMultiplier` (Low 0.2 / Mid 0.8 / High 1.5)
+- `severityFactor` = `Pathogen.severity`
+- `drugResistanceReduction` = `pathogen.drugResistance × drugResistanceCoefficient` (SimulationManager)
+- `spreadFactor`/`landBorderSpreadChance`/DNA 마일스톤 간격/저항 단계 임계값 — SimulationManager·
+  HumanResistanceManager 인스펙터 값, 플레이테스트로 조정
+- 항공/해운 전파는 `TransportManager` 인스펙터 값 사용 (`SimulationManager`의
+  `airRouteSpreadChance`/`seaRouteSpreadChance`는 미사용 필드)
+- 인구 스케일링 없음 — `totalPopulation` 등 국가별 인구는 실제 인구 수를 그대로 사용
+  (밸런스 조정 시 축소 스케일 적용 여부 논의 필요, CLAUDE.md에서 이동)
+- `Cure Progress Coefficient`(기본 0.002) — 국가 48개 기준 재조정 필요 시 여기부터

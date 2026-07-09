@@ -5,7 +5,13 @@
         <ui:VisualElement name="upgrade-header" class="upgrade-header">
             <ui:VisualElement name="upgrade-header__nav" class="upgrade-header__nav">
                 <ui:Button name="prev-category-button" text="◀" class="upgrade-header__arrow" />
-                <ui:Label name="category-title-label" text="" class="upgrade-header__category-title" />
+                <!-- UI_Design.md 11.5: 카테고리명 표기를 "영문 LAB 캡션(작게) + 기존 한글 라벨(크게)"
+                     2줄로 병기 — HUD의 world-status-frame__caption과 같은 문법. 기존
+                     category-title-label 텍스트/로직(CategoryLabel())은 그대로 두고 캡션 라벨만 추가. -->
+                <ui:VisualElement class="upgrade-header__title-block">
+                    <ui:Label name="category-caption-label" text="" class="upgrade-header__caption" />
+                    <ui:Label name="category-title-label" text="" class="upgrade-header__category-title" />
+                </ui:VisualElement>
                 <ui:Button name="next-category-button" text="▶" class="upgrade-header__arrow" />
             </ui:VisualElement>
             <ui:VisualElement name="upgrade-header__actions" class="upgrade-header__actions">
@@ -17,9 +23,18 @@
 
         <ui:ScrollView name="node-scroll" class="node-scroll" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
 
-        <ui:VisualElement name="detail-panel" class="detail-panel">
-            <ui:Label name="detail-title" text="노드를 선택하세요" class="detail-panel__title" />
-            <ui:Label name="detail-desc" text="" class="detail-panel__desc" />
+        <!-- UI_Design.md 11.4/11.8: detail-panel을 tactical-panel(코너컷 4개 + 헤더) 구조로 전환.
+             detail-desc 단일 Label(문자열 한 덩어리)을 detail-rows 컨테이너로 교체 —
+             UpgradeTreeView.SelectNode()가 data-row를 여러 줄 Add한다. -->
+        <ui:VisualElement name="detail-panel" class="detail-panel tactical-panel">
+            <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:VisualElement class="tactical-panel__header">
+                <ui:Label name="detail-title" text="노드를 선택하세요" class="tactical-panel__title" />
+            </ui:VisualElement>
+            <ui:VisualElement name="detail-rows" class="detail-rows" />
             <ui:Button name="buy-button" text="구매" class="detail-panel__buy" />
         </ui:VisualElement>
     </ui:VisualElement>
