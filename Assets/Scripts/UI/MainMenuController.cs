@@ -72,7 +72,6 @@ namespace Contagion.UI
                 _pathogenList.Add(CreatePathogenCard(pathogen));
             }
 
-            Debug.Log($"[MainMenuController] 병원체 목록 {pathogens.Count}개 렌더링 완료.");
         }
 
         private VisualElement CreatePathogenCard(PathogenDefinition pathogen)

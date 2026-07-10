@@ -47,11 +47,37 @@ namespace Contagion.UI
             _stageValue = root.Q<Label>("country-dock-stage");
             _transportValue = root.Q<Label>("country-dock-transport");
 
+            // 진단용 — Step 63과 같은 종류의 "Q<>() 바인딩 실패"가 재발했는지 조용히 넘어가지 않고
+            // 바로 원인을 드러내기 위함(Step 68 재신고 조사). country-dock-stage/-transport는
+            // 후속(Step 61) 추가 필드라 구버전 Hud.uxml에서는 없을 수 있어 진단 대상에서 제외.
+            if (_nameLabel == null || _populationValue == null || _infectedRateValue == null ||
+                _deadRateValue == null || _healthValue == null || _borderValue == null)
+            {
+                Debug.LogWarning("[CountryDockController] OnEnable — country-dock-* Label을 UXML에서 " +
+                    $"찾지 못했습니다(name/population/infected/dead/health/border = " +
+                    $"{_nameLabel != null}/{_populationValue != null}/{_infectedRateValue != null}/" +
+                    $"{_deadRateValue != null}/{_healthValue != null}/{_borderValue != null}). " +
+                    "Hud.uxml의 country-dock-* name 속성 또는 UIDocument Source Asset 배선을 확인하세요.");
+            }
+
             Subscribe();
             ShowPlaceholder();
         }
 
-        private void Start() => Subscribe();
+        private void Start()
+        {
+            Subscribe();
+
+            // 진단용 — 이 시점(모든 오브젝트의 Awake가 끝난 뒤)에도 싱글턴이 없으면 재시도 없이
+            // 영구적으로 구독 실패한 상태다. Step 68 재신고 조사: OnCountryClicked/OnCountryChanged
+            // 구독이 실제로 걸렸는지 확인하기 위함.
+            if (WorldMap.Instance == null)
+                Debug.LogWarning("[CountryDockController] Start — WorldMap.Instance가 null이라 " +
+                    "OnCountryClicked 구독에 실패했습니다. 국가를 클릭해도 Country Dock이 갱신되지 않습니다.");
+            if (WorldDataManager.Instance == null)
+                Debug.LogWarning("[CountryDockController] Start — WorldDataManager.Instance가 null이라 " +
+                    "OnCountryChanged 구독에 실패했습니다.");
+        }
 
         private void Subscribe()
         {
@@ -59,6 +85,17 @@ namespace Contagion.UI
             {
                 WorldMap.Instance.OnCountryClicked -= HandleCountryClicked;
                 WorldMap.Instance.OnCountryClicked += HandleCountryClicked;
+
+                // 진단용(Step 70) — += 라인이 실제로 실행됐는지 확인. C# event는 선언 클래스
+                // 밖에서 GetInvocationList() 등으로 직접 조회할 수 없어(CS0070), 실제 구독자 수는
+                // WorldMap.HandleCountryClicked() 내부(선언 클래스 안)에 남긴 로그로 확인한다.
+                Debug.Log("[CountryDockController] Subscribe — WorldMap.OnCountryClicked += 실행됨 " +
+                    $"(instanceId={GetInstanceID()}).");
+            }
+            else
+            {
+                Debug.LogWarning("[CountryDockController] Subscribe — WorldMap.Instance가 null이라 " +
+                    "OnCountryClicked 구독을 시도조차 못 했습니다.");
             }
 
             if (WorldDataManager.Instance != null)
@@ -78,6 +115,10 @@ namespace Contagion.UI
 
         private void HandleCountryClicked(Country country)
         {
+            // 진단용(Step 70) — 이 메서드 자체가 호출되는지, country.id가 뭔지 실측하기 위함.
+            Debug.Log($"[CountryDockController] HandleCountryClicked 진입 — country.id={country?.id}, " +
+                $"country.name={country?.name}, 이전 _shownCountryId={_shownCountryId}");
+
             _shownCountryId = country.id;
             Populate(country);
         }
@@ -85,6 +126,12 @@ namespace Contagion.UI
         /// <summary>선택 중인 국가의 값이 매 틱 갱신될 때(다른 국가면 무시) 도킹 패널도 같이 갱신한다.</summary>
         private void HandleCountryChanged(Country country)
         {
+            // 진단용(Step 70) — 이 메서드가 호출은 되는지, country.id와 _shownCountryId가 실제로
+            // 일치하는지(게이트를 왜 못 뚫는지) 실측하기 위함. 매 틱 여러 국가에 대해 호출되므로
+            // 로그가 많을 수 있음 — 원인 특정 후 반드시 제거할 것.
+            Debug.Log($"[CountryDockController] HandleCountryChanged 진입 — country.id={country?.id}, " +
+                $"_shownCountryId={_shownCountryId}, 일치={country?.id == _shownCountryId}");
+
             if (country.id == _shownCountryId) Populate(country);
         }
 
@@ -105,6 +152,10 @@ namespace Contagion.UI
 
         private void Populate(Country country)
         {
+            // OnEnable에서 Q<>() 바인딩이 실패했으면(경고 로그 참고) 여기서 NRE로 죽는 대신 조용히
+            // 빠져나온다 — ShowPlaceholder()와 동일한 가드 스타일.
+            if (_nameLabel == null) return;
+
             float infectionRatio = country.LivingPopulation > 0
                 ? (float)country.infectedCount / country.LivingPopulation
                 : 0f;

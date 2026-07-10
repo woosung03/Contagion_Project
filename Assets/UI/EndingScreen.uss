@@ -40,7 +40,10 @@
 
 .ending-score {
     color: var(--color-brand-gold);
-    font-size: var(--font-size-xxl);
+    /* Docs/UI_Design.md 10절 — "font-size-hero 유지": ending-title(승/패)과 동일한 hero
+       크기로 "최종 판정" 신호를 준다. --font-size-xxl(26px, DESIGN.md 타이포 표에서
+       "예약"으로만 표시된 미사용 토큰)로 축소돼 있던 것을 바로잡음. */
+    font-size: var(--font-size-hero);
     -unity-font-style: bold;
 }
 

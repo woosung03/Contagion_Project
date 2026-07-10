@@ -1,14 +1,17 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="CountryPopup.uss" />
-    <ui:VisualElement name="popup-root" class="popup-root">
-        <ui:Label name="country-name" text="" class="popup-title" />
-        <ui:Label name="population-label" text="" class="popup-row" />
-        <ui:Label name="infected-label" text="" class="popup-row" />
-        <ui:Label name="dead-label" text="" class="popup-row" />
-        <ui:Label name="health-label" text="" class="popup-row" />
-        <ui:Label name="climate-label" text="" class="popup-row" />
-        <ui:Label name="status-label" text="" class="popup-row" />
-        <ui:Button name="close-button" text="닫기" class="popup-close" />
+    <ui:VisualElement name="modal-root" class="popup-root tactical-panel">
+        <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+        <ui:VisualElement class="tactical-panel__header popup-header">
+            <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+            <ui:Button name="modal-close" text="✕" class="popup-close" />
+        </ui:VisualElement>
+        <ui:VisualElement name="modal-rows" class="detail-rows" />
+        <ui:VisualElement name="modal-footer" class="modal-footer" />
     </ui:VisualElement>
 </ui:UXML>

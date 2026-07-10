@@ -51,9 +51,6 @@ namespace Contagion.Managers
 
         private void Start()
         {
-            Debug.Log($"[FLOW][GameDataBootstrapper] ===== Start() — 씬 로드/재시작 시작 (instanceId={GetInstanceID()}, " +
-                $"time={Time.realtimeSinceStartup:F2}) =====");
-
             if (WorldDataManager.Instance == null || UpgradeManager.Instance == null)
             {
                 Debug.LogError("[FLOW][GameDataBootstrapper] WorldDataManager/UpgradeManager가 씬에 없습니다.");
@@ -81,8 +78,6 @@ namespace Contagion.Managers
                 // UpgradeTreeDatabase 에셋을 아직 만들지 않았어도 바로 플레이할 수 있도록,
                 // 코드로 정의된 27노드 세분화 트리(감염경로/증상/능력 각 9개)를 폴백으로 사용한다.
                 // (Docs/PlagueIncReference.md 참고, DefaultUpgradeTreeFactory 참고)
-                Debug.Log("[GameDataBootstrapper] upgradeTreeDatabase 미지정 — DefaultUpgradeTreeFactory의 " +
-                    "27노드 세분화 트리로 시작합니다.");
                 UpgradeManager.Instance.SetTree(DefaultUpgradeTreeFactory.BuildDefaultDetailedTree());
             }
 
@@ -90,11 +85,6 @@ namespace Contagion.Managers
             {
                 Debug.Log("[FLOW][GameDataBootstrapper] skipMainMenu 켜짐 — MainMenu 없이 즉시 시작합니다.");
                 BeginGame(selectedPathogen, startingCountryId);
-            }
-            else
-            {
-                Debug.Log("[FLOW][GameDataBootstrapper] MainMenu 대기 중 — UIManager가 BeginGame()을 호출할 때까지 " +
-                    "일시정지 상태를 유지합니다.");
             }
         }
 
@@ -137,7 +127,6 @@ namespace Contagion.Managers
             startingCountryId = countryId;
             SeedStartingInfection();
             GameManager.Instance?.SetPaused(false);
-            Debug.Log($"[FLOW][GameDataBootstrapper] BeginGame — pathogen={effectivePathogen?.DisplayName}, startingCountry={countryId}");
         }
 
         /// <summary>발원 국가에 초기 감염자를 심는다. 설계 문서 2절 "발원 국가 선택".</summary>

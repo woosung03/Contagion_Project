@@ -1,3 +1,8 @@
+/* CountryPopup(Tactical Modal) 전용 확장 — Docs/UI_Design.md 12절/13절.
+   tactical-panel/corner-cut/data-row 등 공용 규칙은 Tactical.uss가 담당하고, 이 파일은
+   화면 고유 배치(위치/폭/헤더 가로배치/닫기 버튼 크기)만 추가한다.
+   로드 순서: Theme.uss -> Tactical.uss -> CountryPopup.uss */
+
 .popup-root {
     position: absolute;
     left: 50%;
@@ -5,27 +10,30 @@
     width: 320px;
     margin-left: -160px;
     background-color: var(--color-bg-panel);
-    border-radius: var(--radius-lg);
     padding: var(--space-lg);
+    /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
+       않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
 }
 
-.popup-title {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-xl);
-    -unity-font-style: bold;
-    margin-bottom: var(--space-sm);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.popup-row {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-md);
-    margin-bottom: var(--space-xs);
+/* modal-title(국가명) + modal-close(닫기)를 한 줄에 배치 — tactical-panel__header 기본값은
+   세로 스택이라 이 화면에서만 가로 배치로 확장한다. */
+.popup-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .popup-close {
-    margin-top: 10px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* 확인/취소 등 액션 버튼 슬롯 — CountryPopup은 닫기가 헤더로 옮겨가 지금은 비어있다(안 보임).
+   향후 다른 Tactical Modal 소비자(이벤트 상세/설정/확인창)를 위한 공용 배치 규칙만 미리 둔다. */
+.modal-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: var(--space-sm);
 }

@@ -48,21 +48,6 @@ namespace Contagion.UI
             _backButton = root.Q<Button>("back-button");
             _startButton = root.Q<Button>("start-button");
 
-            // 디버깅용 — 이 중 하나라도 NULL이면 UXML의 name 속성과 여기서 쿼리하는 이름이
-            // 어긋났거나 UIDocument의 Source Asset이 제대로 로드되지 않은 것. NULL인 채로
-            // RegisterCallback을 호출하면 예외가 나서 이 메서드 전체(버튼 클릭 핸들러 등록 포함)가
-            // 중간에 멈춰버리는데, 그 예외가 씬 로드 시점에 한 번만 조용히 찍히고 지나가면
-            // 나중에 버튼을 눌러도 "아무 반응 없음"으로만 보여서 원인 파악이 어려웠다 — 그래서
-            // 각 참조를 개별적으로 확인하고 로그로 남긴다.
-            Debug.Log($"[FLOW][CountrySelectController] OnEnable (instanceId={GetInstanceID()}, " +
-                $"time={Time.realtimeSinceStartup:F2}) — " +
-                $"root={(_root != null ? "OK" : "NULL")}, " +
-                $"countryList={(_countryList != null ? "OK" : "NULL")}, " +
-                $"detailTitle={(_detailTitle != null ? "OK" : "NULL")}, " +
-                $"detailRows={(_detailRows != null ? "OK" : "NULL")}, " +
-                $"backButton={(_backButton != null ? "OK" : "NULL")}, " +
-                $"startButton={(_startButton != null ? "OK" : "NULL")}");
-
             if (_backButton == null || _startButton == null)
             {
                 Debug.LogError("[FLOW][CountrySelectController] back-button/start-button을 UXML에서 찾지 못해 " +
@@ -79,16 +64,12 @@ namespace Contagion.UI
             });
             _startButton.RegisterCallback<ClickEvent>(_ =>
             {
-                Debug.Log($"[FLOW][CountrySelectController] 시작 버튼 클릭됨 (instanceId={GetInstanceID()}, " +
-                    $"selectedCountryId={_selectedCountryId}).");
                 HandleStartClicked();
             });
         }
 
         public void Show()
         {
-            Debug.Log($"[FLOW][CountrySelectController] Show() 호출됨 (instanceId={GetInstanceID()}, " +
-                $"root={(_root != null ? "OK" : "NULL")}).");
             if (_root != null) _root.style.display = DisplayStyle.Flex;
             RebuildList();
         }
@@ -127,7 +108,6 @@ namespace Contagion.UI
                 _countryList.Add(CreateCountryRow(country));
             }
 
-            Debug.Log($"[FLOW][CountrySelectController] 국가 목록 {countries.Count}개 렌더링 완료.");
         }
 
         private VisualElement CreateCountryRow(Country country)
@@ -152,8 +132,22 @@ namespace Contagion.UI
             name.AddToClassList("country-row__name");
             row.Add(name);
 
-            var meta = new Label($"인구 {country.population:N0} · {DevLabel(country.developmentLevel)}");
+            // country-row__meta — Tactical.uss data-row/data-label/data-value 판독행 문법 재사용
+            // (Docs/UI_Design.md 9절 "Country Dock 시각 언어 재사용"). 48행 스크롤 높이 제약 때문에
+            // data-row를 세로로 쌓지 않고 이 한 줄 안에서만 label:value로 구조화한다(정보량 동일,
+            // 표현 문법만 판독행으로 전환 — country-row__meta CSS가 기본 data-row 하단 헤어라인은 무효화).
+            var meta = new VisualElement();
             meta.AddToClassList("country-row__meta");
+            meta.AddToClassList("data-row");
+
+            var metaLabel = new Label("인구");
+            metaLabel.AddToClassList("data-label");
+            meta.Add(metaLabel);
+
+            var metaValue = new Label($"{country.population:N0} · {DevLabel(country.developmentLevel)}");
+            metaValue.AddToClassList("data-value");
+            meta.Add(metaValue);
+
             row.Add(meta);
 
             row.RegisterCallback<ClickEvent>(_ => SelectCountry(country, row));
@@ -177,7 +171,6 @@ namespace Contagion.UI
 
         private void SelectCountry(Country country, VisualElement row)
         {
-            Debug.Log($"[FLOW][CountrySelectController] 국가 행 클릭됨 — {country.id} (instanceId={GetInstanceID()}).");
             _selectedCountryId = country.id;
 
             foreach (var child in _countryList.Children())

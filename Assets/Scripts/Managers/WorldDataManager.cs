@@ -97,7 +97,27 @@ namespace Contagion.Managers
             NotifyWorldStateChanged();
         }
 
-        public void NotifyCountryChanged(Country country) => OnCountryChanged?.Invoke(country);
+        /// <summary>
+        /// OnCountryChanged를 구독자별로 개별 try/catch하며 순회 호출한다. 매 틱 여러 번 발행되는
+        /// 이벤트인데, 표준 멀티캐스트 delegate.Invoke()는 구독자 하나가 예외를 던지면 그 뒤에 등록된
+        /// 구독자는 전부 호출되지 않고 조용히 스킵된다 — 구독 순서상 뒤에 있는 컨트롤러(예: Country
+        /// Dock)만 원인 불명으로 안 움직이는 것처럼 보이는 버그를 유발할 수 있어 방어적으로 격리한다.
+        /// </summary>
+        public void NotifyCountryChanged(Country country)
+        {
+            if (OnCountryChanged == null) return;
+            foreach (Action<Country> handler in OnCountryChanged.GetInvocationList())
+            {
+                try
+                {
+                    handler(country);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
+        }
 
         public void NotifyWorldStateChanged() => OnWorldStateChanged?.Invoke(worldState);
 

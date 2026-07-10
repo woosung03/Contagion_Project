@@ -2903,3 +2903,342 @@ detail-panel 모서리에 올바르게 붙는지(position:relative 적용 확인
 드래그 중 오선택 가드(WasDragging) — unity-editor-task.md 2~3절 체크리스트 그대로 유효.
 
 **변경 파일**: `Assets/Scenes/GamePlay.unity`, `Docs/unity-editor-task.md`.
+
+## Step 64 구현 메모 (CountrySelect Tactical 마무리 — UI_Design.md 9절/16.2 ①)
+
+**배경**: `detail-panel`(tactical-panel+corner-cut 4개+detail-rows) 전환은 이미 이전 세션에서
+반영돼 있었으나, 조사 결과 두 가지가 계획(9절/16.2 ①)과 어긋나 있었다.
+
+**버그 1 — border-left-width 캐스케이드**: `country-row`에 `accent-bar-row`(Tactical.uss,
+`border-left-width: 4px`)와 `country-row--dev-*`(CountrySelect.uss, `border-left-color`만)를
+같이 부여하고 있었는데, `Theme.uss → Tactical.uss → MainMenu.uss → CountrySelect.uss` 로드
+순서상 `MainMenu.uss`의 `.country-row { border-width: 2px; }` 셔손드가 나중에 적용돼 좌측
+4px accent bar가 실제로는 2px로 렌더링되고 있었다(동일 특이도에서 나중 파일이 이김). 개발수준
+severity 색상 자체(border-left-color)는 CountrySelect.uss가 더 나중에 로드돼 정상 적용되고
+있었지만, 두께는 죽어 있었던 것. `UpgradeTree.uss`의 `.tree-node`(`border-width: 1px;
+border-left-width: 4px;`를 **같은 rule 안**에 두는 패턴)와 동일하게 `.country-row` 한 rule
+안에서 override하도록 고쳐 크로스파일 캐스케이드 의존을 제거했다.
+
+**갭 2 — country-row가 data-row 문법 미사용**: `country-row__meta`가 "인구 N · 개발수준"을
+합친 Label 하나였다. 9절은 "48행 스크롤 높이 제약 때문에 data-row를 세로로 쌓지 않고 한 줄
+유지 권장, 분해는 상세 패널에서만"이라고 명시했으므로, 줄 수를 늘리지 않는 선에서 기존 정보량
+그대로 `data-row`(라벨 "인구" + 값 "N · 개발수준") 컨테이너로 재구성했다. 컨테이너 자체가
+`country-row`의 카드 테두리 안에 다시 하단 헤어라인을 그리면 불필요한 줄로 보여서
+`country-row__meta`에서 `border-bottom-width/margin-bottom/padding-bottom: 0`으로 무효화.
+
+**원칙**: 컨트롤러 이벤트 시그니처(`OnCountryConfirmed`/`OnBackRequested`), UXML `name` 속성,
+게임 로직 전부 무변경 — `CreateCountryRow()`의 meta 생성부만 Label 1개 → VisualElement(data-row)
++ Label 2개로 교체했다.
+
+**변경 파일**: `Assets/UI/MainMenu.uss`, `Assets/Scripts/UI/CountrySelectController.cs`.
+
+## Step 65 구현 메모 (MainMenu Tactical 감사 — UI_Design.md 8절/16.2 ②)
+
+**배경**: CLAUDE.md TODO에 "MainMenu pathogen-card/detail-panel 전환"이 미착수로 남아있어
+착수하려 했으나, 실제 조사 결과 `MainMenu.uxml`/`MainMenu.uss`/`MainMenuController.cs`는 8절
+설계안(pathogen-card에 tactical-panel+코너컷 4개, 스탯을 data-row 4줄로 분해, detail-panel
+tactical-panel+코너컷+헤더, "PATHOGEN BRIEFING TERMINAL" 영문 캡션, pathogen-card--selected
+금색 테두리 유지, FlavorText는 문단 그대로 유지)이 **이미 전부 반영되어 있었다** — CLAUDE.md가
+갱신되지 않아 상태가 어긋나 있던 것. CountrySelect(Step 64)에서 발견한 것과 같은 종류의
+border-width 캐스케이드 버그가 있는지 별도로 확인했으나, `.pathogen-card`는 border-width를
+전혀 재정의하지 않고 `tactical-panel`의 1px 테두리를 그대로 쓰고 있어 문제 없음(border를
+재정의하는 CountrySelect의 `country-row`와 구조가 다름).
+
+**정리한 것**: `MainMenuController.CreatePathogenCard()`가 데이터-row 리팩터링 이후 더 이상
+쓰지 않는 `.pathogen-card__stats`(구 버전, 스탯 4종을 한 Label에 합쳐 표시하던 시절의 클래스)
+죽은 CSS 룰을 `MainMenu.uss`에서 제거했다. `.pathogen-card__stats-rows`(현재 사용 중)와
+헷갈릴 수 있어 삭제가 안전 확인 우선이었다 — 컨트롤러 전체에서 `pathogen-card__stats`(하이픈
+없는 접미어) 참조가 `pathogen-card__stats-rows` 한 곳뿐임을 grep으로 확인 후 제거.
+
+**실제 코드 변경 없음(UXML/컨트롤러/스타일 로직)** — 이번 Step은 감사 + CLAUDE.md 상태 동기화 +
+죽은 CSS 제거만 수행. §8 설계안 자체는 추가 작업 불필요.
+
+**변경 파일**: `Assets/UI/MainMenu.uss`(dead CSS 제거만).
+
+## Step 66 구현 메모 (EndingScreen Tactical 감사 — UI_Design.md 10절/16.2 ③)
+
+**배경**: CLAUDE.md TODO의 "EndingScreen 통계/스코어 패널 tactical-panel 전환"에 착수하려
+조사했으나, `EndingScreen.uxml`/`EndingScreenController.cs`는 10절 설계안(승/패 히어로
+타이틀 → "OPERATION REPORT" 캡션 → 통계 `tactical-panel`[코너컷 4개 + `data-row` 4줄:
+GLOBAL INFECTED/DEATHS/COLLAPSED NATIONS/경과일, severity 색상] → FINAL SCORE 금색
+`tactical-panel`[코너컷 4개] → 버튼 2개)이 **이미 순서·구조 그대로 반영되어 있었다** —
+CountrySelect(Step 64)/MainMenu(Step 65)와 같은 패턴으로 CLAUDE.md만 갱신되지 않은 상태.
+COLLAPSED NATIONS 집계(`Countries.Count(c => c.GetCollapseStage() >= FullCollapse)`)도
+10절이 제안한 형태 그대로 구현돼 있었고, `ComputeFinalScore()`/`ComputeBiohazardScore()`
+점수 계산 로직은 손대지 않은 채였다.
+
+**발견한 갭 — ending-score font-size**: 10절 본문이 "별도 tactical-panel(코너컷 4개,
+`--color-brand-gold` 테두리, `font-size-hero` 유지)로 감싸"라고 명시했는데, 실제 `.ending-score`는
+`--font-size-xxl`(26px)을 쓰고 있었다. `--font-size-xxl`은 `DESIGN.md` 타이포 표에 "(예약)"
+— 즉 아직 용도가 배정되지 않은 토큰이고, `--font-size-hero`(40px)가 정확히 "엔딩 등 최종
+판정 강조" 용도로 예약된 토큰이라 설계 의도와 어긋났다. `ending-title`(승/패)이 이미
+`font-size-hero`를 쓰고 있어 스코어도 같은 크기로 맞추면 "최종 판정" 신호가 통일된다 —
+`.ending-score`의 `font-size`를 `--font-size-hero`로 수정.
+
+**DESIGN.md 위반 여부 확인**: `ending-score-panel`이 `tactical-panel`의 기본 테두리색
+(accent-glow-soft)을 금색으로 override하는 것은 Usage Rules > Tactical Panel 규정과
+충돌하는 것처럼 보일 수 있으나, `UI_Design.md` 10절이 이 화면에 한해 명시적으로 지시한
+것이고(문서 우선순위 규칙 — 화면 배치는 UI_Design.md가 우선), `tree-node--maxed`(완료
+노드, 금색 2px 테두리)와 동일한 "브랜드 골드 = 완결/최종" 신호 축을 재사용하는 것이라
+Brand Accent/Node State 축 분리 원칙과도 모순되지 않는다. Corner Cut(패널 2개, 4개 전부
+사용)·Severity Colors(감염/사망/위험만 국가 데이터에 사용, 경과일은 무색)도 규정과 일치.
+
+**실제 코드 변경**: `.ending-score` font-size 1줄만 수정. UXML/컨트롤러 무변경(이벤트
+시그니처 `OnReviveRequested`/`OnRestartRequested`, `name` 속성, 점수 계산 로직 전부 그대로).
+
+**변경 파일**: `Assets/UI/EndingScreen.uss`.
+
+## Step 67 구현 메모 (CountryPopup → Tactical Modal Base 승격 — UI_Design.md 12절/13절/16.2 ④)
+
+**배경**: `Docs/UI_Design.md` 12절/16.0은 "`CountryPopupController`는 씬에서 GameObject만
+비활성화된 채 코드는 살아있는 죽은 코드"라고 서술했다. 착수 전 이 전제를 코드로 재검증했다.
+
+**전제가 틀렸다는 것을 발견**: `Assets/Scenes/GamePlay.unity`에서 `CountryPopupUI`
+GameObject를 직접 확인한 결과 `m_IsActive: 1`(활성) — 비활성 상태가 아니었다.
+`CountryDockController.cs`(13행) 주석은 "Step 28-2 이후 클릭 트리거가 제거돼 죽은 코드"라고
+쓰여 있지만, 이는 Step 28-2 시점 서술이 그대로 방치된 것 — 실제로는 `CountryView.cs`(561~568행,
+주석 확인) "HUD 리디자인에서 Country Dock을 되살리며 `WorldMap.HandleCountryClicked()` 호출을
+다시 넣었다"고 명시돼 있고, 그 의도한 소비자는 `CountryDockController`였다. 문제는
+`CountryPopupController`의 `WorldMap.OnCountryClicked`/`WorldDataManager.OnCountryChanged`
+구독 코드 자체는 그때 같이 지워지지 않았고 GameObject도 비활성화되지 않은 채 남아있었다는
+것 — 즉 국가를 탭하면 **의도치 않게 Country Dock과 이 팝업이 동시에 뜬다.** `UIManager.cs`도
+`countryPopupController` 필드를 여전히 보유하고 `HandleUpgradeButtonClicked()`에서
+`.Hide()`를 호출한다(살아있는 참조).
+
+**결정**: 이번 작업 범위는 명시적으로 "구조 승격"(스타일/컴포넌트 프레임 전환)이라 이 자동
+팝업 트리거 자체를 끄는 행동 변경은 하지 않았다(§ "기능 추가 최소화/기존 로직 파괴 금지"
+원칙과 충돌할 수 있어 사용자 판단이 필요한 별도 사안으로 분리 — CLAUDE.md TODO에 기록).
+따라서 결정 기준 A(완전히 죽은 코드)가 아니라 **B(부분적으로/실제로 사용 중)** 로 판단,
+12절이 이미 결론 낸 "공용 Modal Base로 추출"(방식 b — 신규 `TacticalModalController` +
+`CountryPopupController`는 그 위의 얇은 래퍼)을 그대로 실행했다.
+
+**구현 — 씬 편집 없이 완료**: `TacticalModalController`를 별도 컴포넌트로 씬에 추가하는 대신
+(Step 63처럼 GUID 수동 배선이 필요해지므로), `CountryPopupController : TacticalModalController`
+**상속**으로 구성했다 — 씬의 `CountryPopupUI` GameObject에 붙어있는 컴포넌트 슬롯(스크립트 GUID
+`715567c2258f4a04f8e123a3c0ac92c5`)은 클래스 이름이 그대로라 아무 변경도 필요 없다(zero scene
+diff). `TacticalModalController`(신규)는 `Show(title)`/`Hide()`/`AddRow(label,value,valueClass)`/
+`ClearRows()`/`Footer` 범용 API를 제공하고 `modal-root`/`modal-title`/`modal-close`/`modal-rows`/
+`modal-footer`를 Q<>()로 바인딩한다 — §13 템플릿과 동일 계약. `CountryPopupController`는
+`Subscribe()`/`HandleCountryClicked()`/`HandleCountryChanged()`/`Populate()`(6개 popup-row를
+`AddRow()` 6줄로 전환, 감염자/사망자/의료수준에 severity 색상 부여 — Country Dock/CountrySelect와
+동일 규약 재사용)만 남기고, `Hide()`는 `_shownCountryId` 초기화 후 `base.Hide()` 호출로 오버라이드.
+`UIManager.countryPopupController?.Hide()` 호출부는 타입/시그니처 무변경이라 그대로 동작한다.
+
+**UXML/USS**: `CountryPopup.uxml`을 §13 템플릿 그대로 재작성 — `popup-root`에 `tactical-panel`
+병기(`name`은 `modal-root`로 변경 — 이 파일 내부 전용 식별자라 컨트롤러와 함께 좌표해 바꿈,
+외부에서 이 이름을 참조하는 코드 없음을 grep으로 확인), 코너컷 4개, `tactical-panel__header`
+안에 `modal-title`+`modal-close`(✕, 기존 "닫기" 전체폭 버튼에서 헤더 인라인 아이콘 버튼으로),
+`modal-rows`(`detail-rows`), `modal-footer`(현재 비어있음, 향후 소비자용). `CountryPopup.uss`는
+`.popup-root`의 `border-radius`(구 `--radius-lg`) 제거(tactical-panel의 radius:0과 충돌 방지 —
+Step 64에서 겪은 캐스케이드 버그 재발 방지), `.popup-header`(가로 배치)/`.popup-close`(28×28
+아이콘 버튼)/`.modal-footer`(빈 슬롯 기본 배치) 3개만 추가, `.popup-title`/`.popup-row`(구
+버전 전용, `tactical-panel__title`/`data-row`로 대체돼 무용)는 제거.
+
+**변경 파일**: `Assets/Scripts/UI/TacticalModalController.cs`(신규), `Assets/Scripts/UI/CountryPopupController.cs`,
+`Assets/UI/CountryPopup.uxml`, `Assets/UI/CountryPopup.uss`.
+
+## Step 68 구현 메모 (Country Dock 무반응 재신고 — 이벤트 디스패치 방어 강화)
+
+**신고**: Step 63에서 고쳤다던 Country Dock이 여전히 "국가를 선택하세요" + "-"만 표시, 클릭해도
+갱신 안 됨. Step 67(Tactical Modal 승격) 직후 신고돼 연관성 의심.
+
+**조사 — 씬 배선은 정상이었다**: `GamePlay.unity`를 직접 확인. HUD GameObject(fileID 543881991,
+`m_IsActive: 1`)의 `m_Component` 목록에 `CountryDockController`(fileID 543881996, guid
+`03d2a5f4b33123845a800ef1995c3836`)가 정확히 등록돼 있어 Step 63의 수정 자체는 씬에 그대로
+남아있음을 확인했다. `Hud.uxml`의 `country-dock-*` name 8개도 `CountryDockController.cs`의
+`Q<>()` 호출과 전부 일치(불일치 없음). `CountryView.cs`(561~574행)의 클릭 트리거,
+`WorldMap.cs`의 `OnCountryClicked`/`HandleCountryClicked()`도 Step 67에서 손대지 않아 무변경.
+`TacticalModalController`/`CountryPopupController`(Step 67 신규·변경분)도 `Show`/`Hide`/
+`AddRow`/`ClearRows` 전부 null-안전하게 작성돼 있어 정적 분석상 예외를 던질 경로를 찾지 못했다
+— **unity-editor-task.md 1절의 체크박스가 여전히 `[ ]`(미확인)로 남아있는 것으로 보아, 사용자가
+Step 63 수정 이후 실제 플레이 테스트를 이번이 처음 했을 가능성이 있다.**
+
+**남은 유력 가설 — 멀티캐스트 delegate 예외 전파**: `WorldMap.OnCountryClicked`와
+`WorldDataManager.OnCountryChanged` 둘 다 구독자가 2개 이상이다(전자: CountryDockController +
+CountryPopupController, 후자: WorldMap 자신 + CountryDockController + CountryStatusPanelController
++ CountryPopupController). 기존 코드는 `OnCountryClicked?.Invoke(country)` /
+`OnCountryChanged?.Invoke(country)` 형태의 **표준 멀티캐스트 호출**이었는데, C#에서 이 방식은
+구독자 하나가 예외를 던지면 그 뒤에 등록된 구독자 전부가 호출되지 않고 조용히 스킵된다(예외를
+잡는 코드가 어디에도 없어 Console에도 안 남을 수 있음 — Unity가 처리되지 않은 예외를 로그에
+남기긴 하지만, 어느 구독자가 문제인지 특정하기 어렵고 이후 호출이 전부 끊긴다는 사실 자체가
+안 보인다). **구독 순서상 CountryPopupController가 CountryDockController보다 먼저 등록되면,
+전자가 어떤 이유로든 예외를 던질 경우 후자는 영원히 실행되지 않는다** — 정확히 신고된 증상과
+일치하는 구조적 취약점이라, Step 67에서 CountryPopupController가 (원래도 죽지 않은 채였지만)
+새로 손댄 코드로 바뀐 시점과 신고 시점이 맞물린 것도 설명이 된다(실제로 예외가 나는지는 정적
+분석만으로 100% 확정할 수 없었음 — Unity 콘솔 확인 필요).
+
+**수정 — 이벤트 디스패치 격리**: `WorldMap.HandleCountryClicked()`와
+`WorldDataManager.NotifyCountryChanged()`를 `GetInvocationList()`로 순회하며 구독자별로
+개별 try/catch하도록 변경 — 한 구독자의 예외가 `Debug.LogException`으로 로그만 남기고
+나머지 구독자 호출은 계속 진행되도록 격리했다. 이제 (a) Country Dock은 다른 구독자 상태와
+무관하게 항상 갱신되고, (b) 만약 실제로 예외가 나고 있었다면 Console에 스택 트레이스가 찍혀
+진짜 원인(어느 컨트롤러의 어느 줄)을 바로 특정할 수 있다.
+
+**원칙 준수**: UI 리디자인 없음 — 이벤트 디스패치 로직만 방어적으로 강화. 이벤트 시그니처
+(`Action<Country> OnCountryClicked`/`OnCountryChanged`), 구독/해제 코드, 컨트롤러 공개 API
+전부 무변경.
+
+**남은 확인(QA, `Docs/QA_Checklist.md`에 항목 추가)**: 이 수정 후에도 Country Dock이 안 뜨면
+Console에 `Debug.LogException`으로 찍히는 예외의 스택 트레이스를 확인 — 그게 진짜 원인이다.
+안 뜨고 예외도 없다면 `WorldMap.Instance`/`WorldDataManager.Instance`가 클릭 시점에 null인지
+(초기화 순서 문제) 별도로 의심해야 한다.
+
+**변경 파일**: `Assets/Scripts/Gameplay/WorldMap.cs`, `Assets/Scripts/Managers/WorldDataManager.cs`,
+`Docs/QA_Checklist.md`.
+
+## Step 69 구현 메모 (Country Dock 재신고 추가 조사 — CountryDockController 자가진단 로그 추가)
+
+**신고**: Step 68 수정 후에도 Country Dock이 여전히 "국가를 선택하세요"/"-" 고정. 국가현황
+패널(CountryStatusPanelController)은 정상 동작.
+
+**비교 조사 — CountryStatusPanelController vs CountryDockController**: 결정적 차이를 찾았다.
+`CountryStatusPanelController.HandleCountryChanged()`는 `WorldDataManager.OnCountryChanged`
+하나만 구독하고 게이트 없이 48개국 전체를 항상 갱신한다. 반면 `CountryDockController.
+HandleCountryChanged()`는 `if (country.id == _shownCountryId) Populate(country);`로 게이트돼
+있고, `_shownCountryId`는 오직 `HandleCountryClicked()`(즉 `WorldMap.OnCountryClicked`)가
+성공적으로 호출돼야만 세팅된다 — **`OnCountryChanged`가 정상 작동해도(국가현황 패널이 이를
+증명) `OnCountryClicked` 쪽이 막혀 있으면 Country Dock은 절대 못 움직인다.** 두 패널이 갈리는
+지점은 정확히 여기다.
+
+**씬/코드 정적 검증 — 전부 정상**: `GamePlay.unity`에서 HUD GameObject의 `m_Component` 순서를
+직접 확인(Transform → **UIDocument** → HudController → NewsFeedController → CountryDockController)
+— UIDocument가 CountryDockController보다 앞서 있어 `rootVisualElement`가 준비되기 전에 Q<>()가
+실행될 위험은 낮다. 같은 GameObject의 `HudController.OnEnable()`도 동일 패턴(`GetComponent
+<UIDocument>().rootVisualElement` 후 Q<>())으로 라벨을 바인딩하는데 HUD 상단 스탯(감염자/사망자/
+DNA 등)은 정상 동작한다고 알려져 있어, UIDocument 타이밍 자체가 깨졌을 가능성도 낮다.
+`Hud.uxml`의 `country-dock-*` name 8개도 재확인 결과 `CountryDockController.cs`의 Q<>() 호출과
+전부 일치. `WorldMap.HandleCountryClicked()`/`WorldDataManager.NotifyCountryChanged()`도 Step 68
+수정이 정확히 적용돼 있음을 재확인했다. **즉, 정적 분석으로는 더 이상 원인을 좁힐 수 없다** —
+Unity 콘솔에서 실제 런타임 상태를 봐야 하는 지점.
+
+**추가한 것 — 자가진단 로그(영구 코드, 스팸 아님)**: `CountryDockController`에 3가지 진단을
+추가했다. (1) `OnEnable()`에서 country-dock-* 핵심 Label 6개 중 하나라도 Q<>() 바인딩이
+실패하면 `Debug.LogWarning`으로 어떤 필드가 null인지 정확히 나열(Step 63과 같은 종류의 바인딩
+실패 재발 여부를 즉시 드러냄). (2) `Start()`(모든 오브젝트의 Awake가 끝난 뒤, 재시도의 마지막
+기회)에서 `WorldMap.Instance`/`WorldDataManager.Instance`가 여전히 null이면 구독이 영구적으로
+실패했다는 경고. (3) `Populate()`에 `ShowPlaceholder()`와 동일한 `_nameLabel == null` 가드를
+추가해, 바인딩이 실패한 상태에서 클릭이 들어와도 NRE 대신 조용히 스킵하도록 방어했다(Step 68의
+try/catch로도 잡히지만, 애초에 예외를 안 던지는 게 더 안전). 이 3개는 정상 상태에서는 전혀
+로그를 찍지 않고, 실제 이상이 있을 때만 원인을 정확히 지목한다 — 다음 실행에서 Console에 이
+경고 중 하나라도 뜨면 그게 진짜 원인이다. 아무 경고도 없이 여전히 안 뜬다면 `WorldMap.
+HandleCountryClicked()`를 호출하는 `CountryView.OnMouseUpAsButton()` 자체가 실행되지 않는
+것(클릭 판정/Collider 문제)으로 조사를 좁혀야 한다.
+
+**추가 정리**: 사용자 요청으로 `[EventManager]`(치료 자금 캡 감소 로그, 미사용된 `oldCap` 변수도
+같이 제거), `[TransportManager]`(허브 좌표 해석 완료/감염 유입 로그 2건), `[FloatingTextEffect]`
+(생성 로그 + 폰트 미발견 경고, DNA 버블 수집마다 찍혀 가장 스팸성이 컸음) 태그의 `Debug.Log`를
+전부 제거했다. 게임 로직은 무변경.
+
+**원칙 준수**: UI 변경 없음, 이벤트 시그니처/구독 코드/컨트롤러 공개 API 무변경 — 진단 로그
+추가와 null 가드 하나만 더했다.
+
+**변경 파일**: `Assets/Scripts/UI/CountryDockController.cs`, `Assets/Scripts/Managers/EventManager.cs`,
+`Assets/Scripts/Managers/TransportManager.cs`, `Assets/Scripts/Gameplay/FloatingTextEffect.cs`,
+`Assets/Scripts/Gameplay/DnaBubble.cs`([DnaBubble] 로그 제거는 직전 세션에서 이미 반영).
+
+## Step 70 구현 메모 (Country Dock 재신고 3차 — 실측 로그로 범위 좁힘)
+
+**사용자 실측 결과**: `HandleCountryChanged`는 정상 호출된다(즉 `WorldDataManager.OnCountryChanged`
+구독은 살아있다). 그런데 `_shownCountryId`가 항상 비어있다(null) — `HandleCountryClicked()`가
+`_shownCountryId`를 세팅하는 유일한 경로인데 실행이 안 되고 있다는 뜻.
+
+**CountryStatusPanelController 국가 선택 방식 확인(요청 3)**: 이 컨트롤러는 `WorldMap.
+OnCountryClicked`를 아예 구독하지 않는다 — "선택된 국가 1개"라는 개념 자체가 없고,
+`WorldDataManager.OnCountryChanged` 하나만으로 48개국 전체를 항상(게이트 없이) 갱신한다. 그래서
+지도 클릭과 무관하게 항상 정상으로 보인다 — Country Dock과 "같은 이벤트를 쓰게" 이식할 수 있는
+구조가 아니다(요청 4). Country Dock은 "선택된 1개 국가"라는 상태가 필요한데, 그 상태를 만드는
+경로가 `OnCountryClicked` 하나뿐이라 이 이벤트 자체를 고쳐야 한다 — 다른 이벤트로 우회하는 게
+아니라 `OnCountryClicked`가 실제로 CountryDockController까지 도달하는지부터 확인이 먼저다.
+
+**HandleCountryClicked가 실행되는지 확인하는 진단 3단 추가(요청 1·2)** — 호출 체인
+`CountryView.OnMouseUpAsButton()` → `WorldMap.HandleCountryClicked(string)` →
+`OnCountryClicked` 구독자들(`CountryDockController.HandleCountryClicked` 포함) 전체에 로그를
+심어 어느 링크에서 끊기는지 실측 가능하게 했다:
+
+1. `CountryView.OnMouseUpAsButton()` — 클릭 자체가 감지되는지, `WorldMap.Instance`가 그 순간
+   null인지(`WorldMap.Instance?.HandleCountryClicked(...)`는 null이면 아무 로그 없이 조용히
+   아무 일도 안 하는 구조라 기존엔 이 실패가 안 보였음).
+2. `WorldMap.HandleCountryClicked(string)` — countryId로 country 해석 성공 여부,
+   `OnCountryClicked`의 실제 구독자 수(`GetInvocationList().Length`) — 0이면 아무도 구독 안 된
+   상태로 클릭이 도착했다는 뜻.
+3. `CountryDockController.Subscribe()` — `WorldMap.Instance != null`이 아니면 경고(이미 Step 69),
+   맞으면 `+=` 직후 구독자 목록에 이 인스턴스가 실제로 걸려있는지(`Delegate.Target == this`)까지
+   확인해 로그로 남김(Step 69의 Start() 시점 null 체크보다 더 이른 시점, 더 정밀한 확인).
+   `HandleCountryClicked()` 진입 로그는 Step 69에서 이미 추가됨(진입 여부/country.id/이전
+   `_shownCountryId` 출력).
+
+**아직 원인 미확정** — 이 요청을 처리하는 이 세션에서도 Unity를 직접 실행할 수 없어 실제 로그
+값을 확보하지 못했다. 사용자가 위 3개 로그를 다음 플레이테스트에서 확인해 어느 지점에서 체인이
+끊기는지 알려주면(① 클릭 자체가 안 잡히는지, ② WorldMap.Instance가 클릭 시점에 null인지,
+③ 구독자 수가 0인지, ④ 구독자는 있는데 이 인스턴스가 없는지) 그에 맞는 정확한 수정을 바로
+적용한다. 진단 로그는 원인 확정 후 전부 제거 예정(현재는 매 클릭 시 한 번씩만 찍혀 스팸은 아님).
+
+**원칙 준수**: UI 변경 없음, 이벤트 시그니처/공개 API 무변경 — 진단 로그만 추가.
+
+**변경 파일**: `Assets/Scripts/Gameplay/CountryView.cs`, `Assets/Scripts/Gameplay/WorldMap.cs`,
+`Assets/Scripts/UI/CountryDockController.cs`.
+
+### Step 70 추가 대응 (진단 코드 자체의 컴파일 에러 수정)
+
+**증상**: 사용자가 실행 전 Unity 콘솔에서 컴파일 에러 2종 신고 — `CS0070`(`WorldMap.
+OnCountryClicked`는 `+=`/`-=` 외에는 선언 클래스 밖에서 접근 불가) x2, `CS0246`(`Action<>`
+타입을 못 찾음).
+
+**원인**: `CountryDockController.Subscribe()`에 추가한 진단 코드가 `WorldMap.Instance.
+OnCountryClicked.GetInvocationList()`를 **선언 클래스(WorldMap) 밖에서** 호출했다 — C#
+`event` 키워드는 정확히 이런 외부 접근(구독/해제 이외의 멤버 호출)을 막으려고 존재하는
+것이라 컴파일 자체가 안 된다. `Action<Country>`도 이 블록에서만 쓰였는데 이 파일에
+`using System;`이 없어 같이 에러가 났다.
+
+**수정**: 문제의 `foreach`/`GetInvocationList()` 블록을 제거하고, `+=` 실행 여부만 남기는
+로그로 교체했다. 실제 구독자 수는 이미 **선언 클래스 안**인 `WorldMap.HandleCountryClicked()`
+내부에 남긴 로그(Step 70 본문)로 확인 가능하므로 진단 목적은 그대로 달성된다.
+
+**남은 경고 2종(CS0414, `CountryView._lastLoggedInfectionBand`/`_lastLoggedDeadBand`,
+`SimulationManager.airRouteSpreadChance`/`seaRouteSpreadChance`)은 이번 작업과 무관한 기존
+코드의 미사용 필드 경고 — 컴파일을 막지 않으며 이번 세션에서 건드리지 않았다.**
+
+**변경 파일**: `Assets/Scripts/UI/CountryDockController.cs`.
+
+### Step 70 추가 대응 (진짜 원인 발견 — BoxCollider2D 크기가 국가 클릭 자체를 막고 있었다)
+
+**사용자 실측 결과**: `[CountryView] OnMouseUpAsButton` 로그가 국가를 클릭해도 단 한 줄도 안
+찍힘 — 클릭 이벤트 체인의 가장 첫 단계(`CountryView`)조차 도달하지 못하고 있다는 뜻. 사용자가
+"레이어 문제 아니냐"고 제안.
+
+**조사 — Unity 레이어는 아니었지만 결이 같은 문제였다**: `ProjectSettings/TagManager.asset`
+확인 결과 이 프로젝트는 커스텀 Physics 레이어를 하나도 정의하지 않았고(기본 Default뿐), 카메라
+`m_CullingMask`도 `4294967295`(전체 레이어 포함)라 Unity Layer 자체는 원인이 아니었다. 대신
+`CountryView.cs` 전체를 다시 훑다가 결정적인 것을 찾았다 — `[RequireComponent(typeof(
+BoxCollider2D))]`로 콜라이더는 자동으로 붙지만, `Awake()`/`ApplyCountryShape()`(국가별 실루엣
+스프라이트를 `_renderer.sprite`에 대입하는 메서드) 어디에도 **`_collider.size`/`.offset`을
+설정하는 코드가 없었다.** `CountryView`용 프리팹도 존재하지 않아(전부 씬에 직접 배치) 콜라이더
+크기는 순전히 `GamePlay.unity`에 저장된 값에 의존하는데, China(`countryId: CHI`, fileID
+735204845)의 `BoxCollider2D`를 직접 열어보니 `m_Size: {x: 0.16, y: 0.16}`, `m_Offset: {x: 0,
+y: 0}` — 세계지도 캔버스(약 8×3.4유닛) 기준으로 보면 지도 중앙 부근에 손톱만한 클릭 가능 영역
+하나가 전부였다. `m_SpriteTilingProperty.newSize: {x: 0.82, y: 0.96}`(에디터의 "Edit Collider"
+자동 맞춤 도구가 계산해뒀던 값으로 추정)와 실제 적용된 `m_Size`가 다른 것으로 보아, 누군가
+한 번쯤 자동 맞춤을 시도했지만 실제로 적용되지는 않은 채 남은 것으로 보인다. `grep`으로
+`m_Size: {x: 0.16, y: 0.16}`를 씬 전체에서 세어보니 92회 등장 — **국가 48개 전부가 Step 29
+"캔버스 통일" 이전(플레이스홀더 스프라이트 시절)의 기본 콜라이더 크기에 그대로 고정돼 있는
+프로젝트 전역 문제**였다. 눈에 보이는 국가 실루엣을 클릭해도 그 지점엔 콜라이더가 없으니
+`OnMouseUpAsButton()` 자체가 안 불리는 게 당연했다 — Country Dock/CountryPopup 둘 다
+무반응이던 근본 원인이 여기였다(Step 68/69의 이벤트 디스패치 방어, Step 63의 컴포넌트 배선은
+전부 정상이었는데 애초에 클릭이 발생하지 않고 있었을 뿐).
+
+**수정**: `CountryView.ApplyCountryShape()`에서 `_renderer.sprite = shape;` 직후
+`_collider.size = shape.bounds.size; _collider.offset = shape.bounds.center;` 추가 — 국가별로
+로드된 스프라이트의 실제 바운즈에 맞춰 매번 콜라이더를 재계산한다. 씬 파일을 48번 손으로 고칠
+필요 없이 코드 한 곳만 고치면 48개국 전부 해결된다. `_collider`는 같은 `Awake()`에서 이 호출보다
+먼저 대입되므로 null 걱정 없음(방어적으로 null 체크는 남겨둠).
+
+**검증 남음**: Step 70 본문에서 추가한 진단 로그(`[CountryView]`/`[WorldMap]`/
+`[CountryDockController]`)들은 이 수정이 실제로 문제를 해결했는지 다음 플레이테스트로
+확인한 뒤 제거 예정 — 이번엔 `[CountryView] OnMouseUpAsButton`부터 `[CountryDockController]
+HandleCountryClicked 진입`까지 체인 전체가 찍히고 `_shownCountryId`가 클릭한 국가 id로
+채워지는지가 성공 기준이다.
+
+**원칙 준수**: UI 변경 없음, 게임 로직(감염/사망/치료제 등) 무변경 — 콜라이더 크기 계산 로직만
+추가. 이벤트 시그니처/컨트롤러 API 전부 무변경.
+
+**변경 파일**: `Assets/Scripts/Gameplay/CountryView.cs`.

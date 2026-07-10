@@ -144,8 +144,6 @@ namespace Contagion.Data
                 if (entry.diameter > 0f && (_minDiameter < 0f || entry.diameter < _minDiameter))
                     _minDiameter = entry.diameter;
             }
-
-            Debug.Log($"[InfectionDotDatabase] 감염 점 좌표 로드 완료 — {_layoutByCountry.Count}개국, 최소 diameter={_minDiameter:F5}");
         }
     }
 }

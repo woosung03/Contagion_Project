@@ -216,11 +216,9 @@ namespace Contagion.Managers
             // 나무위키: 재해로 사망자가 나면 그 나라의 치료 자금 투자 한계치가 영구적으로 낮아진다
             // (Docs/PlagueIncReference.md 4절) — HumanResistanceManager.ApplyPolicy가 이 상한선으로
             // healthFunding을 매 틱 다시 클램프하므로, 여기서는 캡 자체만 낮추면 자연스럽게 반영된다.
-            float oldCap = country.healthFundingCap;
             country.healthFundingCap = Mathf.Max(0f, country.healthFundingCap - naturalDisasterFundingCapPenalty);
             data.NotifyCountryChanged(country);
 
-            Debug.Log($"[EventManager] {country.name} 치료 자금 투자 한계치 감소: {oldCap:F2} -> {country.healthFundingCap:F2}");
             RaiseNews(NewsEventCategory.Positive,
                 $"[속보] {country.name}에서 대규모 자연재해 발생 — 감염이 급격히 확산되고 의료 인프라 투자 여력이 줄어들고 있습니다.");
             return true;

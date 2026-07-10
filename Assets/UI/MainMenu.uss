@@ -57,12 +57,6 @@
     white-space: nowrap;
 }
 
-.pathogen-card__stats {
-    color: var(--color-text-info);
-    font-size: 17px;
-    margin-top: var(--space-xs);
-}
-
 /* pathogen-card 전용 data-row 래퍼 — Tactical.uss의 범용 data-row/data-label/data-value를
    4줄(전염력/중증도/치사율/내성)로 감싸는 컨테이너. MainMenuController.CreatePathogenCard() 참고. */
 .pathogen-card__stats-rows {
@@ -72,6 +66,11 @@
 .country-row {
     background-color: var(--color-surface);
     border-width: 2px;
+    /* border-left-width는 이 rule 안에서 override — accent-bar-row(Tactical.uss)에 맡기면
+       Theme.uss->Tactical.uss->MainMenu.uss 로드 순서상 이 shorthand가 나중에 적용되어
+       4px accent bar가 2px로 눌려버린다(UpgradeTree.uss .tree-node와 동일한 단일 rule
+       패턴으로 고정 — Docs/UI_Design.md 16.2 ①). */
+    border-left-width: 4px;
     border-color: var(--color-border);
     border-radius: var(--radius-md);
     padding: 8px 12px;
@@ -109,9 +108,16 @@
     white-space: nowrap;
 }
 
+/* country-row__meta는 Tactical.uss의 .data-row 컨테이너 위에 얹힌다(라벨:값 판독행 문법
+   재사용, Docs/UI_Design.md 9절 "Country Dock 시각 언어 재사용"). 다만 country-row 자체가
+   이미 카드 테두리를 갖고 있어 .data-row 기본값(하단 헤어라인 구분선)은 이 맥락에서
+   불필요한 줄로 보이므로 0으로 무효화하고, 48행 스크롤 높이 제약(9절 "한 줄 유지 권장")을
+   지키기 위해 라벨+값을 세로로 쌓지 않고 한 줄(flex-row)로만 유지한다. */
 .country-row__meta {
-    color: var(--color-text-tertiary);
-    font-size: var(--font-size-body);
+    flex-shrink: 0;
+    border-bottom-width: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .detail-panel {

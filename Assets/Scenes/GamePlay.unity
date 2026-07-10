@@ -9557,7 +9557,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f8b15a6912f4d44d93459ec442b942e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.SimulationManager
-  tickIntervalSeconds: 5
+  tickIntervalSeconds: 0.1
   autoStart: 1
   globalSpreadFactor: 0.5
   visibilityGainRate: 0.02
@@ -10325,4 +10325,22 @@ MonoBehaviour:
   sortingOrder: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
-  m_ObjectH
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 245050057}
+  - {fileID: 511221706}
+  - {fileID: 519420032}
+  - {fileID: 543881993}
+  - {fileID: 619394802}
+  - {fileID: 643170212}
+  - {fileID: 660003738}
+  - {fileID: 883301165}
+  - {fileID: 1230783507}
+  - {fileID: 1737611718}
+  - {fileID: 2050405927}
+  - {fileID: 3100000103}
+  - {fileID: 3100000203}
+  - {fileID: 3200000302}
+  - {fileID: 3300000402}
+  - {fileID: 3300000502}
+  - {fileID: 5900000002}

@@ -206,7 +206,6 @@ namespace Contagion.Managers
 
             _hubWorldPositions = resolved;
             _hubPositionsResolved = true;
-            Debug.Log($"[TransportManager] 허브 {_hubs.Count}개 좌표 해석 완료 — 교통망 가동 시작.");
             return true;
         }
 
@@ -378,7 +377,6 @@ namespace Contagion.Managers
 
             destination.infectedCount += seed;
             WorldDataManager.Instance.NotifyCountryChanged(destination);
-            Debug.Log($"[TransportManager] {(isAir ? "항공편" : "선박")}이 {destination.name}에 감염 유입 (+{seed}).");
         }
 
         /// <summary>

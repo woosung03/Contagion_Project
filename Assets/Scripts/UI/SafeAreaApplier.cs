@@ -51,7 +51,6 @@ namespace Contagion.UI
         private Vector2Int lastResolution = new Vector2Int(-1, -1);
         private Rect lastSafeArea = new Rect(-1f, -1f, -1f, -1f);
         private bool applied;
-        private bool loggedFallback, loggedAit;
 
         private const string SAFE_TOP_CLASS = "safe-area-top"; // 상단 absolute 앵커 요소 마커 — padding에 안 밀려 translate로 인셋 적용
 
@@ -153,7 +152,6 @@ namespace Contagion.UI
                 if (ApplyDevicePx(tossLeft * tossDpr, tossRight * tossDpr, tossTop * tossDpr, tossBottom * tossDpr, reserveTop))
                 {
                     MarkApplied();
-                    LogAppliedOnce("AIT");
                     lastOverlaySrc = "AIT";
                 }
                 return;
@@ -168,7 +166,6 @@ namespace Contagion.UI
             if (ApplyDevicePx(left, right, top, bottom, reserveTop))
             {
                 MarkApplied();
-                LogAppliedOnce(src);
                 lastOverlaySrc = src;
             }
         }
@@ -178,17 +175,6 @@ namespace Contagion.UI
             applied = true;
             lastResolution = new Vector2Int(Screen.width, Screen.height);
             lastSafeArea = Screen.safeArea;
-        }
-
-        private void LogAppliedOnce(string source)
-        {
-            bool isAit = source == "AIT";
-            if (isAit ? loggedAit : loggedFallback) return;
-            if (isAit) loggedAit = true; else loggedFallback = true;
-            var root = document != null ? document.rootVisualElement : null;
-            Debug.Log($"[Verify-SafeArea] applied src={source} targetClass='{targetClass}' " +
-                      $"screen={Screen.width}x{Screen.height} logical={(root != null ? root.resolvedStyle.width : -1f)}x{(root != null ? root.resolvedStyle.height : -1f)} " +
-                      $"reserveTop={navBarReserveTop} padTop={target.resolvedStyle.paddingTop} padBottom={target.resolvedStyle.paddingBottom}");
         }
 
         // ── 디버그 오버레이 ──────────────────────────────────────────────

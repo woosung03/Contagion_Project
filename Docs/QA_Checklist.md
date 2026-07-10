@@ -24,6 +24,15 @@
 - [ ] UpgradeTree detail-panel 코너컷이 모서리에 올바르게 붙는지(position:relative 적용 확인),
       연결선 꺾은선/포트 마커가 3개 카테고리 전부에서 겹침 없이 그려지는지 확인 (근거: DevLog Step 62)
 - [ ] UpgradeTree 헤더 2줄(영문 LAB 캡션 + 한글 라벨)이 좁은 폭에서 안 잘리는지 확인 (근거: DevLog Step 62)
+- [ ] Country Dock이 국가 탭 시 정상적으로 데이터로 채워지는지 확인 — 원인은 48개국
+      CountryView의 BoxCollider2D 크기가 0.16×0.16으로 고정돼 클릭 자체가 씹히던 것으로 특정,
+      `ApplyCountryShape()`에서 스프라이트 로드 시 콜라이더 size/offset을 재계산하도록 수정
+      완료. 콘솔에서 `[CountryView] OnMouseUpAsButton` → `[WorldMap] HandleCountryClicked` →
+      `[CountryDockController] HandleCountryClicked 진입`까지 로그 체인이 찍히고
+      `_shownCountryId`가 클릭한 국가로 채워지는지가 성공 기준 (근거: DevLog Step 70)
+- [ ] 위 항목 확인 후, 국가 탭 시 Country Dock과 CountryPopup(모달)이 동시에 뜨는지 확인 —
+      클릭이 막혀있던 동안 가려져 있던 증상일 수 있음. 동시에 뜨면 어느 쪽을 남길지 결정 필요
+      (근거: DevLog Step 67, CLAUDE.md TODO)
 
 ## 감염 점 오버레이 확인 (`dotsEnabled=true`, `hotspotsEnabled=false`)
 

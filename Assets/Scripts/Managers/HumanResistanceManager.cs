@@ -112,8 +112,6 @@ namespace Contagion.Managers
             var mortalityStage = state.GetMortalityStage();
             if (mortalityStage != _lastMortalityStage)
             {
-                Debug.Log($"[HumanResistanceManager] 세계 사망률 위험도 변경: {_lastMortalityStage} -> {mortalityStage} " +
-                    $"(사망률={(state.totalPopulation > 0 ? (float)state.deadCount / state.totalPopulation : 0f):P2})");
                 _lastMortalityStage = mortalityStage;
                 OnMortalityStageChanged?.Invoke(mortalityStage);
             }

@@ -147,7 +147,6 @@ namespace Contagion.Managers
             try
             {
                 File.WriteAllText(LocalPath, json);
-                Debug.Log("[SaveManager] 로컬 저장 완료.");
             }
             catch (Exception e)
             {

@@ -59,8 +59,6 @@ namespace Contagion.Gameplay
             if (_popRoutine != null) StopCoroutine(_popRoutine);
             transform.localScale = _baseScale * 0.2f;
             _popRoutine = StartCoroutine(PopIn());
-
-            Debug.Log($"[DnaBubble] 스폰됨 at {transform.position}, dnaValue={dnaValue}, baseScale={_baseScale}, popInDuration={popInDuration}");
         }
 
         private IEnumerator PopIn()
@@ -82,7 +80,6 @@ namespace Contagion.Gameplay
         {
             yield return new WaitForSeconds(seconds);
             _lifeRoutine = null;
-            Debug.Log($"[DnaBubble] 수명 만료로 소멸 at {transform.position} (수집 안 됨)");
             OnExpired?.Invoke(this);
         }
 
@@ -99,7 +96,6 @@ namespace Contagion.Gameplay
                 _popRoutine = null;
             }
 
-            Debug.Log($"[DnaBubble] 수집됨 at {transform.position}, dnaValue={DnaValue}");
             FloatingTextEffect.Spawn(transform.position, $"+{DnaValue}", collectTextColor);
 
             OnCollected?.Invoke(this);

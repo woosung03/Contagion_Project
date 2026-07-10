@@ -94,10 +94,37 @@ namespace Contagion.Gameplay
                 view.UpdateVisual(country);
         }
 
+        /// <summary>
+        /// OnCountryClicked를 구독자별로 개별 try/catch하며 순회 호출한다 — WorldDataManager.
+        /// NotifyCountryChanged()와 동일한 이유(구독자 하나가 예외를 던지면 표준 delegate.Invoke()는
+        /// 그 뒤 구독자를 전부 스킵한다). 지금 이 이벤트의 구독자는 CountryDockController와
+        /// CountryPopupController 2개뿐이지만, 등록 순서에 따라 한쪽이 죽으면 다른 쪽(예: Country
+        /// Dock)도 갱신이 멈춘 것처럼 보이는 진단하기 어려운 버그로 이어질 수 있어 방어적으로 격리한다.
+        /// </summary>
         public void HandleCountryClicked(string countryId)
         {
             var country = WorldDataManager.Instance?.GetCountry(countryId);
-            if (country != null) OnCountryClicked?.Invoke(country);
+
+            // 진단용(Step 70) — Country Dock 무반응 추적. OnCountryClicked가 null이면(구독자가
+            // 아무도 없음) 기존 코드는 아무 로그 없이 조용히 return했다 — 그게 실제 원인인지
+            // 확인하기 위해 country 해석 결과와 구독자 수를 명시적으로 남긴다.
+            Debug.Log($"[WorldMap] HandleCountryClicked 진입 — countryId={countryId}, " +
+                $"country={(country != null ? country.name : "NULL(해석 실패)")}, " +
+                $"OnCountryClicked 구독자 수={OnCountryClicked?.GetInvocationList().Length ?? 0}");
+
+            if (country == null || OnCountryClicked == null) return;
+
+            foreach (Action<Country> handler in OnCountryClicked.GetInvocationList())
+            {
+                try
+                {
+                    handler(country);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
+            }
         }
     }
 }

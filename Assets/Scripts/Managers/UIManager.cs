@@ -44,11 +44,6 @@ namespace Contagion.Managers
             // 게임 시작 전 화면부터 노출. GameManager.isPaused 기본값은 true지만, GameManager는
             // DontDestroyOnLoad라 "재시작"(씬 리로드) 시에는 직전 판의 인스턴스가 그대로 이어져
             // isPaused=false 상태로 넘어올 수 있다 — MainMenu를 띄우는 시점에 명시적으로 다시 멈춘다.
-            Debug.Log($"[FLOW][UIManager] Start() 실행 (instanceId={GetInstanceID()}, time={Time.realtimeSinceStartup:F2}) — " +
-                $"mainMenuController={(mainMenuController != null ? "OK" : "NULL")}, " +
-                $"countrySelectController={(countrySelectController != null ? "OK" : "NULL")}, " +
-                $"endingScreenController={(endingScreenController != null ? "OK" : "NULL")}");
-
             if (mainMenuController != null)
             {
                 GameManager.Instance?.SetPaused(true);
@@ -145,8 +140,6 @@ namespace Contagion.Managers
 
         private void HandlePathogenConfirmed(PathogenDefinition pathogen)
         {
-            Debug.Log($"[FLOW][UIManager] HandlePathogenConfirmed — pathogen={pathogen?.DisplayName}, " +
-                $"countrySelectController={(countrySelectController != null ? "OK" : "NULL")}");
             _pendingPathogen = pathogen;
             mainMenuController.Hide();
             countrySelectController?.Show();
@@ -161,8 +154,6 @@ namespace Contagion.Managers
 
         private void HandleCountryConfirmed(string countryId)
         {
-            Debug.Log($"[FLOW][UIManager] HandleCountryConfirmed — countryId={countryId}, " +
-                $"GameDataBootstrapper.Instance={(GameDataBootstrapper.Instance != null ? "OK" : "NULL")}");
             countrySelectController.Hide();
             GameDataBootstrapper.Instance?.BeginGame(_pendingPathogen, countryId);
         }

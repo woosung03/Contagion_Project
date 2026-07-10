@@ -436,6 +436,20 @@ namespace Contagion.Gameplay
             }
 
             _renderer.sprite = shape;
+
+            // [Step 70] 국가 클릭이 전혀 안 되던 근본 원인 — BoxCollider2D가 씬에 배치될 당시(Step 29
+            // 캔버스 통일 이전, 플레이스홀더 스프라이트 시절)의 기본값 0.16x0.16에 offset(0,0)으로 굳어
+            // 있었다(48개국 전부 동일 값으로 GamePlay.unity에 저장돼 있었음을 확인). 지금은 스프라이트가
+            // 국가별로 실제 실루엣 크기만큼 다른데 콜라이더만 그 시절 크기 그대로 남아있어, 국가를
+            // 눈으로 보고 클릭해도 그 지점에 콜라이더가 없어 OnMouseUpAsButton() 자체가 호출되지 않았다
+            // (Country Dock/CountryPopup 둘 다 무반응이던 이유). 매번 로드된 sprite.bounds에 맞춰 콜라이더
+            // 크기/오프셋을 재계산하면 48개국 각각의 실제 실루엣과 정확히 일치한다 — 씬 파일을 48번
+            // 수동으로 고칠 필요 없이 여기 한 곳만 고치면 전부 해결된다.
+            if (_collider != null)
+            {
+                _collider.size = shape.bounds.size;
+                _collider.offset = shape.bounds.center;
+            }
         }
 
         private void Start()
@@ -570,6 +584,12 @@ namespace Contagion.Gameplay
         {
             if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
                 return;
+
+            // 진단용(Step 70) — Country Dock 무반응 추적. WorldMap.Instance?.HandleCountryClicked(...)는
+            // Instance가 null이면 아무 로그도 안 남기고 조용히 아무 일도 안 일어난다 — 그게 실제
+            // 원인인지 확인하기 위해 클릭 자체는 감지됐다는 것과 Instance 상태를 명시적으로 남긴다.
+            Debug.Log($"[CountryView] OnMouseUpAsButton — countryId={countryId}, " +
+                $"WorldMap.Instance={(WorldMap.Instance != null ? "OK" : "NULL")}");
 
             WorldMap.Instance?.HandleCountryClicked(countryId);
         }
