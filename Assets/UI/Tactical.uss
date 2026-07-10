@@ -56,13 +56,24 @@
     color: var(--color-text-tertiary);
     font-size: var(--font-size-xs);
     letter-spacing: var(--tracking-label);
+    flex-shrink: 0; /* 값이 줄어들 때 라벨은 항상 원래 폭 유지 */
 }
 
+/* flex-shrink/min-width/white-space — CountryPopup 320px 폭에서 긴 값(10자리 인구수 등)이
+   패널 밖으로 넘치던 문제의 근본 수정(조사: Docs/QA_Checklist.md 인구/공항·항구·국경 오버플로우
+   항목). CSS flexbox 규칙상 white-space:nowrap인 flex 아이템은 min-width:0이 없으면 "자동 최소
+   너비 = 줄바꿈 없는 전체 텍스트 너비"가 되어 아무리 좁아도 줄어들지 않는다(MainMenu.uss
+   country-row__name의 동일 트랩 참고) — data-row를 쓰는 모든 화면이 공용으로 혜택받도록 여기서
+   고친다. */
 .data-value {
     color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
     -unity-font-style: bold;
     letter-spacing: var(--tracking-label);
+    flex-shrink: 1;
+    min-width: 0;
+    white-space: normal;
+    -unity-text-align: upper-right;
 }
 
 /* severity 색상 — Theme.uss --color-status-* 그대로 매핑(감염/사망/위험/정보). */

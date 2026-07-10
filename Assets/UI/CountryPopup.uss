@@ -7,8 +7,9 @@
     position: absolute;
     left: 50%;
     top: 30%;
-    width: 320px;
-    margin-left: -160px;
+    width: 340px; /* 320px는 인구/공항·항구·국경처럼 긴 값에서 여유가 없어 340px로 소폭 확대
+                     (조사 결과: Docs/QA_Checklist.md 참고) — 세로 1440px 폭 기준 화면비 문제 없음 */
+    margin-left: -170px;
     background-color: var(--color-bg-panel);
     padding: var(--space-lg);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지

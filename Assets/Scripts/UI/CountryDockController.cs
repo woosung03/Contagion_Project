@@ -133,7 +133,7 @@ namespace Contagion.UI
                 : 0f;
 
             _nameLabel.text = country.name;
-            _populationValue.text = $"{country.population:N0}";
+            _populationValue.text = FormatPopulation(country.population);
             _infectedRateValue.text = $"{infectionRatio * 100f:F1}%";
             _deadRateValue.text = $"{deadRatio * 100f:F2}%";
             _healthValue.text = DevLabel(country.developmentLevel);
@@ -151,6 +151,17 @@ namespace Contagion.UI
                 _transportValue.text =
                     $"{(country.isAirportOpen ? "공항 개방" : "공항 폐쇄")} · {(country.isPortOpen ? "항구 개방" : "항구 폐쇄")}";
             }
+        }
+
+        /// <summary>인구수를 억/만 단위로 축약(예: 1,412,914,089 → "14.1억") — Country Dock은
+        /// `.country-dock` 폭이 140px(CountryPopup 340px보다 훨씬 좁은 상시 표시 위젯)이라 10자리
+        /// 정수를 그대로 쓰면 넘친다. 상세 수치가 필요하면 CountryPopup(N0 그대로 유지, Docs/DevLog.md
+        /// Step 77)을 열어 확인하면 되므로 Dock은 규모 감만 전달하는 축약 표기로 통일한다.</summary>
+        private static string FormatPopulation(long population)
+        {
+            if (population >= 100_000_000) return $"{population / 100_000_000f:0.#}억";
+            if (population >= 10_000) return $"{population / 10_000f:0.#}만";
+            return population.ToString("N0");
         }
 
         private static string StageLabel(CountryCollapseStage stage) => stage switch

@@ -8,6 +8,18 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] CountryPopup 오버플로우 수정 검증 — 중국(CHI)/인도(IND) 선택 시 인구수(N0 전체 숫자,
+      Step 77로 축약 표기에서 되돌림)와 공항/항구/국경 3행이 340px 팝업 폭 안에서 잘리거나
+      넘치지 않는지, 다른 46개국도 정상 표시되는지 확인. `country-row__meta`(MainMenu 48행
+      리스트)도 인구 큰 국가(중국/인도) 행이 여전히 한 줄로 말줄임되는지(줄바꿈으로 행 높이가
+      깨지지 않는지) 같이 확인 (근거: DevLog Step 76)
+- [ ] Country Dock 인구 축약 표기 검증 — 중국/인도 선택 시 우측 상단 Country Dock의 인구
+      값이 "14.1억"처럼 축약되어 140px 폭 안에 정상 표시되는지, CountryPopup(전체 숫자)과
+      값이 일치하는(단위만 다른) 같은 데이터인지 확인 (근거: DevLog Step 77)
+- [ ] (참고, 급하지 않음) Country Dock의 공항/항구 상태(`_transportValue`)도 CountryPopup이
+      Step 76에서 고친 것과 같은 "한 문자열로 이어붙이기" 패턴이라 140px 폭에서 넘칠 가능성 —
+      실측 후 필요하면 별도 조치 (근거: DevLog Step 77)
+
 - [ ] GamePlay.unity 정상 로드 + MainMenu→CountrySelect→게임 시작 플로우 확인 (근거: DevLog Step 56)
 - [ ] "시작 버튼 즉시 패배" 재현 여부 확인 — 재현 시 `[FLOW][GameDataBootstrapper] BeginGame`/
       `SeedStartingInfection` 로그로 `startingCountryId` 전달 확인 (근거: DevLog Step 54)

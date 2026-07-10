@@ -60,7 +60,15 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 75(감염 점 실제 커버리지
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 77(인구 축약 표기 위치
+정정 — CountryPopup은 상세 정보 창이므로 N0 전체 숫자로 되돌리고, Step 76에서 도입한
+`FormatPopulation()`은 대신 `CountryDockController`(우측 상단 상시 표시 위젯, `.country-dock` 폭
+140px로 CountryPopup보다 더 좁음)로 이관 — CountryPopup=전체 숫자/Country Dock=축약 숫자로 역할
+분리. 검증은 `Docs/QA_Checklist.md` 참고) — Step 76은 CountryPopup 인구수/
+공항·항구·국경 오버플로우 조사·수정 — 원인은 `Tactical.uss` `.data-value`에 wrap/shrink 처리가
+없던 공용 결함, 320px 폭인 CountryPopup에서 처음 드러남. `Tactical.uss` 공용 수정 + 인구 억/만
+축약 표기 + 공항/항구/국경 개별 행 분리로 해결, MainMenu 48행 리스트는 별도 오버라이드로 기존
+한 줄 동작 보존. 검증은 `Docs/QA_Checklist.md` 참고 — Step 75(감염 점 실제 커버리지
 검증 후 크기 공식 재수정 — 한국/일본/영국 기준 감염률 100% 시 실제 면적 대비 커버리지를 계산해보니
 Step 74의 sqrt 완화로도 여전히 일본 118.7%/영국 105.7%로 설계 목표(70%)를 초과하고 있었다. 원인은
 `diameter`·점 개수가 이미 국가별로 70% 커버리지를 만족하도록 공동 계산된 완결값인데

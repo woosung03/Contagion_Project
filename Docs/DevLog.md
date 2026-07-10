@@ -3514,3 +3514,89 @@ Step 74의 sqrt(sizeRatio))을 **또** 곱해 이중 반영하고 있었다 — 
 무변경 — 감염 점 지름 계산식만 단순화(점 좌표/개수 재생성 없음, 성능 영향 없음).
 
 **변경 파일**: `Assets/Scripts/Gameplay/CountryView.cs`, `Assets/Scripts/Data/InfectionDotDatabase.cs`(주석만).
+
+## Step 76 구현 메모 (CountryPopup 인구수/공항·항구·국경 오버플로우 조사·수정)
+
+**신고**: 중국/인도 선택 시 CountryPopup의 인구수 텍스트, 그리고 공항/항구/국경 상태 표시가 팝업
+영역을 초과해서 그려짐.
+
+**조사 결과 — 근본 원인은 하나**: `Tactical.uss`의 `.data-row`/`.data-label`/`.data-value`(여러
+화면이 공유하는 판독행 규격)가 `white-space`/`flex-shrink`/`min-width`를 전혀 지정하지 않는다.
+이 프로젝트 컨벤션상 UI Toolkit Label은 `white-space: normal`을 명시하지 않으면 줄바꿈되지 않고
+(Hud.uss/MainMenu.uss/UpgradeTree.uss/RankingPanel.uss가 전부 이미 이 패턴을 직접 오버라이드해서
+씀 — `Tactical.uss`만 빠져 있었음), CSS flexbox 규칙상 `white-space: nowrap`인 flex 아이템은
+`min-width: 0`이 없으면 "자동 최소 너비 = 줄바꿈 없는 전체 텍스트 너비"가 되어 아무리 좁아도
+줄어들지 않는다(MainMenu.uss `country-row__name`이 이미 겪고 고친 동일 트랩, 105행 주석 참고).
+VisualElement 기본 `overflow`가 `visible`이라 넘친 텍스트가 그대로 팝업 밖으로 삐져나왔다.
+`.popup-root`가 `width: 320px` 고정인 CountryPopup이 다른 소비자(CountrySelect/UpgradeTree 등,
+더 넓은 패널)보다 훨씬 좁아서 이 공용 결함이 처음으로 실제 오버플로우로 드러난 지점이었다.
+구체적으로: 인구는 중국(1,412,914,089)·인도처럼 10자리 숫자를 `N0`로 그대로 표기해 최장
+숫자열이었고, 공항/항구/국경은 세 상태를 " · "로 이어붙인 하나의 값 문자열(약 19~20자)+앱 내
+가장 긴 라벨("공항/항구/국경", 7자) 조합이라 가장 심하게 초과했다.
+
+**수정(사용자 선택: Tactical UI 기준 최적안)**:
+1. `Tactical.uss` `.data-value`에 `flex-shrink: 1; min-width: 0; white-space: normal;
+   -unity-text-align: upper-right;` 추가, `.data-label`에 `flex-shrink: 0;` 추가 — data-row를
+   쓰는 모든 화면(CountrySelect/MainMenu/EndingScreen/CountryPopup)이 공용으로 오버플로우
+   방지 혜택을 받는다. `UpgradeTree.uss`는 자체 `.data-value`를 따로 갖고 있어(Tactical.uss
+   미로드) 영향 없음.
+2. 이 공용 변경이 `MainMenu.uss` `country-row__meta`(48행 리스트, "한 줄 유지" 명시적 설계
+   제약 — 116행 주석)에 줄바꿈을 유발해 리스트 행 높이를 깨뜨릴 위험이 있어, `.country-row__meta
+   .data-value`에 `white-space: nowrap; text-overflow: ellipsis; overflow: hidden;`을 추가해
+   해당 컨텍스트만 기존 단일 줄 동작으로 되돌렸다(`country-row__name`과 동일 패턴).
+3. `CountryPopupController.Populate()` — 공항/항구/국경을 감염자/사망자처럼 개별 data-row 3개로
+   분리하고 severity 색상(개방=`data-value--info`, 폐쇄/봉쇄=`data-value--danger`) 적용. 인구는
+   신설한 `FormatPopulation()`으로 억/만 단위 축약(예: "14.1억") — 감염자/사망자는 정확한 값이
+   중요해 `N0` 그대로 유지.
+4. `CountryPopup.uss` `.popup-root` 폭을 320px → 340px로 소폭 확대(세로 1440px 폭 기준 화면비
+   문제 없음).
+
+**적용하지 않은 것**: 제안 단계에서 검토했던 `data-row--stacked`(라벨 위/값 아래 세로 배치)
+모디파이어는 위 수정 후 CountryPopup의 어떤 행도 실제로 필요하지 않아(3분할+축약 표기만으로
+340px 안에 전부 들어감) 추가하지 않았다 — 안 쓰이는 CSS를 미리 넣어두는 대신, 향후 다른 화면에서
+필요해지면 그때 만들기로 함. `.data-value`의 wrap-capable 기본값 자체가 어떤 값이든 넘칠 경우
+줄바꿈되는 최소한의 안전망 역할은 대신한다.
+
+**원칙 준수**: 조사(원인 분석·수정안 3개 제시)를 먼저 보고한 뒤 사용자 선택("C. Tactical UI
+최적안")에 따라 수정 진행. 게임 로직(감염/사망/치료제 등) 무변경. Unity 에디터 미접속으로 실제
+렌더링 검증은 못 했음 — 남은 검증은 `Docs/QA_Checklist.md` "CountryPopup 오버플로우 수정 검증"
+섹션 참고.
+
+**변경 파일**: `Assets/UI/Tactical.uss`, `Assets/UI/MainMenu.uss`, `Assets/UI/CountryPopup.uss`,
+`Assets/Scripts/UI/CountryPopupController.cs`.
+
+## Step 77 구현 메모 (인구 축약 표기 위치 정정 — CountryPopup→Country Dock 이관)
+
+**신고**: Step 76에서 CountryPopup 인구수를 억/만 축약 표기로 바꿨는데, CountryPopup은 국가 상세
+정보 창이므로 population은 정확한 정수(N0)를 유지해야 한다는 피드백. 대신 우측 상단 상시 표시
+위젯인 Country Dock(`CountryDockController`)의 인구 표시를 축약 표기로 바꿔달라는 요청.
+
+**조사**: `CountryDockController.Populate()`(122행)가 `_populationValue.text =
+$"{country.population:N0}";`로 CountryPopup과 동일하게 전체 자릿수를 그대로 쓰고 있었다. `Hud.uss`
+`.country-dock`의 폭은 `140px`(232행) — CountryPopup(340px)보다도 훨씬 좁은 상시 표시 위젯인데
+`.country-dock__value`(276행)에도 Step 76에서 `Tactical.uss`에 넣은 wrap/shrink 공용 수정이
+적용되지 않는다(Country Dock은 `Tactical.uss`를 로드하지 않고 자체 `Hud.uss` 규격을 씀 — Step 76
+수정의 사정거리 밖). 즉 중국/인도 선택 시 Country Dock 쪽 인구 행도 같은 오버플로우 가족 버그를
+겪고 있었을 가능성이 높다(이번 세션에서 새로 발견, 이전엔 신고되지 않았던 지점).
+
+**수정**:
+1. `CountryPopupController.Populate()` — 인구 표기를 `FormatPopulation()` 호출에서
+   `$"{country.population:N0}"`로 되돌리고, Step 76에서 추가했던 `FormatPopulation()` 메서드는
+   제거(더 이상 쓰는 곳이 없어 죽은 코드로 남기지 않음). 오버플로우 자체는 이미 Step 76의
+   `Tactical.uss` wrap/shrink 공용 수정 + 340px 확장 폭으로 해결돼 있어 N0로 되돌려도 문제없다.
+2. `CountryDockController.cs`에 동일한 로직의 `FormatPopulation()`을 신설(억/만 단위 축약, 예:
+   "14.1억")하고 `Populate()`의 `_populationValue.text`에 적용. 플레이스홀더("-")는 무변경.
+
+**목표 상태**: CountryPopup = 전체 숫자(N0), Country Dock = 축약 숫자. 두 화면의 역할(상세 정보
+창 vs 상시 표시 요약 위젯)에 맞는 정밀도로 분리됐다.
+
+**적용하지 않은 것**: `Hud.uss` `.country-dock__value`/`.country-dock__label`에는 Tactical.uss와
+같은 wrap/shrink 수정을 추가하지 않았다 — 인구는 이번 수정으로 축약되어 140px 안에 충분히 들어가고,
+`_transportValue`(공항/항구 상태를 한 문자열로 이어붙이는 방식, CountryPopup이 Step 76에서 고친 것과
+동일한 패턴)를 포함한 Country Dock 전반의 오버플로우 내성은 이번 요청 범위 밖이라 손대지 않았다.
+같은 패턴의 잠재적 취약점이므로 필요 시 별도 확인 항목으로 QA_Checklist에 남겨둔다.
+
+**원칙 준수**: 사용자 지시("관련 컨트롤러 조사 후 수정 진행")에 따라 `CountryDockController.cs`/
+`Hud.uss` 확인 후 수정. 게임 로직 무변경. Unity 에디터 미접속으로 실제 렌더링 검증은 못 함.
+
+**변경 파일**: `Assets/Scripts/UI/CountryPopupController.cs`, `Assets/Scripts/UI/CountryDockController.cs`.

@@ -120,6 +120,15 @@
     padding-bottom: 0;
 }
 
+/* Tactical.uss .data-value 기본값이 줄바꿈 허용으로 바뀌면서(CountryPopup 오버플로우 공용 수정,
+   Docs/QA_Checklist.md 참고) 48행 리스트의 "한 줄 유지" 제약(위 country-row__meta 주석)이 깨지지
+   않도록 이 컨텍스트만 원래의 단일 줄+말줄임 동작으로 되돌린다 — country-row__name과 동일 패턴. */
+.country-row__meta .data-value {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 .detail-panel {
     position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
     background-color: var(--color-surface);

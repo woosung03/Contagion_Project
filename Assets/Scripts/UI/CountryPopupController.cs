@@ -71,8 +71,16 @@ namespace Contagion.UI
             base.Hide();
         }
 
-        /// <summary>기존 6개 popup-row(Label 개별 대입)를 data-row 6줄로 전환 — 정보 항목은 동일,
-        /// 표현만 판독행으로 통일(Country Dock/CountrySelect와 동일 severity 색상 규약 재사용).</summary>
+        /// <summary>기존 6개 popup-row(Label 개별 대입)를 data-row 8줄로 전환 — 정보 항목은 동일,
+        /// 표현만 판독행으로 통일(Country Dock/CountrySelect와 동일 severity 색상 규약 재사용).
+        ///
+        /// 오버플로우 조사 결과(Docs/QA_Checklist.md) 반영 — 두 가지를 고쳤다:
+        /// 1) 인구는 정확한 전체 자릿수(N0)를 유지한다 — CountryPopup은 상세 정보 창이라 축약 없이
+        ///    전체 숫자를 보여주는 게 목적에 맞다(억/만 축약 표기는 Country Dock 쪽으로 이관됨,
+        ///    Docs/DevLog.md Step 77). 오버플로우 자체는 Tactical.uss의 wrap/shrink 공용 수정(Step 76)
+        ///    으로 이미 해결돼 있어 N0로 되돌려도 320px보다 넓어진 340px 폭 안에서 문제없이 줄바꿈된다.
+        /// 2) "공항/항구/국경" 한 줄로 이어붙였던 값을 감염자/사망자처럼 개별 data-row 3개로 분리하고
+        ///    severity 색상(개방=info, 폐쇄/봉쇄=danger)을 입혀 다른 행과 표현 문법을 통일했다.</summary>
         private void Populate(Country country)
         {
             ClearRows();
@@ -81,9 +89,12 @@ namespace Contagion.UI
             AddRow("사망자", $"{country.deadCount:N0}", "data-value--dead");
             AddRow("의료 수준", DevLabel(country.developmentLevel), DevValueClass(country.developmentLevel));
             AddRow("기후", ClimateLabel(country.climate));
-            AddRow("공항/항구/국경", $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
-                                  $"항구 {(country.isPortOpen ? "개방" : "폐쇄")} · " +
-                                  $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}");
+            AddRow("공항", country.isAirportOpen ? "개방" : "폐쇄",
+                   country.isAirportOpen ? "data-value--info" : "data-value--danger");
+            AddRow("항구", country.isPortOpen ? "개방" : "폐쇄",
+                   country.isPortOpen ? "data-value--info" : "data-value--danger");
+            AddRow("국경", country.isBorderClosed ? "봉쇄" : "개방",
+                   country.isBorderClosed ? "data-value--danger" : "data-value--info");
         }
 
         /// <summary>CountrySelectController.DevValueClass()와 동일 규약 — 의료 수준을 severity로 재해석.</summary>
