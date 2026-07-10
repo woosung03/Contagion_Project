@@ -55,12 +55,31 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   tactical-panel)/MainMenu(pathogen-card tactical-panel+corner-cut+data-row, detail-panel)/
   EndingScreen(통계+스코어 패널 tactical-panel+corner-cut, data-row 4줄, hero 스코어)/
   CountryPopup(신규 `TacticalModalController` 공용 프레임 상속, modal-root+tactical-panel)
+- CountryPopup 국가 대시보드 확장 — 감염 상태 도넛 차트(`CountryDonutChart`, Painter2D)/감염
+  통계(감염률·치사율 추정·생존자 수)/의료 시스템 부하(신규 계산식 4단계)/세계 순위(감염자·사망자·
+  감염률 각각 별도 행)/이동 통제 섹션(공항·항구·국경, 섹션 캡션+좌측 accent bar), 최근 국가 이벤트는
+  후속 과제로 보류. `TacticalModalController`에 `AddSectionCaption()`/`AddRow(rowClass)` 공용 확장 추가
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 77(인구 축약 표기 위치
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 79(CountryPopup 2차
+다듬기 — 세계 순위를 "감염자 N위 · 사망자 N위 · 감염률 N위" 한 줄 압축에서 각각 별도 data-row
+3개로 분리. 공항/항구/국경 3행은 시인성 개선을 위해 "이동 통제" 섹션 캡션 + 좌측 accent bar
+(`data-row--open`/`data-row--closed`)로 그룹화 — 아이콘 폰트 글리프는 실기기 폰트 지원 검증이
+안 돼(Hud.uss news-entry-dot 주석과 동일 이유) 텍스트+색상 바 조합을 대신 택함.
+`TacticalModalController`에 `AddSectionCaption()` 신규 + `AddRow()` 4번째 인자(`rowClass`) 추가 —
+공용 확장이라 다른 소비 화면(CountrySelect/EndingScreen/UpgradeTree) 영향 없음. 검증은
+`Docs/QA_Checklist.md` 참고) — Step 78은 CountryPopup 국가
+대시보드 1차 확장 — 사전 조사 문서 `Docs/CountryStatus_Dashboard_Investigation.md`의 최종 추천안 중
+사용자 승인 4항목만 구현: 감염 상태 도넛 차트(`CountryDonutChart.cs` 신규, HudSparkline과 동일한
+Painter2D 방식)/감염 통계(감염률·치사율 추정·생존자 수)/의료 시스템 부하(감염률×(1-의료수준) 계산식
+신규, 기존 CountryCollapseStage와는 별개 축)/세계 순위(48개국 LINQ 정렬, OnWorldStateChanged 추가
+구독으로 팝업이 열려있는 동안 매 틱 갱신). 기존 "감염자"/"사망자" data-row 2줄은 도넛 범례로 대체.
+"최근 국가 이벤트"는 NewsEvent에 countryId가 없고 HumanResistanceManager 봉쇄 변화가 Debug.Log뿐이라
+구조화된 이력이 없어 이번 범위에서 제외(후속 Step 후보). Unity 에디터 미접속으로 Painter2D 렌더링
+미검증 — 검증은 `Docs/QA_Checklist.md` 참고) — Step 77은 인구 축약 표기 위치
 정정 — CountryPopup은 상세 정보 창이므로 N0 전체 숫자로 되돌리고, Step 76에서 도입한
 `FormatPopulation()`은 대신 `CountryDockController`(우측 상단 상시 표시 위젯, `.country-dock` 폭
 140px로 CountryPopup보다 더 좁음)로 이관 — CountryPopup=전체 숫자/Country Dock=축약 숫자로 역할

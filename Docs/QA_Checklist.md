@@ -8,6 +8,28 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] CountryPopup 도넛 차트 렌더링 확인 — `CountryDonutChart.cs`가 `Painter2D.Arc()`/`Angle`
+      API로 그린 3개 부채꼴(건강/감염/사망)이 실제로 컴파일·렌더링되는지(Unity 에디터 미접속으로
+      미검증), 가운데 구멍 오버레이 색(`CountryDonutChart.HoleColor`)이 `CountryPopup.uss`
+      `.popup-root` 배경색(`--color-bg-panel`)과 시각적으로 자연스럽게 맞물리는지 확인 (근거:
+      DevLog Step 78)
+- [ ] CountryPopup 도넛 범례 3줄(건강/감염/사망) 텍스트가 340px 폭 안에서 줄바꿈 없이 들어가는지,
+      값이 도넛 조각 색상과 정확히 같은 순서로 매핑되는지(건강=파랑/감염=주황/사망=빨강) 확인
+      (근거: DevLog Step 78)
+- [ ] CountryPopup 신규 data-row(감염률/치사율(추정)/의료 시스템 상태) 값이 실제 감염 진행 중인
+      국가에서 합리적으로 나오는지 확인 (근거: DevLog Step 78)
+- [ ] CountryPopup "감염자 순위"/"사망자 순위"/"감염률 순위" 3행이 각각 올바른 국가에서 다른
+      순번을 보여주는지, 표시 중인 국가가 아닌 **다른** 국가의 값 변화만으로도 순위가 틱마다
+      갱신되는지(`OnWorldStateChanged` 구독 확인) 확인 (근거: DevLog Step 78/79)
+- [ ] CountryPopup "이동 통제" 섹션 캡션(`modal-section-caption`)과 공항/항구/국경 3행의 좌측
+      accent bar(`data-row--open`/`data-row--closed`, 3px)가 실제로 보이는지, 기존 `data-row`
+      하단 구분선과 시각적으로 충돌(겹침/어색한 여백)하지 않는지 확인 (근거: DevLog Step 79)
+- [ ] CountryPopup 위치 상향(`top: 30%`→`16%`) 후 상단 SafeArea/코너컷과 겹치지 않는지, 패널
+      전체가 화면 안에 들어오는지 확인 (근거: DevLog Step 79 추가 대응)
+- [ ] CountryPopup 패널 총 길이 확인 — 도넛+범례+행 6개(생존자 수/감염률/치사율/의료 시스템 상태/
+      순위 3행)+"이동 통제" 캡션까지 추가로 길어진 만큼 1440×3120 세로 화면 `top: 30%` 기준 하단이
+      잘리지 않는지, 잘리면 `modal-rows`를 `ScrollView`로 교체하는 안전장치 검토 (근거: DevLog
+      Step 78/79, Docs/CountryStatus_Dashboard_Investigation.md 2.6절)
 - [ ] CountryPopup 오버플로우 수정 검증 — 중국(CHI)/인도(IND) 선택 시 인구수(N0 전체 숫자,
       Step 77로 축약 표기에서 되돌림)와 공항/항구/국경 3행이 340px 팝업 폭 안에서 잘리거나
       넘치지 않는지, 다른 46개국도 정상 표시되는지 확인. `country-row__meta`(MainMenu 48행

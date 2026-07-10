@@ -11,6 +11,10 @@
             <ui:Label name="modal-title" text="" class="tactical-panel__title" />
             <ui:Button name="modal-close" text="✕" class="popup-close" />
         </ui:VisualElement>
+        <ui:VisualElement name="popup-donut-row" class="popup-donut-row">
+            <ui:VisualElement name="modal-donut" class="popup-donut" picking-mode="Ignore" />
+            <ui:VisualElement name="modal-donut-legend" class="popup-donut-legend" />
+        </ui:VisualElement>
         <ui:VisualElement name="modal-rows" class="detail-rows" />
         <ui:VisualElement name="modal-footer" class="modal-footer" />
     </ui:VisualElement>

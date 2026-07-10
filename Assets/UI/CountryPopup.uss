@@ -6,7 +6,8 @@
 .popup-root {
     position: absolute;
     left: 50%;
-    top: 30%;
+    top: 16%; /* 국가 대시보드 확장(Step 78/79)으로 도넛+범례+행 다수가 늘어나 패널이 길어진 만큼,
+                 1440×3120 세로 화면에서 하단이 잘리지 않도록 기존 30%에서 위로 올림 */
     width: 340px; /* 320px는 인구/공항·항구·국경처럼 긴 값에서 여유가 없어 340px로 소폭 확대
                      (조사 결과: Docs/QA_Checklist.md 참고) — 세로 1440px 폭 기준 화면비 문제 없음 */
     margin-left: -170px;
@@ -37,4 +38,75 @@
     flex-direction: row;
     justify-content: flex-end;
     margin-top: var(--space-sm);
+}
+
+/* 감염 상태 도넛 차트 + 범례 — Docs/CountryStatus_Dashboard_Investigation.md 3절 1차 구현분.
+   data-row 목록(modal-rows) 위, 헤더 바로 아래 배치해 "이 나라 지금 상태"를 텍스트보다 먼저
+   보여준다. 구분선(border-bottom)은 data-row와 동일한 --color-grid-line 톤을 그대로 써서
+   아래 data-row 목록과 시각적으로 이어지게 한다. */
+.popup-donut-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+/* CountryDonutChart.cs가 이 엘리먼트에 generateVisualContent로 직접 그린다 — 크기는
+   여기서 고정하고 C# 쪽은 contentRect를 읽어 그 크기에 맞춰 그린다(HudSparkline과 동일 계약). */
+.popup-donut {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+    margin-right: var(--space-md);
+}
+
+.popup-donut-legend {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.popup-donut-legend__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 0;
+}
+
+.popup-donut-legend__label-group {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+}
+
+/* news-entry-dot(Hud.uss)과 동일한 "색상 원형 칩" 언어 재사용 — 범례 색과 도넛 조각 색이
+   항상 같은 순서(건강/감염/사망)로 매핑되도록 CountryPopupController가 순서를 고정한다. */
+.popup-donut-legend__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: var(--space-xs);
+    flex-shrink: 0;
+}
+
+.popup-donut-legend__dot--healthy  { background-color: var(--color-status-info); }
+.popup-donut-legend__dot--infected { background-color: var(--color-status-infected); }
+.popup-donut-legend__dot--dead     { background-color: var(--color-status-dead); }
+
+.popup-donut-legend__label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+}
+
+.popup-donut-legend__value {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+    flex-shrink: 1;
+    min-width: 0;
+    -unity-text-align: upper-right;
 }

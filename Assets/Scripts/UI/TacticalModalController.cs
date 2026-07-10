@@ -57,13 +57,17 @@ namespace Contagion.UI
         public void ClearRows() => _modalRows?.Clear();
 
         /// <summary>data-row 한 줄(라벨+값) 추가 — Tactical.uss data-row/data-label/data-value 계약
-        /// (UpgradeTree/CountrySelect/EndingScreen과 동일한 헬퍼 패턴).</summary>
-        public void AddRow(string label, string value, string valueClass = null)
+        /// (UpgradeTree/CountrySelect/EndingScreen과 동일한 헬퍼 패턴). rowClass는 행 자체(값이 아닌
+        /// data-row 엘리먼트)에 추가 클래스를 입힐 때 쓴다 — 예: 개방/폐쇄 상태에 따른 좌측 accent bar
+        /// (CountryPopupController의 "이동 통제" 섹션, `data-row--open`/`data-row--closed` 참고).
+        /// 기존 호출부는 3번째 인자까지만 쓰므로 이 4번째 매개변수 추가로 깨지지 않는다.</summary>
+        public void AddRow(string label, string value, string valueClass = null, string rowClass = null)
         {
             if (_modalRows == null) return;
 
             var row = new VisualElement();
             row.AddToClassList("data-row");
+            if (!string.IsNullOrEmpty(rowClass)) row.AddToClassList(rowClass);
 
             var labelEl = new Label(label);
             labelEl.AddToClassList("data-label");
@@ -75,6 +79,20 @@ namespace Contagion.UI
             row.Add(valueEl);
 
             _modalRows.Add(row);
+        }
+
+        /// <summary>data-row 사이에 섹션 캡션(예: "이동 통제")을 끼워 넣어 여러 data-row를 시각적으로
+        /// 묶는다 — 폰트 아이콘 글리프는 실기기 지원 여부를 검증할 수 없어(Hud.uss news-entry-dot
+        /// 주석과 동일한 우려) 쓰지 않고, 텍스트 캡션 + 좌측 accent bar(AddRow의 rowClass) 조합으로
+        /// 판독성을 높이는 방식을 택했다. Tactical.uss의 `modal-section-caption` 클래스를 사용하며,
+        /// 이 컨트롤러를 상속하는 다른 화면(이벤트 상세/설정 등)에서도 재사용 가능하다.</summary>
+        public void AddSectionCaption(string text)
+        {
+            if (_modalRows == null) return;
+
+            var caption = new Label(text);
+            caption.AddToClassList("modal-section-caption");
+            _modalRows.Add(caption);
         }
     }
 }
