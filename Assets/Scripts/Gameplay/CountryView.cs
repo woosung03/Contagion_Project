@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Contagion.Data;
 using Contagion.Managers;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace Contagion.Gameplay
     /// 오르면서 infectedColor/deadColor로 Lerp되며 알파도 같이 올라가 흐릿하게 스며드는 것처럼 보인다.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
-    [RequireComponent(typeof(BoxCollider2D))]
+    [RequireComponent(typeof(PolygonCollider2D))]
     public class CountryView : MonoBehaviour
     {
         [SerializeField] private string countryId;
@@ -145,7 +146,7 @@ namespace Contagion.Gameplay
         private float minRevealedScaleFraction = 0.3f;
 
         private SpriteRenderer _renderer;
-        private BoxCollider2D _collider;
+        private PolygonCollider2D _collider;
         private Color _targetColor;
         private bool _hasTarget;
         private float _targetInfectionRatio;
@@ -198,15 +199,30 @@ namespace Contagion.Gameplay
         private void Awake()
         {
             _renderer = GetComponent<SpriteRenderer>();
-            _collider = GetComponent<BoxCollider2D>();
+
+            // [Step 73] PolygonCollider2D 전환 — GamePlay.unity에는 Step 29~72 동안 48개 국가
+            // GameObject 전부에 BoxCollider2D가 직접 배치돼 있다. RequireComponent(PolygonCollider2D)로
+            // 바꿔도 이미 씬에 저장된 기존 컴포넌트는 자동으로 지워지지 않으므로(새로 필요한 컴포넌트를
+            // "추가"만 보장할 뿐 기존 걸 "치환"하지는 않음), 여기서 직접 레거시 BoxCollider2D를 정리한다
+            // — Step 70이 콜라이더 크기 문제를 씬 파일 48번 수정 대신 코드 한 곳으로 해결했던 것과
+            // 같은 원칙. 씬 파일(GamePlay.unity)은 손대지 않는다.
+            var legacyBoxCollider = GetComponent<BoxCollider2D>();
+            if (legacyBoxCollider != null) Destroy(legacyBoxCollider);
+
+            _collider = GetComponent<PolygonCollider2D>();
+            if (_collider == null) _collider = gameObject.AddComponent<PolygonCollider2D>();
+
             _renderer.color = healthyColor; // 알파 0 — 첫 UpdateVisual 전까지 아무것도 안 보임(의도된 동작)
             _renderer.sortingOrder = countrySortingOrder; // [Step 46] 레이어 순서 재정비, 위 필드 툴팁 참고
-            ApplyCountryShape();
+            // [Step 72] LoadDotData()를 ApplyCountryShape()보다 먼저 호출하도록 순서를 바꿨다 —
+            // ApplyCountryShape()가 콜라이더 형태를 계산할 때 이 데이터를 폴백으로 쓰므로(아래
+            // ApplyColliderShapeFromSprite() 참고) 그 시점에 데이터가 이미 로드돼 있어야 한다.
             // [Step 49] 좌표/지름 로딩은 hotspotsEnabled와 무관하게 항상 실행 — DNA 버블 스폰
             // (GetRandomDnaSpawnWorldPosition/DnaSpawnScatterRadius)이 이 데이터를 재사용하기 때문에,
             // 핫스팟을 꺼도 DNA 버블은 여전히 정확한 국가 실루엣 내부 좌표에서 스폰돼야 한다(Step 42에서
             // 고친 국경 이탈 버그가 다시 나면 안 됨).
             LoadDotData();
+            ApplyCountryShape();
             if (dotsEnabled) SetupInfectionDots(); // [Step 50] 기본값 true — 위 dotsEnabled 툴팁 참고
             if (hotspotsEnabled) SetupHotspots(); // 기본값 false — 아래 hotspotsEnabled 툴팁 참고
         }
@@ -437,19 +453,95 @@ namespace Contagion.Gameplay
 
             _renderer.sprite = shape;
 
-            // [Step 70] 국가 클릭이 전혀 안 되던 근본 원인 — BoxCollider2D가 씬에 배치될 당시(Step 29
-            // 캔버스 통일 이전, 플레이스홀더 스프라이트 시절)의 기본값 0.16x0.16에 offset(0,0)으로 굳어
-            // 있었다(48개국 전부 동일 값으로 GamePlay.unity에 저장돼 있었음을 확인). 지금은 스프라이트가
-            // 국가별로 실제 실루엣 크기만큼 다른데 콜라이더만 그 시절 크기 그대로 남아있어, 국가를
-            // 눈으로 보고 클릭해도 그 지점에 콜라이더가 없어 OnMouseUpAsButton() 자체가 호출되지 않았다
-            // (Country Dock/CountryPopup 둘 다 무반응이던 이유). 매번 로드된 sprite.bounds에 맞춰 콜라이더
-            // 크기/오프셋을 재계산하면 48개국 각각의 실제 실루엣과 정확히 일치한다 — 씬 파일을 48번
-            // 수동으로 고칠 필요 없이 여기 한 곳만 고치면 전부 해결된다.
-            if (_collider != null)
+            // [Step 70→72→73] Step 70은 콜라이더를 shape.bounds(스프라이트 바운즈)에 맞췄지만, 이
+            // 캔버스는 48개국 전부 동일한 4000x1714 세계지도 크기라(위 클래스 설명 참고) sprite.bounds는
+            // 실루엣 크기가 아니라 항상 캔버스 전체 크기를 반환해 모든 국가의 클릭 반경이 월드맵
+            // 전체가 되는 버그로 이어졌다. Step 72는 감염 점 바운딩박스로 사각형 콜라이더를 근사해
+            // "지도 전체" 문제는 해결했지만, 사각형은 여전히 실제 국경선과 다르고 인접국과 겹치는
+            // 영역이 있어 오탭 원인이 됐다(사용자 재조사 요청). Step 73은 국가 실루엣 폴리곤 자체를
+            // 콜라이더 경로로 쓴다 — ApplyColliderShapeFromSprite() 참고.
+            ApplyColliderShapeFromSprite(shape);
+        }
+
+        /// <summary>
+        /// [Step 73] PolygonCollider2D 전환 — 스프라이트에 구워진 실제 실루엣 physics shape를 콜라이더
+        /// 경로로 그대로 사용한다. CountryShapes/{id}.png는 isReadable=0이라 런타임에 알파 채널을 직접
+        /// 읽을 수 없지만(InfectionDotDatabase 클래스 설명 참고), physics shape는 텍스처 임포트
+        /// 시점(에디터, 원본 PNG에서 직접)에 미리 구워져 스프라이트 에셋에 저장되는 별도 데이터라
+        /// isReadable과 무관하게 Sprite.GetPhysicsShapeCount()/GetPhysicsShape()로 런타임에 읽을 수 있다.
+        ///
+        /// 이 데이터는 Assets/Editor/CountryShapePhysicsShapeGenerator.cs(에디터 전용 배치 툴)로 48개
+        /// 텍스처의 "Generate Physics Shape" 임포트 옵션을 켠 뒤 재임포트해야 채워진다 — 아직 그
+        /// 배치를 실행하지 않았거나 특정 국가만 데이터가 비어 있으면(GetPhysicsShapeCount()==0)
+        /// ApplyFallbackRectCollider()로 자동 폴백해 Step 72 수준(감염 점 바운딩박스 사각형)의 클릭
+        /// 가능 영역은 항상 보장한다 — 배치 실행 전후로 "클릭이 아예 안 되는" 회귀가 없다.
+        /// </summary>
+        private void ApplyColliderShapeFromSprite(Sprite shape)
+        {
+            if (_collider == null) return;
+
+            int shapeCount = shape.GetPhysicsShapeCount();
+            if (shapeCount > 0)
             {
-                _collider.size = shape.bounds.size;
-                _collider.offset = shape.bounds.center;
+                _collider.pathCount = shapeCount;
+                var path = new List<Vector2>();
+                for (int i = 0; i < shapeCount; i++)
+                {
+                    path.Clear();
+                    shape.GetPhysicsShape(i, path);
+                    _collider.SetPath(i, path);
+                }
+                return;
             }
+
+            ApplyFallbackRectCollider();
+        }
+
+        /// <summary>
+        /// [Step 72에서 이식, Step 73] 스프라이트에 physics shape가 아직 구워지지 않은 국가를 위한
+        /// 폴백 — 감염 점 좌표(_allDotPoints, 실루엣 내부 보장)의 바운딩박스로 사각형 폴리곤 1개를
+        /// 만든다. Step 72의 BoxCollider2D 크기 계산 로직과 수학적으로 동일하되, PolygonCollider2D의
+        /// pathCount/SetPath API로 옮겨 썼다.
+        /// </summary>
+        private void ApplyFallbackRectCollider()
+        {
+            if (_allDotPoints == null || _allDotPoints.Length == 0)
+            {
+                // 감염 점 데이터가 없는 국가(정상적으로는 없어야 하지만 방어적으로) — 지도 전체 크기로
+                // 새는 것보다는 클릭이 아예 안 되는 쪽이 안전해 Step 70 이전의 구형 기본값(0.16x0.16)으로
+                // 폴백한다.
+                _collider.pathCount = 1;
+                _collider.SetPath(0, new[]
+                {
+                    new Vector2(-0.08f, -0.08f), new Vector2(0.08f, -0.08f),
+                    new Vector2(0.08f, 0.08f), new Vector2(-0.08f, 0.08f)
+                });
+                return;
+            }
+
+            float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
+            for (int i = 0; i < _allDotPoints.Length; i++)
+            {
+                Vector2 p = _allDotPoints[i];
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.y > maxY) maxY = p.y;
+            }
+
+            const float paddingFactor = 1.2f; // 점 분포가 실루엣 가장자리까지 못 미치는 여유분 보정
+            float halfWidth = Mathf.Max(maxX - minX, 0.02f) * paddingFactor * 0.5f;
+            float halfHeight = Mathf.Max(maxY - minY, 0.02f) * paddingFactor * 0.5f;
+            Vector2 center = new Vector2((minX + maxX) * 0.5f, (minY + maxY) * 0.5f);
+
+            _collider.pathCount = 1;
+            _collider.SetPath(0, new[]
+            {
+                center + new Vector2(-halfWidth, -halfHeight),
+                center + new Vector2(halfWidth, -halfHeight),
+                center + new Vector2(halfWidth, halfHeight),
+                center + new Vector2(-halfWidth, halfHeight)
+            });
         }
 
         private void Start()
@@ -584,12 +676,6 @@ namespace Contagion.Gameplay
         {
             if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
                 return;
-
-            // 진단용(Step 70) — Country Dock 무반응 추적. WorldMap.Instance?.HandleCountryClicked(...)는
-            // Instance가 null이면 아무 로그도 안 남기고 조용히 아무 일도 안 일어난다 — 그게 실제
-            // 원인인지 확인하기 위해 클릭 자체는 감지됐다는 것과 Instance 상태를 명시적으로 남긴다.
-            Debug.Log($"[CountryView] OnMouseUpAsButton — countryId={countryId}, " +
-                $"WorldMap.Instance={(WorldMap.Instance != null ? "OK" : "NULL")}");
 
             WorldMap.Instance?.HandleCountryClicked(countryId);
         }

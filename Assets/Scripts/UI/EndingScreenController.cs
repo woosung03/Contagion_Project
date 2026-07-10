@@ -76,7 +76,9 @@ namespace Contagion.UI
             float score = ComputeFinalScore(isVictory, day);
 
             _resultTitle.text = isVictory ? "인류 전멸 — 승리" : "치료제 완성 — 패배";
-            _scoreLabel.text = $"바이오하자드 점수: {score:N0}";
+            // 라벨("바이오하자드 점수")은 UXML의 .ending-score-caption 고정 텍스트로 분리됨 —
+            // 숫자만 hero 폰트로 렌더링해 화면 폭(참조 해상도 480px) 안에 들어오게 한다.
+            _scoreLabel.text = $"{score:N0}";
 
             // 문단(N일 경과)뿐이던 결과 요약을 data-row 4줄(감염/사망/붕괴국/경과일)로 확장 —
             // Docs/UI_Design.md 14절. GLOBAL INFECTED/DEATHS는 WorldDataManager.State 스냅샷 그대로,

@@ -22,6 +22,7 @@
             <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:Label text="바이오하자드 점수" class="ending-score-caption" />
             <ui:Label name="score-label" text="" class="ending-score" />
         </ui:VisualElement>
 

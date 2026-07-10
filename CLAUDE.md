@@ -41,8 +41,8 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 
 - 핵심 데이터/시뮬레이션 — `Pathogen`/`Country`/`WorldState`, 틱 기반 감염·사망·치료제 진행
   (`SimulationManager`), `WorldDataManager`, `GameManager`(페이즈/난이도/일시정지)
-- 세계 지도 — `WorldMap`+`CountryView`(국가별 실제 실루엣, 좌우 드래그 스크롤), 국가현황 리스트 패널,
-  DNA 버블 스포너(오브젝트 풀링)
+- 세계 지도 — `WorldMap`+`CountryView`(국가별 실제 실루엣, 좌우 드래그 스크롤, `PolygonCollider2D`
+  기반 국가 클릭 판정), 국가현황 리스트 패널, DNA 버블 스포너(오브젝트 풀링)
 - 감염 점 오버레이 — 국가별 개별 점(면적 비례 크기/개수), `dotsEnabled=true`/`hotspotsEnabled=false`
   (핫스팟 방식은 폐기, 코드는 보존)
 - 글로벌 교통망 — 항공/해운 허브 46개(28개국 보유), 유닛이 지도 위를 이동하며 도착 시 감염 전파,
@@ -60,15 +60,20 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 70(Country Dock 재신고
-3차 — CountryView/WorldMap/CountryDockController 클릭 체인 실측 로그로 진짜 원인 발견: 48개국
-CountryView의 BoxCollider2D가 전부 Step 29 캔버스 통일 이전 크기 0.16×0.16에 고정돼 있어 국가
-실루엣을 클릭해도 콜라이더가 없어 클릭 자체가 씹히고 있었음. `CountryView.ApplyCountryShape()`에서
-스프라이트 로드 시 콜라이더 size/offset을 매번 재계산하도록 수정 — 사용자 실행 확인 대기 중,
-확인되면 Step 68~70에서 추가한 진단 로그 전부 제거 예정 — Step 64는 CountrySelect 마무리(9절/
-16.2 ①)/Step 65는 MainMenu 감사(8절/16.2 ②)/Step 66은 EndingScreen 감사(10절/16.2 ③)/Step 67은
-CountryPopup → Tactical Modal Base 승격(12절/13절/16.2 ④)/Step 68은 이벤트 디스패치 방어 강화/
-Step 69는 자가진단 경고 로그 3종 추가).
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 73(국가 선택 콜라이더를
+`BoxCollider2D`(사각형)에서 `PolygonCollider2D`(실제 실루엣)로 전환 — 인접국 클릭 시 오탭되는
+문제의 근본 원인이 Step 72의 사각형 폴백 콜라이더 자체였음을 조사로 확인 후 조치. `Assets/Editor/
+CountryShapePhysicsShapeGenerator.cs` 신규(48개 `CountryShapes` 텍스처의 "Generate Physics Shape"
+임포트 옵션을 배치로 켜는 에디터 전용 툴), `CountryView`는 `Sprite.GetPhysicsShapeCount()/
+GetPhysicsShape()`로 임포트 시점에 구워진 실제 국가 실루엣 폴리곤을 콜라이더 경로로 사용하고
+Awake()에서 씬에 남은 레거시 `BoxCollider2D`를 자가 정리(씬 파일 미변경). Editor 배치 미실행
+국가는 Step 72 방식(사각형)으로 자동 폴백. **Generate Physics Shapes 배치 실행 2026-07-10 사용자
+확인 완료** — 남은 검증은 `Docs/QA_Checklist.md` "PolygonCollider2D 전환 검증" 섹션(Validate 실행,
+인접국/다도서국/극소국 클릭 테스트) 참고). Step 72는 국가 클릭 반경이 월드맵 전체로 잡히던 문제 수정
+— Step 71은 엔딩 화면 점수 잘림 + 버튼 디자인 불일치 수정 — Step 64는 CountrySelect 마무리
+(9절/16.2 ①)/Step 65는 MainMenu 감사(8절/16.2 ②)/Step 66은 EndingScreen 감사(10절/16.2 ③)/
+Step 67은 CountryPopup → Tactical Modal Base 승격(12절/13절/16.2 ④)/Step 68은 이벤트 디스패치
+방어 강화/Step 69는 자가진단 경고 로그 3종 추가).
 
 ---
 

@@ -104,14 +104,6 @@ namespace Contagion.Gameplay
         public void HandleCountryClicked(string countryId)
         {
             var country = WorldDataManager.Instance?.GetCountry(countryId);
-
-            // 진단용(Step 70) — Country Dock 무반응 추적. OnCountryClicked가 null이면(구독자가
-            // 아무도 없음) 기존 코드는 아무 로그 없이 조용히 return했다 — 그게 실제 원인인지
-            // 확인하기 위해 country 해석 결과와 구독자 수를 명시적으로 남긴다.
-            Debug.Log($"[WorldMap] HandleCountryClicked 진입 — countryId={countryId}, " +
-                $"country={(country != null ? country.name : "NULL(해석 실패)")}, " +
-                $"OnCountryClicked 구독자 수={OnCountryClicked?.GetInvocationList().Length ?? 0}");
-
             if (country == null || OnCountryClicked == null) return;
 
             foreach (Action<Country> handler in OnCountryClicked.GetInvocationList())

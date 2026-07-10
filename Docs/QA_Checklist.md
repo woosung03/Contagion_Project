@@ -24,15 +24,40 @@
 - [ ] UpgradeTree detail-panel 코너컷이 모서리에 올바르게 붙는지(position:relative 적용 확인),
       연결선 꺾은선/포트 마커가 3개 카테고리 전부에서 겹침 없이 그려지는지 확인 (근거: DevLog Step 62)
 - [ ] UpgradeTree 헤더 2줄(영문 LAB 캡션 + 한글 라벨)이 좁은 폭에서 안 잘리는지 확인 (근거: DevLog Step 62)
-- [ ] Country Dock이 국가 탭 시 정상적으로 데이터로 채워지는지 확인 — 원인은 48개국
-      CountryView의 BoxCollider2D 크기가 0.16×0.16으로 고정돼 클릭 자체가 씹히던 것으로 특정,
-      `ApplyCountryShape()`에서 스프라이트 로드 시 콜라이더 size/offset을 재계산하도록 수정
-      완료. 콘솔에서 `[CountryView] OnMouseUpAsButton` → `[WorldMap] HandleCountryClicked` →
-      `[CountryDockController] HandleCountryClicked 진입`까지 로그 체인이 찍히고
-      `_shownCountryId`가 클릭한 국가로 채워지는지가 성공 기준 (근거: DevLog Step 70)
+- [ ] Country Dock이 국가 탭 시 정상적으로 데이터로 채워지는지 확인 — Step 70/72/73을 거쳐
+      콜라이더 관련 원인은 전부 특정·수정 완료(현재는 PolygonCollider2D 기반, 아래 "PolygonCollider2D
+      전환 검증" 섹션 참고). `_shownCountryId`가 클릭한 국가로 채워지는지가 성공 기준
+      (근거: DevLog Step 70/72/73)
 - [ ] 위 항목 확인 후, 국가 탭 시 Country Dock과 CountryPopup(모달)이 동시에 뜨는지 확인 —
       클릭이 막혀있던 동안 가려져 있던 증상일 수 있음. 동시에 뜨면 어느 쪽을 남길지 결정 필요
       (근거: DevLog Step 67, CLAUDE.md TODO)
+
+## PolygonCollider2D 전환 검증 (근거: DevLog Step 73)
+
+Step 72까지는 BoxCollider2D(사각형)였고, Step 73에서 국가 실루엣 폴리곤 자체를 콜라이더로 쓰도록
+바꿨다. Editor 배치 스크립트(`Assets/Editor/CountryShapePhysicsShapeGenerator.cs`) 실행이 선행
+조건이므로, 아래 순서대로 확인할 것.
+
+- [x] Unity 에디터 메뉴 `Contagion → Country Shapes → Generate Physics Shapes (48개국)` 실행 —
+      콘솔에 "48개 중 48개 신규 활성화"(최초 1회 실행 기준) 로그 확인. **2026-07-10 사용자 실행
+      확인 — 정상 완료.**
+- [ ] 이어서 `Contagion → Country Shapes → Validate Physics Shapes (48개국)` 실행 — "physics shape
+      있음 48개 / 없음 0개" 확인. 0개가 아니면 어떤 국가가 실패했는지 경고 로그로 확인 후 재조사.
+- [ ] Play 모드 진입 후 콘솔에 `[CountryView] {id} — InfectionDotPoints.json에 좌표가 없어...`
+      경고가 없는지(있으면 그 국가는 폴백 사각형 콜라이더로 동작 중이라는 뜻).
+- [ ] 국경을 맞댄 인접국 쌍(예: 한국/일본, 프랑스/독일, 인도/파키스탄)을 실기기에서 경계선
+      가까이 탭해 의도한 국가가 선택되는지 — 이번 조사·수정의 원래 신고 대상.
+- [ ] 다도서국(인도네시아, 필리핀 등 여러 섬으로 나뉜 나라)에서 각 섬을 탭해도 정상 선택되는지 —
+      PolygonCollider2D의 멀티패스(pathCount>1) 처리 확인.
+- [ ] 국가 크기가 극단적으로 작은 나라(예: 베네룩스권 인접국)에서 클릭 반경이 너무 좁아 아예
+      안 잡히는 회귀가 없는지.
+- [ ] `GamePlay.unity`를 에디터에서 열어 48개 국가 GameObject 중 임의로 몇 개를 선택했을 때
+      Inspector에 `Polygon Collider 2D`만 보이고 `Box Collider 2D`가 남아있지 않은지 확인 —
+      `CountryView.Awake()`가 Play 모드 진입 시 레거시 BoxCollider2D를 자동 제거하므로, Edit 모드
+      상태의 씬 파일 자체에는 여전히 예전 BoxCollider2D가 남아있는 게 정상이다(씬 파일은 의도적으로
+      건드리지 않음). Play 모드에서 Hierarchy로 확인할 것.
+- [ ] 감염 점/DNA 버블/색상 오버레이 등 콜라이더와 무관한 기존 기능이 이번 변경으로 회귀하지
+      않았는지(코드상 무관하지만 실측 확인 권장).
 
 ## 감염 점 오버레이 확인 (`dotsEnabled=true`, `hotspotsEnabled=false`)
 

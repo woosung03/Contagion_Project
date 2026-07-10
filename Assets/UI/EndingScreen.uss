@@ -28,9 +28,14 @@
     margin-bottom: var(--space-md);
 }
 
-/* 최종 점수 강조 패널 — 통계 패널과 분리해 금색 테두리로 "최종 판정" 느낌을 별도로 준다. */
+/* 최종 점수 강조 패널 — 통계 패널과 분리해 금색 테두리로 "최종 판정" 느낌을 별도로 준다.
+   width는 stats-panel(280px)과 통일 — 폭을 콘텐츠에 맡겨두면 hero 폰트 숫자가 참조
+   해상도(480px 폭, PanelSettings.asset) 기준으로 화면 밖까지 밀려나가 오른쪽이 잘리는
+   문제가 있었다(버그 리포트: 결과창 점수 오른쪽 잘림). 라벨+숫자를 한 줄에 합쳐서
+   생긴 문제라, 아래처럼 캡션(라벨)과 숫자(hero)를 분리해 각각 폭 안에 확실히 들어오게 했다. */
 .ending-score-panel {
     position: relative;
+    width: 280px;
     border-color: var(--color-brand-gold);
     background-color: var(--color-bg-panel);
     padding: var(--space-md) var(--space-xl);
@@ -38,25 +43,51 @@
     align-items: center;
 }
 
+/* "바이오하자드 점수" 라벨 — data-label과 같은 톤(text-tertiary)으로, 아래 큰 숫자와
+   위계를 분리한다. 예전에는 이 문구가 숫자와 한 줄로 합쳐져 hero 폰트로 렌더링되면서
+   화면 폭을 넘겨 잘렸다. */
+.ending-score-caption {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+    letter-spacing: var(--tracking-label);
+    -unity-text-align: middle-center;
+    margin-bottom: var(--space-xs);
+}
+
 .ending-score {
     color: var(--color-brand-gold);
     /* Docs/UI_Design.md 10절 — "font-size-hero 유지": ending-title(승/패)과 동일한 hero
-       크기로 "최종 판정" 신호를 준다. --font-size-xxl(26px, DESIGN.md 타이포 표에서
-       "예약"으로만 표시된 미사용 토큰)로 축소돼 있던 것을 바로잡음. */
+       크기로 "최종 판정" 신호를 준다. 라벨을 위 캡션으로 분리했으므로 여기는 숫자만
+       남아 280px 패널 폭 안에 항상 들어온다. */
     font-size: var(--font-size-hero);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
 .ending-buttons {
     flex-direction: row;
 }
 
+/* 버그 리포트: 기존엔 width/height/margin만 지정하고 배경·테두리·폰트가 없어 Unity 기본
+   런타임 버튼(둥근 회색)이 그대로 노출돼 Tactical Design System(DESIGN.md, radius:0 +
+   accent-glow 테두리)과 어긋났다. Hud.uss .tab-button / MainMenu.uss .mainmenu-next와
+   동일한 톤으로 맞춤 — 기본(다시 시작)은 중립 판독 패널 배경 + accent-glow 테두리,
+   프리미엄(부활)은 브랜드 퍼플로 구분한다. */
 .ending-button {
     width: 180px;
     height: 56px;
     margin: 0 var(--space-md);
+    border-width: 1px;
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-lg);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
 }
 
 .ending-button--revive {
     background-color: var(--color-brand-premium);
+    border-color: var(--color-brand-premium);
 }
