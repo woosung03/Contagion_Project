@@ -8,6 +8,47 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] CountryStatusPanel Console 에러 확인 — `CountryStatusPanel.uss (line 67): Unsupported
+      selector format` 에러가 더 이상 안 뜨는지(주석 안에 의도치 않은 `*/`가 섞여 스타일시트
+      전체가 파싱 실패했던 문제, 수정 완료) 최우선으로 확인. 이 에러가 사라져야 그동안의 배경
+      불투명도/인셋/오버플로우 수정이 비로소 실제로 적용된다 (근거: DevLog Step 80 추가 대응 4)
+- [ ] CountryStatusPanel 열린 상태에서 국가 클릭 시 자동으로 닫히는지, 그 직후 CountryPopup의
+      ✕ 버튼이 정상적으로 반응하는지(클릭 시 팝업이 닫히는지) 확인 (근거: DevLog Step 80 추가
+      대응 3)
+- [ ] CountryStatusPanel 오버플로우 수정 검증 — `status-scroll`에 `flex-basis: 0`을 추가한
+      뒤 UI Builder(또는 Play 모드)에서 "국가 상태 분포"~"48개국 목록"까지 전 구간이 전부
+      불투명한 배경(`--color-bg-panel-strong`, 완전 불투명) 위에서 보이는지, checkerboard
+      (투명) 영역이 더 이상 없는지 확인. 콘텐츠가 패널 높이보다 길면 `status-root`의
+      `overflow: hidden`으로 스크롤 없이 잘리는 게 아니라 `status-scroll` 내부에서 정상
+      스크롤되는지도 함께 확인 (근거: DevLog Step 80 추가 대응 2 — 진짜 원인은 배경 불투명도가
+      아니라 flex-basis 누락으로 인한 세로 오버플로우였음)
+- [ ] CountryStatusPanel(GLOBAL STATUS CENTER) 화면 크기 확인 — `top: 8%`로 확장한 패널이
+      1440×3120 세로 화면에서 실제로 잘리지 않는지, 하단 `bottom: 12.5%` 아래로 Hud
+      tabs-row가 계속 노출·클릭 가능한지 확인 (근거: DevLog Step 80)
+- [ ] CountryStatusPanel의 `population-bar`가 HUD와 별도인 이 화면 전용 `UIDocument` 인스턴스에서
+      정상 렌더링/갱신되는지(같은 이름 `population-bar-healthy` 등을 HUD와 별개로 재사용) 확인
+      (근거: DevLog Step 80)
+- [ ] CountryStatusPanel 국가 상태 분포(SAFE/WARNING/DANGER/COLLAPSE) 4버킷 합계가 항상 48이
+      되는지, 감염 진행에 따라 버킷 분포가 합리적으로 이동하는지 확인 (근거: DevLog Step 80)
+- [ ] CountryStatusPanel 랭킹 2종(종합 위협도/감염자 각 TOP 10)이 다른 국가의 값 변화만으로도
+      틱마다(`OnWorldStateChanged`) 갱신되는지, 순서가 실제 수치와 일치하는지 확인 (근거: DevLog
+      Step 80/81 — Step 81에서 감염률/치사율/의료부하 3개 랭킹이 종합 위협도 하나로 통합됨)
+- [ ] CountryStatusPanel 48개국 목록 좌측 accent bar 색이 `GetCollapseStage()` 변화에 따라
+      실시간으로(국가 개별 `OnCountryChanged`) 바뀌는지, 기존 O(1) 행 캐싱이 깨지지 않았는지
+      (패널을 오래 열어둬도 프레임 드랍이 재발하지 않는지) 확인 (근거: DevLog Step 80)
+- [ ] CountryStatusPanel GLOBAL STATUS 배너 — 게임 진행에 따라 CONTAINMENT SUCCESS →
+      OUTBREAK EXPANDING → GLOBAL PANDEMIC → WORLD COLLAPSE IMMINENT 순으로 실제로 전환되는지,
+      각 단계의 색(info/infected/danger/dead)이 텍스트+테두리에 함께 적용되는지 확인 (근거:
+      DevLog Step 81 — 임계값(감염률 5%/50%)이 제안값이라 실제 플레이 곡선에 맞는지도 함께 확인)
+- [ ] CountryStatusPanel 감염 국가 현황(감염/무감염/소멸 국가 수)이 "국가 상태 분포" 4버킷 합계
+      (48)와 별도로 항상 정합적인지(감염 국가+무감염 국가=48, 소멸 국가 수가 COLLAPSE 버킷 수를
+      넘지 않는지) 확인 (근거: DevLog Step 81)
+- [ ] CountryStatusPanel 의료 시스템 현황(정상/주의/과부하/붕괴) 4버킷 합계가 항상 48이 되는지,
+      "국가 상태 분포"와 다른 축이라 두 분포의 버킷 분류가 서로 달라도(예: 사망률은 낮지만 의료
+      부하는 높은 국가) 정상으로 보이는지 확인 (근거: DevLog Step 81)
+- [ ] CountryStatusPanel 종합 위협도(THREAT INDEX) TOP10 순위가 감염률/치사율/의료부하 3요소를
+      실제로 반영하는지(단순 감염자 TOP10과 순서가 달라야 정상) 확인 (근거: DevLog Step 81 — 가중치
+      0.4/0.3/0.3이 제안값이라 플레이테스트로 체감 위험도와 맞는지 함께 확인)
 - [ ] CountryPopup 도넛 차트 렌더링 확인 — `CountryDonutChart.cs`가 `Painter2D.Arc()`/`Angle`
       API로 그린 3개 부채꼴(건강/감염/사망)이 실제로 컴파일·렌더링되는지(Unity 에디터 미접속으로
       미검증), 가운데 구멍 오버레이 색(`CountryDonutChart.HoleColor`)이 `CountryPopup.uss`

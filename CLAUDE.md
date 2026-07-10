@@ -59,12 +59,33 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   통계(감염률·치사율 추정·생존자 수)/의료 시스템 부하(신규 계산식 4단계)/세계 순위(감염자·사망자·
   감염률 각각 별도 행)/이동 통제 섹션(공항·항구·국경, 섹션 캡션+좌측 accent bar), 최근 국가 이벤트는
   후속 과제로 보류. `TacticalModalController`에 `AddSectionCaption()`/`AddRow(rowClass)` 공용 확장 추가
+- CountryStatusPanel → GLOBAL STATUS CENTER 세계 감염 현황 센터 — GLOBAL STATUS 한줄평가/세계
+  요약(population-bar+data-row 6줄)/감염 국가 현황(감염·무감염·소멸 국가 수)/국가 상태 분포
+  (SAFE·WARNING·DANGER·COLLAPSE 4버킷)/의료 시스템 현황(정상·주의·과부하·붕괴 4버킷)/랭킹 2종
+  (종합 위협도·감염자 각 TOP 10)/48개국 목록(accent bar 유지) 순 Tactical Dashboard, tactical-panel+
+  코너컷+data-row+severity 4색 체계
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 79(CountryPopup 2차
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 81(CountryStatusPanel에
+GLOBAL STATUS 한줄평가(WorldState.GetMortalityStage()+세계 감염률 조합, 신규 계산 없음)/감염 국가
+현황(감염·무감염·소멸 국가 수)/의료 시스템 현황(정상·주의·과부하·붕괴 4버킷, 국가 상태 분포와 동일
+UI 재사용)을 추가하고, 기존 감염률·치사율·의료부하 TOP10 랭킹 3개를 종합 위협도(ThreatIndex,
+감염률40%+치사율30%+의료부하30% 가중합) TOP10 하나로 통합(랭킹 섹션 4개→2개) — "정보량을 늘리지
+말고 전략적 판단 데이터를 추가하라"는 요청에 따라 6개 후보 중 사용자가 승인한 4개만 구현
+(GLOBAL HOTSPOT 카드·교통 허브 위험도는 제외). 신규 데이터 모델 없음. 검증은 `Docs/QA_Checklist.md`
+참고) — Step 80(CountryStatusPanel을
+48개국 목록뿐이던 화면에서 "GLOBAL STATUS CENTER" 세계 감염 현황 센터로 재설계 — CountryPopup은
+개별 국가 상세, CountryStatusPanel은 세계 전체 요약으로 역할 분리. 세계 요약(population-bar 재사용
++ data-row 6줄)/국가 상태 분포(GetCollapseStage() 6단계를 SAFE·WARNING·DANGER·COLLAPSE 4버킷으로
+집계)/랭킹 4종(감염자·감염률·치사율(추정)·의료 부하 각 TOP 10, CountryPopupController의 계산식을
+독립 복제해 재사용)/48개국 목록(기존 O(1) 행 캐싱 유지, 좌측 accent bar로 버킷 색상 표시) 순.
+tactical-panel+코너컷+data-row+severity 4색으로 전환 — UI_Design.md 진단 당시 이 화면은 애초
+전환 대상 목록에 없었으나 이번에 합류. 도넛 차트(CountryDonutChart)는 이 화면에 맞지 않다고
+판단해 미사용(population-bar로 대체). CountryPopupController/CountryPopup.uxml/.uss는 미변경.
+신규 데이터 모델 추가 없음. 검증은 `Docs/QA_Checklist.md` 참고) — Step 79(CountryPopup 2차
 다듬기 — 세계 순위를 "감염자 N위 · 사망자 N위 · 감염률 N위" 한 줄 압축에서 각각 별도 data-row
 3개로 분리. 공항/항구/국경 3행은 시인성 개선을 위해 "이동 통제" 섹션 캡션 + 좌측 accent bar
 (`data-row--open`/`data-row--closed`)로 그룹화 — 아이콘 폰트 글리프는 실기기 폰트 지원 검증이

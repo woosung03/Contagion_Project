@@ -3390,6 +3390,216 @@ CountryPopupController.cs`, `Assets/UI/Tactical.uss`.
 
 **변경 파일**: `Assets/UI/CountryPopup.uss`.
 
+## Step 80 구현 메모 (CountryStatusPanel → "GLOBAL STATUS CENTER" 세계 감염 현황 센터 재설계)
+
+**배경**: 사용자가 HUD "국가현황" 버튼으로 여는 `CountryStatusPanelController`(48개국 스크롤
+리스트뿐이던 화면)를 `CountryPopupController`(개별 국가 상세, Step 78/79로 이미 확장 완료)와
+역할이 겹치면서도 정보 밀도는 더 낮다고 지적 — "이 국가가 어떤 상태인가"가 아니라 "지금 세계
+상황이 어떤가"에 집중하는 화면으로 재정의해달라는 요청. 사전 조사(조사 전용, 코드 미수정)로
+`Docs/CountryStatus_Dashboard_Investigation.md`(원래 CountryPopup 확장 조사 문서)의 데이터
+소스/계산식 재사용 가능 여부를 다시 확인한 뒤, 세션 내에서 AskUserQuestion으로 4가지(패널
+크기/스타일 전환 여부/랭킹 개수/치사율 계산 방식)를 확정하고 사용자가 최종 승인한 설계대로
+구현했다.
+
+**중요 제약**: `CountryPopupController`/`CountryPopup.uxml`/`CountryPopup.uss`는 이미 완료된
+기능으로 간주해 이번 작업에서 전혀 손대지 않았다. 두 화면에서 공식이 겹치는 치사율(추정)/의료
+부하 계산은 공유 헬퍼로 추출하지 않고 `CountryStatusPanelController`에 동일 공식을 독립적으로
+복제했다(`CountrySelectController.DevValueClass()`가 `CountryPopupController`와 동일 규약을
+별도 구현해둔 기존 선례와 같은 방식 — 두 화면이 서로 의존하지 않게 하기 위함).
+
+**신규 데이터 모델 없음**: `Country`/`WorldState`/`WorldDataManager`의 기존 필드·계산 프로퍼티만
+사용했다. `CountryDonutChart`는 이 화면(세계 현황 대시보드)에는 맞지 않는다고 판단해(모바일
+세로 화면에서는 이미 HUD가 쓰는 `population-bar`가 정보 밀도·공간 효율 면에서 더 적절하다는
+사용자 판단) 사용하지 않았다.
+
+**레이아웃(위→아래, `CountryStatusPanel.uxml` 전면 재작성)**:
+1. 헤더 — "GLOBAL STATUS CENTER" 캡션(`tactical-panel__title`) + ✕ 닫기 버튼(기존 하단
+   "닫기" 풀폭 버튼을 CountryPopup과 동일한 헤더 우측 ✕ 버튼 관례로 교체).
+2. 세계 요약 — `population-bar`(Hud.uss 클래스를 `<Style src="Hud.uss">`로 그대로 재사용,
+   이 화면 전용 `UIDocument`에 새 인스턴스로 붙어 HUD와 이름/클래스가 겹쳐도 충돌 없음) +
+   data-row 6줄(세계 인구/총 감염자/총 사망자/세계 감염률/치사율(추정)/경과 일수).
+3. 국가 상태 분포 — `Country.GetCollapseStage()` 6단계(평시~소멸)를 `BucketOf()`로
+   SAFE/WARNING/DANGER/COLLAPSE 4버킷으로 묶어 국가 수 집계(Normal=SAFE,
+   FullCollapse=WARNING, Disorder=DANGER, NearAnarchy/FullAnarchy/Extinct=COLLAPSE로
+   그룹화 — 임계값 자체는 기존 함수 그대로, 새 계산식 없음). `stat-chip`(Hud.uss, 6×6px
+   색상 사각형)에 국가 데이터 severity 4색(`--color-status-info/infected/danger/dead`)을
+   그대로 매핑한 modifier(`--safe/--warning/--danger/--collapse`)만 추가 — 새 색상 토큰
+   없음(DESIGN.md Do 원칙).
+4. 랭킹 — 감염자/감염률/치사율(추정)/의료 부하 각 TOP 10(사용자가 TOP 5 대신 TOP 10 선택).
+   `WorldDataManager.Countries` LINQ `OrderByDescending().Take(10)` — `CountryPopupController`
+   의 `RankOf()`/`CaseFatalityRate()`/`MedicalLoadStatus()`와 동일한 공식을 독립적으로
+   복제해 재사용했다(위 "중요 제약" 참고). 치사율은 근사치(사망/(사망+감염))를 그대로
+   사용(사용자 선택 — 정확한 누적 CFR을 위한 `Country.cumulativeInfectedCount` 신규 필드는
+   "신규 데이터 모델 추가 금지" 제약과 충돌해 보류).
+5. 48개국 목록 — 기존 3줄 행 구조(이름+단계/인구·감염·사망·의료 수준/공항·항구·국경) 그대로
+   유지, 좌측 4px accent bar로 버킷 색상만 추가(코너컷 대신 밀도 절약형 강조, 기존
+   `accent-bar-row` 문법과 동일).
+
+**Tactical Design System 전환**: `Docs/UI_Design.md` §0.1/0.2 진단 당시 `CountryStatusPanel`은
+애초에 전환 대상 7개 화면(MainMenu/CountrySelect/UpgradeTree/CountryPopup/EndingScreen/
+RankingPanel + HUD) 목록에 없었다(§0.2, 853행 "CountryStatusPanel.uss에는 tactical 관련 로컬
+정의가 없음" — 스코프 밖이었다는 뜻). 이번 개편으로 이 화면도 `tactical-panel`+코너컷 4개+
+`data-row`+severity 4색 체계로 합류시켰다(사용자 승인) — 사실상 8번째 전환 화면.
+
+**갱신 빈도/성능 설계**: 세계 요약/분포/랭킹은 48개국 전체를 다시 훑어야 하는 "집계" 값이라
+`WorldDataManager.OnWorldStateChanged`(틱당 정확히 1회)에만 반응해 전체를 다시 그린다(48개국
+정렬 4회 + 랭킹 행 40개 재생성, 틱당 1회면 성능 영향 없음 — Step 78/79와 동일 근거). 반면
+하단 48개국 목록은 국가 하나만 값이 바뀌어도 되므로 기존 `OnCountryChanged`(국가별, 틱당 최대
+20~30회) 구독 + 행 캐싱(`_rowsByCountryId`, 최초 1회 생성 후 라벨 텍스트만 갱신) 구조를 그대로
+유지했다 — 이 목록에 캐싱 없이 Clear()+재생성을 쓰면 애초에 이 컨트롤러가 겪었던 "매 틱 48개국
+전체 재생성" 프레임 드랍 버그가 재발하기 때문(주석 참고, 이 파일 상단 클래스 주석에도 명시).
+
+**검증 남음**: Unity 에디터 미접속으로 실제 렌더링 미확인(Step 75/78/79와 동일 제약) — 1440×3120
+세로 화면에서 `top: 8%`로 확장한 패널이 실제로 잘리지 않는지, `population-bar`가 별도
+`UIDocument` 인스턴스에서도 정상 동작하는지, 랭킹 40행(4종×10)이 스크롤 안에서 자연스럽게
+읽히는지, 국가 목록 accent bar 색이 실제 붕괴 진행 중인 국가에서 합리적으로 바뀌는지.
+`Docs/QA_Checklist.md`에 항목 추가.
+
+**변경 파일**: `Assets/Scripts/UI/CountryStatusPanelController.cs`(전면 재작성),
+`Assets/UI/CountryStatusPanel.uxml`(전면 재작성), `Assets/UI/CountryStatusPanel.uss`(전면
+재작성). `CountryPopupController.cs`/`CountryPopup.uxml`/`CountryPopup.uss`는 미변경.
+
+### Step 80 추가 대응 (반투명 오버레이 가독성 문제 — 배경 불투명도/패널 크기 재조정)
+
+**신고 내용**: Step 80 구현 결과가 "Tactical Dashboard보다 반투명 Overlay에 가깝다" — 배경
+지도/항로선이 SAFE/WARNING/DANGER/COLLAPSE·랭킹·세계 통계와 겹쳐 보여 가독성이 낮다는 피드백.
+이 화면은 국가 선택 화면이 아니라 Global Status Center이므로 지도는 배경일 뿐, 데이터 판독성이
+최우선이어야 한다는 지적.
+
+**원인**: `.status-root`가 쓰던 `--color-bg-panel-strong`(Theme.uss)이 `rgba(15,15,25,0.97)`로,
+CountryPopup의 `--color-bg-panel`(0.95)과 사실상 차이가 없는 수준이었다 — 이름은 "더 불투명해야
+하는 패널"이라고 되어 있었지만 실제 값은 그 의도를 충분히 반영하지 못했다.
+
+**수정**:
+1. `--color-bg-panel-strong`을 `rgba(9, 9, 16, 0.99)`로 대폭 상향(Theme.uss) — 이 토큰은
+   `CountryStatusPanel.uss`만 참조하므로 값을 올려도 다른 화면(CountryPopup 등)에는 영향 없음.
+2. `.status-root`의 `top`을 `8%` → `3%`로 더 낮춰 거의 풀스크린에 가깝게 확장(bottom 12.5%는
+   Hud tabs-row 노출을 위해 유지).
+
+**검증 남음**: Unity 에디터 미접속으로 실제 화면에서 지도/항로선이 충분히 가려지는지, 0.99
+알파가 실제 렌더링에서 완전 불투명에 가깝게 보이는지 미확인. `Docs/QA_Checklist.md`에 항목
+추가.
+
+**변경 파일**: `Assets/UI/Theme.uss`, `Assets/UI/CountryStatusPanel.uss`.
+
+### Step 80 추가 대응 2 (진짜 원인 — status-scroll 오버플로우로 배경이 잘려나간 레이아웃 버그)
+
+**신고 내용**: 알파값을 1.0(완전 불투명)까지 올렸는데도 인게임에서 여전히 투명하게 보인다는
+재신고. 데이터(감염률/사망률 등)는 실시간으로 정상 갱신되고 있어 C#/이벤트 구독 로직은 문제
+없다는 점, 사용자가 직접 `CountryStatusPanel.uxml`을 UI Builder(Play 모드와 무관하게 에셋을
+그대로 렌더링하는 도구)로 열어서 캡처를 공유 — 헤더+세계 요약(population-bar)까지는 불투명한
+배경이 보이는데 그 아래 "국가 상태 분포"(SAFE/WARNING/DANGER/COLLAPSE)부터는 UI Builder의
+투명 격자 무늬(checkerboard)가 그대로 보였다.
+
+**진단 과정**: 이전 두 차례 대응(알파값 상향, top 인셋 축소, 레이어/sortingOrder 점검)은 전부
+"패널이 왜 반투명해 보이는가"를 배경색 관점에서만 접근한 오진이었다 — UI Builder 캡처로 처음
+확실해진 사실은 **"배경색이 부족한 게 아니라, 패널 박스 자체가 짧게 계산돼서 하단 콘텐츠가
+박스 밖으로 흘러넘치고 있다"**는 것. 박스 밖으로 넘친 부분은 애초에 `status-root`의
+`background-color`가 칠해지는 영역이 아니므로 알파를 아무리 올려도 소용없었다.
+
+**근본 원인**: `.status-scroll`(ScrollView)에 `flex-grow: 1`만 있고 `flex-basis`가 없었다.
+UI Toolkit(Yoga)에서 `flex-basis`를 안 주면 자식이 **자기 콘텐츠의 실제 크기**(세계 요약+
+분포+랭킹 4종 40행+48개국 목록 = 매우 긴 콘텐츠)를 기준값으로 잡아버려, `flex-grow`가 있어도
+이미 그 자체로 충분히(혹은 그 이상) 크기 때문에 전혀 줄어들지 않는다. `.status-root`에는
+`overflow: hidden`도 없었기 때문에, `status-scroll`의 실제 콘텐츠가 `status-root`의 고정
+높이(top 3%~bottom 12.5%)를 넘는 순간 그 초과분이 그대로 화면에 노출됐다 — `status-root`의
+배경색은 자기 박스 크기만큼만 칠해지므로, 넘친 영역은 아무 배경도 없는 상태(=지도가 그대로
+비치는 것과 동일한 결과)로 보인 것.
+
+이 프로젝트에 이미 있던 **가로 방향 오버플로우 버그**(Step 76, `Tactical.uss` `.data-value`에
+`flex-shrink`/`min-width: 0`이 없어서 긴 값이 패널 폭 밖으로 넘치던 문제)와 **완전히 같은
+종류의 버그를 세로 방향에서 재현**한 것이었다 — 그때의 교훈(flex 아이템은 명시적으로 축소/
+기준값을 지정하지 않으면 콘텐츠 크기를 그대로 밀어붙인다)을 새 화면에 적용할 때 놓쳤다.
+
+**수정**(`CountryStatusPanel.uss`):
+1. `.status-root`에 `flex-direction: column`(명시) + `overflow: hidden` 추가 — 이후로도
+   비슷한 계산 오차가 생기더라도 박스 밖으로 내용이 새어나가는 대신 잘리도록 안전장치를 건다.
+2. `.status-scroll`에 `flex-shrink: 1; flex-basis: 0;` 추가 — "일단 0에서 시작해 남는
+   공간만큼만 자란다"로 강제해 `status-root`의 실제 가용 높이 안에 확실히 갇히도록 했다.
+
+**교훈**: Step 78/79/80에서 반복된 패턴 — Unity 에디터 미접속 상태로 여러 Step에 걸쳐 "이럴
+것이다"로 추정 수정(알파/인셋/레이어)을 먼저 시도했지만, 실제로는 사용자가 UI Builder로 직접
+연 캡처 한 장이 훨씬 빠르고 정확한 진단 수단이었다. 앞으로 비슷한 "안 보인다/이상하다" 류
+신고는 배경색 추정 수정보다 **UI Builder 캡처(또는 Play 모드 스크린샷)를 먼저 요청**하는
+편이 낫다.
+
+**검증 남음**: Unity 에디터 미접속으로 실제 적용 후 렌더링 미확인 — `Docs/QA_Checklist.md`에
+항목 추가(기존 "배경 불투명도 확인" 항목을 이 레이아웃 수정 확인으로 대체).
+
+**변경 파일**: `Assets/UI/CountryStatusPanel.uss`.
+
+### Step 80 추가 대응 3 (CountryPopup 닫기 버튼 무반응 — 패널 충돌 수정)
+
+**신고 내용**: 여전히 투명하게 보인다는 재신고 + 새로운 증상 — CountryStatusPanel이 열린 상태에서
+지도의 국가 영토를 클릭하면 `CountryPopupController`(국가 상세 팝업)가 뜨는데, 그 팝업의 닫기
+(✕) 버튼을 눌러도 반응이 없고 Console에 아무 로그도 안 뜬다.
+
+**원인**: `CountryPopupController`는 `WorldMap.OnCountryClicked`를 **독립적으로** 구독해서
+어떤 화면이 열려 있든 상관없이 팝업을 띄운다(`UIManager`를 거치지 않는 직접 구독). 씬 확인 결과
+`CountryStatusPanel`과 `CountryPopup`의 UIDocument `sortingOrder`가 둘 다 1로 동일 — 두 패널이
+동시에 열려 있으면 어느 쪽이 위에 그려지는지 보장되지 않는다. 게다가 UI Toolkit은 **엘리먼트가
+시각적으로 투명해도 기본적으로 클릭(hit-test)을 막는다** — CountryStatusPanel의 배경이 (이번
+Step 80 추가 대응들 이전까지는) 안 보였더라도, 그 자리에 깔린 VisualElement 자체는 여전히
+클릭을 가로챌 수 있었다. 그 결과 CountryPopup의 ✕ 버튼 위치에 CountryStatusPanel의 (보이지 않는)
+엘리먼트가 겹쳐 있으면 클릭이 CountryPopup까지 도달하지 못하고 조용히 씹혔다 — `RegisterCallback`
+자체가 안 불렸으니 로그가 없는 것도 당연했다.
+
+**제약**: `CountryPopupController`/`UIManager`는 이번 작업 수정 대상이 아니라(사용자 지정, "이미
+완료된 기능") 그쪽에서 "다른 패널이 열려 있으면 먼저 닫는다" 조정을 걸 수 없다.
+
+**수정**(`CountryStatusPanelController.cs`만 변경): 이 컨트롤러가 스스로 `WorldMap.OnCountryClicked`
+를 구독해서, 지도에서 국가를 클릭하는 순간 **이 대시보드가 스스로 닫히도록** 했다
+(`HandleWorldMapCountryClicked`). 그러면 그 직후엔 CountryPopup 단독으로만 화면에 남아 충돌 자체가
+사라진다 — UX적으로도 "세계 요약을 보다가 국가 하나를 짚으면 그 나라 상세로 전환"이 자연스럽다.
+`CountryPopupController.cs`/`WorldMap.cs`/`UIManager.cs`는 미변경.
+
+**참고 — 별개 문제(이번 범위 아님)**: 지도의 국가 클릭 자체(`WorldMapCameraController`)는 레거시
+`Input.GetMouseButtonDown` + 물리 레이캐스트로 동작해 **UI Toolkit의 클릭 처리를 아예 거치지
+않는다** — 즉 CountryStatusPanel이 화면을 완전히 덮고 있어도 지도 클릭 자체는 항상 통과된다.
+이건 이 화면의 버그가 아니라 프로젝트 전역의 기존 구조(CLAUDE.md TODO "국가 탭 시 Country
+Dock/CountryPopup 동시 표시"와 같은 계열의 문제)라 이번 범위에서 손대지 않았다.
+
+**검증 남음**: Unity 에디터 미접속으로 미확인. `Docs/QA_Checklist.md`에 항목 추가.
+
+**변경 파일**: `Assets/Scripts/UI/CountryStatusPanelController.cs`.
+
+### Step 80 추가 대응 4 (진짜진짜 원인 — CountryStatusPanel.uss 자체 파싱 에러)
+
+**신고 내용**: 사용자가 Unity Console의 실제 에러 로그를 공유 — `Assets/UI/CountryStatusPanel.uss
+(line 67): error: Unsupported selector format: '...'`. 이게 결정적 증거였다.
+
+**진짜 원인**: 67행 주석에 `/* population-bar/population-bar__track/__segment*/__summary는...`
+라고 썼는데, 이 텍스트 안에 **의도치 않은 `*/`가 중간에 섞여 있었다**(`__segment*/__summary`—
+"segment"와 "summary" 클래스명을 나열하려다 실수로 `*/`를 타이핑). CSS/USS 주석은 처음 만나는
+`*/`에서 즉시 닫히므로, 이 시점에서 주석이 조기 종료되고 그 뒤에 이어지는 "__summary는 Hud.uss
+클래스를 그대로 재사용(...) — 로컬 재정의 없음. world-summary-rows(data-row 6줄)는
+Tactical.uss의 .detail-rows/.data-row 그대로 사용. */"까지의 텍스트 전체가 **실제 CSS 코드로
+해석**됐다 — 당연히 유효한 선택자/규칙이 아니므로 파서가 "Unsupported selector format" 에러를
+내고 **스타일시트 전체를 로드 실패** 처리했다.
+
+**이게 왜 지금까지의 모든 수정이 "바뀐 게 없다"로 보였는지 설명한다**: 배경 알파 상향(0.97→0.99→
+1.0), 인셋 축소(top 8%→3%), `overflow:hidden`/`flex-basis:0` 추가 — 전부 다 이 파일 안의 규칙
+이었는데, 파일 자체가 파싱 에러로 통째로 무시되고 있었으니 어떤 값을 바꿔도 게임에 반영될 수가
+없었다. 반면 C#(`CountryStatusPanelController.cs`) 변경은 스타일시트와 무관한 별도 컴파일
+경로라 정상적으로 반영됐다 — "C#은 되는데 CSS만 하나도 안 바뀐다"는 패턴이 정확히 이 시나리오와
+일치했다.
+
+**교훈**: 여러 차례 "Play 모드 캐싱/재임포트 문제일 것"이라고 추정하고 사용자에게 에디터 재시작/
+Reimport를 요청했는데, 실제로는 훨씬 단순한 문법 오류였다. Console 에러 로그 한 줄이 그 전의
+모든 추정(레이어, 캐싱, sortingOrder)보다 압도적으로 빠르고 정확한 진단 수단이었다 — 앞으로
+"안 바뀐다"류 신고는 처음부터 Console 에러 확인을 최우선으로 요청해야 한다(이미 Step 80 추가
+대응 2에서 같은 교훈을 한 번 적었는데, 이번에 다시 확인됨).
+
+**수정**: 67행 주석을 `*/`가 중간에 섞이지 않도록 다시 썼다(`__segment*/__summary` →
+`population-bar__segment, population-bar__summary`로 클래스명을 쉼표로 나열). 파일 전체를
+다시 훑어 다른 위치에 같은 실수(주석 중간의 의도치 않은 `*/`)가 없는지 확인 완료 — 나머지는
+전부 정상.
+
+**검증 남음**: Unity 에디터 미접속으로 재임포트 후 실제 렌더링 미확인. `Docs/QA_Checklist.md`에
+항목 추가(Console 에러가 사라졌는지 최우선 확인).
+
+**변경 파일**: `Assets/UI/CountryStatusPanel.uss`.
+
 ## Step 71 구현 메모 (엔딩 화면 점수 잘림 + 버튼 디자인 불일치 신고)
 
 **신고 내용**: "결과창에서 바이오하자드 점수 나오는 오른쪽 부분이 잘려서 안 나옴", "버튼 디자인이
@@ -3747,3 +3957,52 @@ $"{country.population:N0}";`로 CountryPopup과 동일하게 전체 자릿수를
 `Hud.uss` 확인 후 수정. 게임 로직 무변경. Unity 에디터 미접속으로 실제 렌더링 검증은 못 함.
 
 **변경 파일**: `Assets/Scripts/UI/CountryPopupController.cs`, `Assets/Scripts/UI/CountryDockController.cs`.
+
+## Step 81 구현 메모 (CountryStatusPanel — GLOBAL STATUS/감염 국가 현황/의료 시스템 현황/종합 위협도 추가)
+
+**배경**: Step 80으로 "GLOBAL STATUS CENTER"의 기본 구조(세계 요약/국가 상태 분포/랭킹 4종/
+48개국 목록)는 완성됐으나, 사용자가 "단순 통계 화면이 아니라 전략 상황실이 되어야 한다 — 정보량을
+늘리지 말고 전략적으로 판단할 수 있는 데이터를 추가하라"고 요청. GLOBAL STATUS 한줄평가/THREAT
+INDEX TOP10/감염 국가 현황/GLOBAL HOTSPOT/의료 시스템 현황/교통 허브 위험도 6개 후보를 제시받아,
+먼저 각 후보가 현재 데이터 구조(Country/WorldState 기존 필드·계산식)만으로 구현 가능한지, UI
+밀도를 얼마나 늘리는지 분석해 추천안을 제시한 뒤(AskUserQuestion 2회, 옵션 6개 중 4개 승인) 승인된
+범위만 구현했다. **GLOBAL HOTSPOT 카드와 교통 허브 위험도 집계는 사용자가 선택하지 않아 이번
+범위에서 제외**됐다(둘 다 데이터상 구현 가능하다고 분석했었음 — 필요 시 후속 Step 후보).
+
+**핵심 발견**: `WorldState.GetResistanceStage()`(plagueVisibility 5단계)/`GetMortalityStage()`
+(사망률 3단계)가 이미 구현돼 있었는데 HUD(`HudController._worldStatusLabel`)/뉴스피드에서만
+쓰이고 `CountryStatusPanelController`에는 전혀 노출되지 않고 있었다 — GLOBAL STATUS 배너는 이
+기존 계산을 그대로 조합해 신규 계산 없이 구현했다.
+
+**구현 4항목** (`CountryStatusPanelController.cs`/`CountryStatusPanel.uxml`/`.uss`):
+
+1. **GLOBAL STATUS 배너** — 화면 최상단(헤더 바로 아래) 추가. `GlobalStatusAssessment()`가
+   `WorldState.GetMortalityStage()`(기존)와 신설 `WorldInfectionRate()`(세계 요약의 감염률
+   계산과 동일 로직을 공유 — 값 불일치 방지 목적으로 헬퍼로 뽑음)를 조합해 4단계 텍스트
+   (CONTAINMENT SUCCESS/OUTBREAK EXPANDING/GLOBAL PANDEMIC/WORLD COLLAPSE IMMINENT, 사용자
+   제시 예시 문구 그대로 사용) + severity 4색(`global-status-banner--info/infected/danger/dead`)
+   modifier 클래스를 결정한다. 임계값(감염률 5%/50%)은 제안값 — 플레이테스트로 조정 필요.
+2. **감염 국가 현황** — "세계 요약" 아래 신규 섹션. 감염 국가 수(`infectedCount>0`인 국가 수)/
+   무감염 국가 수/소멸 국가 수(`GetCollapseStage()==Extinct`) 3개 data-row. 기존 "국가 상태
+   분포"(사망률 기준 4버킷)와는 다른 축(감염 시작 여부)이라 별도 섹션으로 분리했고, 소멸(Extinct)은
+   기존 COLLAPSE 버킷에 이미 포함돼 있지만 거기선 안 보이므로 여기서 별도로 뽑아 보여준다.
+3. **의료 시스템 현황** — "국가 상태 분포" 바로 아래, **동일한 `distribution-row`/`distribution-item`/
+   `stat-chip` UI를 그대로 재사용**(신규 CSS 없음, DESIGN.md "새 국가 데이터 UI는 기존 4색만
+   재사용" 원칙 그대로 따름). 정상/주의/과부하/붕괴 4버킷 국가 수 — 버킷 판정은 기존
+   `MedicalLoadStatus()`의 라벨을 그대로 재사용(임계값 리터럴 중복 없이 단일 소스 유지).
+4. **종합 위협도(THREAT INDEX) TOP10으로 랭킹 통합** — 기존 감염률/치사율(추정)/의료 부하
+   TOP10 3개 랭킹(30행)을 신설 `ThreatIndex()`(감염률 40%+치사율(추정) 30%+의료부하 30% 가중합,
+   세 값 모두 기존 계산식 재사용) 기반 종합 위협도 TOP10 하나로 통합하고, 감염자 TOP10(원시
+   수치, 규모 파악용)만 별도로 남겼다. 랭킹 섹션이 4개(40행)→2개(20행)로 줄어 "정보량을 늘리지
+   말라"는 요구에 맞게 오히려 화면이 단순해졌다. 가중치(0.4/0.3/0.3)는 제안값 — 플레이테스트로
+   조정 필요.
+
+**화면 최종 순서(위→아래)**: GLOBAL STATUS 배너 → 세계 요약 → 감염 국가 현황 → 국가 상태 분포 →
+의료 시스템 현황 → 종합 위협도 TOP10 → 감염자 TOP10 → 48개국 목록.
+
+**원칙 준수**: 신규 데이터 모델 없음(Country/WorldState 기존 필드·계산식만 조합). `CountryPopupController`
+등 다른 화면 미변경. Unity 에디터 미접속으로 실제 렌더링 검증은 못 함 — 검증은
+`Docs/QA_Checklist.md` 참고.
+
+**변경 파일**: `Assets/Scripts/UI/CountryStatusPanelController.cs`, `Assets/UI/CountryStatusPanel.uxml`,
+`Assets/UI/CountryStatusPanel.uss`.

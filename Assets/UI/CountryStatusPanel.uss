@@ -1,43 +1,159 @@
-/* 참조 해상도 480×1040 기준 고정 px 인셋(24/90/130) 대신 %로 표현 — 다른 화면비/해상도에서도
-   비율이 깨지지 않는다(코드베이스 위키 uss-layout-engine "플랫폼 확장성: % 단위 선호").
+/* CountryStatusPanel — "GLOBAL STATUS CENTER" 세계 감염 현황 센터.
+   Docs/CountryStatus_Dashboard_Investigation.md의 CountryPopup 확장과는 별개로,
+   이 화면은 "개별 국가"가 아니라 "세계 전체"를 한눈에 보여주는 Tactical Dashboard다
+   (사용자 승인 설계, 2026-07-10). tactical-panel/corner-cut/data-row/severity 색은
+   Tactical.uss가 담당하고, 이 파일은 이 화면 고유의 배치만 추가한다.
+   로드 순서: Theme.uss -> Tactical.uss -> Hud.uss(population-bar 재사용) -> CountryStatusPanel.uss
 
-   기존엔 left/right 5%, top 8.5% / bottom 12.5%로 화면의 약 90%×79%를 덮는 근-전체화면
-   오버레이였다 — 국가현황을 보는 동안 지도가 거의 다 가려졌다. top을 42%로 내려 화면
-   상단 42%(지도 + Hud 상단 영역)는 항상 보이게 하고, bottom 12.5%는 그대로 유지해
-   Hud 하단바(bottom-bar, 특히 tabs-row)가 이 패널 아래 계속 노출·클릭 가능하도록 했다
-   (원래 bottom 12.5%도 Hud bottom-bar 높이를 피하려고 잡아둔 값으로 보여 그대로 살렸다).
-   좌우 인셋도 5%->0으로 넓혀 모바일 바텀시트 관례에 맞추고, 48개국 리스트 표시 폭도 늘렸다.
-   모서리는 위쪽만 둥글게(border-top-left/right-radius 각각 단일값 — USS는 4값 shorthand
-   border-radius를 지원하지 않으므로 코너별 프로퍼티로 분리) 시트임을 시각적으로 알린다. */
+   기존엔 top:42%/bottom:12.5%(지도 상단이 항상 보이는 bottom sheet)였으나, 세계 요약/
+   국가 상태 분포/랭킹 4종/48개국 목록까지 담으면서 콘텐츠 길이가 크게 늘어 top을 8%로
+   낮춰 거의 풀스크린에 가깝게 확장했다(1차 조정, 사용자 승인). bottom 12.5%는 그대로 유지해
+   Hud 하단 tabs-row는 계속 노출·클릭 가능하다(기존 bottom sheet의 설계 의도 유지).
+
+   [가독성 재조정, 2026-07-10] "반투명 오버레이처럼 보이고 지도/항로선이 비쳐 정보가 묻힌다"는
+   피드백 — 이 화면은 국가 선택 화면이 아니라 Global Status Center이므로 지도는 배경일 뿐,
+   SAFE/WARNING/DANGER/COLLAPSE·랭킹·세계 통계 가독성이 최우선이다. 두 가지로 대응:
+   1) top을 8%->3%로 더 낮춰 거의 풀스크린에 가깝게(지도 노출 영역을 최소화).
+   2) 배경색 자체를 훨씬 불투명하게 — `--color-bg-panel-strong`을 CountryPopup의
+      `--color-bg-panel`(0.95)보다 명백히 더 불투명한 0.99로 올렸다(Theme.uss 참고, 이 토큰은
+      CountryStatusPanel 전용이라 다른 화면 영향 없음). */
 .status-root {
     position: absolute;
     left: 0;
     right: 0;
-    top: 42%;
+    top: 3%;
     bottom: 12.5%;
     background-color: var(--color-bg-panel-strong);
-    border-top-left-radius: var(--radius-lg);
-    border-top-right-radius: var(--radius-lg);
-    padding: var(--space-xl);
+    padding: var(--space-lg);
+    /* [레이아웃 버그 수정, 2026-07-10] flex-direction/overflow를 명시하지 않아 실제로는
+       status-scroll이 자기 콘텐츠 크기(세계 요약+분포+랭킹 40행+48개국 목록 = 매우 김)만큼
+       커지면서 이 박스의 top/bottom 고정 높이를 넘어 흘러넘쳤다 — 그 넘친 부분은 배경색이
+       칠해지는 이 박스 바깥이라 투명하게(지도가 비치는 것처럼) 보였다. UI Builder에서
+       상단(헤더+세계 요약)까지만 불투명하고 그 아래(국가 상태 분포~)부터 checkerboard로
+       보인 것이 이 증거. Tactical.uss data-value의 flex-shrink/min-width 오버플로우 수정
+       (Step 76, 가로 방향)과 같은 종류의 버그를 세로 방향에서 놓친 것 — overflow:hidden으로
+       박스 경계 밖 렌더링을 원천 차단하고, flex-direction을 명시해 자식(헤더/스크롤)이
+       항상 세로로 쌓이도록 고정했다. */
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.status-title {
-    color: var(--color-text-primary);
-    font-size: var(--font-size-xxl);
+/* status-title(GLOBAL STATUS CENTER) + close-button을 한 줄에 배치 — CountryPopup.uss
+   popup-header와 동일한 이유로 tactical-panel__header 기본값(세로 스택)을 가로로 확장. */
+.status-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* GLOBAL STATUS 배너 — 세계 상황 한 줄 평가(CONTAINMENT SUCCESS/OUTBREAK EXPANDING/
+   GLOBAL PANDEMIC/WORLD COLLAPSE IMMINENT). 색상은 severity 4색(Theme.uss --color-status-*)을
+   텍스트+테두리에 그대로 재사용 — DESIGN.md Do/Don't: 새 색을 만들지 않고 기존 4색만 쓴다.
+   컨트롤러(CountryStatusPanelController.GlobalStatusAssessment)가 WorldState의 기존
+   GetMortalityStage()/감염률 계산을 조합해 텍스트+modifier 클래스를 정한다(신규 계산 없음). */
+.global-status-banner {
+    -unity-text-align: middle-center;
+    font-size: var(--font-size-md);
     -unity-font-style: bold;
-    margin-bottom: 10px;
+    letter-spacing: var(--tracking-caption);
+    padding: var(--space-xs) var(--space-sm);
+    margin-bottom: var(--space-sm);
+    border-width: 1px;
 }
 
+.global-status-banner--info     { color: var(--color-status-info);     border-color: var(--color-status-info); }
+.global-status-banner--infected { color: var(--color-status-infected); border-color: var(--color-status-infected); }
+.global-status-banner--danger   { color: var(--color-status-danger);   border-color: var(--color-status-danger); }
+.global-status-banner--dead     { color: var(--color-status-dead);     border-color: var(--color-status-dead); }
+
+.status-close-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* flex-grow만 있고 flex-basis가 없으면 UI Toolkit이 "콘텐츠 크기"를 기준값으로 잡아버려
+   실제로는 전혀 자라지 않고(콘텐츠가 이미 grow 없이도 필요한 만큼 큰 상태) status-root 밖으로
+   그냥 넘쳐버린다 — flex-basis:0으로 "일단 0에서 시작해서 남는 공간만큼만 자란다"로 강제해야
+   status-root 높이 안에 실제로 갇힌다(위 status-root의 overflow:hidden과 세트). */
 .status-scroll {
     flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    margin-top: var(--space-xs);
+}
+
+/* population-bar 관련 클래스(population-bar, population-bar__track, population-bar__segment,
+   population-bar__summary)는 Hud.uss 클래스를 그대로 재사용(CountryStatusPanel.uxml에
+   <Style src="Hud.uss" /> 추가) — 로컬 재정의 없음.
+   world-summary-rows(data-row 6줄)는 Tactical.uss의 .detail-rows/.data-row 그대로 사용. */
+
+/* 국가 상태 분포 — 4버킷(SAFE/WARNING/DANGER/COLLAPSE)을 가로 4열로 배치. stat-chip은
+   Hud.uss 정의(6x6 색상 사각형)를 재사용하고 색상만 이 화면 전용 modifier로 지정한다.
+   의료 시스템 현황(정상/주의/과부하/붕괴)도 같은 4버킷·같은 severity 색 의미(정보/감염/위험/사망)라
+   distribution-row/distribution-item/stat-chip-- 클래스를 그대로 재사용한다(신규 CSS 없음). */
+.distribution-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.distribution-item {
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+/* stat-chip은 6x6px 정사각형(Hud.uss) — 분포 항목에서는 라벨 위에 얹어 캡션처럼 쓴다. */
+.distribution-item .stat-chip {
+    margin-right: 0;
+    margin-bottom: 3px;
+}
+
+/* 국가 데이터 severity 4색(Theme.uss --color-status-*)을 그대로 매핑 — 새 색 추가 없음
+   (DESIGN.md Do/Don't: "새로운 국가 관련 수치 UI를 추가할 때는 이 4색을 그대로 재사용"). */
+.stat-chip--safe     { background-color: var(--color-status-info); }
+.stat-chip--warning  { background-color: var(--color-status-infected); }
+.stat-chip--danger   { background-color: var(--color-status-danger); }
+.stat-chip--collapse { background-color: var(--color-status-dead); }
+
+.distribution-item__label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+}
+
+.distribution-item__count {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+    margin-top: 2px;
+}
+
+/* 랭킹(ranking-infected/rate/cfr/load)은 Tactical.uss .detail-rows/.data-row를 그대로
+   사용 — 컨트롤러가 AddDataRow()로 채운다. 이 파일에는 로컬 정의 없음. */
+
+/* 48개국 목록 — 기존 status-row 3줄(이름/통계/이동수단) 구조는 유지하되, 좌측
+   accent bar로 4버킷 severity를 표시해(코너컷 대신 밀도 절약형 강조, Tactical.uss
+   accent-bar-row와 동일한 문법) 스크롤만으로도 위험 국가를 훑어볼 수 있게 했다. */
+.status-list {
+    margin-top: var(--space-xs);
 }
 
 .status-row {
     background-color: var(--color-surface-soft);
-    border-radius: var(--radius-sm);
     padding: 8px 10px;
     margin-bottom: var(--space-sm);
+    border-left-width: 4px;
+    border-left-color: var(--color-border);
 }
+
+.status-row--safe     { border-left-color: var(--color-status-info); }
+.status-row--warning   { border-left-color: var(--color-status-infected); }
+.status-row--danger    { border-left-color: var(--color-status-danger); }
+.status-row--collapse  { border-left-color: var(--color-status-dead); }
 
 .status-row__name {
     color: var(--color-text-primary);
@@ -57,10 +173,4 @@
 
 .status-row__detail--danger {
     color: var(--color-status-danger);
-}
-
-.status-close {
-    height: var(--touch-target-min);
-    margin-top: var(--space-md);
-    background-color: var(--color-button-secondary);
 }

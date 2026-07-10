@@ -852,6 +852,10 @@ CountrySelect/EndingScreen/Tactical Modal, RankingPanel·알림·이벤트상세
   의도대로 "붕괴 이상 전부"를 잡아낸다.
 - **`CountryStatusPanel.uss`에는 tactical 관련 로컬 정의가 없음** — 로컬 중복 정리 대상은
   `Hud.uss`/`UpgradeTree.uss` 두 곳뿐이다.
+  [Step 80 갱신] 이 진단 당시 `CountryStatusPanel`은 애초에 전환 대상 화면 목록(§0.1/§16
+  머리말)에 없었으나, "GLOBAL STATUS CENTER" 세계 감염 현황 센터로 재설계하며 tactical-panel/
+  코너컷/data-row/severity 4색 체계로 전환 완료됨 — 이제 이 화면도 로컬 tactical 정의가
+  존재한다(자세한 내용은 `Docs/DevLog.md` Step 80 참고).
 
 ### 16.1 공통 인프라 (0순위 — 4개 화면 작업의 전제)
 

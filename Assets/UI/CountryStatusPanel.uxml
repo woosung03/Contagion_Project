@@ -1,9 +1,100 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
+    <Style src="Hud.uss" />
     <Style src="CountryStatusPanel.uss" />
-    <ui:VisualElement name="status-root" class="status-root">
-        <ui:Label name="status-title" text="국가 현황" class="status-title" />
-        <ui:ScrollView name="status-scroll" class="status-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
-        <ui:Button name="close-button" text="닫기" class="status-close" />
+    <ui:VisualElement name="status-root" class="status-root tactical-panel">
+        <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+
+        <ui:VisualElement class="tactical-panel__header status-header">
+            <ui:Label name="status-title" text="GLOBAL STATUS CENTER" class="tactical-panel__title" />
+            <ui:Button name="close-button" text="✕" class="status-close-btn" />
+        </ui:VisualElement>
+
+        <ui:ScrollView name="status-scroll" class="status-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden">
+
+            <!-- GLOBAL STATUS — 세계 상황 한 줄 평가 -->
+            <ui:Label name="global-status-banner" text="GLOBAL STATUS" class="global-status-banner" />
+
+            <!-- 세계 요약 -->
+            <ui:Label text="세계 요약" class="modal-section-caption" />
+            <ui:VisualElement name="population-bar" class="population-bar">
+                <ui:VisualElement name="population-bar-track" class="population-bar__track">
+                    <ui:VisualElement name="population-bar-healthy" class="population-bar__segment population-bar__segment--healthy" picking-mode="Ignore" />
+                    <ui:VisualElement name="population-bar-infected" class="population-bar__segment population-bar__segment--infected" picking-mode="Ignore" />
+                    <ui:VisualElement name="population-bar-dead" class="population-bar__segment population-bar__segment--dead" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:Label name="population-bar-summary" text="감염 0.0% · 사망 0.00%" class="population-bar__summary" />
+            </ui:VisualElement>
+            <ui:VisualElement name="world-summary-rows" class="detail-rows" />
+
+            <!-- 감염 국가 현황 -->
+            <ui:Label text="감염 국가 현황" class="modal-section-caption" />
+            <ui:VisualElement name="infection-summary-rows" class="detail-rows" />
+
+            <!-- 국가 상태 분포 -->
+            <ui:Label text="국가 상태 분포" class="modal-section-caption" />
+            <ui:VisualElement name="distribution-row" class="distribution-row">
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
+                    <ui:Label text="SAFE" class="distribution-item__label" />
+                    <ui:Label name="distribution-safe-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
+                    <ui:Label text="WARNING" class="distribution-item__label" />
+                    <ui:Label name="distribution-warning-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
+                    <ui:Label text="DANGER" class="distribution-item__label" />
+                    <ui:Label name="distribution-danger-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
+                    <ui:Label text="COLLAPSE" class="distribution-item__label" />
+                    <ui:Label name="distribution-collapse-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 의료 시스템 현황 — distribution-row/stat-chip 패턴 재사용(신규 CSS 없음) -->
+            <ui:Label text="의료 시스템 현황" class="modal-section-caption" />
+            <ui:VisualElement name="medical-distribution-row" class="distribution-row">
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
+                    <ui:Label text="정상" class="distribution-item__label" />
+                    <ui:Label name="medical-normal-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
+                    <ui:Label text="주의" class="distribution-item__label" />
+                    <ui:Label name="medical-caution-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
+                    <ui:Label text="과부하" class="distribution-item__label" />
+                    <ui:Label name="medical-overload-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+                <ui:VisualElement class="distribution-item">
+                    <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
+                    <ui:Label text="붕괴" class="distribution-item__label" />
+                    <ui:Label name="medical-collapse-count" text="0" class="distribution-item__count" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- 랭킹 (TOP 10) -->
+            <ui:Label text="종합 위협도 TOP 10" class="modal-section-caption" />
+            <ui:VisualElement name="ranking-threat" class="detail-rows" />
+
+            <ui:Label text="감염자 TOP 10" class="modal-section-caption" />
+            <ui:VisualElement name="ranking-infected" class="detail-rows" />
+
+            <!-- 48개국 목록 -->
+            <ui:Label text="48개국 목록" class="modal-section-caption" />
+            <ui:VisualElement name="status-list" class="status-list" />
+        </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

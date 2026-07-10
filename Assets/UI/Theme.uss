@@ -17,7 +17,14 @@
     /* ---- 배경 (격리소/브리핑룸 톤 다크 배경, 화면별 패널 성격에 따라 구분) ---- */
     --color-bg-root: rgba(8, 8, 16, 0.97);          /* MainMenu/CountrySelect 전체화면 */
     --color-bg-panel: rgba(15, 15, 25, 0.95);        /* 팝업/랭킹 등 뜨는 패널 */
-    --color-bg-panel-strong: rgba(15, 15, 25, 0.97); /* 국가현황처럼 더 불투명해야 하는 패널 */
+    --color-bg-panel-strong: rgba(9, 9, 16, 1);      /* CountryStatusPanel(GLOBAL STATUS CENTER) 전용 —
+                                                         지도/항로선이 전혀 비치지 않아야 하는 풀스크린급
+                                                         Tactical Dashboard. 0.99까지 올렸는데도 실기기/
+                                                         에디터에서 "여전히 투명하다"는 재신고가 있어
+                                                         알파 여지를 아예 없애고 완전 불투명(1.0)으로
+                                                         고정했다(2026-07-10, "지도는 주인공이 아니다"
+                                                         피드백 2차 대응). 이 토큰은 CountryStatusPanel.uss
+                                                         만 참조하므로 값을 올려도 다른 화면에 영향 없음. */
     --color-bg-panel-alt: rgba(10, 10, 20, 0.92);    /* 업그레이드 트리 전체화면 패널 */
     --color-bg-scrim: rgba(0, 0, 0, 0.85);           /* 엔딩 스크림 */
     --color-bg-scrim-strong: rgba(0, 0, 0, 0.75);    /* HUD 하단바 */
