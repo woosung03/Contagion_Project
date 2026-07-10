@@ -176,7 +176,7 @@ namespace Contagion.UI
             refs.StatsLabel.EnableInClassList("status-row__detail--danger", stage >= CountryCollapseStage.Disorder);
 
             refs.FlagsLabel.text =
-                $"항공 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
+                $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
                 $"항구 {(country.isPortOpen ? "개방" : "폐쇄")} · " +
                 $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}";
         }

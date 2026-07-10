@@ -82,7 +82,7 @@ namespace Contagion.UI
                 NewsEventCategory.Flavor => "news-entry--flavor",
                 _ => null
             };
-            AddEntry($"[Day {evt.day}] {evt.text}", extraClass);
+            AddEntry($"[{evt.day}일차] {evt.text}", extraClass);
         }
 
         private void HandleResistanceStageChanged(ResistanceStage stage)
@@ -106,7 +106,7 @@ namespace Contagion.UI
             ResistanceStage.NoAwareness => "인식 없음 (정상 생활)",
             ResistanceStage.DiseaseReported => "질병 보도 (마스크·손씻기 캠페인)",
             ResistanceStage.PublicHealthEmergency => "공중보건 비상사태 (격리 시작, 연구 가속)",
-            ResistanceStage.NationalEmergency => "국가 비상사태 (국경 봉쇄, 항공/항구 폐쇄)",
+            ResistanceStage.NationalEmergency => "국가 비상사태 (국경 봉쇄, 공항/항구 폐쇄)",
             ResistanceStage.WorldCollapse => "세계 붕괴 (무정부 상태)",
             _ => stage.ToString()
         };

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Data.CountryDatabase
   countries:
   - id: CHI
-    name: China
+    name: 중국
     population: 1412914089
     infectedCount: 0
     deadCount: 0
@@ -59,7 +59,7 @@ MonoBehaviour:
     - THA
     - VIE
   - id: IND
-    name: India
+    name: 인도
     population: 1476625576
     infectedCount: 0
     deadCount: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
     - TAN
     - YEM
   - id: USA
-    name: USA
+    name: 미국
     population: 349035494
     infectedCount: 0
     deadCount: 0
@@ -147,7 +147,7 @@ MonoBehaviour:
     - MAR
     - PER
   - id: KOR
-    name: korea
+    name: 대한민국
     population: 51600388
     infectedCount: 0
     deadCount: 0
@@ -173,7 +173,7 @@ MonoBehaviour:
     - CHI
     - JPN
   - id: JPN
-    name: Japan
+    name: 일본
     population: 122427731
     infectedCount: 0
     deadCount: 0
@@ -202,7 +202,7 @@ MonoBehaviour:
     - USA
     - PHI
   - id: IDN
-    name: Indonesia
+    name: 인도네시아
     population: 287886782
     infectedCount: 0
     deadCount: 0
@@ -236,7 +236,7 @@ MonoBehaviour:
     - THA
     - VIE
   - id: SAU
-    name: Saudi Arabia
+    name: 사우디아라비아
     population: 35165787
     infectedCount: 0
     deadCount: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
     - SDN
     - YEM
   - id: GER
-    name: Germany
+    name: 독일
     population: 83644258
     infectedCount: 0
     deadCount: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
     - POL
     - TUR
   - id: UK
-    name: United Kingdom
+    name: 영국
     population: 69931528
     infectedCount: 0
     deadCount: 0
@@ -359,7 +359,7 @@ MonoBehaviour:
     - POL
     - TUR
   - id: FRA
-    name: France
+    name: 프랑스
     population: 66746401
     infectedCount: 0
     deadCount: 0
@@ -395,7 +395,7 @@ MonoBehaviour:
     - ITA
     - MAR
   - id: RUS
-    name: Russia
+    name: 러시아
     population: 143394458
     infectedCount: 0
     deadCount: 0
@@ -424,7 +424,7 @@ MonoBehaviour:
     - POL
     - TUR
   - id: NGA
-    name: Nigeria
+    name: 나이지리아
     population: 242431832
     infectedCount: 0
     deadCount: 0
@@ -458,7 +458,7 @@ MonoBehaviour:
     - GHA
     - MAR
   - id: EGY
-    name: Egypt
+    name: 이집트
     population: 120101175
     infectedCount: 0
     deadCount: 0
@@ -499,7 +499,7 @@ MonoBehaviour:
     - TUR
     - YEM
   - id: RSA
-    name: South Africa
+    name: 남아프리카공화국
     population: 65453084
     infectedCount: 0
     deadCount: 0
@@ -533,7 +533,7 @@ MonoBehaviour:
     - MOZ
     - TAN
   - id: BRA
-    name: Brazil
+    name: 브라질
     population: 213562666
     infectedCount: 0
     deadCount: 0
@@ -567,7 +567,7 @@ MonoBehaviour:
     - GHA
     - PER
   - id: MEX
-    name: Mexico
+    name: 멕시코
     population: 132997658
     infectedCount: 0
     deadCount: 0
@@ -594,7 +594,7 @@ MonoBehaviour:
     - COL
     - PER
   - id: CAN
-    name: Canada
+    name: 캐나다
     population: 40467728
     infectedCount: 0
     deadCount: 0
@@ -614,7 +614,7 @@ MonoBehaviour:
     seaRouteCountryIds:
     - USA
   - id: AUS
-    name: Australia
+    name: 호주
     population: 27227096
     infectedCount: 0
     deadCount: 0
@@ -634,7 +634,7 @@ MonoBehaviour:
     - IDN
     - RSA
   - id: PAK
-    name: Pakistan
+    name: 파키스탄
     population: 259299791
     infectedCount: 0
     deadCount: 0
@@ -660,7 +660,7 @@ MonoBehaviour:
     - IND
     - SAU
   - id: BAN
-    name: Bangladesh
+    name: 방글라데시
     population: 177818044
     infectedCount: 0
     deadCount: 0
@@ -682,7 +682,7 @@ MonoBehaviour:
     - IND
     - MYA
   - id: PHI
-    name: Philippines
+    name: 필리핀
     population: 117724471
     infectedCount: 0
     deadCount: 0
@@ -707,7 +707,7 @@ MonoBehaviour:
     - IDN
     - VIE
   - id: DRC
-    name: Democratic Republic of the Congo
+    name: 콩고민주공화국
     population: 116452162
     infectedCount: 0
     deadCount: 0
@@ -730,7 +730,7 @@ MonoBehaviour:
     seaRouteCountryIds:
     - ANG
   - id: ETH
-    name: Ethiopia
+    name: 에티오피아
     population: 138902185
     infectedCount: 0
     deadCount: 0
@@ -752,7 +752,7 @@ MonoBehaviour:
     - UK
     seaRouteCountryIds: []
   - id: VIE
-    name: Vietnam
+    name: 베트남
     population: 102177431
     infectedCount: 0
     deadCount: 0
@@ -778,7 +778,7 @@ MonoBehaviour:
     - IDN
     - THA
   - id: IRN
-    name: Iran
+    name: 이란
     population: 93168497
     infectedCount: 0
     deadCount: 0
@@ -804,7 +804,7 @@ MonoBehaviour:
     - SAU
     - IND
   - id: TUR
-    name: Turkey
+    name: 튀르키예
     population: 87926082
     infectedCount: 0
     deadCount: 0
@@ -831,7 +831,7 @@ MonoBehaviour:
     - GER
     - UK
   - id: TAN
-    name: Tanzania
+    name: 탄자니아
     population: 72563780
     infectedCount: 0
     deadCount: 0
@@ -857,7 +857,7 @@ MonoBehaviour:
     - EGY
     - IND
   - id: THA
-    name: Thailand
+    name: 태국
     population: 71559614
     infectedCount: 0
     deadCount: 0
@@ -886,7 +886,7 @@ MonoBehaviour:
     - MAS
     - MYA
   - id: ITA
-    name: Italy
+    name: 이탈리아
     population: 58926166
     infectedCount: 0
     deadCount: 0
@@ -913,7 +913,7 @@ MonoBehaviour:
     - ALG
     - ESP
   - id: KEN
-    name: Kenya
+    name: 케냐
     population: 58636412
     infectedCount: 0
     deadCount: 0
@@ -939,7 +939,7 @@ MonoBehaviour:
     - SAU
     - IND
   - id: COL
-    name: Colombia
+    name: 콜롬비아
     population: 53936226
     infectedCount: 0
     deadCount: 0
@@ -962,7 +962,7 @@ MonoBehaviour:
     - MEX
     - BRA
   - id: SDN
-    name: Sudan
+    name: 수단
     population: 53282719
     infectedCount: 0
     deadCount: 0
@@ -985,7 +985,7 @@ MonoBehaviour:
     - EGY
     - SAU
   - id: MYA
-    name: Myanmar
+    name: 미얀마
     population: 55184819
     infectedCount: 0
     deadCount: 0
@@ -1012,7 +1012,7 @@ MonoBehaviour:
     - IDN
     - BAN
   - id: ESP
-    name: Spain
+    name: 스페인
     population: 47850793
     infectedCount: 0
     deadCount: 0
@@ -1039,7 +1039,7 @@ MonoBehaviour:
     - ITA
     - ALG
   - id: ALG
-    name: Algeria
+    name: 알제리
     population: 48028334
     infectedCount: 0
     deadCount: 0
@@ -1062,7 +1062,7 @@ MonoBehaviour:
     - ESP
     - ITA
   - id: ARG
-    name: Argentina
+    name: 아르헨티나
     population: 46003734
     infectedCount: 0
     deadCount: 0
@@ -1086,7 +1086,7 @@ MonoBehaviour:
     - USA
     - PER
   - id: IRQ
-    name: Iraq
+    name: 이라크
     population: 48007437
     infectedCount: 0
     deadCount: 0
@@ -1110,7 +1110,7 @@ MonoBehaviour:
     seaRouteCountryIds:
     - SAU
   - id: UGA
-    name: Uganda
+    name: 우간다
     population: 52761469
     infectedCount: 0
     deadCount: 0
@@ -1132,7 +1132,7 @@ MonoBehaviour:
     - EGY
     seaRouteCountryIds: []
   - id: AFG
-    name: Afghanistan
+    name: 아프가니스탄
     population: 45047069
     infectedCount: 0
     deadCount: 0
@@ -1154,7 +1154,7 @@ MonoBehaviour:
     - RUS
     seaRouteCountryIds: []
   - id: ANG
-    name: Angola
+    name: 앙골라
     population: 40215179
     infectedCount: 0
     deadCount: 0
@@ -1180,7 +1180,7 @@ MonoBehaviour:
     - USA
     - DRC
   - id: UZB
-    name: Uzbekistan
+    name: 우즈베키스탄
     population: 37724223
     infectedCount: 0
     deadCount: 0
@@ -1200,7 +1200,7 @@ MonoBehaviour:
     - IRN
     seaRouteCountryIds: []
   - id: POL
-    name: Poland
+    name: 폴란드
     population: 37843188
     infectedCount: 0
     deadCount: 0
@@ -1225,7 +1225,7 @@ MonoBehaviour:
     - RUS
     - UK
   - id: MAR
-    name: Morocco
+    name: 모로코
     population: 38762441
     infectedCount: 0
     deadCount: 0
@@ -1250,7 +1250,7 @@ MonoBehaviour:
     - NGA
     - USA
   - id: MAS
-    name: Malaysia
+    name: 말레이시아
     population: 36385115
     infectedCount: 0
     deadCount: 0
@@ -1275,7 +1275,7 @@ MonoBehaviour:
     - THA
     - IND
   - id: PER
-    name: Peru
+    name: 페루
     population: 34922148
     infectedCount: 0
     deadCount: 0
@@ -1301,7 +1301,7 @@ MonoBehaviour:
     - BRA
     - ARG
   - id: MOZ
-    name: Mozambique
+    name: 모잠비크
     population: 36639851
     infectedCount: 0
     deadCount: 0
@@ -1324,7 +1324,7 @@ MonoBehaviour:
     - IND
     - EGY
   - id: GHA
-    name: Ghana
+    name: 가나
     population: 35697557
     infectedCount: 0
     deadCount: 0
@@ -1347,7 +1347,7 @@ MonoBehaviour:
     - USA
     - BRA
   - id: YEM
-    name: Yemen
+    name: 예멘
     population: 42961653
     infectedCount: 0
     deadCount: 0

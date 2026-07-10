@@ -149,7 +149,7 @@ namespace Contagion.UI
             if (_transportValue != null)
             {
                 _transportValue.text =
-                    $"{(country.isAirportOpen ? "항공 개방" : "항공 폐쇄")} · {(country.isPortOpen ? "항구 개방" : "항구 폐쇄")}";
+                    $"{(country.isAirportOpen ? "공항 개방" : "공항 폐쇄")} · {(country.isPortOpen ? "항구 개방" : "항구 폐쇄")}";
             }
         }
 

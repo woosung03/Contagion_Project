@@ -4,7 +4,7 @@
     <Style src="EndingScreen.uss" />
     <ui:VisualElement name="ending-root" class="ending-root">
         <ui:Label name="result-title" text="" class="ending-title" />
-        <ui:Label text="OPERATION REPORT" class="ending-caption tactical-caption" />
+        <ui:Label text="작전 보고서" class="ending-caption tactical-caption" />
 
         <ui:VisualElement name="ending-stats-panel" class="ending-stats-panel tactical-panel">
             <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
@@ -12,7 +12,7 @@
             <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
             <ui:VisualElement class="tactical-panel__header">
-                <ui:Label text="FINAL PANDEMIC ANALYSIS" class="tactical-panel__title" />
+                <ui:Label text="최종 팬데믹 분석" class="tactical-panel__title" />
             </ui:VisualElement>
             <ui:VisualElement name="stats-rows" class="detail-rows" />
         </ui:VisualElement>

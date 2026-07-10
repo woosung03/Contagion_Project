@@ -90,9 +90,9 @@ namespace Contagion.UI
                 .Count(c => c.GetCollapseStage() >= CountryCollapseStage.FullCollapse) ?? 0;
 
             _statsRows?.Clear();
-            _statsRows?.Add(MakeStatRow("GLOBAL INFECTED", $"{infected:N0}", "data-value--infected"));
-            _statsRows?.Add(MakeStatRow("GLOBAL DEATHS", $"{dead:N0}", "data-value--dead"));
-            _statsRows?.Add(MakeStatRow("COLLAPSED NATIONS", $"{collapsedNations}", "data-value--danger"));
+            _statsRows?.Add(MakeStatRow("전 세계 감염자", $"{infected:N0}", "data-value--infected"));
+            _statsRows?.Add(MakeStatRow("전 세계 사망자", $"{dead:N0}", "data-value--dead"));
+            _statsRows?.Add(MakeStatRow("붕괴 국가 수", $"{collapsedNations}", "data-value--danger"));
             _statsRows?.Add(MakeStatRow("경과일", $"{day}일"));
 
             // 부활(광고)은 패배(치료제 완성으로 병원체가 진 상황)에서만 의미가 있다 — 설계 문서 13절.

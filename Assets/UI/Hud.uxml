@@ -25,7 +25,7 @@
             <!-- [WORLD STATUS 강조] 상시 노출되는 얇은 프레임으로 감싸 "판독창"처럼 보이게
                  한다. world-status-label 자체의 name/class는 그대로라 HudController.cs 변경 없음. -->
             <ui:VisualElement name="world-status-frame" class="world-status-frame">
-                <ui:Label text="STATUS" class="world-status-frame__caption" />
+                <ui:Label text="상태" class="world-status-frame__caption" />
                 <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -88,7 +88,7 @@
                         <ui:Label name="country-dock-stage" text="-" class="country-dock__value" />
                     </ui:VisualElement>
                     <ui:VisualElement class="country-dock__row">
-                        <ui:Label text="항공/항구" class="country-dock__label" />
+                        <ui:Label text="공항/항구" class="country-dock__label" />
                         <ui:Label name="country-dock-transport" text="-" class="country-dock__value" />
                     </ui:VisualElement>
                 </ui:VisualElement>

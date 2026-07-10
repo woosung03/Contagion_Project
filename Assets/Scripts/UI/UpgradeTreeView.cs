@@ -297,10 +297,10 @@ namespace Contagion.UI
 
         private static string StateCaption(string state) => state switch
         {
-            "locked" => "LOCKED",
-            "available" => "AVAILABLE",
-            "active" => "ACTIVE",
-            "maxed" => "MAXED",
+            "locked" => "잠김",
+            "available" => "해금 가능",
+            "active" => "진행 중",
+            "maxed" => "완료",
             _ => state.ToUpperInvariant()
         };
 
@@ -330,12 +330,12 @@ namespace Contagion.UI
             nameLabel.AddToClassList("tree-node__label");
             box.Add(nameLabel);
 
-            var statusLabel = new Label($"STATUS : {StateCaption(state)}");
+            var statusLabel = new Label($"상태 : {StateCaption(state)}");
             statusLabel.AddToClassList("tree-node__status");
             box.Add(statusLabel);
 
             int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
-            string costText = state == "active" || state == "maxed" ? "UNLOCKED" : $"{effectiveCost} DNA";
+            string costText = state == "active" || state == "maxed" ? "해금됨" : $"{effectiveCost} DNA";
             var costLabel = new Label(costText);
             costLabel.AddToClassList("tree-node__cost");
             box.Add(costLabel);
@@ -421,7 +421,7 @@ namespace Contagion.UI
             string code = _codeByNodeId.TryGetValue(node.id, out var mappedCode) ? mappedCode : node.id;
             int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
 
-            _detailTitle.text = $"{CategoryEnglishName(node.category)} ANALYSIS";
+            _detailTitle.text = $"{CategoryEnglishName(node.category)} 분석";
 
             _detailRows?.Clear();
             AddDetailRow("코드", code);
@@ -443,8 +443,8 @@ namespace Contagion.UI
             if (node.prerequisites.Count > 0)
                 AddDetailRow("선행 노드", string.Join(", ", node.prerequisites.Select(DisplayName)));
 
-            AddDetailRow("DNA COST", node.isUnlocked ? "—" : effectiveCost.ToString());
-            AddDetailRow("STATUS", StateCaption(state), $"data-value--{state}");
+            AddDetailRow("DNA 비용", node.isUnlocked ? "—" : effectiveCost.ToString());
+            AddDetailRow("상태", StateCaption(state), $"data-value--{state}");
 
             bool canUnlock = UpgradeManager.Instance.CanUnlock(nodeId);
             _buyButton.SetEnabled(canUnlock);
@@ -477,10 +477,10 @@ namespace Contagion.UI
         /// <summary>node.effects의 statName -> 상세 패널 표시 라벨(영문 대문자, 탁티컬 콘솔 톤).</summary>
         private static string EffectStatLabel(string statName) => statName switch
         {
-            "infectivity" => "TRANSMISSION",
-            "severity" => "SEVERITY",
-            "lethality" => "LETHALITY",
-            "drugResistance" => "RESISTANCE",
+            "infectivity" => "전파력",
+            "severity" => "중증도",
+            "lethality" => "치사율",
+            "drugResistance" => "약물 내성",
             _ => statName.ToUpperInvariant()
         };
 
@@ -523,26 +523,29 @@ namespace Contagion.UI
             _ => "unknown"
         };
 
-        /// <summary>UI_Design.md 11.5 — 카테고리 영문 전체 명칭("연구 분석 콘솔" 헤더/LAB 캡션 공용).</summary>
+        /// <summary>UI_Design.md 11.5 — 카테고리 전체 명칭("연구 분석 콘솔" 헤더/연구소 캡션 공용).
+        /// (한글화 작업으로 영문 대문자 명칭 대신 한글 명칭을 반환하도록 변경 — 메서드명은
+        /// 하위 호환을 위해 유지.)</summary>
         private static string CategoryEnglishName(UpgradeCategory category) => category switch
         {
-            UpgradeCategory.Transmission => "TRANSMISSION",
-            UpgradeCategory.Symptom => "SYMPTOM",
-            UpgradeCategory.Ability => "ADAPTATION",
-            _ => category.ToString().ToUpperInvariant()
+            UpgradeCategory.Transmission => "감염 경로",
+            UpgradeCategory.Symptom => "증상",
+            UpgradeCategory.Ability => "능력",
+            _ => category.ToString()
         };
 
         /// <summary>UI_Design.md 11.3 — 노드 표시코드(TRANS-001 등) 접두어. CategoryEnglishName의
-        /// 축약형(카드 폭이 좁아 전체 단어 대신 5자 이내로 줄임).</summary>
+        /// 축약형(카드 폭이 좁아 전체 단어 대신 5자 이내로 줄임). (한글화 작업으로 접두어 자체도
+        /// 한글 축약형으로 변경 — 예: "감염-001".)</summary>
         private static string CategoryPrefix(UpgradeCategory category) => category switch
         {
-            UpgradeCategory.Transmission => "TRANS",
-            UpgradeCategory.Symptom => "SYM",
-            UpgradeCategory.Ability => "ADAPT",
-            _ => "NODE"
+            UpgradeCategory.Transmission => "감염",
+            UpgradeCategory.Symptom => "증상",
+            UpgradeCategory.Ability => "능력",
+            _ => "노드"
         };
 
-        /// <summary>UI_Design.md 11.5 — 헤더의 영문 LAB 캡션(기존 한글 category-title-label 위에 병기).</summary>
-        private static string CategoryCaption(UpgradeCategory category) => $"{CategoryEnglishName(category)} LAB";
+        /// <summary>UI_Design.md 11.5 — 헤더의 카테고리 연구소 캡션(기존 한글 category-title-label 위에 병기).</summary>
+        private static string CategoryCaption(UpgradeCategory category) => $"{CategoryEnglishName(category)} 연구소";
     }
 }

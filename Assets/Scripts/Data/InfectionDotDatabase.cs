@@ -90,8 +90,12 @@ namespace Contagion.Data
         /// 위한 기준값 — 로드된 48개국 중 diameter가 가장 작은 국가의 diameter다. 지금 데이터 기준으로는
         /// 한국(KOR, 0.00902)이 그 국가지만, 국가 id를 하드코딩하지 않고 "가장 작은 나라"를 매 로드 시
         /// 자동으로 찾는다 — 나중에 InfectionDotPoints.json이 재생성돼 최소값이 바뀌어도(예: 새 국가
-        /// 추가) 코드 수정 없이 그대로 맞는 기준이 된다. CountryView.SetupInfectionDots()가 이 값 대비
-        /// 자기 diameter의 비율로 "한국보다 몇 배 큰지"를 계산해 점 크기를 그 비율만큼 키운다.
+        /// 추가) 코드 수정 없이 그대로 맞는 기준이 된다.
+        /// [Step 75] diameter·count가 이미 국가별로 "면적의 70% 커버리지"를 만족하도록 공동 계산된
+        /// 값이라, 여기에 이 값 대비 비율(sizeRatio, 1승이든 sqrt든)을 추가로 곱하면 오히려 커버리지가
+        /// 70%를 초과하는 것으로 확인돼(DevLog Step 75) `CountryView.SetupInfectionDots()`가 더 이상
+        /// 이 프로퍼티를 사용하지 않는다 — 계산 로직은 남겨둔다(추후 다른 용도로 "국가 간 최소/최대
+        /// 상대 크기"가 필요해지면 재사용 가능).
         /// </summary>
         public static float MinDiameter
         {

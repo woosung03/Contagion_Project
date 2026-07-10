@@ -60,7 +60,18 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 73(국가 선택 콜라이더를
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 75(감염 점 실제 커버리지
+검증 후 크기 공식 재수정 — 한국/일본/영국 기준 감염률 100% 시 실제 면적 대비 커버리지를 계산해보니
+Step 74의 sqrt 완화로도 여전히 일본 118.7%/영국 105.7%로 설계 목표(70%)를 초과하고 있었다. 원인은
+`diameter`·점 개수가 이미 국가별로 70% 커버리지를 만족하도록 공동 계산된 완결값인데
+`CountryView.SetupInfectionDots()`가 그 위에 국가 크기 비례 배율(Step 53의 sizeRatio, Step 74의
+sqrt(sizeRatio))을 또 곱한 이중 반영이었음 — 배율을 완전히 제거하고 `diameter`를 그대로 최종
+크기로 쓰도록 단순화(`infectionDotDiameterScale`은 다시 전 국가 공통 전역 배율로만 사용). diameter·
+count 자체가 이미 실제 국가 면적에 비례하므로 배율 없이도 대형국 강조 효과는 유지되며, 48개국 전부
+설계 목표(70%)를 정확히 만족. Unity 에디터 미접속으로 실제 렌더링 검증은 못 했고 오프라인 수치
+계산으로만 확인 — 남은 검증은 `Docs/QA_Checklist.md` "감염 점 오버레이 확인" 섹션 참고) — Step 74는
+같은 버그를 sqrt로 1차 완화(대형국 배율 32배→13.5배, 이후 Step 75로 대체) — Step 73은 국가 선택
+콜라이더를
 `BoxCollider2D`(사각형)에서 `PolygonCollider2D`(실제 실루엣)로 전환 — 인접국 클릭 시 오탭되는
 문제의 근본 원인이 Step 72의 사각형 폴백 콜라이더 자체였음을 조사로 확인 후 조치. `Assets/Editor/
 CountryShapePhysicsShapeGenerator.cs` 신규(48개 `CountryShapes` 텍스처의 "Generate Physics Shape"

@@ -81,7 +81,7 @@ namespace Contagion.UI
             AddRow("사망자", $"{country.deadCount:N0}", "data-value--dead");
             AddRow("의료 수준", DevLabel(country.developmentLevel), DevValueClass(country.developmentLevel));
             AddRow("기후", ClimateLabel(country.climate));
-            AddRow("항공/항구/국경", $"항공 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
+            AddRow("공항/항구/국경", $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
                                   $"항구 {(country.isPortOpen ? "개방" : "폐쇄")} · " +
                                   $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}");
         }

@@ -60,11 +60,13 @@ namespace Contagion.Gameplay
         [SerializeField, Tooltip("InfectionDotDatabase가 국가별로 계산해둔 점 지름(전체 활성화 시 국가 " +
             "면적의 약 70%를 덮도록 역산한 값)에 곱하는 배율. [Step 42] 1→0.35(Step41의 1→0.5를 거쳐 " +
             "재조정한 최종값). [Step 51] '크기 2배로 늘려줘' 요청으로 0.35→0.7. " +
-            "[Step 53] '최소 크기 0.5로 고정, 한국보다 큰 나라는 크기를 확대'로 역할이 바뀌었다 — 이제 " +
-            "이 값은 전 국가 공통 배율이 아니라 '가장 작은 나라(현재 한국)에 적용되는 최소 배율(바닥값)'이다. " +
-            "0.7→0.5로 낮추고, 실제 배율은 SetupInfectionDots()에서 InfectionDotDatabase.MinDiameter 대비 " +
-            "자국 diameter 비율만큼 이 값 위로 키운 뒤 적용한다(아래 참고) — 한국은 정확히 이 값(0.5)을 " +
-            "그대로 쓰고, 더 큰 나라는 비례해서 더 커진다.")]
+            "[Step 53] '최소 크기 0.5로 고정, 한국보다 큰 나라는 크기를 확대'로 역할이 바뀌어 국가별 " +
+            "sizeRatio(→[Step 74] sqrt(sizeRatio))를 추가로 곱하는 방식이 됐었지만, [Step 75] 실제 " +
+            "커버리지(%)를 계산해보니 diameter·count 자체가 이미 국가별로 '전체 활성화 시 면적의 70%' " +
+            "를 만족하도록 공동 계산된 값이라 여기에 국가 크기 비례 배율을 또 곱하면 커버리지가 70%를 " +
+            "초과했다(실측: 일본 118.7%, 영국 105.7% — DevLog Step 75). 그래서 국가별 추가 배율을 " +
+            "제거하고 이 필드를 다시 [Step 51 이전처럼] **전 국가 공통 전역 배율**로 되돌렸다 — 국가 " +
+            "간 크기 차이는 diameter·count 자체의 실제 면적 비례로 이미 표현되므로 배율 없이도 유지된다.")]
         private float infectionDotDiameterScale = 0.5f;
         [SerializeField, Tooltip("점이 나타나고 사라지는(스케일 0↔1) 전환 속도.")]
         private float dotTransitionSpeed = 6f;
@@ -251,14 +253,23 @@ namespace Contagion.Gameplay
         {
             int count = Mathf.Min(maxInfectionDots, _allDotPoints.Length);
 
-            // [Step 53] "최소 크기 0.5 고정, 한국보다 큰 나라는 확대" — infectionDotDiameterScale(기본
-            // 0.5)은 이제 가장 작은 나라(InfectionDotDatabase.MinDiameter, 현재 한국)에 적용되는 바닥값이다.
-            // 자국 diameter가 그 최소값보다 클수록(=한국보다 국토가 클수록) 배율을 같은 비율로 키운다 —
-            // 한국 자신은 ratio=1이라 정확히 바닥값(0.5)을 쓰고, 예를 들어 러시아는 원본 diameter가
-            // 한국의 약 5.66배라 배율도 0.5*5.66≈2.83까지 커진다(Mathf.Max로 바닥 아래로는 안 내려가게 보호).
-            float sizeRatio = _baseDotDiameter / InfectionDotDatabase.MinDiameter;
-            float resolvedScale = Mathf.Max(infectionDotDiameterScale, infectionDotDiameterScale * sizeRatio);
-            _resolvedDotDiameter = _baseDotDiameter * resolvedScale;
+            // [Step 53→74→75 이력] Step 53은 "한국보다 큰 나라는 배율도 확대"를 위해 diameter 위에
+            // sizeRatio(자국/최소 diameter 비)를 곱했고, Step 74는 그 증가폭이 제곱이라 대형국이
+            // 20~32배까지 부풀던 버그를 sqrt로 완화했다. [Step 75] 실제 커버리지(%)를 계산해보니 sqrt로도
+            // 문제가 남아있었다 — diameter·count는 이미 Step 36/42/51 오프라인 스크립트가 "감염률 100%일 때
+            // 국가 면적의 70%(COVERAGE_TARGET)를 덮도록" 국가별로 공동 계산해둔 값이라(예: 한국
+            // 128개/0.00902, 러시아 824개/0.05103, 이 자체로 이미 실제 국가 면적 비례), 여기에 어떤
+            // 형태로든(1승이든 sqrt든) 국가 크기 비례 배율을 추가로 곱하면 그만큼 커버리지가 70%를
+            // 초과한다 — 실측 결과 일본 118.7%, 영국 105.7%(한국만 정확히 70%, sizeRatio=1이라 배율의
+            // 영향을 안 받았기 때문). "커버리지 부족분을 점 개수로 보충"하는 방향도 검토했지만 애초에
+            // 부족하지 않고 초과 상태라 개수를 오히려 줄여야 하는 역설적 결과가 나왔다 — 근본 원인은
+            // diameter가 이미 완결된(count와 공동 계산된) 최종 기준값인데 그 위에 국가 크기 비례 배율을
+            // 또 곱한 이중 반영 자체다. 그래서 국가별 추가 배율을 완전히 제거하고 diameter를 그대로
+            // 쓴다 — count·diameter가 이미 실제 국가 면적에 비례해 커지므로(예: 러시아가 한국보다 점도
+            // 6.4배 많고 지름도 5.66배 커서 화면상 확연히 더 크게/빽빽하게 보임) 배율 없이도 대형국 강조
+            // 효과는 유지되고, 48개국 전부가 설계 목표인 70% 커버리지를 정확히 만족한다(수치 검증:
+            // DevLog Step 75). infectionDotDiameterScale은 이제 다시 전 국가 공통 전역 배율로만 쓰인다.
+            _resolvedDotDiameter = _baseDotDiameter * infectionDotDiameterScale;
 
             _dotTransforms = new Transform[count];
             _dotCurrentScale = new float[count];

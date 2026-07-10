@@ -258,7 +258,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -379,7 +379,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -475,7 +475,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -953,7 +953,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -1115,7 +1115,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -1448,7 +1448,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -1635,7 +1635,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -1964,7 +1964,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -1999,7 +1999,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2034,7 +2034,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2089,7 +2089,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2216,7 +2216,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2310,7 +2310,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2360,7 +2360,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2454,7 +2454,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2535,7 +2535,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2690,7 +2690,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -2784,7 +2784,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3017,7 +3017,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3052,7 +3052,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3148,7 +3148,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3308,7 +3308,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3580,7 +3580,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -3753,7 +3753,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4074,7 +4074,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4205,7 +4205,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4240,7 +4240,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4443,7 +4443,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4598,7 +4598,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -4692,7 +4692,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -5037,7 +5037,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -6106,7 +6106,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -6457,7 +6457,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -7045,7 +7045,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -7152,7 +7152,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -8082,7 +8082,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -8117,7 +8117,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -9075,7 +9075,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -9665,7 +9665,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -10056,7 +10056,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -10143,7 +10143,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -10410,7 +10410,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -10591,7 +10591,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -10789,7 +10789,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -11059,7 +11059,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -11175,7 +11175,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -11451,7 +11451,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -11678,7 +11678,7 @@ MonoBehaviour:
   dotsEnabled: 1
   maxInfectionDots: 600
   infectionDotColor: {r: 1, g: 0, b: 0, a: 0.95}
-  infectionDotDiameterScale: 1
+  infectionDotDiameterScale: 2
   dotTransitionSpeed: 6
   dotSortingOrder: 10
   hotspotsEnabled: 0
@@ -12106,7 +12106,7 @@ MonoBehaviour:
   globalSpreadFactor: 0.5
   visibilityGainRate: 0.02
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0004
+  cureProgressCoefficient: 0.0001
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05
