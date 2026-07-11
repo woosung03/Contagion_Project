@@ -54,7 +54,9 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - Tactical Design System 전환 — CountrySelect(country-row accent bar+data-row, detail-panel
   tactical-panel)/MainMenu(pathogen-card tactical-panel+corner-cut+data-row, detail-panel)/
   EndingScreen(통계+스코어 패널 tactical-panel+corner-cut, data-row 4줄, hero 스코어)/
-  CountryPopup(신규 `TacticalModalController` 공용 프레임 상속, modal-root+tactical-panel)
+  CountryPopup(신규 `TacticalModalController` 공용 프레임 상속, modal-root+tactical-panel)/
+  RankingPanel(tactical-panel+corner-cut 4개+tactical-panel__header+data-row+popup-footer-button
+  2개 균등폭, UI Audit C등급 해소 — Tactical Design System 전체 화면 적용 완료)
 - CountryPopup 국가 대시보드 확장 — 감염 상태 도넛 차트(`CountryDonutChart`, Painter2D)/감염
   통계(감염률·치사율 추정·생존자 수)/의료 시스템 부하(신규 계산식 4단계)/세계 순위(감염자·사망자·
   감염률 각각 별도 행)/이동 통제 섹션(공항·항구·국경, 섹션 캡션+좌측 accent bar), 최근 국가 이벤트는
@@ -87,11 +89,6 @@ DevLog 갱신 시 반영 필요. 검증은 `Docs/QA_Checklist.md` 참고.
 
 지금 실행해야 할 **다음 작업**만 남긴다. "확인/검증"류 항목은 `Docs/QA_Checklist.md`,
 배포 점검은 `Docs/Release_Checklist.md`, 에디터 수동 배선은 `Docs/unity-editor-task.md`로 이동됨.
-
-**UI 디자인 시스템 적용** (근거: `Docs/UI_Design.md`, CountrySelect/MainMenu/EndingScreen/
-Tactical Modal은 Step 64/65/66/67로 완료. 남은 1개 화면은 §14 — `RankingPanel`)
-
-- RankingPanel tactical-panel 축소판 전환 (`Docs/UI_Design.md` §11, §16 실행계획에서는 스코프 아웃 — 착수 시 재검토)
 
 **버그 — 결정 필요** (근거: DevLog Step 67)
 

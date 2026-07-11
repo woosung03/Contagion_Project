@@ -1,11 +1,27 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="RankingPanel.uss" />
-    <ui:VisualElement name="ranking-root" class="ranking-root">
-        <ui:Label name="ranking-title" text="랭킹" class="ranking-title" />
-        <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-row" />
+    <!-- Tactical Reskin (UI Audit C등급 해소) — RankingPanelController.cs가 Q<>()로 찾는
+         이름("ranking-root"/"pb-label"/"note-label"/"open-leaderboard-button"/"close-button")은
+         전부 그대로 유지했다. 구조/클래스만 CountryPopup.uxml·ResearchPopup.uxml과 동일한
+         Tactical Modal 언어(tactical-panel+corner-cut+tactical-panel__header+data-row+
+         popup-footer-button)로 교체 — 기능/데이터 변경 없음, 순수 Visual Redesign. -->
+    <ui:VisualElement name="ranking-root" class="ranking-root tactical-panel">
+        <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+        <ui:VisualElement class="tactical-panel__header">
+            <ui:Label name="ranking-title" text="LEADERBOARD TERMINAL" class="tactical-panel__title" />
+        </ui:VisualElement>
+        <ui:VisualElement class="data-row ranking-pb-row">
+            <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-value" />
+        </ui:VisualElement>
         <ui:Label name="note-label" text="" class="ranking-note" />
-        <ui:Button name="open-leaderboard-button" text="토스 리더보드 열기" class="ranking-button" />
-        <ui:Button name="close-button" text="닫기" class="ranking-button ranking-button--secondary" />
+        <ui:VisualElement name="ranking-footer" class="modal-footer">
+            <ui:Button name="open-leaderboard-button" text="토스 리더보드 열기" class="popup-footer-button popup-footer-button--confirm" />
+            <ui:Button name="close-button" text="닫기" class="popup-footer-button" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
