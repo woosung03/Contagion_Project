@@ -74,10 +74,8 @@ namespace Contagion.Managers
             foreach (var page in _upgradePages)
             {
                 if (page == null) continue;
-                page.OnPrevRequested -= HandlePagePrevRequested;
-                page.OnPrevRequested += HandlePagePrevRequested;
-                page.OnNextRequested -= HandlePageNextRequested;
-                page.OnNextRequested += HandlePageNextRequested;
+                page.OnCategoryRequested -= HandleCategoryRequested;
+                page.OnCategoryRequested += HandleCategoryRequested;
             }
 
             if (endingScreenController != null)
@@ -117,8 +115,7 @@ namespace Contagion.Managers
                 foreach (var page in _upgradePages)
                 {
                     if (page == null) continue;
-                    page.OnPrevRequested -= HandlePagePrevRequested;
-                    page.OnNextRequested -= HandlePageNextRequested;
+                    page.OnCategoryRequested -= HandleCategoryRequested;
                 }
             }
 
@@ -184,18 +181,19 @@ namespace Contagion.Managers
             countryStatusPanelController?.Show();
         }
 
-        /// <summary>헤더의 ◀ 버튼 — 이전 카테고리로 순환 이동(맨 앞에서 누르면 맨 뒤로 돌아감).</summary>
-        private void HandlePagePrevRequested()
+        /// <summary>탭 클릭 — Research Database UI Shell(Commit 1)로 좌우 화살표를 대체한 상단 탭
+        /// 3개 중 하나가 눌리면 호출된다. 요청된 카테고리를 담당하는 UpgradeTreeView를 찾아 그
+        /// 화면만 보이고 나머지 둘은 닫는다(3-GameObject 구조는 그대로 유지 — 화면 표시 여부만
+        /// 토글, ResearchDatabase_MVP_ImplementationPlan.md §6-3).</summary>
+        private void HandleCategoryRequested(UpgradeCategory targetCategory)
         {
-            int count = _upgradePages.Length;
-            ShowUpgradePage((_currentUpgradePageIndex - 1 + count) % count);
-        }
-
-        /// <summary>헤더의 ▶ 버튼 — 다음 카테고리로 순환 이동(맨 뒤에서 누르면 맨 앞으로 돌아감).</summary>
-        private void HandlePageNextRequested()
-        {
-            int count = _upgradePages.Length;
-            ShowUpgradePage((_currentUpgradePageIndex + 1) % count);
+            int index = System.Array.FindIndex(_upgradePages, p => p != null && p.Category == targetCategory);
+            if (index < 0)
+            {
+                Debug.LogWarning($"[UIManager] {targetCategory} 카테고리를 담당하는 UpgradeTreeView를 찾지 못했습니다.");
+                return;
+            }
+            ShowUpgradePage(index);
         }
 
         /// <summary>지정한 인덱스의 UpgradeTreeView만 보이고 나머지 둘은 닫는다.</summary>

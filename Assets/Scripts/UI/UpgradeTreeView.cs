@@ -9,49 +9,30 @@ using UnityEngine.UIElements;
 namespace Contagion.UI
 {
     /// <summary>
-    /// 업그레이드 트리 화면. 설계 문서 7.2절.
-    /// 예전엔 노드 좌표 데이터가 없어 카테고리별 리스트로 단순화했었는데, DefaultUpgradeTreeFactory가
-    /// 각 노드에 좌표(position)를 부여하면서 실제 좌표 배치 + 선행조건 연결선(Painter2D)으로 교체했다.
+    /// Research Database 화면 (Commit 1 — "화면 전환 + UI 구조 변경"만 포함하는 UI Shell).
+    /// 참고: Docs/ResearchDatabase_MVP_ImplementationPlan.md, Docs/UpgradeTree_ResearchDatabase_ScreenDesign.md.
     ///
-    /// UI/UX 폴리싱 — 전파/증상/능력 탭 3개가 전부 같은 창(27노드가 한 캔버스에 다 있는 창)을 열어서
-    /// 카테고리 구분이 안 된다는 피드백으로, 이 컴포넌트를 "카테고리 하나만 담당" 하도록 바꿨다.
-    /// 씬에 이 스크립트를 붙인 GameObject 3개(TransmissionTreeUI/SymptomTreeUI/AbilityTreeUI)를 만들고
-    /// 각각 인스펙터에서 <see cref="category"/>만 다르게 지정한다 — UXML/USS는 동일한 UpgradeTree.uxml을
-    /// 재사용(카테고리 제목만 코드에서 동적으로 채움). 전체 트리(27개)가 아니라 그 카테고리(9개)만
-    /// 필터링해서 그리므로, DefaultUpgradeTreeFactory가 부여한 절대 좌표(카테고리별로 x 40~1600까지
-    /// 넓게 퍼져있음)를 그대로 쓰면 창 하나에 카테고리 하나만 있는데도 왼쪽에 큰 빈 여백이 생긴다 —
-    /// RebuildTree()에서 그 카테고리의 최소 x값을 빼서 항상 0부터 시작하도록 보정한다.
+    /// 예전엔 이 화면이 UpgradeManager.Tree의 실제 45개 노드를 절대좌표 캔버스(RebuildTree()) +
+    /// 선행조건 연결선(DrawConnections(), Painter2D)으로 그렸다. 이번 커밋은 그 캔버스를 세로
+    /// 스크롤 리스트(갈래 섹션 헤더 + 연구 항목 행)로 교체하되, 목록 내용 자체는 아직 더미 데이터
+    /// (<see cref="BuildDummyBranches"/>)다 — 실제 UpgradeNode 연결(코드/상태/DNA 비용을
+    /// UpgradeManager에서 읽어오는 것)은 다음 커밋(Commit 2)에서 수행한다. 그래서 상세 패널의
+    /// "연구 시작" 버튼도 이번 커밋에서는 항상 비활성화 상태다 — 아직 아무 노드에도 연결돼 있지
+    /// 않은데 눌리면 안 되기 때문.
     ///
-    /// UI/UX 폴리싱 추가 — 창 3개가 버튼 3개로 따로 열리던 걸 "버튼 하나 + 좌우 화살표로 카테고리
-    /// 전환"하는 방식으로 바꿨다(HUD 탭이 3개→1개). 이 클래스 자체는 여전히 카테고리 하나만 담당하는
-    /// 그대로고(3개 GameObject 구조 유지 — 실제로 화면을 완전히 하나로 합치려면 UIDocument 3개를
-    /// 병합해야 하는데 리스크가 커서 보류), 대신 헤더에 이전/다음 버튼을 추가해 클릭 시
-    /// <see cref="OnPrevRequested"/>/<see cref="OnNextRequested"/> 이벤트만 쏜다. 실제 페이지 전환(현재
-    /// 보이는 창을 Hide()하고 다음 창을 Show())은 <see cref="Contagion.Managers.UIManager"/>가 담당 —
-    /// 같은 버튼 클릭 콜백 안에서 동시에 일어나므로 사용자 입장에서는 창이 하나이고 그 안에서
-    /// 좌우로 넘어가는 것처럼 보인다.
+    /// DetermineState()/StateCaption()/CategoryLabel() 등 상태 판정·표시 텍스트 헬퍼와
+    /// NodeDisplayNames/_codeByNodeId 필드는 Commit 2에서 그대로 재사용할 예정이라 이번 커밋에서
+    /// 지우지 않고 남겨뒀다(현재는 미사용 — ResearchDatabase_MVP_ImplementationPlan.md §5 재사용
+    /// 표 참고). 씬 GameObject 3개(TransmissionTreeUI/SymptomTreeUI/AbilityTreeUI, 카테고리별
+    /// 독립 UIDocument) 구조는 그대로 유지한다 — 탭 클릭 시 UIManager가 세 UIDocument의 표시
+    /// 여부만 토글하므로(플랜 §6-3), 씬 배선을 다시 할 필요가 없다.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class UpgradeTreeView : MonoBehaviour
     {
-        // 열 간격을 180→140으로 줄인 DefaultUpgradeTreeFactory에 맞춰 노드 박스와 캔버스 여백도 축소
-        // (트리를 좀 더 작게 해달라는 피드백 + 참조 해상도 480px 폭 안에 가로로 다 들어가게 하기 위함).
-        // UI 퀄리티 개선 — 노드 라벨이 node.id(영문 스네이크케이스, 예: "trans_air1")를 그대로 표시해
-        // 텍스트가 박스 밖으로 삐져나오던 문제를 한글 표시명(NodeDisplayNames)으로 교체하면서,
-        // 두 단어(예: "유전자 변이 II")가 자연스럽게 줄바꿈되도록 박스를 살짝 키웠다(110x50 → 126x60).
-        // 열 간격(140)/카테고리 간격(240)/행 간격(110)이 전부 이 값보다 넉넉해 겹침은 없다.
-        // UI_Design.md 11.3/11.7 — 노드가 라벨 2개(이름/비용)에서 code/이름/상태/비용 4줄 스택으로
-        // 바뀌면서 세로 공간이 더 필요해 60→78로 키웠다. 행 간격(110px)이 여유 있어 겹치지 않는다.
-        private const float NodeWidth = 126f;
-        private const float NodeHeight = 78f;
-        private const float CanvasPadding = 48f;
-        private const float TopOffset = 34f; // 카테고리 제목을 위한 상단 여백
-
         /// <summary>
-        /// UpgradeNode.id(영문 내부 식별자) → 한국어 표시명. DefaultUpgradeTreeFactory의 45개 노드에
-        /// 전부 대응한다 — 여기 없는 id는 DisplayName()이 원본 id로 폴백한다(신규 노드 추가 시 안전망).
-        /// 감염경로 3갈래(공기/수인성/접촉→곤충→혈액), 증상 3갈래(기침/발진/구토), 능력 3갈래
-        /// (변이→약물저항/은신→위장/구조강화→구조적내성) 각각의 진행 단계를 로마 숫자로 표기.
+        /// node.id(영문 내부 식별자) → 한국어 표시명. Commit 2에서 실제 UpgradeNode 연결 시
+        /// 그대로 재사용할 딕셔너리 — 이번 커밋(더미 데이터 단계)에서는 미사용.
         /// </summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
@@ -82,12 +63,12 @@ namespace Contagion.UI
             { "sym_dermatitis", "피부염" },
             { "sym_hemorrhage", "출혈" },
             { "sym_respfailure", "호흡 부전" },
-            { "sym_necrosis", "조직 괴사" },
+            { "sym_necrosis", "만성 병변" },
             { "sym_sepsis", "패혈증" },
             { "sym_multiorgan1", "다발성 장기부전 I" },
             { "sym_multiorgan2", "다발성 장기부전 II" },
             { "sym_organfailure", "전신 장기부전" },
-            // 능력
+            // 적응 (구 "능력")
             { "abl_mutation1", "유전자 변이 I" },
             { "abl_stealth1", "은신 I" },
             { "abl_hardening1", "구조 강화 I" },
@@ -105,36 +86,39 @@ namespace Contagion.UI
             { "abl_finalevo", "최종 진화체" },
         };
 
-        /// <summary>node.id → 한국어 표시명. 매핑에 없는 id는 원본 id로 폴백(신규 노드 누락 방지 안전망).</summary>
+        /// <summary>node.id → 한국어 표시명. Commit 2 재사용 예정, 현재 미사용.</summary>
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
 
         [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
         private UpgradeCategory category = UpgradeCategory.Transmission;
 
+        /// <summary>UIManager가 탭 클릭 시 어느 카테고리 화면을 보여줘야 할지 판단하는 데 쓴다.</summary>
+        public UpgradeCategory Category => category;
+
         private VisualElement _upgradeRoot;
         private Label _dnaLabel;
-        private Label _categoryCaptionLabel;
-        private Label _categoryTitleLabel;
+        private Label _labCaptionLabel;
         private ScrollView _nodeScroll;
         private Label _detailTitle;
         private VisualElement _detailRows;
         private Button _buyButton;
         private Button _closeButton;
         private Button _adBonusButton;
-        private Button _prevButton;
-        private Button _nextButton;
+        private Button _tabTransmissionButton;
+        private Button _tabSymptomButton;
+        private Button _tabAbilityButton;
 
-        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). RebuildTree()가 카테고리 내 티어/갈래
-        /// 순서로 정렬해서 채우고, 노드 박스와 상세 패널이 같은 값을 공유해서 쓴다(UI_Design.md 11.3).</summary>
+        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). Commit 2에서 실제 노드 순서 기준으로
+        /// 채울 예정 — 이번 커밋에서는 더미 항목의 코드를 <see cref="BuildResearchList"/>가 직접
+        /// 생성하므로 미사용.</summary>
         private readonly Dictionary<string, string> _codeByNodeId = new Dictionary<string, string>();
 
-        /// <summary>헤더의 ◀ 버튼 클릭 — 실제 페이지 전환은 UIManager가 담당.</summary>
-        public event System.Action OnPrevRequested;
-        /// <summary>헤더의 ▶ 버튼 클릭 — 실제 페이지 전환은 UIManager가 담당.</summary>
-        public event System.Action OnNextRequested;
+        /// <summary>탭 클릭 — 다른 카테고리를 요청하면 발생. 실제 화면 전환(다른 UIDocument
+        /// Show/Hide)은 UIManager가 담당한다.</summary>
+        public event System.Action<UpgradeCategory> OnCategoryRequested;
 
-        private string _selectedNodeId;
+        private DummyResearchItem _selectedDummyItem;
 
         [SerializeField, Tooltip("광고 시청 보상 DNA — 설계 문서 13절 표 1행")]
         private int adBonusDna = 10;
@@ -144,32 +128,25 @@ namespace Contagion.UI
             var root = GetComponent<UIDocument>().rootVisualElement;
             _upgradeRoot = root.Q<VisualElement>("upgrade-root");
             _dnaLabel = root.Q<Label>("dna-label");
-            _categoryCaptionLabel = root.Q<Label>("category-caption-label");
-            _categoryTitleLabel = root.Q<Label>("category-title-label");
+            _labCaptionLabel = root.Q<Label>("lab-caption-label");
             _nodeScroll = root.Q<ScrollView>("node-scroll");
             _detailTitle = root.Q<Label>("detail-title");
             _detailRows = root.Q<VisualElement>("detail-rows");
             _buyButton = root.Q<Button>("buy-button");
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
-            _prevButton = root.Q<Button>("prev-category-button");
-            _nextButton = root.Q<Button>("next-category-button");
+            _tabTransmissionButton = root.Q<Button>("tab-transmission-button");
+            _tabSymptomButton = root.Q<Button>("tab-symptom-button");
+            _tabAbilityButton = root.Q<Button>("tab-ability-button");
 
-            if (_categoryTitleLabel != null)
-                _categoryTitleLabel.text = CategoryLabel(category);
-            // UI_Design.md 11.5 — 기존 한글 라벨(위 줄)은 그대로 두고 영문 LAB 캡션만 추가.
-            if (_categoryCaptionLabel != null)
-                _categoryCaptionLabel.text = CategoryCaption(category);
-
-            // 카테고리 하나(9노드, 3열×3티어)만 그리므로 이제 세로 스크롤만으로 충분 — 예전엔 27노드가
-            // 한 캔버스에 다 있어서(카테고리 3개를 가로로 나열) 양방향 스크롤이 필요했다.
             _nodeScroll.mode = ScrollViewMode.Vertical;
 
             _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
-            _buyButton.RegisterCallback<ClickEvent>(_ => HandleBuyClicked());
             _adBonusButton.RegisterCallback<ClickEvent>(_ => HandleAdBonusClicked());
-            _prevButton?.RegisterCallback<ClickEvent>(_ => OnPrevRequested?.Invoke());
-            _nextButton?.RegisterCallback<ClickEvent>(_ => OnNextRequested?.Invoke());
+            _tabTransmissionButton?.RegisterCallback<ClickEvent>(_ => RequestCategory(UpgradeCategory.Transmission));
+            _tabSymptomButton?.RegisterCallback<ClickEvent>(_ => RequestCategory(UpgradeCategory.Symptom));
+            _tabAbilityButton?.RegisterCallback<ClickEvent>(_ => RequestCategory(UpgradeCategory.Ability));
+            UpdateTabHighlight();
 
             Subscribe();
             Hide();
@@ -182,22 +159,21 @@ namespace Contagion.UI
             if (UpgradeManager.Instance == null) return;
             UpgradeManager.Instance.OnDnaChanged -= HandleDnaChanged;
             UpgradeManager.Instance.OnDnaChanged += HandleDnaChanged;
-            UpgradeManager.Instance.OnNodeUnlocked -= HandleNodeUnlocked;
-            UpgradeManager.Instance.OnNodeUnlocked += HandleNodeUnlocked;
         }
 
         private void OnDisable()
         {
             if (UpgradeManager.Instance == null) return;
             UpgradeManager.Instance.OnDnaChanged -= HandleDnaChanged;
-            UpgradeManager.Instance.OnNodeUnlocked -= HandleNodeUnlocked;
         }
 
-        /// <summary>HUD 탭 버튼에서 호출 — 이 창은 인스펙터에 지정된 <see cref="category"/> 하나만 그린다.</summary>
+        /// <summary>HUD "업그레이드" 버튼 또는 탭 클릭에서 호출 — 이 창은 인스펙터에 지정된
+        /// <see cref="category"/> 하나만 그린다.</summary>
         public void Show()
         {
             _upgradeRoot.style.display = DisplayStyle.Flex;
-            RebuildTree();
+            UpdateTabHighlight();
+            BuildResearchList();
             RefreshDna();
         }
 
@@ -212,81 +188,117 @@ namespace Contagion.UI
             _dnaLabel.text = $"DNA: {dna:N0}";
         }
 
-        /// <summary>이번 RebuildTree() 호출에서 이 카테고리 노드들의 x 최소값 — 0부터 시작하도록 빼주는 보정값.</summary>
-        private float _xOffset;
-
-        /// <summary>
-        /// node.position 절대 좌표로 노드를 배치하고, 선행조건 간 연결선을 그린다. 이 카테고리(9개)만
-        /// 필터링해서 그리며, DefaultUpgradeTreeFactory의 절대 좌표(카테고리별로 40/640/1240부터 시작)를
-        /// 그대로 쓰면 창 하나에 한 카테고리만 있는데도 왼쪽에 큰 빈 여백이 생기므로 _xOffset을 빼서
-        /// 항상 x=0부터 시작하도록 보정한다.
-        /// </summary>
-        private void RebuildTree()
+        /// <summary>이 화면 자신의 탭에 강조 클래스를 준다 — 화면 하나가 카테고리 하나만 담당하므로
+        /// 항상 자기 카테고리 탭만 활성 표시하면 된다.</summary>
+        private void UpdateTabHighlight()
         {
-            var canvas = _nodeScroll.contentContainer;
-            canvas.Clear();
+            _tabTransmissionButton?.RemoveFromClassList("tab-button--active");
+            _tabSymptomButton?.RemoveFromClassList("tab-button--active");
+            _tabAbilityButton?.RemoveFromClassList("tab-button--active");
 
-            if (UpgradeManager.Instance == null)
+            var activeTab = category switch
             {
-                Debug.LogWarning("[UpgradeTreeView] UpgradeManager.Instance가 없어 트리를 그릴 수 없습니다.");
-                return;
-            }
-
-            var nodes = UpgradeManager.Instance.Tree.Where(n => n.category == category).ToList();
-            if (nodes.Count == 0)
-            {
-                Debug.LogWarning($"[UpgradeTreeView] {category} 카테고리 노드가 없습니다 — GameDataBootstrapper의 " +
-                    "SetTree 호출 여부 확인 (DefaultUpgradeTreeFactory 폴백이 정상이면 카테고리당 9개가 있어야 함).");
-                return;
-            }
-
-            // UI_Design.md 11.3 — 노드 표시코드(TRANS-001 등)를 티어(y)→갈래(x) 순으로 부여.
-            // 신규 필드 없이 이번 RebuildTree() 호출마다 다시 계산하는 파생값이라 게임 로직과 무관.
-            _codeByNodeId.Clear();
-            var ordered = nodes.OrderBy(n => n.position.y).ThenBy(n => n.position.x).ToList();
-            for (int i = 0; i < ordered.Count; i++)
-                _codeByNodeId[ordered[i].id] = $"{CategoryPrefix(ordered[i].category)}-{(i + 1):000}";
-
-            _xOffset = nodes.Min(n => n.position.x);
-
-            float maxX = 0f, maxY = 0f;
-            foreach (var n in nodes)
-            {
-                maxX = Mathf.Max(maxX, n.position.x - _xOffset + NodeWidth);
-                maxY = Mathf.Max(maxY, n.position.y + NodeHeight);
-            }
-            float canvasWidth = maxX + CanvasPadding;
-            float canvasHeight = maxY + TopOffset + CanvasPadding;
-
-            canvas.style.position = Position.Relative;
-            canvas.style.width = canvasWidth;
-            canvas.style.height = canvasHeight;
-
-            var connectionsLayer = new VisualElement { pickingMode = PickingMode.Ignore };
-            connectionsLayer.style.position = Position.Absolute;
-            connectionsLayer.style.left = 0;
-            connectionsLayer.style.top = 0;
-            connectionsLayer.style.width = canvasWidth;
-            connectionsLayer.style.height = canvasHeight;
-            connectionsLayer.generateVisualContent += DrawConnections;
-            canvas.Add(connectionsLayer);
-
-            foreach (var node in nodes)
-                canvas.Add(CreateNodeElement(node));
-
-            Debug.Log($"[UpgradeTreeView] {category} 트리 렌더링 완료 — 노드 {nodes.Count}개, 캔버스 크기 {canvasWidth}x{canvasHeight}");
+                UpgradeCategory.Transmission => _tabTransmissionButton,
+                UpgradeCategory.Symptom => _tabSymptomButton,
+                UpgradeCategory.Ability => _tabAbilityButton,
+                _ => null
+            };
+            activeTab?.AddToClassList("tab-button--active");
         }
 
-        /// <summary>UI_Design.md 11.2 — LOCKED/AVAILABLE/ACTIVE/MAXED 4단계를 기존 public API만
-        /// 읽기 전용으로 조회해서 계산한다. isUnlocked 필드/CanUnlock/prerequisites 어느 것도
-        /// 바꾸지 않으므로 해금 규칙(게임 로직)에는 영향이 없다 — 순수 표시용 파생값.</summary>
+        private void RequestCategory(UpgradeCategory target)
+        {
+            if (target == category) return; // 이미 이 화면이 보여주는 카테고리 — 아무 일도 안 함
+            OnCategoryRequested?.Invoke(target);
+        }
+
+        /// <summary>
+        /// 갈래 섹션 헤더 + 연구 항목 행을 순서대로 Add() — 예전 RebuildTree()의 절대좌표 계산
+        /// (_xOffset, canvasWidth/Height, node.position 기반 style.left/top 대입)과 DrawConnections()의
+        /// Painter2D 꺾은선 계산을 전부 대체한다. UI Toolkit 기본 Flex 세로 흐름만으로 배치되므로
+        /// 좌표 계산 코드가 필요 없다(ScreenDesign.md §10).
+        /// 이번 커밋은 더미 데이터만 그린다 — 실제 UpgradeManager.Tree 연결은 Commit 2.
+        /// </summary>
+        private void BuildResearchList()
+        {
+            var container = _nodeScroll.contentContainer;
+            container.Clear();
+
+            if (_labCaptionLabel != null)
+                _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} LAB";
+
+            int order = 0;
+            foreach (var branch in BuildDummyBranches(category))
+            {
+                container.Add(CreateBranchSectionHeader(branch.Label));
+                foreach (var item in branch.Items)
+                {
+                    order++;
+                    item.Code = $"{CategoryPrefix(category)}-{order:000}";
+                    container.Add(CreateResearchRow(item));
+                }
+            }
+        }
+
+        private VisualElement CreateBranchSectionHeader(string branchLabel)
+        {
+            var caption = new Label(branchLabel);
+            caption.AddToClassList("section-caption");
+            caption.AddToClassList($"section-caption--{CategoryClass(category)}");
+            return caption;
+        }
+
+        private VisualElement CreateResearchRow(DummyResearchItem item)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("research-row");
+            row.AddToClassList($"research-row--{CategoryClass(category)}");
+            row.AddToClassList($"research-row--{item.State}");
+            if (item == _selectedDummyItem) row.AddToClassList("research-row--selected");
+
+            var codeLabel = new Label(item.Code);
+            codeLabel.AddToClassList("research-row__code");
+            row.Add(codeLabel);
+
+            var nameLabel = new Label(item.Name);
+            nameLabel.AddToClassList("research-row__name");
+            row.Add(nameLabel);
+
+            string statusText = StateCaption(item.State);
+            if (item.State == "locked" && !string.IsNullOrEmpty(item.LockReason))
+                statusText += $" · 선행: {item.LockReason}";
+            var statusLabel = new Label(statusText);
+            statusLabel.AddToClassList("research-row__status");
+            row.Add(statusLabel);
+
+            var costLabel = new Label(item.CostText);
+            costLabel.AddToClassList("research-row__cost");
+            row.Add(costLabel);
+
+            row.RegisterCallback<ClickEvent>(_ => SelectDummyItem(item));
+            return row;
+        }
+
+        /// <summary>LOCKED/AVAILABLE/ACTIVE/MAXED 4단계를 UpgradeNode 없이 문자열 그대로 조회하는
+        /// 더미 버전. Commit 2에서 <c>DetermineState(UpgradeNode)</c>가 반환하는 값과 동일한 4개
+        /// 문자열("locked"/"available"/"active"/"maxed")을 쓰므로, 실제 데이터 연결 시 이 캡션
+        /// 매핑을 그대로 재사용할 수 있다.</summary>
+        private static string StateCaption(string state) => state switch
+        {
+            "locked" => "잠김",
+            "available" => "연구 가능",
+            "active" => "진행 중",
+            "maxed" => "완료",
+            _ => state.ToUpperInvariant()
+        };
+
+        /// <summary>UpgradeNode 기반 상태 판정 — Commit 2에서 재사용 예정, 이번 커밋(더미 데이터
+        /// 단계)에서는 호출되지 않는다. isUnlocked/prerequisites 등 읽기 전용 조회만 하므로 게임
+        /// 로직에는 영향이 없다.</summary>
         private static string DetermineState(UpgradeNode node)
         {
             if (node.isUnlocked)
             {
-                // isLeaf: 이 노드를 선행조건으로 삼는 다음 노드가 하나도 없으면 그 갈래의 마지막
-                // 노드(=더 진행할 게 없음) — MAXED. 있으면 이미 해금됐지만 다음 단계가 남아있는
-                // ACTIVE.
                 bool isLeaf = !UpgradeManager.Instance.Tree.Any(n => n.prerequisites.Contains(node.id));
                 return isLeaf ? "maxed" : "active";
             }
@@ -295,162 +307,25 @@ namespace Contagion.UI
             return prereqsMet ? "available" : "locked";
         }
 
-        private static string StateCaption(string state) => state switch
+        private void SelectDummyItem(DummyResearchItem item)
         {
-            "locked" => "잠김",
-            "available" => "해금 가능",
-            "active" => "진행 중",
-            "maxed" => "완료",
-            _ => state.ToUpperInvariant()
-        };
+            _selectedDummyItem = item;
 
-        private VisualElement CreateNodeElement(UpgradeNode node)
-        {
-            string state = DetermineState(node);
-
-            var box = new VisualElement();
-            box.AddToClassList("tree-node");
-            box.AddToClassList($"tree-node--{CategoryClass(node.category)}");
-            box.AddToClassList($"tree-node--{state}");
-            if (node.id == _selectedNodeId) box.AddToClassList("tree-node--selected");
-
-            box.style.position = Position.Absolute;
-            box.style.left = node.position.x - _xOffset;
-            box.style.top = node.position.y + TopOffset;
-            box.style.width = NodeWidth;
-            box.style.height = NodeHeight;
-
-            // UI_Design.md 11.3 — "연구 모듈 카드": code / 이름 / STATUS / 비용(또는 완료 표시) 4줄.
-            string code = _codeByNodeId.TryGetValue(node.id, out var mappedCode) ? mappedCode : node.id;
-            var codeLabel = new Label(code);
-            codeLabel.AddToClassList("tree-node__code");
-            box.Add(codeLabel);
-
-            var nameLabel = new Label(DisplayName(node.id));
-            nameLabel.AddToClassList("tree-node__label");
-            box.Add(nameLabel);
-
-            var statusLabel = new Label($"상태 : {StateCaption(state)}");
-            statusLabel.AddToClassList("tree-node__status");
-            box.Add(statusLabel);
-
-            int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
-            string costText = state == "active" || state == "maxed" ? "해금됨" : $"{effectiveCost} DNA";
-            var costLabel = new Label(costText);
-            costLabel.AddToClassList("tree-node__cost");
-            box.Add(costLabel);
-
-            string capturedId = node.id;
-            box.RegisterCallback<ClickEvent>(_ => SelectNode(capturedId));
-
-            return box;
-        }
-
-        // UI_Design.md 11.6 — HUD 헤어라인/격자선과 동일 팔레트(Theme.uss --color-accent-glow /
-        // --color-grid-line). USS 변수를 C#에서 직접 읽을 수 없어 값은 수동 동기화 — 색상을 바꿀 땐
-        // 이 두 상수와 Theme.uss :root를 같이 고칠 것.
-        private static readonly Color ConnectionActiveColor = new Color(150f / 255f, 255f / 255f, 185f / 255f, 1f);
-        private static readonly Color ConnectionInactiveColor = new Color(150f / 255f, 255f / 255f, 185f / 255f, 0.16f);
-
-        /// <summary>선행조건 -> 노드 연결선. 선행 노드가 이미 해금됐으면 발광 굵은 선, 아니면 흐린
-        /// 격자선 톤. 이 카테고리는 자체 완결형(선행조건이 전부 같은 카테고리 안에서만 걸림 —
-        /// DefaultUpgradeTreeFactory 참고)이라 카테고리로 필터링해도 연결선이 끊길 일은 없다.
-        /// UI_Design.md 11.6 — 대각선 직선을 "회로도" 인상의 꺾은선(elbow)으로 바꾸고 양 끝에
-        /// 작은 포트 마커를 찍는다. 좌표 계산/선행조건 순회 로직은 기존과 동일, Painter2D 호출만 변경.</summary>
-        private void DrawConnections(MeshGenerationContext mgc)
-        {
-            if (UpgradeManager.Instance == null) return;
-
-            var painter = mgc.painter2D;
-            foreach (var node in UpgradeManager.Instance.Tree.Where(n => n.category == category))
-            {
-                if (node.prerequisites == null) continue;
-                foreach (var prereqId in node.prerequisites)
-                {
-                    var prereq = UpgradeManager.Instance.GetNode(prereqId);
-                    if (prereq == null || prereq.category != category) continue;
-
-                    bool active = prereq.isUnlocked;
-                    Color color = active ? ConnectionActiveColor : ConnectionInactiveColor;
-                    painter.strokeColor = color;
-                    painter.lineWidth = active ? 3f : 2f;
-
-                    Vector2 from = new Vector2(prereq.position.x - _xOffset, prereq.position.y)
-                        + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
-                    Vector2 to = new Vector2(node.position.x - _xOffset, node.position.y)
-                        + new Vector2(NodeWidth / 2f, NodeHeight / 2f + TopOffset);
-                    Vector2 elbow = new Vector2(to.x, from.y);
-
-                    painter.BeginPath();
-                    painter.MoveTo(from);
-                    painter.LineTo(elbow);
-                    painter.LineTo(to);
-                    painter.Stroke();
-
-                    DrawPort(painter, from, color);
-                    DrawPort(painter, to, color);
-                }
-            }
-        }
-
-        /// <summary>연결선 끝에 4px 정사각형 "포트/단자" 마커를 찍는다 — 국가현황 패널 news-entry-dot과
-        /// 같은 "점 하나로 위치를 찍는" 언어를 재사용(UI_Design.md 11.6).</summary>
-        private static void DrawPort(Painter2D painter, Vector2 center, Color color)
-        {
-            const float half = 2f; // 4px 정사각형
-            painter.fillColor = color;
-            painter.BeginPath();
-            painter.MoveTo(center + new Vector2(-half, -half));
-            painter.LineTo(center + new Vector2(half, -half));
-            painter.LineTo(center + new Vector2(half, half));
-            painter.LineTo(center + new Vector2(-half, half));
-            painter.ClosePath();
-            painter.Fill();
-        }
-
-        /// <summary>UI_Design.md 11.4 — "연구 분석 콘솔". 문자열 한 덩어리(BuildDescription())를
-        /// data-row 여러 줄로 분해했다. 읽는 데이터(cost/prerequisites/effects)는 기존과 동일,
-        /// 표시 방식만 바뀐다.</summary>
-        private void SelectNode(string nodeId)
-        {
-            _selectedNodeId = nodeId;
-            var node = UpgradeManager.Instance?.GetNode(nodeId);
-            if (node == null) return;
-
-            string state = DetermineState(node);
-            string code = _codeByNodeId.TryGetValue(node.id, out var mappedCode) ? mappedCode : node.id;
-            int effectiveCost = UpgradeManager.Instance.GetEffectiveCost(node);
-
-            _detailTitle.text = $"{CategoryEnglishName(node.category)} 분석";
-
+            _detailTitle.text = item.Name;
             _detailRows?.Clear();
-            AddDetailRow("코드", code);
-            AddDetailRow("명칭", DisplayName(node.id));
+            AddDetailRow("이름", item.Name);
+            AddDetailRow("설명", item.Description);
+            AddDetailRow("비용", item.CostText);
+            AddDetailRow("상태", StateCaption(item.State), $"data-value--{item.State}");
 
-            if (node.effects.Count > 0)
-            {
-                foreach (var effect in node.effects)
-                {
-                    string sign = effect.amount >= 0 ? "+" : "";
-                    AddDetailRow(EffectStatLabel(effect.statName), $"{sign}{effect.amount:0.##}");
-                }
-            }
-            else
-            {
-                AddDetailRow("효과", "없음");
-            }
+            // Commit 1은 UI 구조 변경만 포함 — 실제 UpgradeManager.TryUnlock() 연결은 Commit 2.
+            // 그래서 버튼은 항상 비활성화 상태로 둔다(아무 노드에도 연결돼 있지 않은데 눌리면 안 됨).
+            _buyButton.SetEnabled(false);
+            _buyButton.text = item.State == "active" || item.State == "maxed"
+                ? "연구 완료"
+                : "연구 시작 (연결 예정)";
 
-            if (node.prerequisites.Count > 0)
-                AddDetailRow("선행 노드", string.Join(", ", node.prerequisites.Select(DisplayName)));
-
-            AddDetailRow("DNA 비용", node.isUnlocked ? "—" : effectiveCost.ToString());
-            AddDetailRow("상태", StateCaption(state), $"data-value--{state}");
-
-            bool canUnlock = UpgradeManager.Instance.CanUnlock(nodeId);
-            _buyButton.SetEnabled(canUnlock);
-            _buyButton.text = node.isUnlocked ? "이미 해금됨" : $"구매 ({effectiveCost} DNA)";
-
-            RebuildTree();
+            BuildResearchList(); // 선택 강조(research-row--selected) 반영
         }
 
         /// <summary>data-row 한 줄을 만들어 detail-rows 컨테이너에 추가한다(country-dock__row와
@@ -474,7 +349,8 @@ namespace Contagion.UI
             _detailRows.Add(row);
         }
 
-        /// <summary>node.effects의 statName -> 상세 패널 표시 라벨(영문 대문자, 탁티컬 콘솔 톤).</summary>
+        /// <summary>node.effects의 statName -> 상세 패널 표시 라벨. Commit 2 재사용 예정,
+        /// 이번 커밋에서는 미사용.</summary>
         private static string EffectStatLabel(string statName) => statName switch
         {
             "infectivity" => "전파력",
@@ -484,14 +360,8 @@ namespace Contagion.UI
             _ => statName.ToUpperInvariant()
         };
 
-        private void HandleBuyClicked()
-        {
-            if (string.IsNullOrEmpty(_selectedNodeId)) return;
-            if (UpgradeManager.Instance.TryUnlock(_selectedNodeId))
-                SelectNode(_selectedNodeId);
-        }
-
-        /// <summary>설계 문서 13절 표 1행: 업그레이드 화면에서 선택 시청 -> DNA +10.</summary>
+        /// <summary>설계 문서 13절 표 1행: 업그레이드 화면에서 선택 시청 -> DNA +10. 화면 구조와
+        /// 무관한 기존 DNA 재화 로직이라 이번 커밋에서도 그대로 유지한다.</summary>
         private void HandleAdBonusClicked()
         {
             _adBonusButton.SetEnabled(false); // 중복 클릭 차단 (위키 함정 #10 대응)
@@ -505,13 +375,12 @@ namespace Contagion.UI
         }
 
         private void HandleDnaChanged(int totalDna) => RefreshDna();
-        private void HandleNodeUnlocked(UpgradeNode node) => RebuildTree();
 
         private static string CategoryLabel(UpgradeCategory category) => category switch
         {
             UpgradeCategory.Transmission => "감염 경로",
             UpgradeCategory.Symptom => "증상",
-            UpgradeCategory.Ability => "능력",
+            UpgradeCategory.Ability => "적응", // ResearchDatabase_Design.md 권장안 — "능력"에서 개명
             _ => category.ToString()
         };
 
@@ -523,29 +392,160 @@ namespace Contagion.UI
             _ => "unknown"
         };
 
-        /// <summary>UI_Design.md 11.5 — 카테고리 전체 명칭("연구 분석 콘솔" 헤더/연구소 캡션 공용).
-        /// (한글화 작업으로 영문 대문자 명칭 대신 한글 명칭을 반환하도록 변경 — 메서드명은
-        /// 하위 호환을 위해 유지.)</summary>
-        private static string CategoryEnglishName(UpgradeCategory category) => category switch
+        /// <summary>탭 라벨(짧은 한글) — CategoryLabel()보다 더 축약된 표기가 필요한 전파 탭만
+        /// 다르고("감염 경로" 대신 "전파"), 나머지는 CategoryLabel()과 동일.</summary>
+        private static string CategoryTabLabel(UpgradeCategory category) => category switch
         {
-            UpgradeCategory.Transmission => "감염 경로",
+            UpgradeCategory.Transmission => "전파",
             UpgradeCategory.Symptom => "증상",
-            UpgradeCategory.Ability => "능력",
+            UpgradeCategory.Ability => "적응",
             _ => category.ToString()
         };
 
-        /// <summary>UI_Design.md 11.3 — 노드 표시코드(TRANS-001 등) 접두어. CategoryEnglishName의
-        /// 축약형(카드 폭이 좁아 전체 단어 대신 5자 이내로 줄임). (한글화 작업으로 접두어 자체도
-        /// 한글 축약형으로 변경 — 예: "감염-001".)</summary>
+        /// <summary>목록 영역 상단 영문 LAB 캡션(예: "TRANSMISSION LAB").</summary>
+        private static string CategoryEnglishCaption(UpgradeCategory category) => category switch
+        {
+            UpgradeCategory.Transmission => "TRANSMISSION",
+            UpgradeCategory.Symptom => "SYMPTOM",
+            UpgradeCategory.Ability => "ADAPTATION",
+            _ => category.ToString().ToUpperInvariant()
+        };
+
+        /// <summary>노드 표시코드(TRANS-001 등) 접두어. "능력"→"적응" 개명에 맞춰 접두어도 갱신.</summary>
         private static string CategoryPrefix(UpgradeCategory category) => category switch
         {
             UpgradeCategory.Transmission => "감염",
             UpgradeCategory.Symptom => "증상",
-            UpgradeCategory.Ability => "능력",
+            UpgradeCategory.Ability => "적응",
             _ => "노드"
         };
 
-        /// <summary>UI_Design.md 11.5 — 헤더의 카테고리 연구소 캡션(기존 한글 category-title-label 위에 병기).</summary>
-        private static string CategoryCaption(UpgradeCategory category) => $"{CategoryEnglishName(category)} 연구소";
+        // ================================================================
+        // 더미 연구 데이터 (Commit 1 전용) — 실제 UpgradeNode/UpgradeManager.Tree를 전혀 읽지 않는다.
+        // 브랜치·항목명은 NodeDisplayNames/UpgradeTree_ResearchDatabase_ScreenDesign.md §3 예시를
+        // 그대로 따서 Commit 2 전환 시 위화감이 없게 했다. Commit 2에서는 이 메서드 전체가
+        // DefaultUpgradeTreeFactory.cs의 prerequisites/position 기반 실제 그룹핑으로 교체된다.
+        // ================================================================
+
+        private class DummyResearchItem
+        {
+            public string Code;
+            public readonly string Name;
+            public readonly string State; // "locked" | "available" | "active" | "maxed"
+            public readonly string LockReason;
+            public readonly string CostText;
+            public readonly string Description;
+
+            public DummyResearchItem(string name, string state, string lockReason, string costText, string description)
+            {
+                Name = name;
+                State = state;
+                LockReason = lockReason;
+                CostText = costText;
+                Description = description;
+            }
+        }
+
+        private class DummyBranch
+        {
+            public readonly string Label;
+            public readonly List<DummyResearchItem> Items;
+
+            public DummyBranch(string label, List<DummyResearchItem> items)
+            {
+                Label = label;
+                Items = items;
+            }
+        }
+
+        private static List<DummyBranch> BuildDummyBranches(UpgradeCategory targetCategory) => targetCategory switch
+        {
+            UpgradeCategory.Transmission => new List<DummyBranch>
+            {
+                new DummyBranch("공기 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("공기 전파 I", "maxed", null, "완료", "비말 형태로 병원체가 실내 공기 중에 부유해 확산된다."),
+                    new DummyResearchItem("공기 전파 II", "active", null, "18 DNA", "공기 전파 범위가 확장되어 전파력이 추가로 상승한다."),
+                    new DummyResearchItem("비말 전파", "available", null, "22 DNA", "기침·재채기로 배출된 비말을 통해 근접 감염이 강화된다."),
+                    new DummyResearchItem("비말 전파 강화", "locked", "비말 전파", "—", "비말 입자의 생존 시간을 늘려 전파 반경을 넓힌다."),
+                }),
+                new DummyBranch("수인성 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("수인성 전파 I", "available", null, "16 DNA", "오염된 식수를 통해 병원체가 퍼진다."),
+                    new DummyResearchItem("수인성 전파 II", "locked", "수인성 전파 I", "—", "정수 시설이 미비한 지역에서 전파력이 추가로 상승한다."),
+                    new DummyResearchItem("곤충 매개 전파", "locked", "수인성 전파 II", "—", "모기 등 매개체를 통한 간접 전파 경로가 열린다."),
+                }),
+                new DummyBranch("접촉·동물매개 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("접촉 전파 I", "available", null, "16 DNA", "직접 접촉을 통한 전파력이 상승한다."),
+                    new DummyResearchItem("인수공통 전파", "locked", "접촉 전파 I", "—", "가축·야생동물을 매개로 한 전파 경로가 열린다."),
+                    new DummyResearchItem("혈액 전파", "locked", "접촉 전파 I", "—", "혈액 접촉을 통한 전파 경로가 열린다."),
+                }),
+                new DummyBranch("통합 연구", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("광역 전파 I", "locked", "3개 항목", "—", "복수 계열의 전파 경로를 통합해 광역 확산 능력을 얻는다."),
+                    new DummyResearchItem("전지구적 전파", "locked", "광역 전파 I", "—", "국경을 초월한 전지구적 확산 능력을 얻는다."),
+                }),
+            },
+            UpgradeCategory.Symptom => new List<DummyBranch>
+            {
+                new DummyBranch("표준형 — 기침 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("기침", "maxed", null, "완료", "감염자에게 기침 증상이 나타나 비말 전파의 토대가 된다."),
+                    new DummyResearchItem("발열", "active", null, "14 DNA", "체온 상승으로 중증도가 소폭 상승한다."),
+                    new DummyResearchItem("폐렴", "available", null, "20 DNA", "호흡기 증상이 악화되어 중증도·치사율이 함께 상승한다."),
+                    new DummyResearchItem("호흡 부전", "locked", "폐렴", "—", "호흡 기능이 저하되어 치사율이 크게 상승한다."),
+                }),
+                new DummyBranch("은신형 — 발진 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("발진", "available", null, "14 DNA", "피부에 가벼운 발진이 나타난다."),
+                    new DummyResearchItem("피부 병변", "locked", "발진", "—", "발진이 병변으로 진행되어 중증도가 상승한다."),
+                    new DummyResearchItem("피부염", "locked", "피부 병변", "—", "만성적인 피부염 증상으로 진행된다."),
+                    new DummyResearchItem("만성 병변", "locked", "피부염", "—", "병변이 만성화되어 치사율이 소폭 상승한다."),
+                }),
+                new DummyBranch("공격형 — 구토 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("구토감", "available", null, "14 DNA", "가벼운 구토감 증상이 나타난다."),
+                    new DummyResearchItem("구토", "locked", "구토감", "—", "실제 구토 증상으로 진행되어 중증도가 상승한다."),
+                    new DummyResearchItem("출혈", "locked", "구토", "—", "내출혈 증상이 동반되어 치사율이 상승한다."),
+                    new DummyResearchItem("패혈증", "locked", "출혈", "—", "전신 염증 반응으로 치사율이 크게 상승한다."),
+                }),
+                new DummyBranch("통합 연구", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("다발성 장기부전 I", "locked", "3개 항목", "—", "복수 계열의 중증 증상이 겹쳐 장기 기능이 저하된다."),
+                    new DummyResearchItem("전신 장기부전", "locked", "다발성 장기부전 I", "—", "전신의 장기 기능이 상실되어 치사율이 최대치로 상승한다."),
+                }),
+            },
+            UpgradeCategory.Ability => new List<DummyBranch>
+            {
+                new DummyBranch("변이 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("유전자 변이 I", "maxed", null, "완료", "병원체의 유전자가 변이해 기초 능력치가 상승한다."),
+                    new DummyResearchItem("유전자 변이 II", "active", null, "18 DNA", "추가 변이로 기초 능력치가 더 상승한다."),
+                    new DummyResearchItem("약물 저항 I", "available", null, "20 DNA", "치료제 개발 속도를 늦추는 약물 저항력을 얻는다."),
+                    new DummyResearchItem("약물 저항 II", "locked", "약물 저항 I", "—", "약물 저항력이 강화되어 치료제 진행이 더 느려진다."),
+                }),
+                new DummyBranch("은신 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("은신 I", "available", null, "16 DNA", "증상을 억제해 발견 확률을 낮춘다."),
+                    new DummyResearchItem("은신 II", "locked", "은신 I", "—", "은신 능력이 강화되어 발견 확률이 더 낮아진다."),
+                    new DummyResearchItem("위장 I", "locked", "은신 II", "—", "검사 회피 능력을 얻는다."),
+                    new DummyResearchItem("위장 II", "locked", "위장 I", "—", "위장 능력이 강화된다."),
+                }),
+                new DummyBranch("구조 강화 계열", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("구조 강화 I", "available", null, "16 DNA", "병원체 구조를 강화해 생존력을 높인다."),
+                    new DummyResearchItem("구조 강화 II", "locked", "구조 강화 I", "—", "구조 강화가 추가로 진행된다."),
+                    new DummyResearchItem("구조적 내성 I", "locked", "구조 강화 II", "—", "구조적 내성을 얻어 약물 저항력이 상승한다."),
+                    new DummyResearchItem("구조적 내성 II", "locked", "구조적 내성 I", "—", "구조적 내성이 강화된다."),
+                }),
+                new DummyBranch("통합 연구", new List<DummyResearchItem>
+                {
+                    new DummyResearchItem("슈퍼균주 I", "locked", "3개 항목", "—", "세 계열의 적응 능력을 통합해 슈퍼균주로 진화한다."),
+                    new DummyResearchItem("최종 진화체", "locked", "슈퍼균주 I", "—", "병원체가 최종 진화체로 완성된다."),
+                }),
+            },
+            _ => new List<DummyBranch>(),
+        };
     }
 }

@@ -64,12 +64,22 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   (SAFE·WARNING·DANGER·COLLAPSE 4버킷)/의료 시스템 현황(정상·주의·과부하·붕괴 4버킷)/랭킹 2종
   (종합 위협도·감염자 각 TOP 10)/48개국 목록(accent bar 유지) 순 Tactical Dashboard, tactical-panel+
   코너컷+data-row+severity 4색 체계
+- Research Database UI Shell — 업그레이드 트리 화면을 절대좌표 캔버스(좌표+연결선)에서 세로 스크롤
+  리스트(상단 탭 3개 전파/증상/적응 + 갈래 섹션 헤더 + 연구 항목 행)로 전환. 목록 내용은 아직
+  더미 데이터(Commit 2에서 실제 UpgradeNode 연결 예정)
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 81(CountryStatusPanel에
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 82(Research Database MVP
+Commit 1 — UpgradeTreeView의 절대좌표 캔버스(RebuildTree/DrawConnections)를 세로 스크롤 리스트로
+교체, 좌우 화살표를 상단 탭 3개(전파/증상/적응)로 교체, "능력"→"적응" 표시명 개명. 목록 내용은
+아직 더미 데이터 — 실제 UpgradeNode 연결은 Commit 2. `UpgradeTreeView.OnPrevRequested`/
+`OnNextRequested`를 `OnCategoryRequested(UpgradeCategory)` 하나로 교체하고 `UIManager`가 탭
+클릭 시 해당 카테고리 화면만 토글하도록 갱신. `UpgradeNode`/`UpgradeManager`/
+`DefaultUpgradeTreeFactory`는 미변경. Unity 에디터 미접속으로 렌더링 미검증 — 검증은
+`Docs/QA_Checklist.md` 참고) — Step 81(CountryStatusPanel에
 GLOBAL STATUS 한줄평가(WorldState.GetMortalityStage()+세계 감염률 조합, 신규 계산 없음)/감염 국가
 현황(감염·무감염·소멸 국가 수)/의료 시스템 현황(정상·주의·과부하·붕괴 4버킷, 국가 상태 분포와 동일
 UI 재사용)을 추가하고, 기존 감염률·치사율·의료부하 TOP10 랭킹 3개를 종합 위협도(ThreatIndex,
@@ -153,6 +163,33 @@ Tactical Modal은 Step 64/65/66/67로 완료. 남은 1개 화면은 §14 — `Ra
   살아있고 씬 GameObject도 활성 상태. 자동 팝업을 계속 띄울지, Country Dock으로 완전히
   대체하고 팝업 트리거는 끌지 결정 필요(끄는 쪽이면 `CountryPopupController.Subscribe()`의
   `WorldMap.OnCountryClicked` 구독 제거 또는 `CountryPopupUI` GameObject 비활성화 한 줄이면 됨)
+
+**Research Database v2(브랜치 현황판+Research Popup) 구현 착수** (근거:
+`Docs/ResearchDatabase_UI_FinalReview.md`, `Docs/ResearchDatabase_V2_UI_StructureDesign.md`)
+
+- 모바일 내비게이션 방향 결정 완료 — **E(브랜치 현황판+연구 콘솔) + Research Popup**을 사용자가
+  최종 확정(6개 조합 비교 후 1순위 추천안 그대로 채택). 후속으로 브랜치 현황판 배치·전체
+  와이어프레임·Popup 필드/버튼 구성·기존 UXML/USS와 충돌 없는 구현 방안·`DESIGN.md` 반영안까지
+  상세 설계 완료(`ResearchDatabase_V2_UI_StructureDesign.md`) — 아직 코드/UXML/USS 변경 없음.
+- 착수 전 그 문서 §7 결정 필요 사항 확인: Commit 순서(구조+데이터 통합 진행 vs 구조 먼저 더미로
+  검증 후 분리), 팝업 오픈 책임 소재(카테고리별 `UpgradeTreeView` 직접 구독 vs 상위 코디네이터),
+  브랜치 선택 기억 정책, `detail-rows` 문단 텍스트 허용 범위.
+- 아래 "Research Database MVP — Commit 2" 항목은 이 v2 구조 확정 이전(구 인라인 리스트 전제)에
+  작성됐으므로, 착수 시 `ResearchDatabase_V2_UI_StructureDesign.md` §5.3 기준으로 범위를 다시
+  맞출 것(권장: 브랜치 보드/팝업 구조 변경과 아래 Commit 2 데이터 연결을 통합 진행).
+
+**Research Database MVP — Commit 2 착수** (근거: DevLog Step 82,
+`Docs/ResearchDatabase_MVP_ImplementationPlan.md`, 착수 시 위 v2 항목의 범위 조정 먼저 확인)
+
+- Commit 1(UI Shell, 더미 데이터)이 끝났다. Commit 2에서 `UpgradeTreeView.cs`의
+  `BuildDummyBranches()`를 `DefaultUpgradeTreeFactory.cs`의 실제 45개 노드
+  (`prerequisites`/`position` 기준 그룹핑)로 교체하고, `_codeByNodeId`/`DetermineState()`를
+  실제 데이터에 연결하며, "연구 시작" 버튼을 `UpgradeManager.TryUnlock()`에 연결한다.
+- 그 다음(Phase 2~4, 이번 MVP 범위 아님)은 `Docs/ResearchDatabase_RuntimeSystems.md` §9 순서
+  (①기존 재사용 → ②`environmentResistance` 소비 → ③`medicalBurdenModifier` → ④
+  `unlockedFlags`)를 따르고, 그 문서 §11의 미결정 항목(게이트 범주별 `Max()` 합성 경계·UI
+  의료부하 계산식 통합 범위·4분류 체계가 깨지는 경우의 대응)과 `NodeMapping.md` §8의 잔여
+  항목(DNA 비용 프리미엄 적용 여부·항원 변이 확률 밸런스 검증)을 함께 확인할 것
 
 **조사 필요**
 

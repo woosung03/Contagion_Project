@@ -4,46 +4,43 @@
     padding: var(--space-xl);
 }
 
-/* 전파/증상/능력 3창 통합 — 헤더를 2줄로 나눔: 위(◀ 제목 ▶ 내비게이션) / 아래(DNA·광고·닫기 액션).
-   한 줄에 다 넣으면(화살표 2개+제목+DNA+광고버튼+닫기버튼) 참조 해상도 480px 폭 안에서
-   제목이 들어갈 공간이 거의 안 남아 2줄로 분리했다. */
+/* Research Database UI Shell (Commit 1) — 헤더를 2줄로 유지: 위(탭 3개) / 아래(DNA·광고·닫기 액션).
+   기존엔 위 줄이 ◀ 제목 ▶ 내비게이션이었는데, 탭 3개 상시 노출로 교체(ScreenDesign.md §2). */
 .upgrade-header {
     flex-direction: column;
     margin-bottom: 14px;
 }
 
-.upgrade-header__nav {
+.upgrade-header__tabs {
     flex-direction: row;
-    align-items: center;
     margin-bottom: 10px;
+}
+
+/* 탭 버튼 — 3개 고정, 터치 영역 48px 이상(--touch-target-min). 선택 강조는 새 색상 축을 만들지
+   않고 기존 --color-border-selected(금색) 하단 밑줄로 처리(DESIGN.md 색상 축 분리 원칙). */
+.tab-button {
+    flex-grow: 1;
+    height: var(--touch-target-min);
+    margin: 0 2px;
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    border-radius: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+}
+
+.tab-button--active {
+    color: var(--color-brand-gold);
+    border-bottom-color: var(--color-border-selected);
 }
 
 .upgrade-header__actions {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-}
-
-/* UI_Design.md 11.5 — 카테고리명 영문 LAB 캡션 + 기존 한글 라벨 2줄 병기용 래퍼.
-   flex-grow는 기존 category-title-label이 아니라 이 래퍼가 담당(가로 중앙 정렬 유지). */
-.upgrade-header__title-block {
-    flex-direction: column;
-    align-items: center;
-    flex-grow: 1;
-}
-
-.upgrade-header__caption {
-    color: var(--color-accent-glow);
-    font-size: 11px;
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-caption);
-}
-
-.upgrade-header__category-title {
-    color: var(--color-brand-gold);
-    font-size: var(--font-size-xl);
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
 }
 
 .upgrade-header__dna {
@@ -56,23 +53,93 @@
     width: 80px;
 }
 
-.upgrade-header__arrow {
-    width: 52px;
-    height: var(--touch-target-min);
-    font-size: var(--font-size-lg);
-    -unity-font-style: bold;
-    margin: 0 var(--space-sm);
-}
-
 .upgrade-header__ad-bonus {
     background-color: var(--color-brand-premium);
     color: var(--color-text-primary);
     width: 160px;
 }
 
+/* ScreenDesign.md §3 — 영문 LAB 캡션(예: "TRANSMISSION LAB")을 목록 영역 상단에 유지. */
+.lab-caption {
+    color: var(--color-accent-glow);
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-caption);
+    margin-bottom: var(--space-sm);
+}
+
 .node-scroll {
     flex-grow: 1;
     margin-bottom: var(--space-lg);
+}
+
+/* ============================================================
+   branch-board (Research Database v2, ResearchDatabase_V2_ImplementationPlan.md
+   §1 Step 3~4 / 커밋 2) — 카테고리당 브랜치 4개(계열 3 + 통합 브랜치 1) 현황판.
+   행(branch-row)은 UpgradeTreeView.BuildBranchBoard()가 다음 커밋에서 동적으로 채운다.
+   이 커밋은 UXML에 빈 rows 컨테이너 + 클래스 정의만 추가 — 화면엔 빈 tactical-panel만 보인다.
+   진행률 막대는 Hud.uss population-bar__track/__segment와 동일 기법(flex-basis:0 +
+   코드가 대입하는 flex-grow 비율)을 재사용한다.
+   ============================================================ */
+.branch-board {
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.branch-board__rows {
+    flex-direction: column;
+}
+
+.branch-row {
+    flex-direction: column;
+    padding: 6px 8px;
+    border-width: 1px;
+    border-color: var(--color-border);
+    background-color: var(--color-surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+}
+
+.branch-row__label {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xs);
+    -unity-font-style: bold;
+    margin-bottom: 3px;
+}
+
+.branch-row__progress {
+    flex-direction: row;
+    height: 8px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--color-surface-soft);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.branch-row__progress-fill {
+    height: 100%;
+    flex-basis: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    background-color: var(--color-accent-glow);
+}
+
+.branch-row--selected {
+    border-width: 2px;
+    border-color: var(--color-border-selected);
+}
+
+.branch-row--locked {
+    opacity: 0.6;
+}
+
+.branch-row--locked .branch-row__label {
+    color: var(--color-text-tertiary);
+}
+
+.branch-row--locked .branch-row__progress-fill {
+    background-color: var(--color-text-tertiary);
 }
 
 /* ============================================================
@@ -143,117 +210,107 @@
 .data-value--active     { color: var(--color-brand-dna); }
 .data-value--maxed      { color: var(--color-brand-gold); }
 
-.category-header {
+/* ============================================================
+   연구 목록 (Research Database 리스트 — ScreenDesign.md §3/§4/§5)
+   갈래 섹션 헤더 + 연구 항목 행. 캔버스 절대좌표(tree-node)/연결선(Painter2D)을 대체한다.
+   ============================================================ */
+
+/* 갈래 섹션 헤더 — 카테고리색 좌측 accent-bar로 "이 섹션이 이 카테고리 소속"임을 인지시킨다.
+   코너컷은 반복되는 헤더/행에는 붙이지 않는다(DESIGN.md Corner Cut Don't). */
+.section-caption {
     color: var(--color-brand-gold);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xs);
     -unity-font-style: bold;
-    margin-top: 10px;
+    letter-spacing: var(--tracking-caption);
+    padding: 4px 0 4px 8px;
+    border-left-width: 4px;
+    margin-top: var(--space-sm);
     margin-bottom: var(--space-xs);
 }
 
-/* 트리 좌표 배치 노드 (UpgradeTreeView — 세분화 항목: 좌표+연결선 시각화) */
-.tree-category-label {
-    color: var(--color-brand-gold);
-    font-size: 19px;
-    -unity-font-style: bold;
-}
+.section-caption--transmission { border-left-color: var(--color-node-transmission); }
+.section-caption--symptom { border-left-color: var(--color-node-symptom); }
+.section-caption--ability { border-left-color: var(--color-node-ability); }
 
-/* UI_Design.md 11.3 — "연구 모듈 카드": 라벨 2개짜리 버튼에서 code/name/status/cost 4줄
-   세로 스택으로 전환. 카테고리 색은 전체 테두리에서 좌측 4px 바(accent bar)로 축소해
-   11.2 상태 테두리(잠금/대기/활성/완료)와 위계가 겹치지 않게 분리했다. */
-.tree-node {
-    background-color: var(--color-surface);
+/* 연구 항목 행 — 기존 tree-node(4줄 세로 스택, 절대좌표)를 가로 한 줄(코드/이름/상태/비용)로
+   압축. 좌측 4px accent-bar는 tree-node와 동일 규칙(카테고리색), Flex 기본 흐름만 사용하므로
+   좌표 계산 코드가 필요 없다. */
+.research-row {
+    flex-direction: row;
+    align-items: center;
+    min-height: var(--touch-target-min);
+    padding: 6px 8px;
     border-width: 1px;
     border-left-width: 4px;
     border-color: var(--color-border);
+    background-color: var(--color-surface);
     border-radius: var(--radius-sm);
-    padding: 5px 7px;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    overflow: hidden; /* 한글 표시명이 길어져도 박스 밖으로 새지 않도록 하는 안전망 */
+    margin-bottom: 2px;
 }
 
-.tree-node--transmission {
-    border-left-color: var(--color-node-transmission);
-}
+.research-row--transmission { border-left-color: var(--color-node-transmission); }
+.research-row--symptom { border-left-color: var(--color-node-symptom); }
+.research-row--ability { border-left-color: var(--color-node-ability); }
 
-.tree-node--symptom {
-    border-left-color: var(--color-node-symptom);
-}
-
-.tree-node--ability {
-    border-left-color: var(--color-node-ability);
-}
-
-/* ---- 11.2 노드 상태 4단계 (LOCKED/AVAILABLE/ACTIVE/MAXED) ----
-   isUnlocked 하나뿐이던 기존 이분법을 대체 — UpgradeTreeView.CreateNodeElement()가
-   node.prerequisites/isUnlocked/leaf 여부를 읽기 전용으로 조회해 상태 하나를 계산하고
-   tree-node--{state} 클래스 하나만 부여한다(게임 로직 변경 없음, 표시만 세분화). */
-.tree-node--locked {
-    border-color: var(--color-border);
-    opacity: 0.7;
-}
-
-.tree-node--available {
-    border-color: var(--color-accent-glow-soft);
-}
-
-.tree-node--active {
-    border-color: var(--color-accent-glow);
-    border-width: 2px;
-    background-color: rgba(120, 220, 140, 0.12);
-}
-
-.tree-node--maxed {
-    border-color: var(--color-brand-gold);
-    border-width: 2px;
-    background-color: rgba(255, 210, 90, 0.10);
-}
-
-.tree-node--selected {
-    border-width: 3px;
-    border-color: var(--color-border-selected);
-}
-
-.tree-node__code {
-    width: 100%; /* align-items:flex-start라도 컨테이너 폭만큼 항상 차지하도록(줄바꿈 측정 안전망) */
+.research-row__code {
+    width: 64px;
     color: var(--color-text-tertiary);
     font-size: 11px;
     -unity-font-style: bold;
     letter-spacing: var(--tracking-caption);
 }
 
-.tree-node__label {
-    width: 100%;
+.research-row__name {
+    flex-grow: 1;
     color: var(--color-text-primary);
     font-size: var(--font-size-xs);
     -unity-font-style: bold;
-    white-space: normal; /* 한글 표시명이 두 단어(예: "다발성 장기부전 II")일 때 자연스럽게 줄바꿈 */
+    white-space: normal;
 }
 
-.tree-node__status {
-    width: 100%;
+.research-row__status {
+    color: var(--color-text-tertiary);
     font-size: 11px;
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-label);
-    color: var(--color-text-tertiary);
+    margin-right: 8px;
+    max-width: 160px;
+    white-space: normal;
 }
 
-.tree-node--locked .tree-node__status    { color: var(--color-text-tertiary); }
-.tree-node--available .tree-node__status { color: var(--color-accent-glow); }
-.tree-node--active .tree-node__status    { color: var(--color-brand-dna); }
-.tree-node--maxed .tree-node__status     { color: var(--color-brand-gold); }
-
-.tree-node--locked .tree-node__label,
-.tree-node--locked .tree-node__code {
-    color: var(--color-text-tertiary);
-}
-
-.tree-node__cost {
-    width: 100%;
+.research-row__cost {
+    min-width: 64px;
     color: var(--color-text-secondary);
     font-size: var(--font-size-xs);
+    -unity-text-align: middle-right;
+}
+
+/* ---- 상태 4단계 (LOCKED/AVAILABLE/ACTIVE/MAXED) — 캔버스 tree-node--{state}와 동일 색 규칙 ---- */
+.research-row--locked {
+    opacity: 0.7;
+}
+.research-row--locked .research-row__status { color: var(--color-text-tertiary); }
+
+.research-row--available {
+    border-color: var(--color-accent-glow-soft);
+}
+.research-row--available .research-row__status { color: var(--color-accent-glow); }
+
+.research-row--active {
+    border-color: var(--color-accent-glow);
+    border-width: 2px;
+    background-color: rgba(120, 220, 140, 0.12);
+}
+.research-row--active .research-row__status { color: var(--color-brand-dna); }
+
+.research-row--maxed {
+    border-color: var(--color-brand-gold);
+    border-width: 2px;
+    background-color: rgba(255, 210, 90, 0.10);
+}
+.research-row--maxed .research-row__status { color: var(--color-brand-gold); }
+
+.research-row--selected {
+    border-width: 3px;
+    border-color: var(--color-border-selected);
 }
 
 /* UI_Design.md 11.4 — "연구 분석 콘솔". position:relative는 코너컷(position:absolute
@@ -269,7 +326,7 @@
     margin-top: var(--space-sm);
 }
 
-/* detail-rows — data-row가 채워지는 컨테이너(SelectNode()가 채움, 기존 detail-panel__desc
+/* detail-rows — data-row가 채워지는 컨테이너(SelectDummyItem()이 채움, 기존 detail-panel__desc
    문자열 한 덩어리를 대체). */
 .detail-rows {
     margin: var(--space-sm) 0;

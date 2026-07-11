@@ -47,6 +47,8 @@ namespace Contagion.Data
             var nodes = new List<UpgradeNode>();
 
             // ================= 감염 경로 (Transmission) — x: 40~400 (열 간격 140), 3갈래(공기/수인성/접촉) =================
+            // 최종 결정안(UpgradeTree_FinalDecision.md) §1: 1~2티어 순수 감염력(예외 유지),
+            // 3티어↑(9개, 60%)에 발각도(severity) 소폭 부착. 갈래 비용 약한 차등(동물매개 할인 등).
             nodes.Add(Node("trans_air1", UpgradeCategory.Transmission, 2, 40, 40, null,
                 ("infectivity", 0.05f)));
             nodes.Add(Node("trans_water1", UpgradeCategory.Transmission, 2, 180, 40, null,
@@ -61,110 +63,122 @@ namespace Contagion.Data
             nodes.Add(Node("trans_insect1", UpgradeCategory.Transmission, 4, 320, 150, new[] { "trans_contact1" },
                 ("infectivity", 0.07f)));
 
-            nodes.Add(Node("trans_droplet1", UpgradeCategory.Transmission, 6, 40, 260, new[] { "trans_air2" },
-                ("infectivity", 0.06f)));
+            nodes.Add(Node("trans_droplet1", UpgradeCategory.Transmission, 7, 40, 260, new[] { "trans_air2" },
+                ("infectivity", 0.06f), ("severity", 0.01f)));
             nodes.Add(Node("trans_animal1", UpgradeCategory.Transmission, 6, 180, 260, new[] { "trans_water2" },
                 ("infectivity", 0.05f), ("severity", 0.02f)));
             nodes.Add(Node("trans_blood1", UpgradeCategory.Transmission, 6, 320, 260, new[] { "trans_insect1" },
-                ("infectivity", 0.07f)));
+                ("infectivity", 0.07f), ("severity", 0.01f)));
 
-            nodes.Add(Node("trans_droplet2", UpgradeCategory.Transmission, 8, 40, 370, new[] { "trans_droplet1" },
-                ("infectivity", 0.05f)));
-            nodes.Add(Node("trans_animal2", UpgradeCategory.Transmission, 8, 180, 370, new[] { "trans_animal1" },
+            nodes.Add(Node("trans_droplet2", UpgradeCategory.Transmission, 9, 40, 370, new[] { "trans_droplet1" },
+                ("infectivity", 0.05f), ("severity", 0.02f)));
+            nodes.Add(Node("trans_animal2", UpgradeCategory.Transmission, 7, 180, 370, new[] { "trans_animal1" },
                 ("infectivity", 0.05f), ("severity", 0.02f)));
             nodes.Add(Node("trans_blood2", UpgradeCategory.Transmission, 8, 320, 370, new[] { "trans_blood1" },
-                ("infectivity", 0.06f)));
+                ("infectivity", 0.06f), ("severity", 0.02f)));
 
-            nodes.Add(Node("trans_advanced1", UpgradeCategory.Transmission, 12, 110, 480,
+            nodes.Add(Node("trans_advanced1", UpgradeCategory.Transmission, 13, 110, 480,
                 new[] { "trans_droplet2", "trans_animal2" },
                 ("infectivity", 0.08f), ("severity", 0.02f)));
-            nodes.Add(Node("trans_advanced2", UpgradeCategory.Transmission, 12, 250, 480, new[] { "trans_blood2" },
-                ("infectivity", 0.08f)));
+            nodes.Add(Node("trans_advanced2", UpgradeCategory.Transmission, 11, 250, 480, new[] { "trans_blood2" },
+                ("infectivity", 0.08f), ("severity", 0.01f)));
 
             nodes.Add(Node("trans_global", UpgradeCategory.Transmission, 20, 180, 590,
                 new[] { "trans_advanced1", "trans_advanced2" },
-                ("infectivity", 0.15f)));
+                ("infectivity", 0.15f), ("severity", 0.02f)));
 
             // ================= 증상 (Symptom) — x: 640~1000 (열 간격 140), 3갈래(기침/발진/구토) =================
             // (예전엔 520~940이라 감염경로 마지막 칸과 40px밖에 안 떨어져 있었고 노드 폭이 140이라
             // 실제로는 겹쳤다 — 플레이 중 발견되어 카테고리 사이 간격을 넓힘. 이후 열 간격 자체를
             // 180→140으로 다시 압축했지만 카테고리 간 간격 240px은 그대로 유지)
+            // 최종 결정안 §1/§2: 3갈래를 표준형(기침)/은신형(발진)/공격형(구토)으로 분리.
+            // 전 노드 다중효과(발각도=severity 기본 대가). §2-2 표준형 상향(fever 감염력 0.05,
+            // pneumonia 감염력 0.06) + 은신형 할인 축소(lesion 4, dermatitis 6). §2-3 multiorgan2 감염력 -0.03.
+            // --- 표준형 (기침 계열): 감염력·치사율·발각도 균형형 ---
             nodes.Add(Node("sym_cough", UpgradeCategory.Symptom, 2, 640, 40, null,
-                ("severity", 0.03f)));
-            nodes.Add(Node("sym_rash", UpgradeCategory.Symptom, 2, 780, 40, null,
-                ("severity", 0.04f)));
-            nodes.Add(Node("sym_nausea", UpgradeCategory.Symptom, 2, 920, 40, null,
-                ("severity", 0.03f)));
-
+                ("infectivity", 0.05f), ("severity", 0.02f)));
             nodes.Add(Node("sym_fever", UpgradeCategory.Symptom, 4, 640, 150, new[] { "sym_cough" },
-                ("severity", 0.05f), ("lethality", 0.01f)));
+                ("infectivity", 0.05f), ("severity", 0.04f), ("lethality", 0.01f)));
+            nodes.Add(Node("sym_pneumonia", UpgradeCategory.Symptom, 7, 640, 260, new[] { "sym_fever" },
+                ("infectivity", 0.06f), ("lethality", 0.05f), ("severity", 0.06f)));
+            nodes.Add(Node("sym_respfailure", UpgradeCategory.Symptom, 9, 640, 370, new[] { "sym_pneumonia" },
+                ("infectivity", 0.02f), ("lethality", 0.07f), ("severity", 0.07f)));
+
+            // --- 은신형 (발진 계열): 감염력 위주, 발각도 최소, 치사율 후반까지 억제 ---
+            nodes.Add(Node("sym_rash", UpgradeCategory.Symptom, 2, 780, 40, null,
+                ("infectivity", 0.06f), ("severity", 0.01f)));
             nodes.Add(Node("sym_lesion", UpgradeCategory.Symptom, 4, 780, 150, new[] { "sym_rash" },
-                ("severity", 0.05f)));
-            nodes.Add(Node("sym_vomit", UpgradeCategory.Symptom, 4, 920, 150, new[] { "sym_nausea" },
-                ("severity", 0.05f)));
-
-            nodes.Add(Node("sym_pneumonia", UpgradeCategory.Symptom, 6, 640, 260, new[] { "sym_fever" },
-                ("severity", 0.06f), ("lethality", 0.03f)));
+                ("infectivity", 0.07f), ("severity", 0.02f)));
             nodes.Add(Node("sym_dermatitis", UpgradeCategory.Symptom, 6, 780, 260, new[] { "sym_lesion" },
-                ("severity", 0.05f)));
-            nodes.Add(Node("sym_hemorrhage", UpgradeCategory.Symptom, 6, 920, 260, new[] { "sym_vomit" },
-                ("severity", 0.06f), ("lethality", 0.03f)));
+                ("infectivity", 0.08f), ("severity", 0.02f)));
+            nodes.Add(Node("sym_necrosis", UpgradeCategory.Symptom, 10, 780, 370, new[] { "sym_dermatitis" },
+                ("infectivity", 0.03f), ("severity", 0.03f), ("lethality", 0.02f)));
 
-            nodes.Add(Node("sym_respfailure", UpgradeCategory.Symptom, 8, 640, 370, new[] { "sym_pneumonia" },
-                ("severity", 0.05f), ("lethality", 0.04f)));
-            nodes.Add(Node("sym_necrosis", UpgradeCategory.Symptom, 8, 780, 370, new[] { "sym_dermatitis" },
-                ("severity", 0.06f), ("lethality", 0.02f)));
-            nodes.Add(Node("sym_sepsis", UpgradeCategory.Symptom, 8, 920, 370, new[] { "sym_hemorrhage" },
-                ("severity", 0.05f), ("lethality", 0.04f)));
+            // --- 공격형 (구토 계열): 치사율·발각도 위주, 감염력 후반에 감소(대가) ---
+            nodes.Add(Node("sym_nausea", UpgradeCategory.Symptom, 2, 920, 40, null,
+                ("infectivity", 0.02f), ("lethality", 0.02f), ("severity", 0.04f)));
+            nodes.Add(Node("sym_vomit", UpgradeCategory.Symptom, 5, 920, 150, new[] { "sym_nausea" },
+                ("infectivity", 0.02f), ("lethality", 0.03f), ("severity", 0.05f)));
+            nodes.Add(Node("sym_hemorrhage", UpgradeCategory.Symptom, 8, 920, 260, new[] { "sym_vomit" },
+                ("infectivity", 0.01f), ("lethality", 0.06f), ("severity", 0.07f)));
+            nodes.Add(Node("sym_sepsis", UpgradeCategory.Symptom, 11, 920, 370, new[] { "sym_hemorrhage" },
+                ("infectivity", -0.01f), ("lethality", 0.08f), ("severity", 0.08f)));
 
+            // --- 합류·최종 ---
             nodes.Add(Node("sym_multiorgan1", UpgradeCategory.Symptom, 12, 710, 480,
                 new[] { "sym_respfailure", "sym_necrosis" },
-                ("severity", 0.06f), ("lethality", 0.05f)));
-            nodes.Add(Node("sym_multiorgan2", UpgradeCategory.Symptom, 12, 850, 480, new[] { "sym_sepsis" },
-                ("severity", 0.06f), ("lethality", 0.05f)));
+                ("infectivity", 0.03f), ("lethality", 0.06f), ("severity", 0.07f)));
+            nodes.Add(Node("sym_multiorgan2", UpgradeCategory.Symptom, 14, 850, 480, new[] { "sym_sepsis" },
+                ("infectivity", -0.03f), ("lethality", 0.10f), ("severity", 0.09f)));
 
-            nodes.Add(Node("sym_organfailure", UpgradeCategory.Symptom, 20, 780, 590,
+            nodes.Add(Node("sym_organfailure", UpgradeCategory.Symptom, 22, 780, 590,
                 new[] { "sym_multiorgan1", "sym_multiorgan2" },
-                ("lethality", 0.18f), ("severity", 0.06f)));
+                ("lethality", 0.20f), ("severity", 0.12f), ("infectivity", -0.08f)));
 
-            // ================= 능력 (Ability) — x: 1240~1600 (열 간격 140), 3갈래(변이/은신/강화) =================
-            nodes.Add(Node("abl_mutation1", UpgradeCategory.Ability, 2, 1240, 40, null,
-                ("drugResistance", 0.04f)));
+            // ================= 능력 (Ability/Resistance) — x: 1240~1600 (열 간격 140), 3갈래 재배선 =================
+            // 최종 결정안 §1/§2-1: drugResistance 단순 반복 제거, "인류 대응 지연" 카테고리로 전환.
+            // 약물내성(구조강화)/백신회피(변이)/면역교란(은신). §2-1 약물내성 상향
+            // (hardening2 약물내성 0.09, resist4 약물내성 0.10)으로 백신회피의 "거의 지배" 해소.
+            // --- 백신회피 (변이 계열): drugResistance 최강, 비싸고 발각도 대가 ---
+            nodes.Add(Node("abl_mutation1", UpgradeCategory.Ability, 3, 1240, 40, null,
+                ("drugResistance", 0.06f), ("severity", 0.01f)));
+            nodes.Add(Node("abl_mutation2", UpgradeCategory.Ability, 5, 1240, 150, new[] { "abl_mutation1" },
+                ("drugResistance", 0.09f), ("severity", 0.02f)));
+            nodes.Add(Node("abl_resist1", UpgradeCategory.Ability, 7, 1240, 260, new[] { "abl_mutation2" },
+                ("drugResistance", 0.10f), ("severity", 0.02f)));
+            nodes.Add(Node("abl_resist3", UpgradeCategory.Ability, 10, 1240, 370, new[] { "abl_resist1" },
+                ("drugResistance", 0.12f), ("severity", 0.03f)));
+
+            // --- 면역교란 (은신 계열): 발각도 억제가 메인, 대가로 감염력 소폭 감소 ---
             nodes.Add(Node("abl_stealth1", UpgradeCategory.Ability, 2, 1380, 40, null,
-                ("severity", -0.03f)));
+                ("severity", -0.03f), ("infectivity", -0.01f)));
+            nodes.Add(Node("abl_stealth2", UpgradeCategory.Ability, 3, 1380, 150, new[] { "abl_stealth1" },
+                ("severity", -0.05f), ("infectivity", -0.01f)));
+            nodes.Add(Node("abl_camouflage1", UpgradeCategory.Ability, 5, 1380, 260, new[] { "abl_stealth2" },
+                ("severity", -0.05f), ("infectivity", -0.01f)));
+            nodes.Add(Node("abl_camouflage2", UpgradeCategory.Ability, 7, 1380, 370, new[] { "abl_camouflage1" },
+                ("severity", -0.06f), ("drugResistance", 0.02f)));
+
+            // --- 약물내성 (구조강화 계열): 방어 위주, 감염력 소폭 보너스 (§2-1 상향) ---
             nodes.Add(Node("abl_hardening1", UpgradeCategory.Ability, 2, 1520, 40, null,
-                ("drugResistance", 0.05f)));
-
-            nodes.Add(Node("abl_mutation2", UpgradeCategory.Ability, 4, 1240, 150, new[] { "abl_mutation1" },
-                ("drugResistance", 0.06f)));
-            nodes.Add(Node("abl_stealth2", UpgradeCategory.Ability, 4, 1380, 150, new[] { "abl_stealth1" },
-                ("severity", -0.05f)));
+                ("drugResistance", 0.05f), ("infectivity", 0.01f)));
             nodes.Add(Node("abl_hardening2", UpgradeCategory.Ability, 4, 1520, 150, new[] { "abl_hardening1" },
-                ("drugResistance", 0.07f)));
-
-            nodes.Add(Node("abl_resist1", UpgradeCategory.Ability, 6, 1240, 260, new[] { "abl_mutation2" },
-                ("drugResistance", 0.08f)));
-            nodes.Add(Node("abl_camouflage1", UpgradeCategory.Ability, 6, 1380, 260, new[] { "abl_stealth2" },
-                ("severity", -0.04f)));
+                ("drugResistance", 0.09f), ("infectivity", 0.01f), ("severity", 0.01f)));
             nodes.Add(Node("abl_resist2", UpgradeCategory.Ability, 6, 1520, 260, new[] { "abl_hardening2" },
-                ("drugResistance", 0.08f)));
-
-            nodes.Add(Node("abl_resist3", UpgradeCategory.Ability, 8, 1240, 370, new[] { "abl_resist1" },
-                ("drugResistance", 0.07f)));
-            nodes.Add(Node("abl_camouflage2", UpgradeCategory.Ability, 8, 1380, 370, new[] { "abl_camouflage1" },
-                ("severity", -0.05f)));
+                ("drugResistance", 0.08f), ("severity", 0.02f)));
             nodes.Add(Node("abl_resist4", UpgradeCategory.Ability, 8, 1520, 370, new[] { "abl_resist2" },
-                ("drugResistance", 0.07f)));
+                ("drugResistance", 0.10f), ("infectivity", 0.01f), ("severity", 0.02f)));
 
-            nodes.Add(Node("abl_superbug1", UpgradeCategory.Ability, 12, 1310, 480,
+            // --- 합류·최종 ---
+            nodes.Add(Node("abl_superbug1", UpgradeCategory.Ability, 14, 1310, 480,
                 new[] { "abl_resist3", "abl_camouflage2" },
-                ("drugResistance", 0.08f), ("severity", -0.03f)));
-            nodes.Add(Node("abl_superbug2", UpgradeCategory.Ability, 12, 1450, 480, new[] { "abl_resist4" },
-                ("drugResistance", 0.08f)));
+                ("drugResistance", 0.12f), ("severity", -0.05f), ("infectivity", -0.01f)));
+            nodes.Add(Node("abl_superbug2", UpgradeCategory.Ability, 11, 1450, 480, new[] { "abl_resist4" },
+                ("drugResistance", 0.10f), ("infectivity", 0.01f), ("severity", 0.01f)));
 
-            nodes.Add(Node("abl_finalevo", UpgradeCategory.Ability, 20, 1380, 590,
+            nodes.Add(Node("abl_finalevo", UpgradeCategory.Ability, 22, 1380, 590,
                 new[] { "abl_superbug1", "abl_superbug2" },
-                ("drugResistance", 0.15f), ("infectivity", 0.05f)));
+                ("drugResistance", 0.20f), ("severity", -0.03f), ("infectivity", 0.02f)));
 
             return nodes;
         }
