@@ -9,33 +9,32 @@ using UnityEngine.UIElements;
 namespace Contagion.UI
 {
     /// <summary>
-    /// Research Database 화면 (Commit 1 — "화면 전환 + UI 구조 변경"만 포함하는 UI Shell).
-    /// 참고: Docs/ResearchDatabase_MVP_ImplementationPlan.md, Docs/UpgradeTree_ResearchDatabase_ScreenDesign.md.
+    /// Research Database 화면 (Research Database v2 커밋 5 — "브랜치 보드 + 리스트 렌더링 교체").
+    /// 참고: Docs/ResearchDatabase_V2_ImplementationPlan.md §1 Step 8~12, §4 커밋 5.
     ///
-    /// 예전엔 이 화면이 UpgradeManager.Tree의 실제 45개 노드를 절대좌표 캔버스(RebuildTree()) +
-    /// 선행조건 연결선(DrawConnections(), Painter2D)으로 그렸다. 이번 커밋은 그 캔버스를 세로
-    /// 스크롤 리스트(갈래 섹션 헤더 + 연구 항목 행)로 교체하되, 목록 내용 자체는 아직 더미 데이터
-    /// (<see cref="BuildDummyBranches"/>)다 — 실제 UpgradeNode 연결(코드/상태/DNA 비용을
-    /// UpgradeManager에서 읽어오는 것)은 다음 커밋(Commit 2)에서 수행한다. 그래서 상세 패널의
-    /// "연구 시작" 버튼도 이번 커밋에서는 항상 비활성화 상태다 — 아직 아무 노드에도 연결돼 있지
-    /// 않은데 눌리면 안 되기 때문.
+    /// 이전 커밋(1~4)까지는 UI 골격(branch-board 빈 컨테이너, ResearchPopup.uxml/.uss,
+    /// NodeDisplayNames/NodeDescriptions/NodeBranch 메타데이터, ResearchPopupController)만
+    /// 갖춰졌고, 실제 목록은 <c>BuildDummyBranches</c>가 만드는 더미 데이터로 그려졌다. 이번
+    /// 커밋에서 그 더미 데이터 경로를 완전히 제거하고, <see cref="UpgradeManager.Instance"/>.Tree의
+    /// 실제 45개 <see cref="UpgradeNode"/>를 <see cref="NodeBranch"/> 기준으로 그룹핑해 그린다.
     ///
-    /// DetermineState()/StateCaption()/CategoryLabel() 등 상태 판정·표시 텍스트 헬퍼와
-    /// NodeDisplayNames/_codeByNodeId 필드는 Commit 2에서 그대로 재사용할 예정이라 이번 커밋에서
-    /// 지우지 않고 남겨뒀다(현재는 미사용 — ResearchDatabase_MVP_ImplementationPlan.md §5 재사용
-    /// 표 참고). 씬 GameObject 3개(TransmissionTreeUI/SymptomTreeUI/AbilityTreeUI, 카테고리별
-    /// 독립 UIDocument) 구조는 그대로 유지한다 — 탭 클릭 시 UIManager가 세 UIDocument의 표시
-    /// 여부만 토글하므로(플랜 §6-3), 씬 배선을 다시 할 필요가 없다.
+    /// 이번 커밋 범위 밖(다음 커밋들로 이관): 연구 항목 행 클릭 시 Research Popup을 여는 이벤트
+    /// 배선(<c>OnResearchItemSelected</c>, V2 계획 커밋 6~7), <c>ResearchPopupController</c> 수정,
+    /// <c>UIManager</c> 수정, "연구 시작" 구매 로직(<see cref="UpgradeManager.TryUnlock"/>) 연결,
+    /// 잠금 사유 텍스트 헬퍼(<c>LockReason()</c>, V2 계획 커밋 8) — 그래서 연구 항목 행은 이번
+    /// 커밋에서 클릭해도 아무 동작을 하지 않는다(안전한 중간 상태, 상세 팝업은 이후 커밋에서 연결).
+    /// 하단 상세 패널(<c>detail-panel</c>)은 개별 항목이 아니라 "선택된 브랜치" 요약(진행률 +
+    /// 다음 추천 연구)을 보여준다 — V2 계획 §1 Step 12.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class UpgradeTreeView : MonoBehaviour
     {
         /// <summary>
-        /// node.id(영문 내부 식별자) → 한국어 표시명. Commit 2(v2 계획 커밋 5)에서 실제
-        /// UpgradeNode 연결 시 그대로 재사용할 딕셔너리 — 이번 커밋(더미 데이터 단계)에서는 미사용.
-        /// 값은 Docs/UpgradeTree_ResearchDatabase_NodeMapping.md의 "신규 이름" 열을 그대로
-        /// 반영했다 — "유지" 분류 노드는 기존 이름 그대로, "수정"/"대체" 분류 노드는 신규 이름으로
-        /// 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은 1개도 바꾸지 않는다.
+        /// node.id(영문 내부 식별자) → 한국어 표시명. 이번 커밋부터 <see cref="DisplayName"/>을 통해
+        /// 실제 연구 항목 행 렌더링에 쓰인다. 값은 Docs/UpgradeTree_ResearchDatabase_NodeMapping.md의
+        /// "신규 이름" 열을 그대로 반영했다 — "유지" 분류 노드는 기존 이름 그대로, "수정"/"대체"
+        /// 분류 노드는 신규 이름으로 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은
+        /// 1개도 바꾸지 않는다.
         /// </summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
@@ -99,18 +98,17 @@ namespace Contagion.UI
         };
 
         /// <summary>
-        /// node.id → 상세 패널 "설명" 행에 쓸 한 줄 설명. Commit 2(v2 계획 커밋 5)에서 실제
-        /// 연결 예정 — 이번 커밋에서는 어디서도 참조하지 않는 신규 딕셔너리라 빌드/동작에 영향
-        /// 없다(안전한 중간 지점, ResearchDatabase_MVP_ImplementationPlan.md §7 커밋 4/
-        /// ResearchDatabase_V2_ImplementationPlan.md §4 커밋 4와 동일한 전략).
+        /// node.id → 상세 설명 한 줄. Research Popup(ResearchPopupController.Show())이 연결되는
+        /// 이후 커밋(V2 계획 커밋 6~7, 이번 커밋 범위 밖)에서 실제로 참조될 예정 — 이번 커밋의
+        /// 하단 상세 패널은 개별 항목 설명이 아니라 브랜치 요약만 보여주므로 이번 커밋에서도 아직
+        /// 미사용이다(안전한 중간 지점, 빌드/동작에 영향 없음).
         /// 문구는 ResearchDatabase_MVP_ImplementationPlan.md §0.1 "서술-효과 불일치 방지 원칙"을
         /// 따른다 — "이미 로직이 존재하는" 노드(abl_hardening1 — drugResistanceReduction 공식으로
         /// 치료제 진행을 이미 저해하는 로직이 존재)만 규칙 문장을 포함하고, 나머지(전부 Phase
         /// 2~4 미착수 메커닉 — environmentResistance 소비/medicalBurdenModifier/unlockedFlags
         /// 의존)는 "정체성 서사"까지만 쓰고 "지금 이 연구가 실제로 무엇을 바꾸는지"에 대한 구체적
         /// 규칙 문장은 넣지 않는다. 스탯 변화(infectivity/severity/lethality/drugResistance
-        /// 증감)는 이 딕셔너리가 아니라 기존처럼 effects 기반 data-row로 노출한다(Commit 2에서
-        /// EffectStatLabel() 재사용 예정).
+        /// 증감)는 이 딕셔너리가 아니라 기존처럼 effects 기반 data-row로 노출한다.
         /// </summary>
         private static readonly Dictionary<string, string> NodeDescriptions = new Dictionary<string, string>
         {
@@ -174,14 +172,12 @@ namespace Contagion.UI
         };
 
         /// <summary>
-        /// node.id → 소속 갈래(브랜치) 라벨. 4브랜치 구조(기반 갈래 3개 + 통합 갈래 1개)는
+        /// node.id → 소속 갈래(브랜치) 라벨. 이번 커밋부터 <see cref="BuildBranches"/>가 실제
+        /// 그룹핑 기준으로 사용한다. 4브랜치 구조(기반 갈래 3개 + 통합 갈래 1개)는
         /// DefaultUpgradeTreeFactory.cs의 prerequisites 그래프가 실제로 강제하는 구조다(카테고리당
         /// 15개 = 4+4+4+3, ResearchDatabase_V2_UI_StructureDesign.md §0이 이미 확인). 라벨
-        /// 문자열 자체는 기존 <see cref="BuildDummyBranches"/>가 이미 쓰던 값(공기 계열/수인성
-        /// 계열/접촉·동물매개 계열/통합 연구 등)을 그대로 재사용해 Commit 2 전환 시 화면 문구가
-        /// 갑자기 바뀌는 위화감이 없게 했다. x좌표 기반 추정은 하지 않았다 — 합류 노드가 티어에
-        /// 따라 같은 x열을 공유해 오판 위험이 있기 때문. 이번 커밋에서는 어디서도 참조하지 않는
-        /// 신규 딕셔너리라 빌드/동작에 영향 없음.
+        /// 문자열 자체는 기존 더미 데이터가 이미 쓰던 값(공기 계열/수인성 계열/접촉·동물매개
+        /// 계열/통합 연구 등)을 그대로 재사용해 화면 문구가 갑자기 바뀌는 위화감이 없게 했다.
         /// </summary>
         private static readonly Dictionary<string, string> NodeBranch = new Dictionary<string, string>
         {
@@ -235,7 +231,20 @@ namespace Contagion.UI
             { "abl_finalevo", "통합 연구" },
         };
 
-        /// <summary>node.id → 한국어 표시명. Commit 2 재사용 예정, 현재 미사용.</summary>
+        /// <summary>
+        /// 카테고리별 브랜치 표시 순서(브랜치 보드 4행 + 리스트 섹션 순서). NodeBranch 딕셔너리의
+        /// 값 자체는 순서를 보장하지 않으므로(Dictionary 순회 순서에 의존하지 않기 위해) 별도로
+        /// 명시한다. 값은 기존 더미 데이터(BuildDummyBranches, 이번 커밋에서 제거)가 쓰던 순서와
+        /// 동일 — 계열 3개(각 4개 노드) + 통합 연구(3개 노드) 순.
+        /// </summary>
+        private static readonly Dictionary<UpgradeCategory, string[]> BranchOrder = new Dictionary<UpgradeCategory, string[]>
+        {
+            { UpgradeCategory.Transmission, new[] { "공기 계열", "수인성 계열", "접촉·동물매개 계열", "통합 연구" } },
+            { UpgradeCategory.Symptom, new[] { "표준형 — 기침 계열", "은신형 — 발진 계열", "공격형 — 구토 계열", "통합 연구" } },
+            { UpgradeCategory.Ability, new[] { "변이 계열", "은신 계열", "구조 강화 계열", "통합 연구" } },
+        };
+
+        /// <summary>node.id → 한국어 표시명.</summary>
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
 
@@ -249,6 +258,7 @@ namespace Contagion.UI
         private Label _dnaLabel;
         private Label _labCaptionLabel;
         private ScrollView _nodeScroll;
+        private VisualElement _branchBoardRows;
         private Label _detailTitle;
         private VisualElement _detailRows;
         private Button _buyButton;
@@ -258,16 +268,21 @@ namespace Contagion.UI
         private Button _tabSymptomButton;
         private Button _tabAbilityButton;
 
-        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). Commit 2에서 실제 노드 순서 기준으로
-        /// 채울 예정 — 이번 커밋에서는 더미 항목의 코드를 <see cref="BuildResearchList"/>가 직접
-        /// 생성하므로 미사용.</summary>
+        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). <see cref="AssignCodes"/>가 카테고리
+        /// 전체(선택된 브랜치와 무관하게)를 브랜치 순서대로 훑으며 채운다 — 브랜치를 옮겨 다녀도
+        /// 코드가 흔들리지 않도록 하기 위함.</summary>
         private readonly Dictionary<string, string> _codeByNodeId = new Dictionary<string, string>();
 
         /// <summary>탭 클릭 — 다른 카테고리를 요청하면 발생. 실제 화면 전환(다른 UIDocument
         /// Show/Hide)은 UIManager가 담당한다.</summary>
         public event System.Action<UpgradeCategory> OnCategoryRequested;
 
-        private DummyResearchItem _selectedDummyItem;
+        /// <summary>이 카테고리의 4개 브랜치(계열 3 + 통합 연구 1). Show()/RequestCategory 시점마다
+        /// UpgradeManager.Tree로부터 다시 계산한다.</summary>
+        private List<ResearchBranch> _branches = new List<ResearchBranch>();
+
+        /// <summary>현재 브랜치 보드/리스트/하단 요약이 가리키는 브랜치.</summary>
+        private ResearchBranch _selectedBranch;
 
         [SerializeField, Tooltip("광고 시청 보상 DNA — 설계 문서 13절 표 1행")]
         private int adBonusDna = 10;
@@ -279,6 +294,7 @@ namespace Contagion.UI
             _dnaLabel = root.Q<Label>("dna-label");
             _labCaptionLabel = root.Q<Label>("lab-caption-label");
             _nodeScroll = root.Q<ScrollView>("node-scroll");
+            _branchBoardRows = root.Q<VisualElement>("branch-board__rows");
             _detailTitle = root.Q<Label>("detail-title");
             _detailRows = root.Q<VisualElement>("detail-rows");
             _buyButton = root.Q<Button>("buy-button");
@@ -317,12 +333,16 @@ namespace Contagion.UI
         }
 
         /// <summary>HUD "업그레이드" 버튼 또는 탭 클릭에서 호출 — 이 창은 인스펙터에 지정된
-        /// <see cref="category"/> 하나만 그린다.</summary>
+        /// <see cref="category"/> 하나만 그린다. 매번 브랜치 목록을 다시 계산하고 "미완료 항목이
+        /// 있는 첫 브랜치"로 선택을 초기화한다(V2 계획 §5 기본값 — 마지막 선택 기억은 이번 범위
+        /// 밖).</summary>
         public void Show()
         {
             _upgradeRoot.style.display = DisplayStyle.Flex;
             UpdateTabHighlight();
-            BuildResearchList();
+            _branches = BuildBranches(category);
+            AssignCodes(_branches);
+            SelectBranch(FirstIncompleteBranch(_branches));
             RefreshDna();
         }
 
@@ -361,13 +381,142 @@ namespace Contagion.UI
             OnCategoryRequested?.Invoke(target);
         }
 
-        /// <summary>
-        /// 갈래 섹션 헤더 + 연구 항목 행을 순서대로 Add() — 예전 RebuildTree()의 절대좌표 계산
-        /// (_xOffset, canvasWidth/Height, node.position 기반 style.left/top 대입)과 DrawConnections()의
-        /// Painter2D 꺾은선 계산을 전부 대체한다. UI Toolkit 기본 Flex 세로 흐름만으로 배치되므로
-        /// 좌표 계산 코드가 필요 없다(ScreenDesign.md §10).
-        /// 이번 커밋은 더미 데이터만 그린다 — 실제 UpgradeManager.Tree 연결은 Commit 2.
-        /// </summary>
+        // ================================================================
+        // 브랜치 데이터 — UpgradeManager.Tree(실제 45개 UpgradeNode)를 NodeBranch 기준으로
+        // 그룹핑한다. Docs/ResearchDatabase_V2_ImplementationPlan.md §1 Step 8.
+        // ================================================================
+
+        private class ResearchBranch
+        {
+            public readonly string Label;
+            public readonly List<UpgradeNode> Items;
+
+            public ResearchBranch(string label, List<UpgradeNode> items)
+            {
+                Label = label;
+                Items = items;
+            }
+        }
+
+        /// <summary>UpgradeManager.Tree에서 이 카테고리 노드만 추려 <see cref="NodeBranch"/> 기준으로
+        /// <see cref="BranchOrder"/> 순서대로 4개 브랜치를 만든다. 각 브랜치 내부는 position.y(티어)
+        /// → position.x(열) 순으로 정렬 — DefaultUpgradeTreeFactory.cs가 이미 이 좌표로 티어/열을
+        /// 인코딩해뒀으므로 별도 깊이 계산이 필요 없다.</summary>
+        private static List<ResearchBranch> BuildBranches(UpgradeCategory targetCategory)
+        {
+            var branches = new List<ResearchBranch>();
+            if (UpgradeManager.Instance == null) return branches;
+
+            var labels = BranchOrder.TryGetValue(targetCategory, out var order) ? order : System.Array.Empty<string>();
+            var categoryNodes = UpgradeManager.Instance.Tree.Where(n => n != null && n.category == targetCategory).ToList();
+
+            foreach (var label in labels)
+            {
+                var items = categoryNodes
+                    .Where(n => NodeBranch.TryGetValue(n.id, out var branchLabel) && branchLabel == label)
+                    .OrderBy(n => n.position.y)
+                    .ThenBy(n => n.position.x)
+                    .ToList();
+                branches.Add(new ResearchBranch(label, items));
+            }
+            return branches;
+        }
+
+        /// <summary>브랜치 순서대로 전체 카테고리를 훑으며 _codeByNodeId를 채운다 — 어느 브랜치가
+        /// 선택돼 있는지와 무관하게 코드가 고정되도록 브랜치를 옮길 때마다 다시 계산하지 않고
+        /// Show()/RequestCategory 시점(카테고리 전체 재계산 시점)에만 갱신한다.</summary>
+        private void AssignCodes(List<ResearchBranch> branches)
+        {
+            _codeByNodeId.Clear();
+            int order = 0;
+            foreach (var branch in branches)
+            {
+                foreach (var node in branch.Items)
+                {
+                    order++;
+                    _codeByNodeId[node.id] = $"{CategoryPrefix(category)}-{order:000}";
+                }
+            }
+        }
+
+        /// <summary>기본 선택 브랜치 — "미완료 항목이 있는 첫 브랜치", 전부 완료됐으면 첫 브랜치.
+        /// V2 계획 §1 Step 10.</summary>
+        private static ResearchBranch FirstIncompleteBranch(List<ResearchBranch> branches)
+        {
+            if (branches.Count == 0) return null;
+            return branches.FirstOrDefault(b => b.Items.Any(n => !n.isUnlocked)) ?? branches[0];
+        }
+
+        /// <summary>브랜치 보드/리스트/하단 요약을 모두 선택된 브랜치 기준으로 다시 그린다.</summary>
+        private void SelectBranch(ResearchBranch branch)
+        {
+            _selectedBranch = branch;
+            BuildBranchBoard();
+            BuildResearchList();
+            BuildBranchSummary();
+        }
+
+        // ================================================================
+        // 브랜치 보드 — branch-board__rows(UpgradeTree.uxml, 커밋 1에서 이미 추가된 빈 컨테이너)를
+        // 채운다. V2 계획 §1 Step 9.
+        // ================================================================
+
+        private void BuildBranchBoard()
+        {
+            if (_branchBoardRows == null) return;
+            _branchBoardRows.Clear();
+            foreach (var branch in _branches)
+                _branchBoardRows.Add(CreateBranchRow(branch));
+        }
+
+        private VisualElement CreateBranchRow(ResearchBranch branch)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("branch-row");
+
+            int total = branch.Items.Count;
+            int unlocked = branch.Items.Count(n => n.isUnlocked);
+            // "통합 연구" 브랜치처럼 진입 노드의 선행조건이 다른 브랜치에 걸쳐 있는 경우, 아직
+            // 아무것도 해금하지 못했고 진입 노드 자체가 잠겨 있으면 브랜치 전체를 잠김으로 표시한다
+            // (V2 계획 §1 Step 2 — 실제 해금 가능 여부 판정은 UpgradeManager.CanUnlock()이 담당,
+            // 여기서는 표시 문구만 결정).
+            bool locked = unlocked == 0 && total > 0 && DetermineState(branch.Items[0]) == "locked";
+            if (locked) row.AddToClassList("branch-row--locked");
+            if (branch == _selectedBranch) row.AddToClassList("branch-row--selected");
+
+            var label = new Label($"{branch.Label} ({unlocked}/{total})");
+            label.AddToClassList("branch-row__label");
+            row.Add(label);
+
+            var track = new VisualElement();
+            track.AddToClassList("branch-row__progress");
+
+            var fill = new VisualElement();
+            fill.AddToClassList("branch-row__progress-fill");
+            fill.style.flexGrow = unlocked;
+            track.Add(fill);
+
+            // 잔여(미해금) 구간 — population-bar류와 달리 이 트랙은 세그먼트가 2개(해금/잔여)뿐이고
+            // 이번 커밋은 UpgradeTreeView.cs만 수정 범위라 UpgradeTree.uss에 새 클래스를 추가하지
+            // 않는다. 트랙 자체 배경(.branch-row__progress의 --color-surface-soft)이 빈 구간처럼
+            // 보이도록 인라인 스타일로만 비율을 잡는다.
+            var remainder = new VisualElement();
+            remainder.style.flexBasis = 0;
+            remainder.style.flexGrow = Mathf.Max(total - unlocked, 0);
+            remainder.style.flexShrink = 0;
+            track.Add(remainder);
+
+            row.Add(track);
+
+            row.RegisterCallback<ClickEvent>(_ => SelectBranch(branch));
+            return row;
+        }
+
+        // ================================================================
+        // 연구 목록 — node-scroll 안에 "선택된 브랜치 하나"만 그린다(V2 계획 §1 Step 11, 이전
+        // 커밋까지는 카테고리 전체 브랜치를 순서대로 다 그렸다).
+        // ================================================================
+
         private void BuildResearchList()
         {
             var container = _nodeScroll.contentContainer;
@@ -376,17 +525,11 @@ namespace Contagion.UI
             if (_labCaptionLabel != null)
                 _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} LAB";
 
-            int order = 0;
-            foreach (var branch in BuildDummyBranches(category))
-            {
-                container.Add(CreateBranchSectionHeader(branch.Label));
-                foreach (var item in branch.Items)
-                {
-                    order++;
-                    item.Code = $"{CategoryPrefix(category)}-{order:000}";
-                    container.Add(CreateResearchRow(item));
-                }
-            }
+            if (_selectedBranch == null) return;
+
+            container.Add(CreateBranchSectionHeader(_selectedBranch.Label));
+            foreach (var node in _selectedBranch.Items)
+                container.Add(CreateResearchRow(node));
         }
 
         private VisualElement CreateBranchSectionHeader(string branchLabel)
@@ -397,41 +540,38 @@ namespace Contagion.UI
             return caption;
         }
 
-        private VisualElement CreateResearchRow(DummyResearchItem item)
+        /// <summary>연구 항목 행 — 실제 UpgradeNode 기반. 클릭 시 상세 팝업을 여는 배선
+        /// (OnResearchItemSelected 이벤트)은 V2 계획 커밋 6~7 범위라 이번 커밋에서는 붙이지
+        /// 않는다 — 지금 탭해도 아무 동작을 하지 않는다(안전한 중간 상태).</summary>
+        private VisualElement CreateResearchRow(UpgradeNode node)
         {
             var row = new VisualElement();
             row.AddToClassList("research-row");
             row.AddToClassList($"research-row--{CategoryClass(category)}");
-            row.AddToClassList($"research-row--{item.State}");
-            if (item == _selectedDummyItem) row.AddToClassList("research-row--selected");
 
-            var codeLabel = new Label(item.Code);
+            string state = DetermineState(node);
+            row.AddToClassList($"research-row--{state}");
+
+            var codeLabel = new Label(_codeByNodeId.TryGetValue(node.id, out var code) ? code : node.id);
             codeLabel.AddToClassList("research-row__code");
             row.Add(codeLabel);
 
-            var nameLabel = new Label(item.Name);
+            var nameLabel = new Label(DisplayName(node.id));
             nameLabel.AddToClassList("research-row__name");
             row.Add(nameLabel);
 
-            string statusText = StateCaption(item.State);
-            if (item.State == "locked" && !string.IsNullOrEmpty(item.LockReason))
-                statusText += $" · 선행: {item.LockReason}";
-            var statusLabel = new Label(statusText);
+            var statusLabel = new Label(StateCaption(state));
             statusLabel.AddToClassList("research-row__status");
             row.Add(statusLabel);
 
-            var costLabel = new Label(item.CostText);
+            var costLabel = new Label(CostText(node, state));
             costLabel.AddToClassList("research-row__cost");
             row.Add(costLabel);
 
-            row.RegisterCallback<ClickEvent>(_ => SelectDummyItem(item));
             return row;
         }
 
-        /// <summary>LOCKED/AVAILABLE/ACTIVE/MAXED 4단계를 UpgradeNode 없이 문자열 그대로 조회하는
-        /// 더미 버전. Commit 2에서 <c>DetermineState(UpgradeNode)</c>가 반환하는 값과 동일한 4개
-        /// 문자열("locked"/"available"/"active"/"maxed")을 쓰므로, 실제 데이터 연결 시 이 캡션
-        /// 매핑을 그대로 재사용할 수 있다.</summary>
+        /// <summary>LOCKED/AVAILABLE/ACTIVE/MAXED 4단계 캡션.</summary>
         private static string StateCaption(string state) => state switch
         {
             "locked" => "잠김",
@@ -441,9 +581,24 @@ namespace Contagion.UI
             _ => state.ToUpperInvariant()
         };
 
-        /// <summary>UpgradeNode 기반 상태 판정 — Commit 2에서 재사용 예정, 이번 커밋(더미 데이터
-        /// 단계)에서는 호출되지 않는다. isUnlocked/prerequisites 등 읽기 전용 조회만 하므로 게임
-        /// 로직에는 영향이 없다.</summary>
+        /// <summary>비용 열 텍스트 — locked는 "—", available은 실제 구매 비용(GetEffectiveCost,
+        /// 읽기 전용 조회라 비용 로직 자체는 건드리지 않는다), active/maxed(둘 다 이미 해금됨)는
+        /// "완료".</summary>
+        private static string CostText(UpgradeNode node, string state)
+        {
+            if (node == null || UpgradeManager.Instance == null) return "—";
+            return state switch
+            {
+                "available" => $"{UpgradeManager.Instance.GetEffectiveCost(node)} DNA",
+                "active" => "완료",
+                "maxed" => "완료",
+                _ => "—"
+            };
+        }
+
+        /// <summary>UpgradeNode 기반 상태 판정. isUnlocked==true면 이 노드를 선행조건으로 삼는
+        /// 다른 노드가 있는지로 active(중간 티어)/maxed(말단) 구분, isUnlocked==false면 선행조건
+        /// 충족 여부로 available/locked 구분.</summary>
         private static string DetermineState(UpgradeNode node)
         {
             if (node.isUnlocked)
@@ -456,25 +611,36 @@ namespace Contagion.UI
             return prereqsMet ? "available" : "locked";
         }
 
-        private void SelectDummyItem(DummyResearchItem item)
+        // ================================================================
+        // 하단 상세 패널 — 개별 항목이 아니라 "선택된 브랜치" 요약(진행률 + 다음 추천 연구) 2행을
+        // 보여준다(V2 계획 §1 Step 12). 개별 항목 상세는 Research Popup(커밋 6~7)의 역할이다.
+        // ================================================================
+
+        private void BuildBranchSummary()
         {
-            _selectedDummyItem = item;
+            if (_detailRows == null) return;
 
-            _detailTitle.text = item.Name;
-            _detailRows?.Clear();
-            AddDetailRow("이름", item.Name);
-            AddDetailRow("설명", item.Description);
-            AddDetailRow("비용", item.CostText);
-            AddDetailRow("상태", StateCaption(item.State), $"data-value--{item.State}");
+            if (_selectedBranch == null)
+            {
+                if (_detailTitle != null) _detailTitle.text = "연구를 선택하세요";
+                _detailRows.Clear();
+                return;
+            }
 
-            // Commit 1은 UI 구조 변경만 포함 — 실제 UpgradeManager.TryUnlock() 연결은 Commit 2.
-            // 그래서 버튼은 항상 비활성화 상태로 둔다(아무 노드에도 연결돼 있지 않은데 눌리면 안 됨).
-            _buyButton.SetEnabled(false);
-            _buyButton.text = item.State == "active" || item.State == "maxed"
-                ? "연구 완료"
-                : "연구 시작 (연결 예정)";
+            int total = _selectedBranch.Items.Count;
+            int unlocked = _selectedBranch.Items.Count(n => n.isUnlocked);
 
-            BuildResearchList(); // 선택 강조(research-row--selected) 반영
+            if (_detailTitle != null) _detailTitle.text = _selectedBranch.Label;
+            _detailRows.Clear();
+            AddDetailRow("진행률", $"{unlocked}/{total}");
+
+            var next = _selectedBranch.Items.FirstOrDefault(n => DetermineState(n) == "available");
+            if (next != null)
+                AddDetailRow("다음 추천 연구", DisplayName(next.id));
+            else if (total > 0 && unlocked == total)
+                AddDetailRow("다음 추천 연구", "브랜치 완료");
+            else
+                AddDetailRow("다음 추천 연구", "선행 조건 필요");
         }
 
         /// <summary>data-row 한 줄을 만들어 detail-rows 컨테이너에 추가한다(country-dock__row와
@@ -498,8 +664,8 @@ namespace Contagion.UI
             _detailRows.Add(row);
         }
 
-        /// <summary>node.effects의 statName -> 상세 패널 표시 라벨. Commit 2 재사용 예정,
-        /// 이번 커밋에서는 미사용.</summary>
+        /// <summary>node.effects의 statName -> 상세 패널 표시 라벨. 개별 항목 상세(Research Popup)
+        /// 연결 시 재사용 예정 — 이번 커밋(브랜치 요약 단계)에서는 미사용.</summary>
         private static string EffectStatLabel(string statName) => statName switch
         {
             "infectivity" => "전파력",
@@ -567,134 +733,6 @@ namespace Contagion.UI
             UpgradeCategory.Symptom => "증상",
             UpgradeCategory.Ability => "적응",
             _ => "노드"
-        };
-
-        // ================================================================
-        // 더미 연구 데이터 (Commit 1 전용) — 실제 UpgradeNode/UpgradeManager.Tree를 전혀 읽지 않는다.
-        // 브랜치·항목명은 NodeDisplayNames/UpgradeTree_ResearchDatabase_ScreenDesign.md §3 예시를
-        // 그대로 따서 Commit 2 전환 시 위화감이 없게 했다. Commit 2에서는 이 메서드 전체가
-        // DefaultUpgradeTreeFactory.cs의 prerequisites/position 기반 실제 그룹핑으로 교체된다.
-        // ================================================================
-
-        private class DummyResearchItem
-        {
-            public string Code;
-            public readonly string Name;
-            public readonly string State; // "locked" | "available" | "active" | "maxed"
-            public readonly string LockReason;
-            public readonly string CostText;
-            public readonly string Description;
-
-            public DummyResearchItem(string name, string state, string lockReason, string costText, string description)
-            {
-                Name = name;
-                State = state;
-                LockReason = lockReason;
-                CostText = costText;
-                Description = description;
-            }
-        }
-
-        private class DummyBranch
-        {
-            public readonly string Label;
-            public readonly List<DummyResearchItem> Items;
-
-            public DummyBranch(string label, List<DummyResearchItem> items)
-            {
-                Label = label;
-                Items = items;
-            }
-        }
-
-        private static List<DummyBranch> BuildDummyBranches(UpgradeCategory targetCategory) => targetCategory switch
-        {
-            UpgradeCategory.Transmission => new List<DummyBranch>
-            {
-                new DummyBranch("공기 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("공기 전파 I", "maxed", null, "완료", "비말 형태로 병원체가 실내 공기 중에 부유해 확산된다."),
-                    new DummyResearchItem("공기 전파 II", "active", null, "18 DNA", "공기 전파 범위가 확장되어 전파력이 추가로 상승한다."),
-                    new DummyResearchItem("비말 전파", "available", null, "22 DNA", "기침·재채기로 배출된 비말을 통해 근접 감염이 강화된다."),
-                    new DummyResearchItem("비말 전파 강화", "locked", "비말 전파", "—", "비말 입자의 생존 시간을 늘려 전파 반경을 넓힌다."),
-                }),
-                new DummyBranch("수인성 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("수인성 전파 I", "available", null, "16 DNA", "오염된 식수를 통해 병원체가 퍼진다."),
-                    new DummyResearchItem("수인성 전파 II", "locked", "수인성 전파 I", "—", "정수 시설이 미비한 지역에서 전파력이 추가로 상승한다."),
-                    new DummyResearchItem("곤충 매개 전파", "locked", "수인성 전파 II", "—", "모기 등 매개체를 통한 간접 전파 경로가 열린다."),
-                }),
-                new DummyBranch("접촉·동물매개 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("접촉 전파 I", "available", null, "16 DNA", "직접 접촉을 통한 전파력이 상승한다."),
-                    new DummyResearchItem("인수공통 전파", "locked", "접촉 전파 I", "—", "가축·야생동물을 매개로 한 전파 경로가 열린다."),
-                    new DummyResearchItem("혈액 전파", "locked", "접촉 전파 I", "—", "혈액 접촉을 통한 전파 경로가 열린다."),
-                }),
-                new DummyBranch("통합 연구", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("광역 전파 I", "locked", "3개 항목", "—", "복수 계열의 전파 경로를 통합해 광역 확산 능력을 얻는다."),
-                    new DummyResearchItem("전지구적 전파", "locked", "광역 전파 I", "—", "국경을 초월한 전지구적 확산 능력을 얻는다."),
-                }),
-            },
-            UpgradeCategory.Symptom => new List<DummyBranch>
-            {
-                new DummyBranch("표준형 — 기침 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("기침", "maxed", null, "완료", "감염자에게 기침 증상이 나타나 비말 전파의 토대가 된다."),
-                    new DummyResearchItem("발열", "active", null, "14 DNA", "체온 상승으로 중증도가 소폭 상승한다."),
-                    new DummyResearchItem("폐렴", "available", null, "20 DNA", "호흡기 증상이 악화되어 중증도·치사율이 함께 상승한다."),
-                    new DummyResearchItem("호흡 부전", "locked", "폐렴", "—", "호흡 기능이 저하되어 치사율이 크게 상승한다."),
-                }),
-                new DummyBranch("은신형 — 발진 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("발진", "available", null, "14 DNA", "피부에 가벼운 발진이 나타난다."),
-                    new DummyResearchItem("피부 병변", "locked", "발진", "—", "발진이 병변으로 진행되어 중증도가 상승한다."),
-                    new DummyResearchItem("피부염", "locked", "피부 병변", "—", "만성적인 피부염 증상으로 진행된다."),
-                    new DummyResearchItem("만성 병변", "locked", "피부염", "—", "병변이 만성화되어 치사율이 소폭 상승한다."),
-                }),
-                new DummyBranch("공격형 — 구토 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("구토감", "available", null, "14 DNA", "가벼운 구토감 증상이 나타난다."),
-                    new DummyResearchItem("구토", "locked", "구토감", "—", "실제 구토 증상으로 진행되어 중증도가 상승한다."),
-                    new DummyResearchItem("출혈", "locked", "구토", "—", "내출혈 증상이 동반되어 치사율이 상승한다."),
-                    new DummyResearchItem("패혈증", "locked", "출혈", "—", "전신 염증 반응으로 치사율이 크게 상승한다."),
-                }),
-                new DummyBranch("통합 연구", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("다발성 장기부전 I", "locked", "3개 항목", "—", "복수 계열의 중증 증상이 겹쳐 장기 기능이 저하된다."),
-                    new DummyResearchItem("전신 장기부전", "locked", "다발성 장기부전 I", "—", "전신의 장기 기능이 상실되어 치사율이 최대치로 상승한다."),
-                }),
-            },
-            UpgradeCategory.Ability => new List<DummyBranch>
-            {
-                new DummyBranch("변이 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("유전자 변이 I", "maxed", null, "완료", "병원체의 유전자가 변이해 기초 능력치가 상승한다."),
-                    new DummyResearchItem("유전자 변이 II", "active", null, "18 DNA", "추가 변이로 기초 능력치가 더 상승한다."),
-                    new DummyResearchItem("약물 저항 I", "available", null, "20 DNA", "치료제 개발 속도를 늦추는 약물 저항력을 얻는다."),
-                    new DummyResearchItem("약물 저항 II", "locked", "약물 저항 I", "—", "약물 저항력이 강화되어 치료제 진행이 더 느려진다."),
-                }),
-                new DummyBranch("은신 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("은신 I", "available", null, "16 DNA", "증상을 억제해 발견 확률을 낮춘다."),
-                    new DummyResearchItem("은신 II", "locked", "은신 I", "—", "은신 능력이 강화되어 발견 확률이 더 낮아진다."),
-                    new DummyResearchItem("위장 I", "locked", "은신 II", "—", "검사 회피 능력을 얻는다."),
-                    new DummyResearchItem("위장 II", "locked", "위장 I", "—", "위장 능력이 강화된다."),
-                }),
-                new DummyBranch("구조 강화 계열", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("구조 강화 I", "available", null, "16 DNA", "병원체 구조를 강화해 생존력을 높인다."),
-                    new DummyResearchItem("구조 강화 II", "locked", "구조 강화 I", "—", "구조 강화가 추가로 진행된다."),
-                    new DummyResearchItem("구조적 내성 I", "locked", "구조 강화 II", "—", "구조적 내성을 얻어 약물 저항력이 상승한다."),
-                    new DummyResearchItem("구조적 내성 II", "locked", "구조적 내성 I", "—", "구조적 내성이 강화된다."),
-                }),
-                new DummyBranch("통합 연구", new List<DummyResearchItem>
-                {
-                    new DummyResearchItem("슈퍼균주 I", "locked", "3개 항목", "—", "세 계열의 적응 능력을 통합해 슈퍼균주로 진화한다."),
-                    new DummyResearchItem("최종 진화체", "locked", "슈퍼균주 I", "—", "병원체가 최종 진화체로 완성된다."),
-                }),
-            },
-            _ => new List<DummyBranch>(),
         };
     }
 }
