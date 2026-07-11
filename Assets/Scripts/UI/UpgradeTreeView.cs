@@ -9,20 +9,19 @@ using UnityEngine.UIElements;
 namespace Contagion.UI
 {
     /// <summary>
-    /// Research Database 화면 (Research Database v2 커밋 5 — "브랜치 보드 + 리스트 렌더링 교체").
-    /// 참고: Docs/ResearchDatabase_V2_ImplementationPlan.md §1 Step 8~12, §4 커밋 5.
+    /// Research Database 화면 (Research Database v2 커밋 6 — "연구 항목 행 클릭 이벤트 배선").
+    /// 참고: Docs/ResearchDatabase_V2_ImplementationPlan.md §1 Step 8~14, §4 커밋 5~6.
     ///
-    /// 이전 커밋(1~4)까지는 UI 골격(branch-board 빈 컨테이너, ResearchPopup.uxml/.uss,
-    /// NodeDisplayNames/NodeDescriptions/NodeBranch 메타데이터, ResearchPopupController)만
-    /// 갖춰졌고, 실제 목록은 <c>BuildDummyBranches</c>가 만드는 더미 데이터로 그려졌다. 이번
-    /// 커밋에서 그 더미 데이터 경로를 완전히 제거하고, <see cref="UpgradeManager.Instance"/>.Tree의
-    /// 실제 45개 <see cref="UpgradeNode"/>를 <see cref="NodeBranch"/> 기준으로 그룹핑해 그린다.
+    /// 커밋 5까지 더미 데이터 경로를 완전히 제거하고, <see cref="UpgradeManager.Instance"/>.Tree의
+    /// 실제 45개 <see cref="UpgradeNode"/>를 <see cref="NodeBranch"/> 기준으로 그룹핑해 그리는
+    /// 단계까지 마쳤다. 이번 커밋에서는 연구 항목 행 클릭 시 <see cref="OnResearchItemSelected"/>
+    /// 이벤트를 발행하도록 배선했다.
     ///
-    /// 이번 커밋 범위 밖(다음 커밋들로 이관): 연구 항목 행 클릭 시 Research Popup을 여는 이벤트
-    /// 배선(<c>OnResearchItemSelected</c>, V2 계획 커밋 6~7), <c>ResearchPopupController</c> 수정,
-    /// <c>UIManager</c> 수정, "연구 시작" 구매 로직(<see cref="UpgradeManager.TryUnlock"/>) 연결,
-    /// 잠금 사유 텍스트 헬퍼(<c>LockReason()</c>, V2 계획 커밋 8) — 그래서 연구 항목 행은 이번
-    /// 커밋에서 클릭해도 아무 동작을 하지 않는다(안전한 중간 상태, 상세 팝업은 이후 커밋에서 연결).
+    /// 이번 커밋 범위 밖(다음 커밋으로 이관): <c>UIManager</c>가 이 이벤트를 구독해
+    /// <c>ResearchPopupController.Show()</c>를 호출하는 배선(V2 계획 커밋 7) — 그래서 아직
+    /// <c>UIManager</c>가 구독하지 않는 한 연구 항목 행을 클릭해도 화면상 변화는 없다(컴파일만
+    /// 통과하는 안전한 중간 상태). "연구 시작" 구매 로직(<see cref="UpgradeManager.TryUnlock"/>)
+    /// 연결, 잠금 사유 텍스트 헬퍼(<c>LockReason()</c>, V2 계획 커밋 8)도 이후 커밋 범위.
     /// 하단 상세 패널(<c>detail-panel</c>)은 개별 항목이 아니라 "선택된 브랜치" 요약(진행률 +
     /// 다음 추천 연구)을 보여준다 — V2 계획 §1 Step 12.
     /// </summary>
@@ -248,6 +247,19 @@ namespace Contagion.UI
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
 
+        /// <summary>node.id → 한국어 표시명 (외부 공개용, V2 계획 커밋 7 — UIManager가
+        /// ResearchPopupController.Show()를 채우는 데 사용). <see cref="DisplayName"/>의 얇은
+        /// 공개 래퍼일 뿐, 조회 로직 자체는 바뀌지 않는다.</summary>
+        public static string GetDisplayName(string id) => DisplayName(id);
+
+        /// <summary>node.id → 상세 설명 한 줄 (외부 공개용, V2 계획 커밋 7). 매핑에 없으면 빈 문자열.</summary>
+        public static string GetDescription(string id) =>
+            NodeDescriptions.TryGetValue(id, out var desc) ? desc : string.Empty;
+
+        /// <summary>node.id → 소속 갈래(브랜치) 라벨 (외부 공개용, V2 계획 커밋 7). 매핑에 없으면 빈 문자열.</summary>
+        public static string GetBranch(string id) =>
+            NodeBranch.TryGetValue(id, out var branch) ? branch : string.Empty;
+
         [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
         private UpgradeCategory category = UpgradeCategory.Transmission;
 
@@ -276,6 +288,11 @@ namespace Contagion.UI
         /// <summary>탭 클릭 — 다른 카테고리를 요청하면 발생. 실제 화면 전환(다른 UIDocument
         /// Show/Hide)은 UIManager가 담당한다.</summary>
         public event System.Action<UpgradeCategory> OnCategoryRequested;
+
+        /// <summary>연구 항목 행 클릭 — 해당 <see cref="UpgradeNode"/>와 함께 발생(V2 계획 커밋 6).
+        /// 상세 팝업(ResearchPopupController.Show())을 실제로 여는 구독은 UIManager가 담당한다
+        /// (V2 계획 커밋 7, 이 클래스는 발행만 하고 구독자가 있는지는 신경 쓰지 않는다).</summary>
+        public event System.Action<UpgradeNode> OnResearchItemSelected;
 
         /// <summary>이 카테고리의 4개 브랜치(계열 3 + 통합 연구 1). Show()/RequestCategory 시점마다
         /// UpgradeManager.Tree로부터 다시 계산한다.</summary>
@@ -540,9 +557,12 @@ namespace Contagion.UI
             return caption;
         }
 
-        /// <summary>연구 항목 행 — 실제 UpgradeNode 기반. 클릭 시 상세 팝업을 여는 배선
-        /// (OnResearchItemSelected 이벤트)은 V2 계획 커밋 6~7 범위라 이번 커밋에서는 붙이지
-        /// 않는다 — 지금 탭해도 아무 동작을 하지 않는다(안전한 중간 상태).</summary>
+        /// <summary>연구 항목 행 — 실제 UpgradeNode 기반. 클릭 시 <see cref="OnResearchItemSelected"/>를
+        /// 발행한다(V2 계획 커밋 6). LOCKED 상태를 포함해 모든 상태에서 발행한다 — 잠긴 항목도
+        /// 상세 팝업에서 선행조건("잠긴 이유")을 확인할 수 있어야 하고, 그 열람 자체를 막을 이유가
+        /// 없다(팝업의 "연구 시작" 버튼 활성화 여부만 상태에 따라 갈리며, 이는 팝업 쪽 책임이다).
+        /// UIManager가 아직 이 이벤트를 구독하지 않으므로(V2 계획 커밋 7) 지금 탭해도 화면상
+        /// 변화는 없다(안전한 중간 상태).</summary>
         private VisualElement CreateResearchRow(UpgradeNode node)
         {
             var row = new VisualElement();
@@ -567,6 +587,8 @@ namespace Contagion.UI
             var costLabel = new Label(CostText(node, state));
             costLabel.AddToClassList("research-row__cost");
             row.Add(costLabel);
+
+            row.RegisterCallback<ClickEvent>(_ => OnResearchItemSelected?.Invoke(node));
 
             return row;
         }

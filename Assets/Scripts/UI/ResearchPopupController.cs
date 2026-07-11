@@ -1,3 +1,4 @@
+using Contagion.Gameplay;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -45,6 +46,11 @@ namespace Contagion.UI
         /// <param name="description">popup-description(Label)에 표시할 설명 문단.</param>
         public void Show(string title, string branch, string description)
         {
+            // [WorldMap Input Lock System] ResearchPopup은 요구사항상 잠금 사유 목록에 명시적으로
+            // 포함된 화면이다(CountryPopup과 달리) — 지금은 Research 화면(AppScreen.Research) 위에서만
+            // 열리므로 UIManager의 Research 잠금과 사실상 중복이지만, 이 팝업이 나중에 다른 화면 위에서도
+            // 열리게 되더라도 스스로 잠그고 풀도록 방어적으로 별도 사유를 둔다.
+            WorldMapInputLock.Lock(WorldMapLockReason.ResearchPopup);
             base.Show(title);
 
             if (_popupDescription != null) _popupDescription.text = description;
@@ -52,6 +58,12 @@ namespace Contagion.UI
             // 재호출 시 이전 브랜치 행이 중복 누적되지 않도록 비우고 다시 추가한다.
             ClearRows();
             AddRow("브랜치", branch);
+        }
+
+        public override void Hide()
+        {
+            WorldMapInputLock.Unlock(WorldMapLockReason.ResearchPopup);
+            base.Hide();
         }
     }
 }

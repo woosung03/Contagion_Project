@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Contagion.Data;
+using Contagion.Gameplay;
 using Contagion.Managers;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -105,12 +106,15 @@ namespace Contagion.UI
 
         public void Show()
         {
+            // [WorldMap Input Lock System] EndingScreen이 떠 있는 동안은 WorldMap 클릭/드래그를 차단한다.
+            WorldMapInputLock.Lock(WorldMapLockReason.EndingScreen);
             if (_endingRoot != null) _endingRoot.style.display = DisplayStyle.Flex;
         }
 
         public void Hide()
         {
             if (_endingRoot != null) _endingRoot.style.display = DisplayStyle.None;
+            WorldMapInputLock.Unlock(WorldMapLockReason.EndingScreen);
         }
 
         private float ComputeFinalScore(bool isVictory, int day)

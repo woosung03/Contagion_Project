@@ -66,17 +66,20 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   코너컷+data-row+severity 4색 체계
 - Research Database v2 — 업그레이드 트리 화면을 절대좌표 캔버스에서 브랜치 보드(계열 3+통합 1,
   진행률 n/m) + 세로 스크롤 리스트(선택된 브랜치만)로 전환, `UpgradeManager.Tree`의 실제 45개
-  `UpgradeNode`에 연결 완료(코드/이름/상태/비용 전부 실데이터). Research Popup(`ResearchPopup.uxml`/
-  `ResearchPopupController`)은 골격만 존재하고 아직 화면에 연결되지 않음(연구 항목 탭 시 이벤트
-  미배선)
+  `UpgradeNode`에 연결 완료(코드/이름/상태/비용 전부 실데이터). 연구 항목 행 클릭 →
+  `UpgradeTreeView.OnResearchItemSelected(UpgradeNode)` 발행 → `UIManager`가 3개 뷰 모두 구독해
+  `ResearchPopupController.Show()` 호출까지 배선 완료 — 연구 항목을 클릭하면 이름/브랜치/설명이
+  담긴 상세 팝업이 실제로 뜬다(Close 버튼 포함). `UpgradeManager.OnNodeUnlocked` 구독으로 활성
+  뷰의 브랜치 보드/요약을 갱신하는 부분과 팝업의 "연구 시작"/"취소" 버튼 로직은 아직 미구현
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근은 Step 83(Research Database v2
-커밋 5 — `UpgradeTreeView`를 `UpgradeManager.Tree`의 실제 45개 `UpgradeNode`에 연결, 브랜치
-보드/리스트를 더미 데이터에서 실데이터로 전환. 검증은 `Docs/QA_Checklist.md` 참고).
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근 기록은 Step 84(Research Database v2
+커밋 6). 이후 `UIManager`가 3개 뷰의 `OnResearchItemSelected`를 구독해 `ResearchPopupController.Show()`를
+호출하는 배선(커밋 7 절반)을 추가로 완료했으나 아직 DevLog에 Step으로 기록되지 않음 — 다음
+DevLog 갱신 시 반영 필요. 검증은 `Docs/QA_Checklist.md` 참고.
 
 ---
 
@@ -98,16 +101,14 @@ Tactical Modal은 Step 64/65/66/67로 완료. 남은 1개 화면은 §14 — `Ra
   대체하고 팝업 트리거는 끌지 결정 필요(끄는 쪽이면 `CountryPopupController.Subscribe()`의
   `WorldMap.OnCountryClicked` 구독 제거 또는 `CountryPopupUI` GameObject 비활성화 한 줄이면 됨)
 
-**Research Database v2 — 커밋 6~7 착수** (근거: DevLog Step 83,
+**Research Database v2 — 커밋 7 나머지 절반** (근거:
 `Docs/ResearchDatabase_V2_ImplementationPlan.md` §1/§4)
 
-- 커밋 1~5(UI 골격/Research Popup UXML·USS/노드 메타데이터/`ResearchPopupController` 뼈대/
-  `UpgradeTreeView`의 실제 `UpgradeNode` 연결) 완료. 연구 항목 행은 아직 탭해도 반응 없음.
-- 커밋 6: `UpgradeTreeView`에 `OnResearchItemSelected(UpgradeNode)` 이벤트 신규 추가, 연구 항목
-  행 클릭 시 발행하도록 배선.
-- 커밋 7: `UIManager`가 3개 `UpgradeTreeView.OnResearchItemSelected`를 구독해
-  `ResearchPopupController.Show()` 호출, `UpgradeManager.OnNodeUnlocked` 구독으로 활성 뷰의
-  브랜치 보드/요약을 갱신 — 이 커밋부터 Research Popup이 실제로 동작.
+- 커밋 1~6 완료. 커밋 7 중 "`UIManager`가 3개 `UpgradeTreeView.OnResearchItemSelected` 구독 →
+  `ResearchPopupController.Show()` 호출"까지 완료 — 연구 항목 행을 클릭하면 이름/브랜치/설명이
+  담긴 팝업이 실제로 뜬다.
+- `UpgradeManager.OnNodeUnlocked` 구독으로 활성 뷰(브랜치 보드/요약)를 갱신하는 나머지 절반이
+  남음(계획서 §4 커밋 7 표 3번째 항목).
 - 이후 폴리싱(`LockReason()`/CTA 버튼 문구 4갈래, 커밋 8) → 구 코드 정리(`buy-button` UXML 제거
   등, 커밋 9) → 문서 반영(`DESIGN.md`/`QA_Checklist.md`/`unity-editor-task.md`, 커밋 10) → 에디터
   씬 배선(`ResearchPopupUI` GameObject)+실기기 검증(커밋 11)까지 계획서 §1/§4 순서 그대로 진행.

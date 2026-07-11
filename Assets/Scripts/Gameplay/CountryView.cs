@@ -685,6 +685,13 @@ namespace Contagion.Gameplay
         // 플레이테스트로 오탭 빈도를 반드시 확인할 것(unity-editor-task.md 참고).
         private void OnMouseUpAsButton()
         {
+            // [WorldMap Input Lock System] MainMenu/CountrySelect/Research/GlobalStatus/Leaderboard/
+            // EndingScreen/ResearchPopup 중 하나라도 열려 있으면 국가 클릭 자체를 무시한다. CountryPopup은
+            // 이 잠금에 포함되지 않으므로(WorldMapInputLock.cs 클래스 설명 참고) Gameplay+CountryPopup
+            // 상태에서는 계속 클릭이 통과한다.
+            if (WorldMapInputLock.IsLocked)
+                return;
+
             if (WorldMapCameraController.Instance != null && WorldMapCameraController.Instance.WasDragging)
                 return;
 

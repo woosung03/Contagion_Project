@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Contagion.Data;
+using Contagion.Gameplay;
 using Contagion.Managers;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -70,6 +71,8 @@ namespace Contagion.UI
 
         public void Show()
         {
+            // [WorldMap Input Lock System] CountrySelect가 떠 있는 동안은 WorldMap 클릭/드래그를 차단한다.
+            WorldMapInputLock.Lock(WorldMapLockReason.CountrySelect);
             if (_root != null) _root.style.display = DisplayStyle.Flex;
             RebuildList();
         }
@@ -77,6 +80,7 @@ namespace Contagion.UI
         public void Hide()
         {
             if (_root != null) _root.style.display = DisplayStyle.None;
+            WorldMapInputLock.Unlock(WorldMapLockReason.CountrySelect);
         }
 
         private void RebuildList()

@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &2997029
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2997030}
+  m_Layer: 0
+  m_Name: UI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2997030
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2997029}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.93445, y: -1.00205, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &104322320
 SpriteRenderer:
   serializedVersion: 2
@@ -11951,7 +11982,7 @@ GameObject:
   - component: {fileID: 2050405918}
   - component: {fileID: 994684355}
   m_Layer: 0
-  m_Name: Bootstrap
+  m_Name: GameSystems
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12393,6 +12424,7 @@ MonoBehaviour:
   countryStatusPanelController: {fileID: 5900000004}
   endingScreenController: {fileID: 511221707}
   rankingPanelController: {fileID: 1737611719}
+  researchPopupController: {fileID: 0}
   mainMenuController: {fileID: 3100000104}
   countrySelectController: {fileID: 3100000204}
   reviveCureProgressRollback: 0.3
@@ -12888,3 +12920,4 @@ SceneRoots:
   - {fileID: 3300000402}
   - {fileID: 3300000502}
   - {fileID: 5900000002}
+  - {fileID: 2997030}

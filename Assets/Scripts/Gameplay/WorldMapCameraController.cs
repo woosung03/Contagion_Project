@@ -63,6 +63,16 @@ namespace Contagion.Gameplay
         {
             if (targetCamera == null) return;
 
+            // [WorldMap Input Lock System] 화면이 잠겨 있으면 드래그 입력 자체를 처리하지 않는다.
+            // _isPressed를 같이 리셋해두는 이유 — 예: GlobalStatus 화면이 열려 있는 동안 카메라 드래그
+            // 제스처를 시작(누름)했다가 화면이 닫혀 잠금이 풀리면, 리셋 없이는 다음 프레임에 "이미 눌려
+            // 있던" 상태로 이어져 화면이 닫히자마자 지도가 갑자기 튀는 것처럼 보일 수 있다.
+            if (WorldMapInputLock.IsLocked)
+            {
+                _isPressed = false;
+                return;
+            }
+
             if (Input.GetMouseButtonDown(0))
             {
                 _isPressed = true;
