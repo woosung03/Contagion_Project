@@ -102,6 +102,11 @@ namespace Contagion.UI
         /// 비용 자체를 안 쓰기 위함(기존과 동일한 가드).</summary>
         private bool _isShown;
 
+        /// <summary>닫기(X) 버튼 클릭 — 이 컨트롤러 스스로 Hide()를 호출하지 않고 요청만 발행한다.
+        /// 실제로 화면을 닫고 WorldMapInputLock을 해제하는 책임은 UIManager 한 곳에만 있다
+        /// (UpgradeTreeView.OnCloseRequested와 동일 패턴 — WorldMap Input Lock 영구 유지 버그 수정).</summary>
+        public event Action OnCloseRequested;
+
         private void OnEnable()
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
@@ -133,7 +138,7 @@ namespace Contagion.UI
 
             _statusList = root.Q<VisualElement>("status-list");
 
-            _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
+            _closeButton.RegisterCallback<ClickEvent>(_ => OnCloseRequested?.Invoke());
 
             Subscribe();
             Hide();

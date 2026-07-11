@@ -117,6 +117,20 @@ namespace Contagion.Managers
                 page.OnCategoryRequested += HandleCategoryRequested;
                 page.OnResearchItemSelected -= HandleResearchItemSelected;
                 page.OnResearchItemSelected += HandleResearchItemSelected;
+                page.OnCloseRequested -= HandleScreenCloseRequested;
+                page.OnCloseRequested += HandleScreenCloseRequested;
+            }
+
+            if (countryStatusPanelController != null)
+            {
+                countryStatusPanelController.OnCloseRequested -= HandleScreenCloseRequested;
+                countryStatusPanelController.OnCloseRequested += HandleScreenCloseRequested;
+            }
+
+            if (rankingPanelController != null)
+            {
+                rankingPanelController.OnCloseRequested -= HandleScreenCloseRequested;
+                rankingPanelController.OnCloseRequested += HandleScreenCloseRequested;
             }
 
             if (endingScreenController != null)
@@ -158,8 +172,15 @@ namespace Contagion.Managers
                     if (page == null) continue;
                     page.OnCategoryRequested -= HandleCategoryRequested;
                     page.OnResearchItemSelected -= HandleResearchItemSelected;
+                    page.OnCloseRequested -= HandleScreenCloseRequested;
                 }
             }
+
+            if (countryStatusPanelController != null)
+                countryStatusPanelController.OnCloseRequested -= HandleScreenCloseRequested;
+
+            if (rankingPanelController != null)
+                rankingPanelController.OnCloseRequested -= HandleScreenCloseRequested;
 
             if (endingScreenController != null)
             {
@@ -343,6 +364,21 @@ namespace Contagion.Managers
         private void HandleRankingClicked()
         {
             TransitionTo(AppScreen.Leaderboard);
+        }
+
+        /// <summary>
+        /// Research/GlobalStatus/Leaderboard 세 화면의 X(닫기) 버튼 공통 핸들러 — 버그 수정
+        /// ("X 버튼으로 닫으면 WorldMapInputLock이 영구 유지되는 문제"). 세 컨트롤러가 각자
+        /// 내부에서 Hide()를 직접 부르던 것을 OnCloseRequested 이벤트 발행으로 바꾸고, 실제
+        /// 화면 전환은 HUD 버튼 경로와 동일하게 TransitionTo()로만 수행한다 — 그래야
+        /// BuildScreenMap()의 hide 델리게이트(WorldMapInputLock.Unlock 포함)가 항상 호출되고
+        /// _currentScreen도 Gameplay로 정확히 되돌아간다. 어느 화면에서 닫기를 눌렀는지는
+        /// TransitionTo() 내부에서 _currentScreen 기준으로 알아서 판단하므로 이 핸들러는
+        /// 발신자를 구분할 필요가 없다.
+        /// </summary>
+        private void HandleScreenCloseRequested()
+        {
+            TransitionTo(AppScreen.Gameplay);
         }
 
         private void HandleRestartRequested()

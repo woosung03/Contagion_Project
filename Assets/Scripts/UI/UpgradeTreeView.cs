@@ -294,6 +294,12 @@ namespace Contagion.UI
         /// (V2 계획 커밋 7, 이 클래스는 발행만 하고 구독자가 있는지는 신경 쓰지 않는다).</summary>
         public event System.Action<UpgradeNode> OnResearchItemSelected;
 
+        /// <summary>닫기(X) 버튼 클릭 — 이 화면 스스로 Hide()를 호출하지 않고 요청만 발행한다.
+        /// 실제로 화면을 닫고(TransitionTo(AppScreen.Gameplay)) WorldMapInputLock을 해제하는 책임은
+        /// UIManager 한 곳에만 있다 — HUD 버튼 경로(TransitionTo)와 X 버튼 경로가 서로 다른 코드를
+        /// 타면서 Unlock() 호출이 누락되던 버그(WorldMap Input Lock 영구 유지)의 근본 수정.</summary>
+        public event System.Action OnCloseRequested;
+
         /// <summary>이 카테고리의 4개 브랜치(계열 3 + 통합 연구 1). Show()/RequestCategory 시점마다
         /// UpgradeManager.Tree로부터 다시 계산한다.</summary>
         private List<ResearchBranch> _branches = new List<ResearchBranch>();
@@ -323,7 +329,7 @@ namespace Contagion.UI
 
             _nodeScroll.mode = ScrollViewMode.Vertical;
 
-            _closeButton.RegisterCallback<ClickEvent>(_ => Hide());
+            _closeButton.RegisterCallback<ClickEvent>(_ => OnCloseRequested?.Invoke());
             _adBonusButton.RegisterCallback<ClickEvent>(_ => HandleAdBonusClicked());
             _tabTransmissionButton?.RegisterCallback<ClickEvent>(_ => RequestCategory(UpgradeCategory.Transmission));
             _tabSymptomButton?.RegisterCallback<ClickEvent>(_ => RequestCategory(UpgradeCategory.Symptom));
