@@ -31,59 +31,208 @@ namespace Contagion.UI
     public class UpgradeTreeView : MonoBehaviour
     {
         /// <summary>
-        /// node.id(영문 내부 식별자) → 한국어 표시명. Commit 2에서 실제 UpgradeNode 연결 시
-        /// 그대로 재사용할 딕셔너리 — 이번 커밋(더미 데이터 단계)에서는 미사용.
+        /// node.id(영문 내부 식별자) → 한국어 표시명. Commit 2(v2 계획 커밋 5)에서 실제
+        /// UpgradeNode 연결 시 그대로 재사용할 딕셔너리 — 이번 커밋(더미 데이터 단계)에서는 미사용.
+        /// 값은 Docs/UpgradeTree_ResearchDatabase_NodeMapping.md의 "신규 이름" 열을 그대로
+        /// 반영했다 — "유지" 분류 노드는 기존 이름 그대로, "수정"/"대체" 분류 노드는 신규 이름으로
+        /// 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은 1개도 바꾸지 않는다.
         /// </summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
-            // 감염 경로
-            { "trans_air1", "공기 전파 I" },
-            { "trans_water1", "수인성 전파 I" },
-            { "trans_contact1", "접촉 전파 I" },
-            { "trans_air2", "공기 전파 II" },
-            { "trans_water2", "수인성 전파 II" },
-            { "trans_insect1", "곤충 매개 전파" },
-            { "trans_droplet1", "비말 전파" },
+            // 감염 경로 — 공기 계열
+            { "trans_air1", "비말 핵 잔류" },
+            { "trans_air2", "에어로졸 광역 부유" },
+            { "trans_droplet1", "호흡기 상재균 교란" },
+            { "trans_droplet2", "실내 공기 재순환 감염" },
+            // 감염 경로 — 수인성 계열
+            { "trans_water1", "수인성 전파" },
+            { "trans_water2", "해상 전파" },
             { "trans_animal1", "인수공통 전파" },
-            { "trans_blood1", "혈액 전파" },
-            { "trans_droplet2", "비말 전파 강화" },
-            { "trans_animal2", "인수공통 전파 강화" },
-            { "trans_blood2", "혈액 전파 강화" },
-            { "trans_advanced1", "광역 전파 I" },
-            { "trans_advanced2", "광역 전파 II" },
-            { "trans_global", "전지구적 전파" },
-            // 증상
+            { "trans_animal2", "숙주 전이 가속" },
+            // 감염 경로 — 접촉·동물매개 계열
+            { "trans_contact1", "조류 매개 전파" },
+            { "trans_insect1", "설치류 매개 확산" },
+            { "trans_blood1", "수혈 전파" },
+            { "trans_blood2", "오염 혈액 유통망" },
+            // 감염 경로 — 통합 연구
+            { "trans_advanced1", "교차 매개 네트워크" },
+            { "trans_advanced2", "혈액-매개체 융합 전파" },
+            { "trans_global", "전지구적 전파망" },
+            // 증상 — 표준형(기침 계열)
             { "sym_cough", "기침" },
-            { "sym_rash", "발진" },
-            { "sym_nausea", "구토감" },
             { "sym_fever", "발열" },
-            { "sym_lesion", "피부 병변" },
-            { "sym_vomit", "구토" },
             { "sym_pneumonia", "폐렴" },
-            { "sym_dermatitis", "피부염" },
-            { "sym_hemorrhage", "출혈" },
             { "sym_respfailure", "호흡 부전" },
+            // 증상 — 은신형(발진 계열)
+            { "sym_rash", "발진" },
+            { "sym_lesion", "피부 병변" },
+            { "sym_dermatitis", "피부염" },
             { "sym_necrosis", "만성 병변" },
+            // 증상 — 공격형(구토 계열)
+            { "sym_nausea", "구토감" },
+            { "sym_vomit", "구토" },
+            { "sym_hemorrhage", "출혈" },
             { "sym_sepsis", "패혈증" },
+            // 증상 — 통합 연구
             { "sym_multiorgan1", "다발성 장기부전 I" },
             { "sym_multiorgan2", "다발성 장기부전 II" },
             { "sym_organfailure", "전신 장기부전" },
-            // 적응 (구 "능력")
-            { "abl_mutation1", "유전자 변이 I" },
-            { "abl_stealth1", "은신 I" },
-            { "abl_hardening1", "구조 강화 I" },
-            { "abl_mutation2", "유전자 변이 II" },
-            { "abl_stealth2", "은신 II" },
-            { "abl_hardening2", "구조 강화 II" },
-            { "abl_resist1", "약물 저항 I" },
-            { "abl_camouflage1", "위장 I" },
-            { "abl_resist2", "구조적 내성 I" },
-            { "abl_resist3", "약물 저항 II" },
-            { "abl_camouflage2", "위장 II" },
-            { "abl_resist4", "구조적 내성 II" },
-            { "abl_superbug1", "슈퍼균주 I" },
-            { "abl_superbug2", "슈퍼균주 II" },
-            { "abl_finalevo", "최종 진화체" },
+            // 적응(구 "능력") — 변이 계열
+            { "abl_mutation1", "항원 변이" },
+            { "abl_mutation2", "잠복 변이" },
+            { "abl_resist1", "백신 회피 항체 조작" },
+            { "abl_resist3", "다중 변종 분화" },
+            // 적응 — 은신 계열
+            { "abl_stealth1", "면역 회피 단백질" },
+            { "abl_stealth2", "검사 회피" },
+            { "abl_camouflage1", "숙주 내 잠행" },
+            { "abl_camouflage2", "면역계 잠입" },
+            // 적응 — 구조 강화 계열
+            { "abl_hardening1", "약물 내성" },
+            { "abl_hardening2", "세포벽 강화" },
+            { "abl_resist2", "격리 내성" },
+            { "abl_resist4", "내한성" },
+            // 적응 — 통합 연구
+            { "abl_superbug1", "다제내성 병원체" },
+            { "abl_superbug2", "전천후 적응" },
+            { "abl_finalevo", "최종 진화" },
+        };
+
+        /// <summary>
+        /// node.id → 상세 패널 "설명" 행에 쓸 한 줄 설명. Commit 2(v2 계획 커밋 5)에서 실제
+        /// 연결 예정 — 이번 커밋에서는 어디서도 참조하지 않는 신규 딕셔너리라 빌드/동작에 영향
+        /// 없다(안전한 중간 지점, ResearchDatabase_MVP_ImplementationPlan.md §7 커밋 4/
+        /// ResearchDatabase_V2_ImplementationPlan.md §4 커밋 4와 동일한 전략).
+        /// 문구는 ResearchDatabase_MVP_ImplementationPlan.md §0.1 "서술-효과 불일치 방지 원칙"을
+        /// 따른다 — "이미 로직이 존재하는" 노드(abl_hardening1 — drugResistanceReduction 공식으로
+        /// 치료제 진행을 이미 저해하는 로직이 존재)만 규칙 문장을 포함하고, 나머지(전부 Phase
+        /// 2~4 미착수 메커닉 — environmentResistance 소비/medicalBurdenModifier/unlockedFlags
+        /// 의존)는 "정체성 서사"까지만 쓰고 "지금 이 연구가 실제로 무엇을 바꾸는지"에 대한 구체적
+        /// 규칙 문장은 넣지 않는다. 스탯 변화(infectivity/severity/lethality/drugResistance
+        /// 증감)는 이 딕셔너리가 아니라 기존처럼 effects 기반 data-row로 노출한다(Commit 2에서
+        /// EffectStatLabel() 재사용 예정).
+        /// </summary>
+        private static readonly Dictionary<string, string> NodeDescriptions = new Dictionary<string, string>
+        {
+            // 감염 경로 — 공기 계열
+            { "trans_air1", "미세 비말이 실내 공기 중에 핵 형태로 남아 잔류 감염을 일으킨다." },
+            { "trans_air2", "병원체가 초미세 에어로졸로 변해 더 넓은 공간까지 퍼져나간다." },
+            { "trans_droplet1", "호흡기 상주균총을 교란시켜 비말을 통한 근접 감염을 강화한다." },
+            { "trans_droplet2", "환기 시설을 타고 실내 공기가 재순환되며 밀집 공간의 감염이 늘어난다." },
+            // 감염 경로 — 수인성 계열
+            { "trans_water1", "오염된 식수를 통해 병원체가 퍼진다." },
+            { "trans_water2", "선박 급수 시설과 해상 물류를 타고 병원체가 항구 사이를 이동한다." },
+            { "trans_animal1", "가축·야생동물을 매개로 한 전파 경로가 열린다." },
+            { "trans_animal2", "동물 숙주 사이의 전이 속도가 빨라져 재유입 감염이 잦아진다." },
+            // 감염 경로 — 접촉·동물매개 계열
+            { "trans_contact1", "철새의 계절 이동 경로를 따라 병원체가 퍼진다." },
+            { "trans_insect1", "쥐 등 설치류를 매개로 병원체가 은밀히 확산된다." },
+            { "trans_blood1", "오염된 혈액이 수혈 과정을 통해 새로운 숙주에게 전달된다." },
+            { "trans_blood2", "혈액 제제 유통망이 오염되어 전파 경로가 더 넓어진다." },
+            // 감염 경로 — 통합 연구
+            { "trans_advanced1", "여러 전파 경로가 교차하며 하나의 통합된 감염망을 이룬다." },
+            { "trans_advanced2", "혈액 전파와 매개체 전파가 융합되어 새로운 감염 양상을 만든다." },
+            { "trans_global", "국경을 초월한 전지구적 확산 능력을 얻는다." },
+            // 증상 — 표준형(기침 계열)
+            { "sym_cough", "감염자에게 기침 증상이 나타나 비말 전파의 토대가 된다." },
+            { "sym_fever", "체온이 상승하며 병세의 초반 진행이 완만해진다." },
+            { "sym_pneumonia", "호흡기 증상이 악화되어 병세가 급격히 진행된다." },
+            { "sym_respfailure", "호흡 기능이 저하되어 치사율이 크게 상승한다." },
+            // 증상 — 은신형(발진 계열)
+            { "sym_rash", "피부에 가벼운 발진이 나타나 초기에는 눈에 띄지 않는다." },
+            { "sym_lesion", "발진이 병변으로 진행되며 좀처럼 발각되지 않는다." },
+            { "sym_dermatitis", "만성적인 피부염 증상으로 진행되어 대응이 더디다." },
+            { "sym_necrosis", "병변이 만성화되어 급성기 없이 서서히 악화된다." },
+            // 증상 — 공격형(구토 계열)
+            { "sym_nausea", "가벼운 구토감 증상이 나타난다." },
+            { "sym_vomit", "실제 구토 증상으로 진행되어 중증도가 상승한다." },
+            { "sym_hemorrhage", "내출혈 증상이 동반되어 감염자들이 스스로 몸을 사리게 된다." },
+            { "sym_sepsis", "전신 염증 반응으로 치사율이 크게 상승한다." },
+            // 증상 — 통합 연구
+            { "sym_multiorgan1", "복수 계열의 중증 증상이 겹쳐 장기 기능이 저하된다." },
+            { "sym_multiorgan2", "장기부전이 더욱 심화되어 치사율이 큰 폭으로 상승한다." },
+            { "sym_organfailure", "전신의 장기 기능이 상실되어 치사율이 최대치로 상승한다." },
+            // 적응 — 변이 계열
+            { "abl_mutation1", "표면 항원이 끊임없이 변이해 치료제 개발을 근본적으로 어렵게 한다." },
+            { "abl_mutation2", "잠복기 동안 변이가 축적되어 발각도가 낮아진다." },
+            { "abl_resist1", "항체 반응을 무력화하는 방향으로 표면 구조를 조작한다." },
+            { "abl_resist3", "여러 변종으로 분화해 치료제 완성 이후에도 일부가 살아남는다." },
+            // 적응 — 은신 계열
+            { "abl_stealth1", "면역계의 인식을 피하는 단백질을 발현해 감염자가 스스로 낫기 어렵게 만든다." },
+            { "abl_stealth2", "진단 검사를 피해가는 성질을 얻어 발각도를 낮춘다." },
+            { "abl_camouflage1", "숙주 체내에 조용히 자리잡아 대응 체계의 경계를 늦춘다." },
+            { "abl_camouflage2", "면역계 깊숙이 잠입해 발각도를 최대한 억제한다." },
+            // 적응 — 구조 강화 계열
+            { "abl_hardening1", "병원체 구조를 조정해 치료제의 효력을 떨어뜨린다." },
+            { "abl_hardening2", "세포벽을 강화해 구조적 생존력을 높인다." },
+            { "abl_resist2", "격리 상황에서도 버텨내는 구조적 내성을 얻는다." },
+            { "abl_resist4", "추운 환경에서도 버텨내는 내한성을 얻는다." },
+            // 적응 — 통합 연구
+            { "abl_superbug1", "여러 계열의 적응 능력을 통합해 다제내성을 지닌 균주로 진화한다." },
+            { "abl_superbug2", "기후에 관계없이 버텨내는 전천후 적응력을 갖춘다." },
+            { "abl_finalevo", "병원체가 최종 진화체로 완성된다." },
+        };
+
+        /// <summary>
+        /// node.id → 소속 갈래(브랜치) 라벨. 4브랜치 구조(기반 갈래 3개 + 통합 갈래 1개)는
+        /// DefaultUpgradeTreeFactory.cs의 prerequisites 그래프가 실제로 강제하는 구조다(카테고리당
+        /// 15개 = 4+4+4+3, ResearchDatabase_V2_UI_StructureDesign.md §0이 이미 확인). 라벨
+        /// 문자열 자체는 기존 <see cref="BuildDummyBranches"/>가 이미 쓰던 값(공기 계열/수인성
+        /// 계열/접촉·동물매개 계열/통합 연구 등)을 그대로 재사용해 Commit 2 전환 시 화면 문구가
+        /// 갑자기 바뀌는 위화감이 없게 했다. x좌표 기반 추정은 하지 않았다 — 합류 노드가 티어에
+        /// 따라 같은 x열을 공유해 오판 위험이 있기 때문. 이번 커밋에서는 어디서도 참조하지 않는
+        /// 신규 딕셔너리라 빌드/동작에 영향 없음.
+        /// </summary>
+        private static readonly Dictionary<string, string> NodeBranch = new Dictionary<string, string>
+        {
+            // 감염 경로
+            { "trans_air1", "공기 계열" },
+            { "trans_air2", "공기 계열" },
+            { "trans_droplet1", "공기 계열" },
+            { "trans_droplet2", "공기 계열" },
+            { "trans_water1", "수인성 계열" },
+            { "trans_water2", "수인성 계열" },
+            { "trans_animal1", "수인성 계열" },
+            { "trans_animal2", "수인성 계열" },
+            { "trans_contact1", "접촉·동물매개 계열" },
+            { "trans_insect1", "접촉·동물매개 계열" },
+            { "trans_blood1", "접촉·동물매개 계열" },
+            { "trans_blood2", "접촉·동물매개 계열" },
+            { "trans_advanced1", "통합 연구" },
+            { "trans_advanced2", "통합 연구" },
+            { "trans_global", "통합 연구" },
+            // 증상
+            { "sym_cough", "표준형 — 기침 계열" },
+            { "sym_fever", "표준형 — 기침 계열" },
+            { "sym_pneumonia", "표준형 — 기침 계열" },
+            { "sym_respfailure", "표준형 — 기침 계열" },
+            { "sym_rash", "은신형 — 발진 계열" },
+            { "sym_lesion", "은신형 — 발진 계열" },
+            { "sym_dermatitis", "은신형 — 발진 계열" },
+            { "sym_necrosis", "은신형 — 발진 계열" },
+            { "sym_nausea", "공격형 — 구토 계열" },
+            { "sym_vomit", "공격형 — 구토 계열" },
+            { "sym_hemorrhage", "공격형 — 구토 계열" },
+            { "sym_sepsis", "공격형 — 구토 계열" },
+            { "sym_multiorgan1", "통합 연구" },
+            { "sym_multiorgan2", "통합 연구" },
+            { "sym_organfailure", "통합 연구" },
+            // 적응(구 "능력")
+            { "abl_mutation1", "변이 계열" },
+            { "abl_mutation2", "변이 계열" },
+            { "abl_resist1", "변이 계열" },
+            { "abl_resist3", "변이 계열" },
+            { "abl_stealth1", "은신 계열" },
+            { "abl_stealth2", "은신 계열" },
+            { "abl_camouflage1", "은신 계열" },
+            { "abl_camouflage2", "은신 계열" },
+            { "abl_hardening1", "구조 강화 계열" },
+            { "abl_hardening2", "구조 강화 계열" },
+            { "abl_resist2", "구조 강화 계열" },
+            { "abl_resist4", "구조 강화 계열" },
+            { "abl_superbug1", "통합 연구" },
+            { "abl_superbug2", "통합 연구" },
+            { "abl_finalevo", "통합 연구" },
         };
 
         /// <summary>node.id → 한국어 표시명. Commit 2 재사용 예정, 현재 미사용.</summary>
