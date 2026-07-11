@@ -8,17 +8,6 @@
 
 ## 세션 시작 시 확인 (미해결)
 
-- [ ] SafeArea Minimum Margin Fix 검증 (근거: DevLog Step 85) — Unity 에디터 미접속으로 작성돼
-      실기기/에디터 검증 전부 미완료.
-  - [ ] 노치 없는 기기(또는 에디터 `previewInEditor` + `previewSafeLeft/Right=0`)에서 HUD/MainMenu/
-        UpgradeTree/EndingScreen 좌우·하단이 화면 끝에 붙지 않고 최소 20px 여백이 보이는지 확인
-  - [ ] 노치 있는 기기(safe-area inset > 20px)에서는 여전히 inset이 그대로 적용되고 20px로
-        깎이지 않는지 확인 (Mathf.Max 방향 확인)
-  - [ ] 상단은 `navBarReserveTop`(기본 48px)이 여전히 별도로 더해져 X·더보기 버튼과 안 겹치는지
-        확인
-  - [ ] `showDebugOverlay` 켠 상태에서 좌하단 오버레이의 `minMargin=20` 표시와 실제
-        `pad L/R/T/B` 값이 공식(`Mathf.Max(minMargin, inset)`)과 일치하는지 확인
-  - [ ] 회전/해상도 변경 후에도(폴링 재조회) 최소 여백이 깨지지 않는지 확인
 - [ ] Research Database UI Shell 검증 (근거: DevLog Step 82) — Unity 에디터 미접속으로 작성돼
       실기기/에디터 검증 전부 미완료.
   - [ ] 업그레이드 버튼 클릭 시 화면이 정상 표시되는지, 콘솔 에러/경고 0건인지 확인

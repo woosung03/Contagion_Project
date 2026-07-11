@@ -32,14 +32,6 @@ namespace Contagion.UI
                  "안드로이드를 제외한 모든 환경에서 적용.")]
         [SerializeField] private float navBarReserveTop = 48f;
 
-        [Header("최소 여백 (Minimum Margin)")]
-        [Tooltip("노치 등 실제 safe-area inset이 0에 가까운 기기(대부분의 안드로이드, 구형 iPhone 등)에서도 " +
-                 "화면 끝에 UI가 붙지 않도록 보장할 최소 padding(논리 px). Theme.uss --space-xl(20px)과 " +
-                 "동일값 — UpgradeTree.uss의 .upgrade-root가 이미 이 값을 기본 padding으로 선언해뒀지만 " +
-                 "런타임에 SafeAreaApplier가 덮어쓰면서 무시되고 있었다. 좌우/상/하 각 축에 독립 적용되며, " +
-                 "safe-area inset이 이 값보다 크면 inset이 그대로 쓰인다(Mathf.Max).")]
-        [SerializeField] private float minMargin = 20f;
-
         [Header("디버그 오버레이 (실기기 검증용)")]
         [Tooltip("켜면 화면 좌하단에 적용 상태(src·인셋·padding·dpr·재시도)를 표시. 검증 후 끄거나 제거.")]
         [SerializeField] private bool showDebugOverlay = false;
@@ -135,12 +127,11 @@ namespace Contagion.UI
         private void ApplyPreview()
         {
             if (target == null) return;
-            float padT = Mathf.Max(minMargin, previewSafeTop) + navBarReserveTop;
-            target.style.paddingTop = padT;
-            target.style.paddingBottom = Mathf.Max(minMargin, previewSafeBottom);
-            target.style.paddingLeft = Mathf.Max(minMargin, previewSafeLeft);
-            target.style.paddingRight = Mathf.Max(minMargin, previewSafeRight);
-            ApplyTopAnchorTranslate(padT);
+            target.style.paddingTop = Mathf.Max(0f, previewSafeTop + navBarReserveTop);
+            target.style.paddingBottom = Mathf.Max(0f, previewSafeBottom);
+            target.style.paddingLeft = Mathf.Max(0f, previewSafeLeft);
+            target.style.paddingRight = Mathf.Max(0f, previewSafeRight);
+            ApplyTopAnchorTranslate(Mathf.Max(0f, previewSafeTop + navBarReserveTop));
             applied = true;
             lastOverlaySrc = "editor preview";
         }
@@ -236,7 +227,7 @@ namespace Contagion.UI
                    $"pad T={target.resolvedStyle.paddingTop:F1} B={target.resolvedStyle.paddingBottom:F1} " +
                    $"L={target.resolvedStyle.paddingLeft:F1} R={target.resolvedStyle.paddingRight:F1}\n" +
                    tossLine +
-                   $"reserveTop={navBarReserveTop} minMargin={minMargin} status={overlayStatus}";
+                   $"reserveTop={navBarReserveTop} status={overlayStatus}";
         }
 
         private static string Short(string s, int max = 64)
@@ -258,12 +249,10 @@ namespace Contagion.UI
             float scaleX = sw / logicalW;
             float scaleY = sh / logicalH;
 
-            // safe-area inset과 minMargin 중 큰 값을 우선 보장한 뒤, 상단 nav바 회피 여백(extraTopLogical)은
-            // 별도로 더한다 — extraTopLogical은 이미 minMargin보다 크게 설정돼 있어(기본 48 > 20) 항상 보존됨.
-            float padL = Mathf.Max(minMargin, leftPx / scaleX);
-            float padR = Mathf.Max(minMargin, rightPx / scaleX);
-            float padT = Mathf.Max(minMargin, topPx / scaleY) + Mathf.Max(0f, extraTopLogical);
-            float padB = Mathf.Max(minMargin, bottomPx / scaleY);
+            float padL = Mathf.Max(0f, leftPx / scaleX);
+            float padR = Mathf.Max(0f, rightPx / scaleX);
+            float padT = Mathf.Max(0f, topPx / scaleY + extraTopLogical);
+            float padB = Mathf.Max(0f, bottomPx / scaleY);
             if (!Finite(padL) || !Finite(padR) || !Finite(padT) || !Finite(padB)) return false;
 
             target.style.paddingLeft = padL;
