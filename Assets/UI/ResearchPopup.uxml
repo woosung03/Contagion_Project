@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
+    <Style src="ResearchPopup.uss" />
+    <!-- Research Database v2 — 연구 상세 팝업(Research Popup). ResearchDatabase_V2_UI_StructureDesign.md
+         "E안(브랜치 현황판+연구 콘솔) + Research Popup" 중 Popup 쪽 뼈대. CountryPopup.uxml/
+         TacticalModalController 계약(modal-root/modal-title/modal-close/modal-rows/modal-footer)을
+         그대로 따라 TacticalModalController를 상속/재사용할 수 있게 한다 — 이번 커밋은 UXML 뼈대만
+         두고 Controller/UIManager/UpgradeTreeView 연결은 후속 커밋으로 미룬다. -->
+    <ui:VisualElement name="modal-root" class="popup-root tactical-panel">
+        <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+        <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+        <ui:VisualElement class="tactical-panel__header popup-header">
+            <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+            <ui:Button name="modal-close" text="✕" class="popup-close" />
+        </ui:VisualElement>
+        <!-- 연구 항목 설명 — CountryPopup의 popup-donut-row 자리에 대응하는, 헤더 바로 아래
+             단일 문단. 도넛 차트 대신 텍스트인 이유는 연구 항목엔 비율로 쪼갤 수치가 없고
+             UpgradeTreeView.BuildDummyBranches()의 DummyResearchItem.Description과 동일한
+             성격의 문장 하나이기 때문. -->
+        <ui:Label name="popup-description" text="" class="popup-description" />
+        <!-- data-row(비용/상태/선행조건 등)가 채워지는 자리 — Tactical.uss detail-rows 계약,
+             TacticalModalController.AddRow()/ClearRows()가 그대로 재사용 가능. -->
+        <ui:VisualElement name="modal-rows" class="detail-rows" />
+        <!-- 확인/취소 액션 — CountryPopup은 이 자리가 비어있었지만(닫기가 헤더로 이동),
+             Research Popup은 "연구 시작"이라는 확정 액션이 필요해 버튼 2개를 균등폭으로 배치한다.
+             이름만 미리 붙여두고 클릭 콜백은 연결하지 않는다(Controller 작성은 다음 커밋). -->
+        <ui:VisualElement name="modal-footer" class="modal-footer">
+            <ui:Button name="research-popup-confirm-button" text="연구 시작" class="popup-footer-button popup-footer-button--confirm" />
+            <ui:Button name="research-popup-cancel-button" text="취소" class="popup-footer-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

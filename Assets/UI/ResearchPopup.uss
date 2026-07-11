@@ -1,0 +1,83 @@
+/* ResearchPopup(Tactical Modal) 전용 확장 — Docs/ResearchDatabase_V2_UI_StructureDesign.md
+   "Research Popup" 뼈대. tactical-panel/corner-cut/data-row 등 공용 규칙은 Tactical.uss가
+   담당하고, 이 파일은 화면 고유 배치(위치/폭/헤더 가로배치/닫기 버튼 크기/설명 문단/
+   footer 버튼 2개 균등폭)만 추가한다 — CountryPopup.uss와 동일한 역할 분리 원칙.
+   로드 순서: Theme.uss -> Tactical.uss -> ResearchPopup.uss */
+
+.popup-root {
+    position: absolute;
+    left: 50%;
+    top: 30%; /* CountryPopup은 도넛+범례+행 다수로 16%까지 올렸지만, Research Popup은
+                 설명 문단 + data-row 소수 구성이라 콘텐츠가 짧다 — CountryPopup 확장 이전
+                 기본값(30%)을 그대로 채택. 내용이 늘어나면 CountryPopup Step 78 사례처럼
+                 재조정한다. */
+    width: 320px;
+    margin-left: -160px;
+    background-color: var(--color-bg-panel);
+    padding: var(--space-lg);
+    /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
+       않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
+}
+
+/* modal-title(연구 항목명) + modal-close(닫기)를 한 줄에 배치 — CountryPopup.uss와 동일 패턴. */
+.popup-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.popup-close {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* 연구 항목 설명 문단 — DummyResearchItem.Description과 동일 성격의 텍스트 한 덩어리.
+   data-row 목록(modal-rows) 위, 헤더 바로 아래 배치해 "이게 뭔지" 수치보다 먼저 보여준다.
+   구분선은 popup-donut-row(CountryPopup.uss)와 동일하게 data-row 톤을 그대로 이어간다. */
+.popup-description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-sm);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+/* 확인/취소 액션 버튼 슬롯 — CountryPopup의 modal-footer는 비어있었지만(닫기가 헤더로
+   이동), Research Popup은 "연구 시작"이라는 확정 액션이 있어 버튼 2개를 가로로 균등폭
+   배치한다. */
+.modal-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: var(--space-sm);
+}
+
+/* 버튼 2개 균등폭 — flex-grow:1 + flex-basis:0로 modal-footer 폭을 정확히 절반씩 나눠
+   가진다(고정 width를 쓰면 팝업 폭(320px)이 바뀔 때마다 버튼 폭을 같이 손봐야 해서 회피).
+   EndingScreen.uss .ending-button과 동일한 Tactical Design System 버튼 톤
+   (radius:0 + accent-glow 테두리 + bg-panel 배경)을 기본으로 삼는다. */
+.popup-footer-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: var(--touch-target-min);
+    margin: 0 4px;
+    border-width: 1px;
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+}
+
+/* "연구 시작" — 확정 액션이라 EndingScreen.uss .ending-button--revive와 같은 방식으로
+   accent-glow 배경을 얹어 "취소"와 시각적으로 구분한다(별도 색상 축 신설 없이 기존
+   --color-accent-glow-soft 재사용, DESIGN.md 색상 축 분리 원칙 준수). */
+.popup-footer-button--confirm {
+    background-color: var(--color-accent-glow-soft);
+    border-color: var(--color-accent-glow);
+}
