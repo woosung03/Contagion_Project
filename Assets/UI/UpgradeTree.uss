@@ -51,12 +51,19 @@
 
 .upgrade-header__close {
     width: 80px;
+    background-color: var(--color-bg-panel);
+    border-width: 1px;
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
 }
 
 .upgrade-header__ad-bonus {
     background-color: var(--color-brand-premium);
     color: var(--color-text-primary);
     width: 160px;
+    border-width: 1px;
+    border-color: var(--color-brand-premium);
+    border-radius: 0;
 }
 
 /* ScreenDesign.md §3 — 영문 LAB 캡션(예: "TRANSMISSION LAB")을 목록 영역 상단에 유지. */
@@ -125,8 +132,10 @@
     background-color: var(--color-accent-glow);
 }
 
+/* Stroke System: Selected = 3px(Docs/DESIGN.md). 기존 2px는 --stroke-active(진행 상태)와
+   같은 두께를 "선택됨"에 재사용하고 있어 의미가 충돌했다 — 3px로 수정. */
 .branch-row--selected {
-    border-width: 2px;
+    border-width: var(--stroke-selected);
     border-color: var(--color-border-selected);
 }
 

@@ -26,11 +26,19 @@
     align-items: center;
 }
 
+/* Button System: Secondary(Docs/DESIGN.md) — background/border/radius를 명시하지 않으면
+   Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
+   패턴, 2026-07-14 수정). CountryPopup.uss의 동일 클래스와 같은 스타일을 유지한다. */
 .popup-close {
     width: 28px;
     height: 28px;
     padding: 0;
     flex-shrink: 0;
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
 }
 
 /* 연구 항목 설명 문단 — DummyResearchItem.Description과 동일 성격의 텍스트 한 덩어리.

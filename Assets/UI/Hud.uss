@@ -16,9 +16,11 @@
     align-items: center;
     height: 34px;
     padding: 0 var(--space-sm);
-    background-color: var(--color-bg-scrim-soft);
+    background-color: var(--color-bg-panel);
+    border-left-width: 1px;
+    border-right-width: 1px;
     border-bottom-width: 1px;
-    border-bottom-color: var(--color-accent-glow-soft);
+    border-color: var(--color-accent-glow-soft);
 }
 
 .resource-strip__sep {
@@ -303,7 +305,11 @@
 .population-bar {
     flex-direction: column;
     padding: var(--space-xs) var(--space-lg) 0;
-    background-color: var(--color-bg-scrim-strong);
+    background-color: var(--color-bg-panel);
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-color: var(--color-accent-glow-soft);
 }
 
 .population-bar__track {
@@ -356,10 +362,14 @@
     justify-content: flex-start;
     align-items: flex-end;
     flex-wrap: nowrap;
-    background-color: var(--color-bg-scrim-strong);
+    background-color: var(--color-bg-panel);
     padding: var(--space-sm) var(--space-lg) 0;
     border-top-width: 1px;
     border-top-color: var(--color-grid-line);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-left-color: var(--color-accent-glow-soft);
+    border-right-color: var(--color-accent-glow-soft);
 }
 
 .stat-graph-item {
@@ -445,24 +455,35 @@
 .action-strip {
     flex-direction: row;
     justify-content: space-between;
-    background-color: var(--color-bg-scrim-strong);
+    background-color: var(--color-bg-panel);
     padding: var(--space-sm) var(--space-lg) 14px;
     border-top-width: 1px;
-    border-top-color: var(--color-accent-glow-soft);
+    border-top-color: var(--color-grid-line);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-left-color: var(--color-accent-glow-soft);
+    border-right-color: var(--color-accent-glow-soft);
 }
 
-/* [DNA 그린 액센트 승격] 주 액션(업그레이드/국가현황)엔 발광 테두리를 줘 "주 기능"임을
-   드러내고, 보조 액션(랭킹)은 중립 테두리로 남겨 우선순위 차이를 시각적으로 구분한다. */
+/* [Secondary Button 통일] CountryPopup ✕ / ResearchPopup ✕ / CountrySelect 뒤로 버튼과
+   동일 공식(어두운 --color-bg-panel 내부 + 밝은 --color-accent-glow 테두리)으로 3개 버튼을
+   통일한다. 채움형 강조(민트/회보라)를 제거 — 반투명 Scrim 위에서 "칠해진 면"으로 지각되던
+   문제의 근본 원인. 폭 비율(flex-grow)만 주 액션(1) vs 보조 액션(0.6)으로 유지한다. */
 .tab-button {
     flex-grow: 1;
     margin: 0 var(--space-sm);
     height: var(--touch-target-min);
     border-width: 1px;
     border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
 }
 
 .tab-button--secondary {
     flex-grow: 0.6;
-    background-color: var(--color-button-secondary);
-    border-color: var(--color-border);
+    background-color: var(--color-bg-panel);
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    color: var(--color-text-primary);
 }

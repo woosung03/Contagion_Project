@@ -66,11 +66,19 @@
 .global-status-banner--danger   { color: var(--color-status-danger);   border-color: var(--color-status-danger); }
 .global-status-banner--dead     { color: var(--color-status-dead);     border-color: var(--color-status-dead); }
 
+/* Button System: Secondary(Docs/DESIGN.md) — background/border/radius를 명시하지 않으면
+   Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
+   패턴, 2026-07-14 수정). CountryPopup.uss .popup-close와 동일 톤으로 통일. */
 .status-close-btn {
     width: 28px;
     height: 28px;
     padding: 0;
     flex-shrink: 0;
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
 }
 
 /* flex-grow만 있고 flex-basis가 없으면 UI Toolkit이 "콘텐츠 크기"를 기준값으로 잡아버려

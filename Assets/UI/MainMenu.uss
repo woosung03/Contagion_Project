@@ -164,10 +164,24 @@
     -unity-font-style: bold;
     background-color: var(--color-brand-dna);
     color: rgb(10, 30, 15);
+    border-width: 1px;
+    border-color: var(--color-brand-dna);
+    border-radius: 0;
 }
 
+/* Button System: Secondary(Docs/DESIGN.md) — background/border/radius를 명시하지 않으면
+   Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
+   패턴, 2026-07-14 수정). ending-button/popup-footer-button 기본형과 동일 톤으로 통일. */
 .mainmenu-back {
     height: 46px;
     flex-shrink: 0;
     margin-bottom: var(--space-md);
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
 }
