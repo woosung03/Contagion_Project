@@ -142,7 +142,8 @@ Button:disabled {
 .pathogen-card,
 .country-row,
 .tree-node,
-.status-row {
+.status-row,
+.continent-header {
     transition-property: border-color, background-color;
     transition-duration: var(--transition-normal);
     transition-timing-function: ease-out;

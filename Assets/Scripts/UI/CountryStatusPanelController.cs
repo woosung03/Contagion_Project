@@ -55,6 +55,48 @@ namespace Contagion.UI
             public Label FlagsLabel;
         }
 
+        /// <summary>[대륙별 접기/펼치기, 2026-07-14 사용자 요청] 48개국 단일 리스트를 대륙 단위로
+        /// 묶는다. `Country`에는 대륙 필드가 없어(Assets/Scripts/Data/Country.cs 확인 완료) 데이터
+        /// 모델은 건드리지 않고 이 컨트롤러 전용 id→대륙 매핑을 새로 둔다 — MedicalLoad()/
+        /// CaseFatalityRate() 등 다른 계산식을 CountryPopupController에서 독립적으로 복제해온
+        /// 이 파일의 기존 관례와 동일한 방식이다. 러시아(유럽/아시아 걸침)·튀르키예(아시아 대부분,
+        /// 유럽 취급도 흔함)·이집트(아프리카, 시나이반도만 아시아)처럼 대륙에 걸친 나라는 게임의
+        /// 6대륙 단순화 관례를 따른 판단값이다 — 실제 플레이 확인 후 조정 가능.</summary>
+        private static readonly Dictionary<string, string> ContinentByCountryId = new()
+        {
+            // 아시아(중동·중앙아시아 포함, 19개국)
+            ["CHI"] = "ASIA", ["IND"] = "ASIA", ["KOR"] = "ASIA", ["JPN"] = "ASIA", ["IDN"] = "ASIA",
+            ["SAU"] = "ASIA", ["PAK"] = "ASIA", ["BAN"] = "ASIA", ["PHI"] = "ASIA", ["VIE"] = "ASIA",
+            ["IRN"] = "ASIA", ["TUR"] = "ASIA", ["THA"] = "ASIA", ["MYA"] = "ASIA", ["IRQ"] = "ASIA",
+            ["AFG"] = "ASIA", ["UZB"] = "ASIA", ["MAS"] = "ASIA", ["YEM"] = "ASIA",
+            // 유럽(7개국)
+            ["GER"] = "EUROPE", ["UK"] = "EUROPE", ["FRA"] = "EUROPE", ["RUS"] = "EUROPE",
+            ["ITA"] = "EUROPE", ["ESP"] = "EUROPE", ["POL"] = "EUROPE",
+            // 북아메리카(3개국)
+            ["USA"] = "NORTH AMERICA", ["MEX"] = "NORTH AMERICA", ["CAN"] = "NORTH AMERICA",
+            // 남아메리카(4개국)
+            ["BRA"] = "SOUTH AMERICA", ["COL"] = "SOUTH AMERICA", ["ARG"] = "SOUTH AMERICA",
+            ["PER"] = "SOUTH AMERICA",
+            // 아프리카(14개국)
+            ["NGA"] = "AFRICA", ["EGY"] = "AFRICA", ["RSA"] = "AFRICA", ["DRC"] = "AFRICA",
+            ["ETH"] = "AFRICA", ["TAN"] = "AFRICA", ["KEN"] = "AFRICA", ["SDN"] = "AFRICA",
+            ["ALG"] = "AFRICA", ["UGA"] = "AFRICA", ["ANG"] = "AFRICA", ["MAR"] = "AFRICA",
+            ["MOZ"] = "AFRICA", ["GHA"] = "AFRICA",
+            // 오세아니아(1개국)
+            ["AUS"] = "OCEANIA",
+        };
+
+        /// <summary>섹션이 그려지는 고정 순서. 매핑에 없는(향후 추가된) 국가는 ContinentOf()가
+        /// "OTHER"로 떨어뜨리고, EnsureRowsBuilt()가 이 배열 뒤에 자동으로 이어붙인다.</summary>
+        private static readonly string[] ContinentOrder =
+            { "ASIA", "EUROPE", "NORTH AMERICA", "SOUTH AMERICA", "AFRICA", "OCEANIA" };
+
+        /// <summary>초기 상태에서 펼쳐져 있을 대륙 — 요구사항: "ASIA만 펼침, 나머지는 접힘".</summary>
+        private const string DefaultExpandedContinent = "ASIA";
+
+        private static string ContinentOf(Country country) =>
+            ContinentByCountryId.TryGetValue(country.id, out var continent) ? continent : "OTHER";
+
         private VisualElement _root;
         private Button _closeButton;
 
@@ -98,6 +140,18 @@ namespace Contagion.UI
         /// Clear()/재생성 없이 이 캐시를 통해 해당 행의 라벨만 갱신한다(기존 성능 최적화 유지).</summary>
         private readonly Dictionary<string, RowRefs> _rowsByCountryId = new();
 
+        /// <summary>대륙 라벨("ASIA" 등) → 해당 섹션의 펼침 여부. 컨트롤러(=GameObject)가
+        /// Show()/Hide()로만 토글되고 파괴되지 않는 한 이 필드가 그대로 유지되므로, 요구사항
+        /// "CountryPopup을 열고 닫아도 대륙 펼침 상태 유지"가 별도 저장 로직 없이 충족된다
+        /// (EnsureRowsBuilt()가 최초 1회만 섹션을 만드는 기존 가드와 같은 원리).</summary>
+        private readonly Dictionary<string, bool> _continentExpanded = new();
+
+        /// <summary>대륙 라벨 → 국가 행들을 담는 컨테이너. 펼침 토글 시 display만 바꾼다.</summary>
+        private readonly Dictionary<string, VisualElement> _continentBodies = new();
+
+        /// <summary>대륙 라벨 → 화살표(▼/▶) Label. 토글 시 텍스트만 바꾼다.</summary>
+        private readonly Dictionary<string, Label> _continentArrows = new();
+
         /// <summary>패널이 열려 있는 동안만 이벤트에 반응해서 다시 그린다 — 닫혀 있을 땐 갱신
         /// 비용 자체를 안 쓰기 위함(기존과 동일한 가드).</summary>
         private bool _isShown;
@@ -106,6 +160,14 @@ namespace Contagion.UI
         /// 실제로 화면을 닫고 WorldMapInputLock을 해제하는 책임은 UIManager 한 곳에만 있다
         /// (UpgradeTreeView.OnCloseRequested와 동일 패턴 — WorldMap Input Lock 영구 유지 버그 수정).</summary>
         public event Action OnCloseRequested;
+
+        /// <summary>48개국 목록 행 클릭 — Research Database의 "리스트 화면(AppScreen.Research) →
+        /// 항목 클릭 → 상세 드릴다운(ResearchPopupController)" 구조를 이 화면에도 그대로 적용한다
+        /// (2026-07-14 결정: 새 Country Database 화면을 만들지 않고 기존 CountryStatusPanel을
+        /// 리스트→상세 팝업 구조로 확장, CountryPopup은 지도 클릭과 이 리스트 양쪽에서 재사용).
+        /// 실제로 팝업을 여는 구독(CountryPopupController.ShowCountry 호출)은 UIManager가 담당한다
+        /// (UpgradeTreeView.OnResearchItemSelected와 동일 패턴 — 이 클래스는 발행만 한다).</summary>
+        public event Action<Country> OnCountryRowSelected;
 
         private void OnEnable()
         {
@@ -540,7 +602,11 @@ namespace Contagion.UI
         }
 
         /// <summary>행이 이미 만들어져 있으면 아무 것도 하지 않는다 — 국가 목록은 게임 시작 시
-        /// 고정되므로(48개), 최초 1회 생성 후에는 재생성이 필요 없다(기존 동작 그대로 유지).</summary>
+        /// 고정되므로(48개), 최초 1회 생성 후에는 재생성이 필요 없다(기존 동작 그대로 유지).
+        /// [대륙별 접기/펼치기, 2026-07-14] 이제 국가 행을 `_statusList`에 바로 붙이지 않고
+        /// 대륙 섹션(`ContinentOrder` 순서, 매핑 밖 국가는 뒤에 자동으로 이어붙임) → 섹션 바디
+        /// 순으로 붙인다. 섹션/펼침 상태는 최초 1회만 만들어지므로 이후 Show()/Hide()나
+        /// CountryPopup 열고 닫기로는 재생성되지 않는다(펼침 상태 유지 요구사항의 근거).</summary>
         private void EnsureRowsBuilt()
         {
             if (_rowsByCountryId.Count > 0) return;
@@ -551,13 +617,89 @@ namespace Contagion.UI
 
             _statusList.Clear();
             _rowsByCountryId.Clear();
+            _continentBodies.Clear();
+            _continentArrows.Clear();
+            _continentExpanded.Clear();
 
-            foreach (var country in countries)
+            var byContinent = countries.GroupBy(ContinentOf).ToDictionary(g => g.Key, g => g.ToList());
+
+            // 고정 순서(ContinentOrder) 먼저, 매핑에 없는 대륙("OTHER")은 뒤에 이어붙인다.
+            var continentKeys = ContinentOrder.Where(byContinent.ContainsKey)
+                .Concat(byContinent.Keys.Where(k => !ContinentOrder.Contains(k)))
+                .ToList();
+
+            foreach (var continentLabel in continentKeys)
             {
-                var refs = BuildRow(country);
-                _rowsByCountryId[country.id] = refs;
-                _statusList.Add(refs.Row);
+                var members = byContinent[continentLabel];
+                _continentExpanded[continentLabel] = continentLabel == DefaultExpandedContinent;
+
+                var (section, arrow, body) = BuildContinentSection(continentLabel, members.Count);
+                _continentArrows[continentLabel] = arrow;
+                _continentBodies[continentLabel] = body;
+                ApplyContinentExpandedState(continentLabel);
+
+                foreach (var country in members)
+                {
+                    var refs = BuildRow(country);
+                    _rowsByCountryId[country.id] = refs;
+                    body.Add(refs.Row);
+                }
+
+                _statusList.Add(section);
             }
+        }
+
+        /// <summary>대륙 헤더(화살표+"ASIA (12)") + 바디(국가 행 컨테이너)로 구성된 섹션 하나를
+        /// 만든다. AddDataRow()와 같은 패턴(컨트롤러가 런타임에 VisualElement를 직접 조립)을
+        /// 따른다. 헤더 클릭은 이 대륙 하나만 토글한다(요구사항: 대륙 헤더 클릭 시 접힘↔펼침).</summary>
+        private (VisualElement section, Label arrow, VisualElement body) BuildContinentSection(
+            string continentLabel, int countryCount)
+        {
+            var section = new VisualElement();
+            section.AddToClassList("continent-section");
+
+            var header = new VisualElement();
+            header.AddToClassList("continent-header");
+            header.AddToClassList("accent-bar-row");
+
+            var arrow = new Label();
+            arrow.AddToClassList("continent-header__arrow");
+            header.Add(arrow);
+
+            var titleLabel = new Label($"{continentLabel} ({countryCount})");
+            titleLabel.AddToClassList("continent-header__label");
+            header.Add(titleLabel);
+
+            header.RegisterCallback<ClickEvent>(_ => ToggleContinent(continentLabel));
+
+            var body = new VisualElement();
+            body.AddToClassList("continent-body");
+
+            section.Add(header);
+            section.Add(body);
+
+            return (section, arrow, body);
+        }
+
+        private void ToggleContinent(string continentLabel)
+        {
+            if (!_continentExpanded.ContainsKey(continentLabel)) return;
+            _continentExpanded[continentLabel] = !_continentExpanded[continentLabel];
+            ApplyContinentExpandedState(continentLabel);
+        }
+
+        /// <summary>펼침 상태 → 바디 display + 화살표 텍스트(▼ 펼침 / ▶ 접힘) 반영. 상태를
+        /// 바꾸는 쪽(ToggleContinent)과 최초 반영하는 쪽(EnsureRowsBuilt) 둘 다 이 메서드 하나로
+        /// 모아 두 곳의 표시 로직이 어긋나지 않게 했다.</summary>
+        private void ApplyContinentExpandedState(string continentLabel)
+        {
+            bool expanded = _continentExpanded.TryGetValue(continentLabel, out var value) && value;
+
+            if (_continentBodies.TryGetValue(continentLabel, out var body))
+                body.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (_continentArrows.TryGetValue(continentLabel, out var arrow))
+                arrow.text = expanded ? "▼" : "▶";
         }
 
         private RowRefs BuildRow(Country country)
@@ -576,6 +718,13 @@ namespace Contagion.UI
             var flagsLabel = new Label();
             flagsLabel.AddToClassList("status-row__detail");
             row.Add(flagsLabel);
+
+            // research-row와 동일한 규약 — 행 자체가 클릭 대상이며, 상태(LOCKED 포함)와 무관하게
+            // 항상 상세를 열 수 있다(research-row도 LOCKED 상태에서 선행조건 확인을 위해 클릭 가능).
+            // country는 이 메서드 호출 시점의 참조를 클로저로 캡처하지만 WorldDataManager.Countries의
+            // Country 인스턴스는 게임 시작 시 고정되어 필드만 매 틱 갱신되므로(RefreshRow 참고),
+            // 나중에 클릭해도 항상 최신 데이터를 가리킨다.
+            row.RegisterCallback<ClickEvent>(_ => OnCountryRowSelected?.Invoke(country));
 
             return new RowRefs { Row = row, NameLabel = nameLabel, StatsLabel = statsLabel, FlagsLabel = flagsLabel };
         }

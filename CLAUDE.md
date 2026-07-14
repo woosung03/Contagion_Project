@@ -66,6 +66,16 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   (SAFE·WARNING·DANGER·COLLAPSE 4버킷)/의료 시스템 현황(정상·주의·과부하·붕괴 4버킷)/랭킹 2종
   (종합 위협도·감염자 각 TOP 10)/48개국 목록(accent bar 유지) 순 Tactical Dashboard, tactical-panel+
   코너컷+data-row+severity 4색 체계
+- CountryStatusPanel 리스트→상세 팝업 드릴다운 — Research Database와 동일 패턴(리스트 행 클릭 →
+  이벤트 발행 → `UIManager` → 상세 팝업). 48개국 목록의 `status-row` 클릭 시
+  `CountryStatusPanelController.OnCountryRowSelected` → `UIManager` → `CountryPopupController.
+  ShowCountry()`로 지도 클릭과 동일한 국가 상세 팝업이 열린다. 새 화면은 만들지 않고 기존
+  `CountryPopupController`/`CountryStatusPanelController`를 재사용, `CountryPopupUI`의
+  `m_SortingOrder`를 2로 올려 `CountryStatusPanelUI`(1) 위에 항상 렌더링되도록 수정
+- CountryStatusPanel 48개국 목록 → 대륙별 접기/펼치기 아코디언 — 6대륙(ASIA/EUROPE/NORTH
+  AMERICA/SOUTH AMERICA/AFRICA/OCEANIA) 헤더 클릭으로 토글, ASIA만 초기 펼침. 국가 행
+  클릭(`OnCountryRowSelected`)·`CountryPopup` 재사용 구조는 그대로 유지, `Country`에 대륙
+  필드를 추가하지 않고 컨트롤러 전용 id→대륙 매핑으로 처리
 - Research Database v2 — 업그레이드 트리 화면을 절대좌표 캔버스에서 브랜치 보드(계열 3+통합 1,
   진행률 n/m) + 세로 스크롤 리스트(선택된 브랜치만)로 전환, `UpgradeManager.Tree`의 실제 45개
   `UpgradeNode`에 연결 완료(코드/이름/상태/비용 전부 실데이터). 연구 항목 행 클릭 →
@@ -78,10 +88,11 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
 
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근 기록은 Step 84(Research Database v2
-커밋 6). 이후 `UIManager`가 3개 뷰의 `OnResearchItemSelected`를 구독해 `ResearchPopupController.Show()`를
-호출하는 배선(커밋 7 절반)을 추가로 완료했으나 아직 DevLog에 Step으로 기록되지 않음 — 다음
-DevLog 갱신 시 반영 필요. 검증은 `Docs/QA_Checklist.md` 참고.
+최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근 기록은 Step 85(CountryStatusPanel
+리스트→상세 팝업 드릴다운 확장, `CountryPopupUI` sortingOrder 충돌 수정 포함). Step 84 이후
+`UIManager`가 3개 뷰의 `OnResearchItemSelected`를 구독해 `ResearchPopupController.Show()`를
+호출하는 배선(커밋 7 절반)을 완료했으나 아직 DevLog에 Step으로 기록되지 않음 — 다음 DevLog 갱신
+시 반영 필요. 검증은 `Docs/QA_Checklist.md` 참고.
 
 ---
 
@@ -89,14 +100,6 @@ DevLog 갱신 시 반영 필요. 검증은 `Docs/QA_Checklist.md` 참고.
 
 지금 실행해야 할 **다음 작업**만 남긴다. "확인/검증"류 항목은 `Docs/QA_Checklist.md`,
 배포 점검은 `Docs/Release_Checklist.md`, 에디터 수동 배선은 `Docs/unity-editor-task.md`로 이동됨.
-
-**버그 — 결정 필요** (근거: DevLog Step 67)
-
-- 국가 탭 시 Country Dock(HUD)과 CountryPopup(모달)이 동시에 뜬다 — `CountryPopupController`가
-  Step 28-2 이후 죽은 코드로 방치된 줄 알았으나 실제로는 `WorldMap.OnCountryClicked` 구독이
-  살아있고 씬 GameObject도 활성 상태. 자동 팝업을 계속 띄울지, Country Dock으로 완전히
-  대체하고 팝업 트리거는 끌지 결정 필요(끄는 쪽이면 `CountryPopupController.Subscribe()`의
-  `WorldMap.OnCountryClicked` 구독 제거 또는 `CountryPopupUI` GameObject 비활성화 한 줄이면 됨)
 
 **Research Database v2 — 커밋 7 나머지 절반** (근거:
 `Docs/ResearchDatabase_V2_ImplementationPlan.md` §1/§4)

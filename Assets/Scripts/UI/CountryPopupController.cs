@@ -82,8 +82,16 @@ namespace Contagion.UI
             }
         }
 
-        private void HandleCountryClicked(Country country)
+        private void HandleCountryClicked(Country country) => ShowCountry(country);
+
+        /// <summary>국가 상세를 채우고 팝업을 연다 — 지도 클릭(HandleCountryClicked)과
+        /// CountryStatusPanelController의 48개국 목록 행 클릭(UIManager 배선) 양쪽에서 재사용하는
+        /// 공개 진입점이다(2026-07-14 결정: 새 Country Database 화면을 만들지 않고, CountryPopup을
+        /// 지도 클릭과 CountryStatusPanel 리스트 양쪽에서 재사용). 로직 자체는 기존
+        /// HandleCountryClicked와 동일 — 트리거 소스만 늘어난다.</summary>
+        public void ShowCountry(Country country)
         {
+            if (country == null) return;
             _shownCountryId = country.id;
             Populate(country);
             Show(country.name);

@@ -8,6 +8,36 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] CountryStatusPanel 대륙별 접기/펼치기 아코디언 검증 (근거: DevLog Step 86) — Unity 에디터
+      미접속으로 작성돼 실기기/에디터 검증 전부 미완료.
+  - [ ] GLOBAL STATUS CENTER를 열면 ASIA 섹션만 펼쳐져 있고 나머지 5개 대륙(EUROPE/NORTH
+        AMERICA/SOUTH AMERICA/AFRICA/OCEANIA)은 접혀 있는지 확인
+  - [ ] 대륙 헤더를 클릭할 때마다 그 대륙만 펼침↔접힘이 토글되고(다른 대륙은 영향 없음), 화살표가
+        ▼(펼침)/▶(접힘)로 정확히 바뀌는지 확인
+  - [ ] 각 대륙 헤더의 국가 수 표기(예: "ASIA (19)")가 실제 하위 국가 행 개수와 일치하는지, 6개
+        대륙 합계가 48인지 확인
+  - [ ] 접힌 대륙의 국가 행이 실제로 화면에서 사라지고(레이아웃 공간도 차지하지 않고) ScrollView
+        높이가 그만큼 줄어드는지 확인
+  - [ ] 국가 행 클릭 시 기존과 동일하게 CountryPopup이 뜨는지(대륙 헤더 클릭과 국가 행 클릭이
+        서로 간섭하지 않는지) 확인
+  - [ ] 대륙 몇 개를 펼침/접힘으로 바꾼 뒤 국가 행을 클릭해 CountryPopup을 열고 닫아도 대륙
+        펼침 상태가 그대로 유지되는지 확인
+  - [ ] 감염 확산 중 특정 국가의 상태가 바뀔 때(`OnCountryChanged`) 해당 국가가 속한 대륙 섹션이
+        접혀 있어도 프레임 드랍 없이 정상 갱신되는지(안 보이는 행도 라벨 텍스트는 갱신됨) 확인
+  - [ ] 대륙 헤더에 severity 색(감염/사망/위험/정보)이 아니라 구조용 발광색만 쓰였는지 육안 확인
+        (DESIGN.md Severity Colors Don't 규칙 준수 여부)
+- [ ] CountryStatusPanel 리스트→상세 팝업 드릴다운 검증 (근거: DevLog Step 85) — Unity 에디터
+      미접속으로 작성돼 실기기/에디터 검증 전부 미완료.
+  - [ ] GLOBAL STATUS CENTER를 연 상태에서 48개국 목록 중 아무 행이나 클릭하면 CountryPopup이
+        해당 국가 데이터로 정상 표시되는지 확인
+  - [ ] 팝업이 뜬 상태에서 CountryStatusPanel(뒤에 깔린 화면)이 시각적으로 가려지지 않고 팝업이
+        항상 위에 렌더링되는지 확인 (`CountryPopupUI` sortingOrder를 1→2로 올려 수정)
+  - [ ] 팝업의 ✕(닫기) 버튼이 CountryStatusPanel에 클릭을 가로채이지 않고 정상적으로 반응해
+        팝업만 닫히는지, 이때 CountryStatusPanel은 계속 열려 있는지 확인
+  - [ ] 팝업을 닫은 뒤 다른 행을 연달아 클릭해도(같은 국가 재클릭 포함) 데이터가 매번 올바르게
+        갱신되는지 확인
+  - [ ] 지도를 직접 클릭했을 때의 기존 동작(Country Dock 갱신 + CountryPopup 표시 + GlobalStatus가
+        열려 있었다면 자동으로 닫힘)이 이번 변경으로 깨지지 않았는지 함께 확인
 - [ ] Research Database UI Shell 검증 (근거: DevLog Step 82) — Unity 에디터 미접속으로 작성돼
       실기기/에디터 검증 전부 미완료.
   - [ ] 업그레이드 버튼 클릭 시 화면이 정상 표시되는지, 콘솔 에러/경고 0건인지 확인

@@ -125,6 +125,8 @@ namespace Contagion.Managers
             {
                 countryStatusPanelController.OnCloseRequested -= HandleScreenCloseRequested;
                 countryStatusPanelController.OnCloseRequested += HandleScreenCloseRequested;
+                countryStatusPanelController.OnCountryRowSelected -= HandleCountryRowSelected;
+                countryStatusPanelController.OnCountryRowSelected += HandleCountryRowSelected;
             }
 
             if (rankingPanelController != null)
@@ -177,7 +179,10 @@ namespace Contagion.Managers
             }
 
             if (countryStatusPanelController != null)
+            {
                 countryStatusPanelController.OnCloseRequested -= HandleScreenCloseRequested;
+                countryStatusPanelController.OnCountryRowSelected -= HandleCountryRowSelected;
+            }
 
             if (rankingPanelController != null)
                 rankingPanelController.OnCloseRequested -= HandleScreenCloseRequested;
@@ -318,6 +323,17 @@ namespace Contagion.Managers
         private void HandleCountryStatusClicked()
         {
             TransitionTo(AppScreen.GlobalStatus);
+        }
+
+        /// <summary>GlobalStatus 화면(48개국 목록) 행 클릭 — UpgradeTreeView.OnResearchItemSelected
+        /// → ResearchPopupController.Show()와 동일한 패턴으로 CountryPopupController.ShowCountry()를
+        /// 재사용한다(2026-07-14 결정 — 새 Country Database 화면을 만들지 않고, CountryPopup을
+        /// 지도 클릭과 CountryStatusPanel 리스트 양쪽에서 재사용). CountryPopupController는
+        /// AppScreen/WorldMapInputLock 밖에 있는 기존 동작을 그대로 유지하므로 이 핸들러는 별도
+        /// 잠금 처리 없이 표시만 위임한다.</summary>
+        private void HandleCountryRowSelected(Country country)
+        {
+            countryPopupController?.ShowCountry(country);
         }
 
         /// <summary>탭 클릭 — Research Database UI Shell(Commit 1)로 좌우 화살표를 대체한 상단 탭
