@@ -39,6 +39,14 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 기능 단위 요약만 남긴다. 구현 배경·이유는 `Docs/DevLog.md`, 코드/폴더 구조는 `Docs/Architecture.md`
 참고.
 
+**UI 시스템 전제**: Contagion Project UI는 "Gameplay UI"/"Preparation UI"로 분리된 두 개의
+디자인 시스템이 아니라, **단일 Tactical Design System**을 사용한다(`Docs/DESIGN.md`가
+정본). 화면별 차이는 별도 시스템이 아니라 **Density Mode**(정보 밀도 프리셋) 차이다 —
+Tactical Readout Mode(HUD/CountryDock/Event·News/CountryPopup/UpgradeTree/ResearchPopup/
+CountryStatusPanel/RankingPanel), Briefing Terminal Mode(MainMenu/CountrySelect), Debrief
+Mode(EndingScreen) 3가지. 정의는 `Docs/DESIGN.md` > UI Density Modes, 화면별 매핑·적용은
+`Docs/UI_Design.md` §0.0 참고.
+
 - 핵심 데이터/시뮬레이션 — `Pathogen`/`Country`/`WorldState`, 틱 기반 감염·사망·치료제 진행
   (`SimulationManager`), `WorldDataManager`, `GameManager`(페이즈/난이도/일시정지)
 - 세계 지도 — `WorldMap`+`CountryView`(국가별 실제 실루엣, 좌우 드래그 스크롤, `PolygonCollider2D`
@@ -115,6 +123,15 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - Phase 2~4(`environmentResistance`/`medicalBurdenModifier`/`unlockedFlags` 소비, 이번 범위
   아님)는 `Docs/ResearchDatabase_RuntimeSystems.md` §9 순서를 따르고, 그 문서 §11의 미결정
   항목과 `NodeMapping.md` §8의 잔여 항목(DNA 비용 프리미엄·항원 변이 확률 밸런스)을 착수 전 확인.
+
+**UI 기술 부채 — Tactical.uss 로컬 중복 정의 제거** (근거: `Docs/UI_Design.md` §15
+Historical Notes, §16.1)
+
+- `Hud.uss`(155~165행)에 `tactical-panel`/`corner-cut`/`data-row`가 `Tactical.uss`와
+  별개로 로컬 정의되어 있음 — `Tactical.uss` 참조로 교체하고 로컬 정의 제거 필요.
+- `UpgradeTree.uss`(84~145행)도 동일한 로컬 중복(노드 상태 variant는 UpgradeTree 전용이라
+  잔류 유지). 두 파일 모두 기능상 문제는 없음(같은 값 이중 정의일 뿐) — 제거 후 45노드/
+  코너컷/상태색 회귀 확인 필요.
 
 **조사 필요**
 

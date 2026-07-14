@@ -125,6 +125,85 @@ components:
 악센트 색을 추가하는 것과 달리, 이 시스템은 **3개의 브랜드 색(DNA그린/골드/프리미엄퍼플)
 으로 고정**하고 그 이상 늘리지 않는다.
 
+## UI Density Modes
+
+> **UI Design System Audit(감사) 결론**: 이 프로젝트에 "Gameplay UI"와 "Preparation UI"라는
+> 두 개의 분리된 디자인 시스템은 존재하지 않는다. 실제로는 **하나의 Tactical Design System**
+> (이 문서의 Color System/Typography/Stroke System/Surface Hierarchy/Component
+> Library/Button System 전부)을 모든 화면이 공유하며, 화면마다 다르게 느껴지는 이유는
+> 시스템이 달라서가 아니라 **정보 밀도 프리셋(Density Preset)** 이 다르기 때문이다. 즉
+> 화면을 고를 때 "이 화면은 어떤 디자인 시스템을 쓰는가"를 판단할 필요는 없다 — 시스템은
+> 항상 이 문서 하나다. 판단해야 할 것은 "이 화면이 Layer A/B/C 중 어디에 속하는가" 뿐이다.
+> 새 색상 체계·새 Button System·새 Stroke System·새 Corner Rule을 화면별로 만들지 않는다
+> — 아래 3개 레이어는 전부 이 문서에 이미 정의된 토큰·컴포넌트만 재사용하며, 차이는 오직
+> 폰트 스케일 선택과 정보 밀도(행 수·문단 허용 여부)뿐이다.
+
+### Layer A — Tactical Readout Mode
+
+- **목적**: 실시간으로 갱신되는 데이터를 빠르게 판독하게 한다 — "Global Surveillance
+  Center / Pandemic Monitoring Console" 컨셉.
+- **사용 화면**: HUD, Country Dock(HUD 하위), Event/News Dock(HUD 하위), CountryPopup,
+  UpgradeTree, ResearchPopup, CountryStatusPanel, RankingPanel.
+- **폰트 스케일**: `--font-size-xs`(13px) ~ `--font-size-sm`(14px) 위주. 헤더/타이틀에
+  한해 `--font-size-lg`(20px)까지만 예외 허용(예: `tactical-panel__title`).
+- **정보 밀도**: 높음 — 화면 하나에 수십 개의 판독 행이 반복될 수 있음(예: CountryStatusPanel
+  48개국 목록, UpgradeTree 45노드).
+- **허용 컴포넌트**: `data-row`/`data-label`/`data-value`(핵심 단위), `tactical-panel` +
+  `corner-cut`(패널 수가 적을 때만 4개, 많으면 `accent-bar-row`로 대체), `stat-chip`,
+  `world-status-frame`, `graph-frame`, severity 4색, 노드 상태 4색.
+- **금지 사항**: 서술형 문단 텍스트(항상 `data-row` 반복으로 분해), 리스트 행 단위의
+  코너컷(대신 좌측 accent bar), `--font-size-xl` 이상의 히어로 타이틀(판독 밀도를 깨뜨림).
+
+### Layer B — Briefing Terminal Mode
+
+- **목적**: 선택 이전 단계에서 여유 있게 설명하고 결정을 유도한다 — "Pathogen Briefing
+  Terminal / Global Deployment Terminal" 컨셉.
+- **사용 화면**: MainMenu, CountrySelect.
+- **폰트 스케일**: `--font-size-lg`(20px) ~ `--font-size-hero`(40px) 위주. 리스트 항목
+  (`pathogen-card`/`country-row`)의 메타 텍스트만 `--font-size-sm`까지 허용.
+- **정보 밀도**: 낮음 — 카드/행 수가 적거나(병원체 6종) 한 줄 요약 위주(국가 48행이라도
+  행당 정보는 1줄로 압축), 선택 후 상세 패널에서만 밀도가 일시적으로 올라간다(`data-row`
+  3~4줄).
+- **허용 컴포넌트**: `tactical-panel` + corner-cut(카드 수가 적으면 4개 전부),
+  `data-row`(상세 패널 한정), 서술형 설명 텍스트(문단 유지 허용 — `FlavorText`류),
+  영문 캡션 + 한글 타이틀 2줄 병기(`tracking-caption`), `pathogen-card--selected`/
+  `country-row--selected` 선택 강조.
+- **금지 사항**: 화면 전체를 HUD 수준(`font-size-xs`)으로 압축하지 않는다, 리스트 항목
+  1줄 요약을 억지로 `data-row` 다행으로 쪼개지 않는다(상세 패널에서만 분해).
+
+### Layer C — Debrief Mode
+
+- **목적**: 결과를 극적으로 보고하면서도 수치는 판독 가능하게 정리한다 — "Operation
+  Debrief Center" 컨셉.
+- **사용 화면**: EndingScreen.
+- **폰트 스케일**: 승/패 히어로 타이틀은 `--font-size-hero`(40px) 유지, 통계/스코어
+  패널 내부는 Layer A와 동일한 `data-row`(`--font-size-xs`/`sm`)로 전환.
+- **정보 밀도**: 혼합 — 상단은 낮음(히어로 타이틀 단독), 하단 통계·스코어 패널은
+  Layer A 수준으로 조밀.
+- **허용 컴포넌트**: 히어로 타이틀(그대로 유지, 캡션화 금지), `tactical-panel` +
+  corner-cut 4개(통계 패널, 스코어 패널 각각 1개), `data-row`(통계 항목),
+  `--color-brand-gold` 테두리 강조(최종 점수 패널 — MAXED 노드와 동일한 "완결" 신호 재사용).
+- **금지 사항**: 히어로 타이틀을 `data-row`로 대체하지 않는다(임팩트 손실), 통계 패널을
+  서술형 문단으로 되돌리지 않는다.
+
+### 화면 → Density Mode 매핑 요약
+
+| 화면 | Density Mode |
+|---|---|
+| HUD / Country Dock / Event·News Dock | Tactical Readout Mode |
+| CountryPopup | Tactical Readout Mode |
+| UpgradeTree | Tactical Readout Mode |
+| ResearchPopup | Tactical Readout Mode |
+| CountryStatusPanel | Tactical Readout Mode |
+| RankingPanel | Tactical Readout Mode |
+| MainMenu | Briefing Terminal Mode |
+| CountrySelect | Briefing Terminal Mode |
+| EndingScreen | Debrief Mode |
+
+화면별 배치·와이어프레임 적용 방법은 `Docs/UI_Design.md`가 정본이다 — 이 문서는 각 Density
+Mode의 "무엇을 허용/금지하는가"만 정의하고, "이 화면에서 구체적으로 어떻게 배치하는가"는
+다루지 않는다.
+
 ## Color System
 
 ### 1. Canvas & Panel — 표면 계단 (배경)
