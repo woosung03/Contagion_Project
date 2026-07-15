@@ -1,0 +1,547 @@
+/* ============================================================
+   Contagion Project — Country Status Screen Prototype CSS
+   기반: awesome-design-md-main/design-md/nvidia/DESIGN.md (Source of Truth)
+   — 2px 각짐(rounded.sm) · 단일 그린 액센트(#76b900) · 헤어라인 전용
+   위계(box-shadow 없음) · corner-square 시그니처 장식 · NVIDIA-EMEA(→Inter
+   대체) 타이포. NVIDIA 원본은 라이트 캔버스+다크 히어로/푸터의 "2-mode"
+   구조이나, 이 화면은 문서가 이미 허용하는 다크 모드 축(surface-dark/
+   surface-elevated/hairline-strong/on-dark)만 취해 전체를 다크 캔버스로
+   구성한다 — "Tactical Command Center" 성격상 NVIDIA 히어로/푸터 챕터의
+   다크 모드를 화면 전체로 확장한 것.
+
+   포터빌리티 규칙 (기존 MainHud.css와 동일 — Unity UI Toolkit/USS 변환 전제):
+   - box-shadow 사용 금지 (NVIDIA 시스템 자체도 카드에 그림자 없음 — Elevation
+     문서 Level 0~2는 전부 hairline, Level 3(5px ambient)만 예외인데 그마저
+     sticky chrome 전용이라 이 화면엔 적용하지 않음)
+   - border-radius는 항상 단일 값만 사용 (rounded.none/xs/sm/full 중 하나)
+   - linear-gradient 등 배경 그라디언트 금지 — NVIDIA 시스템도 flat 컬러만 사용
+   - gap 대신 margin으로 간격 처리
+   - position: fixed 미사용 — absolute + relative 부모로만 배치
+   - :last-child 미지원 가정 — 마지막 행 예외 처리를 하지 않는다
+   - device-frame(프리뷰 전용 래퍼)에만 고정 px 치수 사용
+   ============================================================ */
+
+:root {
+    /* ---- NVIDIA DESIGN.md > colors (다크 모드 축만 채용) ---- */
+    --nv-primary: #76b900;          /* colors.primary — 유일한 액센트, corner-square/CTA/포지티브 강조 */
+    --nv-primary-dark: #5a8d00;     /* colors.primary-dark — pressed */
+    --nv-accent-green-pale: #bff230;/* colors.accent-green-pale — 희소 하이라이트(내 국가 강조 등) */
+
+    --nv-surface-dark: #000000;     /* colors.surface-dark — 화면 캔버스(NVIDIA 히어로/푸터 색) */
+    --nv-surface-elevated: #1a1a1a; /* colors.surface-elevated — 패널/카드 배경(다크 중첩 패널) */
+    --nv-hairline-strong: #5e5e5e;  /* colors.hairline-strong — 다크 표면 위 1px 구분선 */
+
+    --nv-on-dark: #ffffff;          /* colors.on-dark */
+    --nv-on-dark-mute: rgba(255, 255, 255, 0.7); /* colors.on-dark-mute */
+    --nv-mute: #757575;             /* colors.mute — 메타데이터/캡션 */
+    --nv-stone: #898989;            /* colors.stone — 최저 강조 텍스트 */
+    --nv-ash: #a7a7a7;              /* colors.ash — 비활성 */
+
+    --nv-error: #e52020;            /* colors.error — 위험/사망/치명 */
+    --nv-error-deep: #650b0b;       /* colors.error-deep — 위험 배지 배경용 딥톤 */
+    --nv-warning: #df6500;          /* colors.warning — 경고 */
+    --nv-warning-bright: #ef9100;   /* colors.warning-bright — 다크 캔버스 위 경고 */
+    --nv-success-deep: #3f8500;     /* colors.success-deep — primary와 채도 충돌 피하는 보조 긍정색 */
+
+    /* Severity 배지 배경(문서 badge-tag는 라이트 캔버스 surface-soft 전제 —
+       다크 캔버스 확장: severity 색의 15% alpha를 배경으로, 원색을 텍스트로
+       사용해 동일한 badge-tag 구조를 다크 모드에 이식) */
+    --nv-error-dim: rgba(229, 32, 32, 0.16);
+    --nv-warning-dim: rgba(239, 145, 0, 0.16);
+    --nv-success-dim: rgba(118, 185, 0, 0.14);
+
+    /* ---- rounded (문서 그대로) ---- */
+    --nv-radius-none: 0px;
+    --nv-radius-xs: 1px;
+    --nv-radius-sm: 2px;   /* 모든 인터랙티브 요소 기본값 — 문서 규칙: 2px를 넘지 않는다 */
+    --nv-radius-full: 9999px; /* 아바타/도트류 전용 */
+
+    /* ---- spacing (문서 8px 베이스를 그대로 쓰되, section(64px)은 마케팅
+       페이지 전용 값이라 이 밀도 높은 모바일 HUD 화면에는 과도함 — 문서의
+       Responsive Behavior가 이미 "Section padding: 64→48→32(mobile)" 축소를
+       허용하므로, 컴팩트 앱 화면 맥락에 맞춰 한 단계 더 축소해 xl(24px)을
+       화면 내 최대 블록 간격으로 사용한다) ---- */
+    --nv-space-2: 2px;
+    --nv-space-4: 4px;
+    --nv-space-8: 8px;
+    --nv-space-12: 12px;
+    --nv-space-16: 16px;
+    --nv-space-20: 20px;
+    --nv-space-24: 24px;
+
+    /* ---- typography (NVIDIA-EMEA 프록시: Inter, 문서가 명시한 공식 폴백
+       Arial 유지 + 한글 표시를 위한 Noto Sans KR/Malgun Gothic 추가 — 문서는
+       모노스페이스를 어떤 역할에도 쓰지 않는다: 수치 표기도 전부 이 서체.
+       크기는 문서 티어를 그대로 계승하되 mobile-narrow(320px) 규칙이 이미
+       display-xl 48→32px 축소를 허용하므로 그 비율을 다른 티어에도 적용해
+       390px 폭 밀도 화면에 맞췄다) ---- */
+    --nv-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', Arial, -apple-system, sans-serif;
+
+    --nv-text-display: 30px;   /* display-lg(36) 축소 — 히어로 스탯 수치 */
+    --nv-text-heading-md: 18px;/* heading-md(20) 축소 — 패널 타이틀 */
+    --nv-text-card-title: 15px;/* card-title(17) 축소 — 리스트 1급 항목 */
+    --nv-text-body: 14px;      /* body-md(16) 축소 — 본문 */
+    --nv-text-body-sm: 13px;   /* body-sm(15) 축소 — 보조 본문 */
+    --nv-text-caption-md: 11px;/* caption-md(14) 축소 — 섹션 이어브로우(uppercase) */
+    --nv-text-caption-sm: 11px;/* caption-sm(12) 축소 — 타임스탬프/메타 */
+    --nv-text-caption-xs: 9px; /* caption-xs(11) 축소 — 배지 텍스트(uppercase) */
+    --nv-text-utility-xs: 9px; /* utility-xs(10) 축소 — 최상단 유틸리티 바 */
+
+    --nv-transition-normal: 0.18s;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b; /* 프리뷰 배경(디바이스 프레임 바깥) */
+    font-family: var(--nv-font);
+}
+
+/* ============================================================
+   프리뷰 전용 래퍼 — Unity 변환 대상 아님. 기존 MainHud.css와 동일한
+   390x844 (≈ 1440x3120, 19.5:9 세로 화면의 CSS px 축소본).
+   ============================================================ */
+.device-frame {
+    width: 390px;
+    height: 844px;
+    margin: 24px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--nv-hairline-strong);
+}
+
+/* ============================================================
+   status-root — 세로 flex 컬럼. Unity: country-status-root
+   VisualElement, ScrollView 하나만 자식으로 스크롤 담당.
+   ============================================================ */
+.status-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nv-surface-dark);
+    color: var(--nv-on-dark);
+}
+
+/* ============================================================
+   utility-bar — 문서 component.utility-bar 그대로(다크, 32px, caption-sm).
+   ============================================================ */
+.utility-bar {
+    height: 28px;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nv-space-16);
+    background-color: var(--nv-surface-dark);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.utility-bar__brand {
+    font-size: var(--nv-text-utility-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-mute);
+}
+
+.utility-bar__day {
+    font-size: var(--nv-text-utility-xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+/* ============================================================
+   status-header — 화면 타이틀 영역(뒤로가기+국가명+단계 배지).
+   position:fixed 대신 flex 형제 순서로 "스크롤 안 되는 헤더" 구현.
+   ============================================================ */
+.status-header {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-12) var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.back-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 18px;
+    line-height: 1;
+    margin-right: var(--nv-space-12);
+    padding: 0;
+}
+
+.back-button:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+}
+
+.status-header__titles {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.status-header__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+    margin-bottom: var(--nv-space-4);
+}
+
+.status-header__country {
+    display: flex;
+    align-items: center;
+}
+
+.status-header__flag {
+    font-size: 20px;
+    margin-right: var(--nv-space-8);
+}
+
+.status-header__name {
+    font-size: var(--nv-text-heading-md);
+    font-weight: 700;
+}
+
+.status-header__phase-badge {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4) var(--nv-space-8);
+    white-space: nowrap;
+}
+
+/* ============================================================
+   status-scroll — 실제 스크롤 영역(Unity: ScrollView). flex-grow로
+   header 아래 남은 공간을 전부 차지.
+   ============================================================ */
+.status-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--nv-space-16);
+}
+
+/* ============================================================
+   panel — 문서 card 계열(product-card/feature-card) 공용 셸.
+   배경 surface-elevated + 1px hairline-strong, radius sm, 그림자 없음.
+   corner-square는 이 panel에만 부착(문서: 리스트 행에는 붙이지 않는다).
+   ============================================================ */
+.panel {
+    position: relative;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-16);
+    margin-bottom: var(--nv-space-24);
+}
+
+.corner-square {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-none);
+}
+
+.corner-square--tl {
+    top: -1px;
+    left: -1px;
+}
+
+.panel__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+    margin-bottom: var(--nv-space-4);
+}
+
+.panel__title {
+    font-size: var(--nv-text-heading-md);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    margin-bottom: var(--nv-space-16);
+}
+
+.panel__footer-link {
+    display: block;
+    font-size: var(--nv-text-body-sm);
+    font-weight: 700;
+    color: var(--nv-primary);
+    text-align: right;
+    margin-top: var(--nv-space-12);
+    text-decoration: none;
+}
+
+/* ============================================================
+   Hero Stats — display 티어 수치 3열(문서 callout-stat 패턴 차용).
+   ============================================================ */
+.hero-stats {
+    display: flex;
+}
+
+.hero-stat {
+    flex-grow: 1;
+    flex-basis: 0;
+    display: flex;
+    flex-direction: column;
+    padding-right: var(--nv-space-8);
+}
+
+.hero-stat__value {
+    font-size: var(--nv-text-display);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    line-height: 1.15;
+}
+
+.hero-stat__value--danger {
+    color: var(--nv-error);
+}
+
+.hero-stat__label {
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-on-dark-mute);
+    margin-top: var(--nv-space-4);
+}
+
+.hero-stat__delta {
+    font-size: var(--nv-text-caption-sm);
+    font-weight: 700;
+    margin-top: var(--nv-space-4);
+}
+
+.hero-stat__delta--up {
+    color: var(--nv-warning-bright);
+}
+
+.hero-stat__delta--up-bad {
+    color: var(--nv-error);
+}
+
+.hero-stat__delta--flat {
+    color: var(--nv-stone);
+    font-weight: 400;
+}
+
+/* ============================================================
+   region-list — Infection Distribution. 각 행 = 라벨+수치 행 +
+   meter(트랙/필). 문서의 "hairline로만 구분, box-shadow 없음" 원칙.
+   ============================================================ */
+.region-row {
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.region-row__top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--nv-space-8);
+}
+
+.region-row__name {
+    font-size: var(--nv-text-body);
+    font-weight: 400;
+    color: var(--nv-on-dark);
+}
+
+.region-row__figure {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark-mute);
+}
+
+.region-row__figure strong {
+    color: var(--nv-on-dark);
+    font-weight: 700;
+}
+
+.meter__track {
+    width: 100%;
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill {
+    height: 100%;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill--warning {
+    background-color: var(--nv-warning-bright);
+}
+
+.meter__fill--error {
+    background-color: var(--nv-error);
+}
+
+/* ============================================================
+   Medical Status — data-row 유사(라벨:값) + meter, badge-tag로
+   상태 표시(문서 component.badge-tag 다크 확장).
+   ============================================================ */
+.medical-row {
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.medical-row__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--nv-space-8);
+}
+
+.medical-row__label {
+    font-size: var(--nv-text-body);
+    color: var(--nv-on-dark);
+}
+
+.medical-row__value {
+    font-size: var(--nv-text-body);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+}
+
+.medical-row--badge-only {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: none;
+}
+
+.badge-tag {
+    display: inline-block;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4) var(--nv-space-8);
+}
+
+.badge-tag--warning {
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+}
+
+.badge-tag--critical {
+    color: var(--nv-error);
+    background-color: var(--nv-error-dim);
+}
+
+.badge-tag--info {
+    color: var(--nv-on-dark-mute);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.badge-tag--success {
+    color: var(--nv-primary);
+    background-color: var(--nv-success-dim);
+}
+
+/* ============================================================
+   Country Ranking Preview — 순위 리스트. 내 국가 행만 accent-green-pale
+   좌측 강조(문서: 희소 하이라이트 용도 그대로 사용).
+   ============================================================ */
+.rank-row {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.rank-row__index {
+    width: 22px;
+    font-size: var(--nv-text-body-sm);
+    font-weight: 700;
+    color: var(--nv-stone);
+}
+
+.rank-row__flag {
+    font-size: 16px;
+    margin-right: var(--nv-space-8);
+}
+
+.rank-row__name {
+    flex-grow: 1;
+    font-size: var(--nv-text-card-title);
+    color: var(--nv-on-dark);
+}
+
+.rank-row__figure {
+    font-size: var(--nv-text-body-sm);
+    font-weight: 700;
+    color: var(--nv-on-dark-mute);
+}
+
+.rank-row--self {
+    border-left: 2px solid var(--nv-accent-green-pale);
+    padding-left: var(--nv-space-8);
+    background-color: var(--nv-success-dim);
+}
+
+.rank-row--self .rank-row__index,
+.rank-row--self .rank-row__figure {
+    color: var(--nv-accent-green-pale);
+}
+
+.rank-row--self .rank-row__name {
+    font-weight: 700;
+}
+
+.rank-row__divider {
+    text-align: center;
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-stone);
+    padding: var(--nv-space-4) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+/* ============================================================
+   Recent Events — 이벤트 로그. badge-tag(severity) + caption-sm
+   타임스탬프 + body-sm 설명 3단 구성.
+   ============================================================ */
+.event-row {
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.event-row__meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--nv-space-4);
+}
+
+.event-row__timestamp {
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-mute);
+    margin-left: var(--nv-space-8);
+}
+
+.event-row__desc {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark-mute);
+}

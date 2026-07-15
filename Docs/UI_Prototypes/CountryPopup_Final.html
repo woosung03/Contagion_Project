@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Contagion Project — Country Popup Final (Bottom Sheet)</title>
+<link rel="stylesheet" href="CountryPopup_Final.css" />
+</head>
+<body>
+
+  <div class="device-frame">
+
+    <!-- hud-root: MainHud_Final과 동일한 배경(지도가 항상 보인다는 맥락) -->
+    <div class="hud-root">
+      <div class="utility-bar">
+        <span class="utility-bar__brand">TACTICAL COMMAND CENTER</span>
+        <span class="utility-bar__day">DAY 17</span>
+      </div>
+
+      <div class="command-header">
+        <button class="icon-button" aria-label="설정">⚙</button>
+        <span class="command-header__phase">잠복기</span>
+        <button class="icon-button" aria-label="이벤트 피드">🗞</button>
+      </div>
+
+      <div class="map-frame">
+        <div class="map-frame__label-row">
+          <span class="panel__eyebrow">Global Surveillance</span>
+          <span class="panel__status-pill">TRACKING</span>
+        </div>
+        <div class="map-placeholder">
+          <span class="landmass landmass--eurasia"></span>
+          <span class="landmass landmass--africa"></span>
+          <span class="landmass landmass--namerica"></span>
+          <span class="landmass landmass--samerica"></span>
+          <span class="landmass landmass--australia"></span>
+
+          <!-- 플레이어가 방금 터치한 국가(중국) — 선택 링 표시 -->
+          <span class="infection-dot infection-dot--critical infection-dot--selected" style="left:63%; top:32%;"></span>
+          <span class="infection-dot" style="left:52%; top:34%;"></span>
+          <span class="infection-dot" style="left:47%; top:31%;"></span>
+          <span class="infection-dot" style="left:23%; top:30%;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         country-popup: Bottom Sheet. map-frame 위쪽 60%는 그대로 노출된
+         상태로 하단 40%에만 오버레이된다.
+         ============================================================ -->
+    <div class="country-popup">
+      <span class="popup-corner popup-corner--l"></span>
+      <span class="popup-corner popup-corner--r"></span>
+
+      <div class="popup-handle"></div>
+
+      <div class="popup-header">
+        <span class="popup-header__flag">🇨🇳</span>
+        <div class="popup-header__titles">
+          <div class="popup-header__name">중국</div>
+          <span class="popup-header__continent">아시아</span>
+        </div>
+        <button class="popup-close" aria-label="닫기">×</button>
+      </div>
+
+      <div class="quick-stat-grid">
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">👥</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">인구</span>
+            <span class="quick-stat-cell__value">1,412,000,000</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">🦠</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">감염자</span>
+            <span class="quick-stat-cell__value">18,204,552</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">💀</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">사망자</span>
+            <span class="quick-stat-cell__value">600,750</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">📊</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">감염률</span>
+            <span class="quick-stat-cell__value">1.29%</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">✈️</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">공항 상태</span>
+            <span class="badge-tag badge-tag--warning">제한 운항</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">🚢</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">항만 상태</span>
+            <span class="badge-tag badge-tag--warning">부분 폐쇄</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">🏥</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">의료 수준</span>
+            <span class="badge-tag badge-tag--warning">중</span>
+          </span>
+        </div>
+        <div class="quick-stat-cell">
+          <span class="quick-stat-cell__icon">🏛️</span>
+          <span class="quick-stat-cell__body">
+            <span class="quick-stat-cell__label">정부 대응</span>
+            <span class="badge-tag badge-tag--success">적극적</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="popup-actions">
+        <button class="tab-button tab-button--primary">상세 보기</button>
+        <button class="tab-button">닫기</button>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

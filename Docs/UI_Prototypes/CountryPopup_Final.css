@@ -1,0 +1,437 @@
+/* ============================================================
+   Contagion Project — Country Popup "Final"
+   Source of Truth: awesome-design-md-main/design-md/nvidia/DESIGN.md
+   (동일 문서 — 다른 design.md 혼합 없음)
+
+   목적: CountryStatus_Final(상세 보고서)의 축소판이 아니다. 플레이 중
+   국가를 터치했을 때 "지도를 가리지 않고 5초 안에 핵심만 확인"하는
+   독립적인 UI — Bottom Sheet 형태. 화면 상단 55~60%는 항상 World Map
+   (MainHud_Final의 utility-bar/command-header/map-frame 그대로)이
+   노출되고, 하단 40%만 country-popup이 덮는다.
+
+   NVIDIA DESIGN.md 적용 방식의 차이점(의도적):
+   - CountryStatus_Final의 .panel(카드)은 border-radius: sm(2px).
+   - 이 팝업(.country-popup)은 화면 폭 전체를 덮는 "도크형 시트"라
+     문서가 radius:none을 쓰는 대상(utility-bar/primary-nav/footer,
+     즉 "카드가 아니라 크롬")과 같은 범주로 취급해 border-radius: none.
+     내부의 버튼(상세보기/닫기)은 여전히 인터랙티브 요소이므로 2px 유지
+     — "카드=2px, 도크 크롬=0" 구분을 그대로 따른 것.
+
+   포터빌리티 규칙: box-shadow/gradient/position:fixed 금지(팝업은
+   position:absolute + 부모 position:relative로 구현, fixed 아님),
+   radius 단일 값, gap 대신 margin, :last-child 미사용.
+   ============================================================ */
+
+:root {
+    --nv-primary: #76b900;
+    --nv-primary-dark: #5a8d00;
+    --nv-accent-green-pale: #bff230;
+
+    --nv-surface-dark: #000000;
+    --nv-surface-elevated: #1a1a1a;
+    --nv-hairline-strong: #5e5e5e;
+
+    --nv-on-dark: #ffffff;
+    --nv-on-dark-mute: rgba(255, 255, 255, 0.7);
+    --nv-mute: #757575;
+    --nv-stone: #898989;
+
+    --nv-error: #e52020;
+    --nv-warning: #df6500;
+    --nv-warning-bright: #ef9100;
+
+    --nv-error-dim: rgba(229, 32, 32, 0.16);
+    --nv-warning-dim: rgba(239, 145, 0, 0.16);
+    --nv-success-dim: rgba(118, 185, 0, 0.14);
+
+    --nv-radius-none: 0px;
+    --nv-radius-sm: 2px;
+    --nv-radius-full: 9999px;
+
+    --nv-space-4: 4px;
+    --nv-space-8: 8px;
+    --nv-space-12: 12px;
+    --nv-space-16: 16px;
+
+    --nv-touch-min: 44px;
+
+    --nv-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', Arial, -apple-system, sans-serif;
+
+    --nv-text-heading-md: 17px;
+    --nv-text-body: 13px;
+    --nv-text-body-sm: 12px;
+    --nv-text-caption-md: 11px;
+    --nv-text-caption-sm: 10px;
+    --nv-text-caption-xs: 9px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b;
+    font-family: var(--nv-font);
+}
+
+.device-frame {
+    width: 390px;
+    height: 844px;
+    margin: 24px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--nv-hairline-strong);
+}
+
+/* ============================================================
+   hud-root — MainHud_Final과 동일한 배경 레이어(지도가 항상 보인다는
+   전제를 보여주기 위한 컨텍스트). 실제 팝업 로직과 무관.
+   ============================================================ */
+.hud-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nv-surface-dark);
+    color: var(--nv-on-dark);
+}
+
+.utility-bar {
+    height: 26px;
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.utility-bar__brand {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-mute);
+}
+
+.utility-bar__day {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+.command-header {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.icon-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+}
+
+.command-header__phase {
+    flex-grow: 1;
+    text-align: center;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4) var(--nv-space-8);
+    margin: 0 var(--nv-space-8);
+}
+
+.map-frame {
+    position: relative;
+    flex-grow: 1;
+    margin: var(--nv-space-8) var(--nv-space-16);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    overflow: hidden;
+}
+
+.map-frame__label-row {
+    position: absolute;
+    top: var(--nv-space-8);
+    left: var(--nv-space-8);
+    right: var(--nv-space-8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+}
+
+.panel__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+.panel__status-pill {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-on-dark-mute);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+.map-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: var(--nv-surface-dark);
+}
+
+.landmass {
+    position: absolute;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+}
+
+.landmass--eurasia   { width: 58%; height: 34%; top: 24%; left: 30%; }
+.landmass--africa    { width: 22%; height: 30%; top: 46%; left: 40%; }
+.landmass--namerica  { width: 26%; height: 28%; top: 20%; left: 6%; }
+.landmass--samerica  { width: 16%; height: 26%; top: 50%; left: 18%; }
+.landmass--australia { width: 14%; height: 12%; top: 64%; left: 78%; }
+
+.infection-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--nv-radius-full);
+    background-color: var(--nv-warning-bright);
+    transform: translate(-50%, -50%);
+}
+
+.infection-dot--critical {
+    background-color: var(--nv-error);
+    width: 11px;
+    height: 11px;
+}
+
+/* 팝업을 연 국가의 위치 표시 — 링 강조(선택 상태) */
+.infection-dot--selected {
+    box-sizing: content-box;
+    border: 2px solid var(--nv-accent-green-pale);
+    padding: 2px;
+}
+
+/* ============================================================
+   country-popup — Bottom Sheet. 화면 하단 ~40%만 덮고, 위쪽 map-frame은
+   그대로 노출된다(핵심 원칙 1: 지도는 항상 보인다).
+   ============================================================ */
+.country-popup {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background-color: var(--nv-surface-elevated);
+    border-top: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-none);
+    padding: var(--nv-space-8) var(--nv-space-16) var(--nv-space-16);
+}
+
+.popup-handle {
+    width: 36px;
+    height: 3px;
+    background-color: var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    margin: 0 auto var(--nv-space-12);
+}
+
+.popup-corner {
+    position: absolute;
+    top: -1px;
+    width: 9px;
+    height: 9px;
+    background-color: var(--nv-primary);
+}
+
+.popup-corner--l { left: -1px; }
+.popup-corner--r { right: -1px; }
+
+/* ============================================================
+   popup-header — 국가명/국기/대륙 + 닫기 버튼(44px 터치 타겟).
+   ============================================================ */
+.popup-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--nv-space-12);
+}
+
+.popup-header__flag {
+    font-size: 26px;
+    margin-right: var(--nv-space-8);
+}
+
+.popup-header__titles {
+    flex-grow: 1;
+}
+
+.popup-header__name {
+    font-size: var(--nv-text-heading-md);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    margin-right: var(--nv-space-8);
+}
+
+.popup-header__continent {
+    display: inline-block;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-on-dark-mute);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+    margin-top: var(--nv-space-4);
+}
+
+.popup-close {
+    width: var(--nv-touch-min);
+    height: var(--nv-touch-min);
+    min-width: var(--nv-touch-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-dark);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+}
+
+.popup-close:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+}
+
+/* ============================================================
+   quick-stat-grid — 8개 핵심 지표 2열 그리드(5초 스캔용). 인구/감염자/
+   사망자/감염률은 수치, 공항/항만/의료/정부 대응은 badge-tag(등급형).
+   ============================================================ */
+.quick-stat-grid {
+    display: flex;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--nv-hairline-strong);
+    border-left: 1px solid var(--nv-hairline-strong);
+}
+
+.quick-stat-cell {
+    flex-basis: 50%;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--nv-space-4) var(--nv-space-8);
+    border-right: 1px solid var(--nv-hairline-strong);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.quick-stat-cell__icon {
+    font-size: 16px;
+    width: 22px;
+    text-align: center;
+    margin-right: var(--nv-space-8);
+}
+
+.quick-stat-cell__body {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.quick-stat-cell__label {
+    display: block;
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-on-dark-mute);
+}
+
+.quick-stat-cell__value {
+    display: block;
+    font-size: var(--nv-text-body);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+}
+
+.badge-tag {
+    display: inline-block;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+.badge-tag--warning { color: var(--nv-warning-bright); background-color: var(--nv-warning-dim); }
+.badge-tag--critical { color: var(--nv-error); background-color: var(--nv-error-dim); }
+.badge-tag--success { color: var(--nv-primary); background-color: var(--nv-success-dim); }
+
+/* ============================================================
+   popup-actions — 상세 보기(primary) / 닫기(secondary). MainHud_Final의
+   tab-button 컴포넌트를 그대로 재사용(동일 버튼 크롬).
+   ============================================================ */
+.popup-actions {
+    display: flex;
+    margin-top: var(--nv-space-12);
+}
+
+.tab-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: var(--nv-touch-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-dark);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: var(--nv-text-body);
+    font-weight: 700;
+    margin-right: var(--nv-space-8);
+}
+
+.tab-button:last-of-type {
+    margin-right: 0;
+}
+
+.tab-button--primary {
+    color: var(--nv-primary);
+    border-color: var(--nv-primary);
+}
+
+.tab-button:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+    color: var(--nv-on-dark);
+}

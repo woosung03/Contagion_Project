@@ -1,0 +1,333 @@
+/* ============================================================
+   Contagion Project — Country Status "Variant A: Data Density First"
+   Source of Truth: awesome-design-md-main/design-md/nvidia/DESIGN.md
+   (동일 문서 — ClickHouse/OpenCode/Sanity 등 다른 design.md 혼합 없음)
+
+   방향성: Plague Inc 스타일 정보량 극대화. 스크롤 최소화, 표 형태(의사
+   테이블) 적극 사용, 숫자 가독성 최우선. corner-square 장식은 화면당
+   패널 개수를 줄이지 않기 위해 최소화(패널 헤더 안 인라인 텍스트로 대체
+   가능한 곳은 corner-square를 생략) — "장식보다 데이터가 위" 원칙.
+
+   포터빌리티 규칙 (VariantB/C, 기존 MainHud.css/CountryStatus.css와 동일):
+   - box-shadow 금지 / gradient 금지 / position:fixed 금지
+   - border-radius 단일 값만 사용
+   - gap 대신 margin
+   - :last-child 미사용(모든 행에 동일한 hairline 하단선 — 값이 옅어 마지막
+     행에 남아도 무방하다는 기존 규칙 그대로 적용)
+   - <table>/<tr>/<td> 미사용 — Unity UI Toolkit에 테이블 엘리먼트가 없으므로
+     div+flex로 "의사 테이블"을 구성해 그대로 VisualElement로 옮길 수 있게 함
+   ============================================================ */
+
+:root {
+    /* ---- NVIDIA DESIGN.md > colors (다크 모드 축) ---- */
+    --nv-primary: #76b900;
+    --nv-primary-dark: #5a8d00;
+    --nv-accent-green-pale: #bff230;
+
+    --nv-surface-dark: #000000;
+    --nv-surface-elevated: #1a1a1a;
+    --nv-hairline-strong: #5e5e5e;
+
+    --nv-on-dark: #ffffff;
+    --nv-on-dark-mute: rgba(255, 255, 255, 0.7);
+    --nv-mute: #757575;
+    --nv-stone: #898989;
+    --nv-ash: #a7a7a7;
+
+    --nv-error: #e52020;
+    --nv-warning: #df6500;
+    --nv-warning-bright: #ef9100;
+    --nv-success-deep: #3f8500;
+
+    --nv-error-dim: rgba(229, 32, 32, 0.16);
+    --nv-warning-dim: rgba(239, 145, 0, 0.16);
+    --nv-success-dim: rgba(118, 185, 0, 0.14);
+
+    --nv-radius-none: 0px;
+    --nv-radius-sm: 2px;
+    --nv-radius-full: 9999px;
+
+    --nv-space-2: 2px;
+    --nv-space-4: 4px;
+    --nv-space-8: 8px;
+    --nv-space-12: 12px;
+    --nv-space-16: 16px;
+
+    --nv-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', Arial, -apple-system, sans-serif;
+
+    --nv-text-scoreboard: 20px;  /* display-lg 축소 — 밀도 우선이라 원래 30px보다 더 줄임 */
+    --nv-text-heading-sm: 15px;
+    --nv-text-body: 13px;
+    --nv-text-body-sm: 12px;
+    --nv-text-caption-md: 10px;
+    --nv-text-caption-sm: 10px;
+    --nv-text-caption-xs: 9px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b;
+    font-family: var(--nv-font);
+}
+
+.device-frame {
+    width: 390px;
+    height: 844px;
+    margin: 24px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--nv-hairline-strong);
+}
+
+.status-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nv-surface-dark);
+    color: var(--nv-on-dark);
+}
+
+/* ============================================================
+   compact-header — utility-bar + 국가 정보를 한 줄로 병합(밀도 우선).
+   ============================================================ */
+.compact-header {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 var(--nv-space-12);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.compact-header__back {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    margin-right: var(--nv-space-8);
+}
+
+.compact-header__flag {
+    font-size: 14px;
+    margin-right: var(--nv-space-4);
+}
+
+.compact-header__name {
+    font-size: var(--nv-text-body);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    margin-right: var(--nv-space-4);
+}
+
+.compact-header__meta {
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-mute);
+    flex-grow: 1;
+}
+
+.compact-header__phase {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-4);
+}
+
+.status-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--nv-space-12);
+}
+
+/* ============================================================
+   panel — 밀도 우선이라 padding을 원본보다 좁게, margin도 축소.
+   ============================================================ */
+.panel {
+    position: relative;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-8) var(--nv-space-12);
+    margin-bottom: var(--nv-space-12);
+}
+
+.panel__eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+    margin-bottom: var(--nv-space-8);
+}
+
+.panel__count {
+    font-size: var(--nv-text-caption-xs);
+    color: var(--nv-stone);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ============================================================
+   Hero Stats — scoreboard(4셀, 세로 hairline 구분).
+   ============================================================ */
+.scoreboard {
+    display: flex;
+}
+
+.scoreboard-cell {
+    flex-grow: 1;
+    flex-basis: 0;
+    text-align: center;
+    border-right: 1px solid var(--nv-hairline-strong);
+    padding: 0 var(--nv-space-4);
+}
+
+.scoreboard-cell__value {
+    display: block;
+    font-size: var(--nv-text-scoreboard);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    line-height: 1.1;
+}
+
+.scoreboard-cell__value--danger {
+    color: var(--nv-error);
+}
+
+.scoreboard-cell__label {
+    display: block;
+    font-size: 9px;
+    color: var(--nv-on-dark-mute);
+    margin-top: var(--nv-space-2);
+}
+
+.scoreboard-cell__delta {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--nv-warning-bright);
+    margin-top: var(--nv-space-2);
+}
+
+/* ============================================================
+   pseudo-table — Infection Distribution / Medical Status / Ranking /
+   Events 공용. div+flex row로 구성(<table> 미사용).
+   ============================================================ */
+.ptable-row {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-4) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.ptable-row--header {
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.ptable-row--header .ptable-cell {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-stone);
+}
+
+.ptable-cell {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark);
+}
+
+/* Infection Distribution 컬럼 폭 */
+.col-region      { flex-basis: 34%; }
+.col-count       { flex-basis: 28%; text-align: right; padding-right: var(--nv-space-8); }
+.col-rate        { flex-basis: 14%; text-align: right; padding-right: var(--nv-space-8); color: var(--nv-on-dark-mute); }
+.col-bar         { flex-basis: 24%; }
+
+/* Medical Status 컬럼 폭 */
+.col-med-label   { flex-basis: 44%; }
+.col-med-value   { flex-basis: 16%; text-align: right; padding-right: var(--nv-space-8); font-weight: 700; }
+.col-med-bar     { flex-basis: 40%; }
+
+/* Ranking 컬럼 폭 */
+.col-rank        { flex-basis: 10%; color: var(--nv-stone); font-weight: 700; }
+.col-rank-flag   { flex-basis: 8%; }
+.col-rank-name   { flex-basis: 38%; }
+.col-rank-count  { flex-basis: 26%; text-align: right; padding-right: var(--nv-space-8); }
+.col-rank-share  { flex-basis: 18%; text-align: right; color: var(--nv-on-dark-mute); }
+
+/* Events 컬럼 폭 */
+.col-ev-time     { flex-basis: 16%; color: var(--nv-mute); }
+.col-ev-badge    { flex-basis: 18%; }
+.col-ev-desc     { flex-basis: 66%; }
+
+.meter__track {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill {
+    height: 100%;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill--warning { background-color: var(--nv-warning-bright); }
+.meter__fill--error { background-color: var(--nv-error); }
+
+.ptable-row--self {
+    background-color: var(--nv-success-dim);
+    border-left: 2px solid var(--nv-accent-green-pale);
+    padding-left: var(--nv-space-4);
+}
+
+.ptable-row--self .col-rank,
+.ptable-row--self .col-rank-share {
+    color: var(--nv-accent-green-pale);
+}
+
+.badge-tag {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-4);
+}
+
+.badge-tag--warning { color: var(--nv-warning-bright); background-color: var(--nv-warning-dim); }
+.badge-tag--critical { color: var(--nv-error); background-color: var(--nv-error-dim); }
+.badge-tag--info { color: var(--nv-on-dark-mute); background-color: rgba(255, 255, 255, 0.08); }
+
+.panel__footer-link {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--nv-primary);
+    text-align: right;
+    margin-top: var(--nv-space-8);
+    text-decoration: none;
+}

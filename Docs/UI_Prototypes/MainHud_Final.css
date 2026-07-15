@@ -1,0 +1,491 @@
+/* ============================================================
+   Contagion Project — Main HUD "Final" (CountryStatus_Final과 동일한
+   디자인 언어로 재설계)
+   Source of Truth: awesome-design-md-main/design-md/nvidia/DESIGN.md
+   (동일 문서 — 다른 design.md 혼합 없음)
+
+   목표: Tactical Command Center / Mobile Portrait / Data First /
+   World Map 중심 플레이 유지. CountryStatus_Final에서 확립한 컴포넌트
+   (panel+corner-square 4개+status-pill, readout-cell, monitor-row+meter,
+   alert-row, badge-tag, 버튼 크롬)를 그대로 재사용하고, World Map만
+   화면에서 가장 넓은 flex-grow 영역으로 유지한다.
+
+   포터빌리티 규칙: box-shadow/gradient/position:fixed 금지, radius
+   단일 값, gap 대신 margin, :last-child 미사용 — CountryStatus_Final과
+   동일.
+   ============================================================ */
+
+:root {
+    --nv-primary: #76b900;
+    --nv-primary-dark: #5a8d00;
+    --nv-accent-green-pale: #bff230;
+
+    --nv-surface-dark: #000000;
+    --nv-surface-elevated: #1a1a1a;
+    --nv-hairline-strong: #5e5e5e;
+
+    --nv-on-dark: #ffffff;
+    --nv-on-dark-mute: rgba(255, 255, 255, 0.7);
+    --nv-mute: #757575;
+    --nv-stone: #898989;
+
+    --nv-error: #e52020;
+    --nv-warning: #df6500;
+    --nv-warning-bright: #ef9100;
+
+    --nv-error-dim: rgba(229, 32, 32, 0.16);
+    --nv-warning-dim: rgba(239, 145, 0, 0.16);
+    --nv-success-dim: rgba(118, 185, 0, 0.14);
+
+    --nv-radius-none: 0px;
+    --nv-radius-sm: 2px;
+    --nv-radius-full: 9999px;
+
+    --nv-space-4: 4px;
+    --nv-space-8: 8px;
+    --nv-space-12: 12px;
+    --nv-space-16: 16px;
+
+    --nv-touch-min: 44px;
+
+    --nv-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', Arial, -apple-system, sans-serif;
+
+    --nv-text-display: 22px;
+    --nv-text-heading-md: 16px;
+    --nv-text-body: 13px;
+    --nv-text-body-sm: 12px;
+    --nv-text-caption-md: 11px;
+    --nv-text-caption-sm: 10px;
+    --nv-text-caption-xs: 9px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b;
+    font-family: var(--nv-font);
+}
+
+.device-frame {
+    width: 390px;
+    height: 844px;
+    margin: 24px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--nv-hairline-strong);
+}
+
+.hud-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nv-surface-dark);
+    color: var(--nv-on-dark);
+}
+
+/* ============================================================
+   utility-bar — CountryStatus_Final과 동일.
+   ============================================================ */
+.utility-bar {
+    height: 26px;
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.utility-bar__brand {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-mute);
+}
+
+.utility-bar__day {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+/* ============================================================
+   command-header — 뒤로가기 대신 아이콘 버튼(설정/이벤트 피드 토글) +
+   단계 배지. back-button과 동일한 박스 버튼 크롬 재사용.
+   ============================================================ */
+.command-header {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.icon-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+}
+
+.icon-button:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+}
+
+.command-header__phase {
+    flex-grow: 1;
+    text-align: center;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4) var(--nv-space-8);
+    margin: 0 var(--nv-space-8);
+}
+
+/* ============================================================
+   panel — CountryStatus_Final과 동일한 4-corner + status-pill 헤더.
+   HUD에서는 padding을 좁혀 map 영역을 최대한 확보한다.
+   ============================================================ */
+.panel {
+    position: relative;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-8) var(--nv-space-12);
+    margin: var(--nv-space-8) var(--nv-space-16) 0;
+}
+
+.corner-square {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-none);
+}
+
+.corner-square--tl { top: -1px; left: -1px; }
+.corner-square--tr { top: -1px; right: -1px; }
+.corner-square--bl { bottom: -1px; left: -1px; }
+.corner-square--br { bottom: -1px; right: -1px; }
+
+.panel__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--nv-space-8);
+}
+
+.panel__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+.panel__status-pill {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-on-dark-mute);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+/* ============================================================
+   Event Feed — CountryStatus_Final의 alert-row 그대로 재사용,
+   높이만 2건 노출 정도로 압축(맵 공간 확보).
+   ============================================================ */
+.event-feed-panel {
+    margin-bottom: 0;
+}
+
+.event-feed-list {
+    max-height: 70px;
+    overflow-y: auto;
+}
+
+.alert-row {
+    padding: var(--nv-space-4) var(--nv-space-8);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+    border-left: 1px solid var(--nv-hairline-strong);
+}
+
+.alert-row--critical {
+    border-left: 2px solid var(--nv-error);
+    background-color: var(--nv-error-dim);
+}
+
+.alert-row__meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.badge-tag {
+    display: inline-block;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+.badge-tag--warning { color: var(--nv-warning-bright); background-color: var(--nv-warning-dim); }
+.badge-tag--critical { color: var(--nv-error); background-color: var(--nv-error-dim); }
+.badge-tag--info { color: var(--nv-on-dark-mute); background-color: rgba(255, 255, 255, 0.08); }
+
+.alert-row__timestamp {
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-mute);
+    margin-left: var(--nv-space-8);
+}
+
+.alert-row__desc {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark-mute);
+}
+
+/* ============================================================
+   map-frame — World Map 중심 영역. flex-grow로 화면에서 가장 넓은
+   공간 차지. 계기판 프레임(corner-square+eyebrow)만 얹고 지도 자체는
+   그대로 노출(패딩 없음).
+   ============================================================ */
+.map-frame {
+    position: relative;
+    flex-grow: 1;
+    margin: var(--nv-space-8) var(--nv-space-16);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    overflow: hidden;
+}
+
+.map-frame__label-row {
+    position: absolute;
+    top: var(--nv-space-8);
+    left: var(--nv-space-8);
+    right: var(--nv-space-8);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+}
+
+.map-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: var(--nv-surface-dark);
+}
+
+.landmass {
+    position: absolute;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+}
+
+.landmass--eurasia   { width: 58%; height: 34%; top: 24%; left: 30%; }
+.landmass--africa    { width: 22%; height: 30%; top: 46%; left: 40%; }
+.landmass--namerica  { width: 26%; height: 28%; top: 20%; left: 6%; }
+.landmass--samerica  { width: 16%; height: 26%; top: 50%; left: 18%; }
+.landmass--australia { width: 14%; height: 12%; top: 64%; left: 78%; }
+
+.infection-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--nv-radius-full);
+    transform: translate(-50%, -50%);
+}
+
+.infection-dot--origin    { background-color: var(--nv-error); }
+.infection-dot--spreading { background-color: var(--nv-warning-bright); }
+.infection-dot--critical  { background-color: var(--nv-error); width: 11px; height: 11px; }
+
+.map-legend {
+    position: absolute;
+    bottom: var(--nv-space-8);
+    left: var(--nv-space-8);
+    display: flex;
+    z-index: 2;
+}
+
+.map-legend__item {
+    display: flex;
+    align-items: center;
+    font-size: var(--nv-text-caption-xs);
+    color: var(--nv-on-dark-mute);
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+    margin-right: var(--nv-space-4);
+}
+
+.map-legend__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--nv-radius-full);
+    margin-right: var(--nv-space-4);
+}
+
+.map-legend__dot--origin { background-color: var(--nv-error); }
+.map-legend__dot--spreading { background-color: var(--nv-warning-bright); }
+
+/* ============================================================
+   Global Status panel — DNA/감염자/사망자 readout-cell(CountryStatus_
+   Final의 Hero Stats 컴포넌트 그대로) + Cure Progress monitor-row.
+   ============================================================ */
+.readout-row {
+    display: flex;
+}
+
+.readout-cell {
+    flex-grow: 1;
+    flex-basis: 0;
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4);
+    margin-right: var(--nv-space-8);
+    text-align: center;
+}
+
+.readout-cell:last-of-type {
+    margin-right: 0;
+}
+
+.readout-cell__value {
+    display: block;
+    font-size: var(--nv-text-display);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    line-height: 1.1;
+}
+
+.readout-cell__value--brand { color: var(--nv-primary); }
+.readout-cell__value--danger { color: var(--nv-error); }
+
+.readout-cell__label {
+    display: block;
+    font-size: 9px;
+    color: var(--nv-on-dark-mute);
+    margin-top: 2px;
+}
+
+.readout-cell__delta {
+    display: block;
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--nv-warning-bright);
+    margin-top: 2px;
+}
+
+.readout-cell__delta--brand { color: var(--nv-primary); }
+.readout-cell__delta--bad { color: var(--nv-error); }
+
+.monitor-row {
+    display: flex;
+    align-items: center;
+    margin-top: var(--nv-space-8);
+}
+
+.monitor-row__label {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark);
+    flex-basis: 40%;
+}
+
+.monitor-row__value {
+    font-size: var(--nv-text-body-sm);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    flex-basis: 12%;
+    text-align: right;
+    padding-right: var(--nv-space-8);
+}
+
+.monitor-row__badge {
+    flex-basis: 18%;
+}
+
+.monitor-row__bar {
+    flex-basis: 30%;
+}
+
+.meter__track {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill {
+    height: 100%;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-sm);
+}
+
+/* ============================================================
+   tabs-row — Action Buttons. CountryStatus_Final의 버튼 크롬(hairline
+   박스, radius 2px, 그림자 없음) + 문서 button-primary/outline 구분.
+   ============================================================ */
+.tabs-row {
+    display: flex;
+    padding: var(--nv-space-8) var(--nv-space-16) var(--nv-space-16);
+}
+
+.tab-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: var(--nv-touch-min);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: var(--nv-text-body);
+    font-weight: 700;
+    margin-right: var(--nv-space-8);
+}
+
+.tab-button:last-of-type {
+    margin-right: 0;
+}
+
+.tab-button--primary {
+    color: var(--nv-primary);
+    border-color: var(--nv-primary);
+}
+
+.tab-button:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+    color: var(--nv-on-dark);
+}

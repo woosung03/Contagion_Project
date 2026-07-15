@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Contagion Project — Country Status Variant A (Data Density First)</title>
+<link rel="stylesheet" href="CountryStatus_VariantA.css" />
+</head>
+<body>
+
+  <div class="device-frame">
+    <div class="status-root">
+
+      <!-- compact-header: utility-bar + 국가 정보 한 줄 병합 -->
+      <div class="compact-header">
+        <button class="compact-header__back" aria-label="뒤로가기">‹</button>
+        <span class="compact-header__flag">🇰🇷</span>
+        <span class="compact-header__name">대한민국</span>
+        <span class="compact-header__meta">DAY 17 · TACTICAL COMMAND CENTER</span>
+        <span class="compact-header__phase">잠복기</span>
+      </div>
+
+      <div class="status-scroll">
+
+        <!-- Hero Stats: scoreboard 4셀 -->
+        <section class="panel">
+          <div class="panel__eyebrow"><span>Hero Stats</span></div>
+          <div class="scoreboard">
+            <div class="scoreboard-cell">
+              <span class="scoreboard-cell__value">796,340</span>
+              <span class="scoreboard-cell__label">감염자</span>
+              <span class="scoreboard-cell__delta">▲16,540</span>
+            </div>
+            <div class="scoreboard-cell">
+              <span class="scoreboard-cell__value scoreboard-cell__value--danger">26,279</span>
+              <span class="scoreboard-cell__label">사망자</span>
+              <span class="scoreboard-cell__delta" style="color:var(--nv-error);">▲540</span>
+            </div>
+            <div class="scoreboard-cell">
+              <span class="scoreboard-cell__value">1.54%</span>
+              <span class="scoreboard-cell__label">감염률</span>
+              <span class="scoreboard-cell__delta" style="color:var(--nv-stone);">/51.78M</span>
+            </div>
+            <div class="scoreboard-cell" style="border-right:none;">
+              <span class="scoreboard-cell__value">3.30%</span>
+              <span class="scoreboard-cell__label">치명률</span>
+              <span class="scoreboard-cell__delta" style="color:var(--nv-stone);">사망/감염</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Infection Distribution: 의사 테이블 -->
+        <section class="panel">
+          <div class="panel__eyebrow">
+            <span>Infection Distribution</span>
+            <span class="panel__count">6 REGIONS</span>
+          </div>
+
+          <div class="ptable-row ptable-row--header">
+            <span class="ptable-cell col-region">지역</span>
+            <span class="ptable-cell col-count">감염자</span>
+            <span class="ptable-cell col-rate">비율</span>
+            <span class="ptable-cell col-bar">추이</span>
+          </div>
+
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">서울·경기</span>
+            <span class="ptable-cell col-count">412,650</span>
+            <span class="ptable-cell col-rate">3.2%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill meter__fill--warning" style="width:64%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">인천(관문)</span>
+            <span class="ptable-cell col-count">88,340</span>
+            <span class="ptable-cell col-rate">2.8%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill meter__fill--warning" style="width:56%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">부산·경남</span>
+            <span class="ptable-cell col-count">156,220</span>
+            <span class="ptable-cell col-rate">2.1%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill" style="width:42%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">대구·경북</span>
+            <span class="ptable-cell col-count">74,910</span>
+            <span class="ptable-cell col-rate">1.4%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill" style="width:28%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">광주·전라</span>
+            <span class="ptable-cell col-count">41,280</span>
+            <span class="ptable-cell col-rate">0.9%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill" style="width:18%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-region">강원·기타</span>
+            <span class="ptable-cell col-count">22,940</span>
+            <span class="ptable-cell col-rate">0.5%</span>
+            <span class="ptable-cell col-bar"><div class="meter__track"><div class="meter__fill" style="width:10%"></div></div></span>
+          </div>
+        </section>
+
+        <!-- Medical Status: 의사 테이블 (label:value:bar 1줄) -->
+        <section class="panel">
+          <div class="panel__eyebrow"><span>Medical Status</span></div>
+
+          <div class="ptable-row">
+            <span class="ptable-cell col-med-label">치료제 개발(전 세계)</span>
+            <span class="ptable-cell col-med-value">12%</span>
+            <span class="ptable-cell col-med-bar"><div class="meter__track"><div class="meter__fill" style="width:12%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-med-label">병상 가동률</span>
+            <span class="ptable-cell col-med-value">34%</span>
+            <span class="ptable-cell col-med-bar"><div class="meter__track"><div class="meter__fill" style="width:34%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-med-label">의약품 비축량</span>
+            <span class="ptable-cell col-med-value">78%</span>
+            <span class="ptable-cell col-med-bar"><div class="meter__track"><div class="meter__fill" style="width:78%"></div></div></span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-med-label">국경 통제 단계</span>
+            <span class="ptable-cell col-med-value" style="flex-basis:56%; text-align:right;">
+              <span class="badge-tag badge-tag--warning">1단계 · 검역 강화</span>
+            </span>
+          </div>
+        </section>
+
+        <!-- Country Ranking Preview: 의사 테이블 (순위/국명/감염자/점유율) -->
+        <section class="panel">
+          <div class="panel__eyebrow">
+            <span>Global Ranking</span>
+            <span class="panel__count">TOTAL 128,402,110</span>
+          </div>
+
+          <div class="ptable-row ptable-row--header">
+            <span class="ptable-cell col-rank">#</span>
+            <span class="ptable-cell col-rank-flag"></span>
+            <span class="ptable-cell col-rank-name">국가</span>
+            <span class="ptable-cell col-rank-count">감염자</span>
+            <span class="ptable-cell col-rank-share">점유율</span>
+          </div>
+
+          <div class="ptable-row">
+            <span class="ptable-cell col-rank">1</span>
+            <span class="ptable-cell col-rank-flag">🇨🇳</span>
+            <span class="ptable-cell col-rank-name">중국</span>
+            <span class="ptable-cell col-rank-count">18,204,552</span>
+            <span class="ptable-cell col-rank-share">14.18%</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-rank">2</span>
+            <span class="ptable-cell col-rank-flag">🇮🇳</span>
+            <span class="ptable-cell col-rank-name">인도</span>
+            <span class="ptable-cell col-rank-count">15,982,110</span>
+            <span class="ptable-cell col-rank-share">12.45%</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-rank">3</span>
+            <span class="ptable-cell col-rank-flag">🇺🇸</span>
+            <span class="ptable-cell col-rank-name">미국</span>
+            <span class="ptable-cell col-rank-count">11,540,280</span>
+            <span class="ptable-cell col-rank-share">8.99%</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-rank">4</span>
+            <span class="ptable-cell col-rank-flag">🇧🇷</span>
+            <span class="ptable-cell col-rank-name">브라질</span>
+            <span class="ptable-cell col-rank-count">9,872,004</span>
+            <span class="ptable-cell col-rank-share">7.69%</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-rank">5</span>
+            <span class="ptable-cell col-rank-flag">🇮🇩</span>
+            <span class="ptable-cell col-rank-name">인도네시아</span>
+            <span class="ptable-cell col-rank-count">8,340,552</span>
+            <span class="ptable-cell col-rank-share">6.50%</span>
+          </div>
+          <div class="ptable-row ptable-row--self">
+            <span class="ptable-cell col-rank">14</span>
+            <span class="ptable-cell col-rank-flag">🇰🇷</span>
+            <span class="ptable-cell col-rank-name">대한민국(현재)</span>
+            <span class="ptable-cell col-rank-count">796,340</span>
+            <span class="ptable-cell col-rank-share">0.62%</span>
+          </div>
+
+          <a class="panel__footer-link" href="#">전체 48개국 순위 →</a>
+        </section>
+
+        <!-- Recent Events: 의사 테이블 -->
+        <section class="panel">
+          <div class="panel__eyebrow"><span>Recent Events</span></div>
+
+          <div class="ptable-row">
+            <span class="ptable-cell col-ev-time">2시간 전</span>
+            <span class="ptable-cell col-ev-badge"><span class="badge-tag badge-tag--critical">Critical</span></span>
+            <span class="ptable-cell col-ev-desc">대구 지역 변이 감지 — 잠복기 12% 단축 추정</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-ev-time">5시간 전</span>
+            <span class="ptable-cell col-ev-badge"><span class="badge-tag badge-tag--warning">Warning</span></span>
+            <span class="ptable-cell col-ev-desc">인천공항 입국자 전원 검역 강화 발표</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-ev-time">11시간 전</span>
+            <span class="ptable-cell col-ev-badge"><span class="badge-tag badge-tag--warning">Warning</span></span>
+            <span class="ptable-cell col-ev-desc">부산항 화물 검역 절차 강화 조치 시행</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-ev-time">18시간 전</span>
+            <span class="ptable-cell col-ev-badge"><span class="badge-tag badge-tag--info">Info</span></span>
+            <span class="ptable-cell col-ev-desc">WHO, 원인불명 발열 환자 급증 지역 조사 착수</span>
+          </div>
+          <div class="ptable-row">
+            <span class="ptable-cell col-ev-time">1일 전</span>
+            <span class="ptable-cell col-ev-badge"><span class="badge-tag badge-tag--info">Info</span></span>
+            <span class="ptable-cell col-ev-desc">서울시 임시 선별진료소 12곳 추가 개설</span>
+          </div>
+
+          <a class="panel__footer-link" href="#">이벤트 전체 보기 →</a>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

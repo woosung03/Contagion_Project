@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Contagion Project — Country Status Variant C (Mobile Game First)</title>
+<link rel="stylesheet" href="CountryStatus_VariantC.css" />
+</head>
+<body>
+
+  <div class="device-frame">
+    <div class="status-root">
+
+      <div class="status-header">
+        <button class="back-button" aria-label="뒤로가기">‹</button>
+        <div class="status-header__titles">
+          <span class="status-header__eyebrow">Country Status Report</span>
+          <div class="status-header__country">
+            <span class="status-header__flag">🇰🇷</span>
+            <span class="status-header__name">대한민국</span>
+          </div>
+        </div>
+        <span class="status-header__phase-badge">잠복기</span>
+      </div>
+
+      <!-- quick-chip-row: 스크롤 전 한눈에 보는 요약 -->
+      <div class="quick-chip-row">
+        <div class="quick-chip">
+          <span class="quick-chip__icon">🦠</span>
+          <span class="quick-chip__value">796,340</span>
+          <span class="quick-chip__label">감염자</span>
+        </div>
+        <div class="quick-chip">
+          <span class="quick-chip__icon">💀</span>
+          <span class="quick-chip__value">26,279</span>
+          <span class="quick-chip__label">사망자</span>
+        </div>
+        <div class="quick-chip">
+          <span class="quick-chip__icon">💉</span>
+          <span class="quick-chip__value">12%</span>
+          <span class="quick-chip__label">치료제</span>
+        </div>
+      </div>
+
+      <div class="status-scroll">
+
+        <!-- Hero Stats: 카드형 세로 스택(최우선 강조) -->
+        <section class="panel">
+          <span class="corner-square"></span>
+          <div class="panel__eyebrow">Hero Stats</div>
+
+          <div class="hero-card">
+            <span class="hero-card__icon">🦠</span>
+            <div class="hero-card__body">
+              <span class="hero-card__value">796,340</span>
+              <span class="hero-card__label">누적 감염자</span>
+            </div>
+            <span class="hero-card__delta">▲ +16,540<br />(24H)</span>
+          </div>
+
+          <div class="hero-card">
+            <span class="hero-card__icon">💀</span>
+            <div class="hero-card__body">
+              <span class="hero-card__value hero-card__value--danger">26,279</span>
+              <span class="hero-card__label">누적 사망자</span>
+            </div>
+            <span class="hero-card__delta hero-card__delta--bad">▲ +540<br />(24H)</span>
+          </div>
+
+          <div class="hero-card" style="border-bottom:none;">
+            <span class="hero-card__icon">📊</span>
+            <div class="hero-card__body">
+              <span class="hero-card__value">1.54%</span>
+              <span class="hero-card__label">전 국민 감염률</span>
+            </div>
+            <span class="hero-card__delta hero-card__delta--flat">51.78M 대비</span>
+          </div>
+        </section>
+
+        <!-- Infection Distribution: top3 카드 + 더보기(details/summary) -->
+        <section class="panel">
+          <span class="corner-square"></span>
+          <div class="panel__eyebrow">Infection Distribution</div>
+          <div class="panel__title">지역별 감염 분포</div>
+
+          <div class="region-card">
+            <span class="region-card__name">서울·경기</span>
+            <span class="region-card__figure"><strong>412,650명</strong> · 3.2%</span>
+          </div>
+          <div class="region-card">
+            <span class="region-card__name">인천 (관문 지역)</span>
+            <span class="region-card__figure"><strong>88,340명</strong> · 2.8%</span>
+          </div>
+          <div class="region-card" style="border-bottom:none;">
+            <span class="region-card__name">부산·경남</span>
+            <span class="region-card__figure"><strong>156,220명</strong> · 2.1%</span>
+          </div>
+
+          <details>
+            <summary>나머지 3개 지역 더보기 <span class="chevron">⌄</span></summary>
+            <div class="region-card">
+              <span class="region-card__name">대구·경북</span>
+              <span class="region-card__figure"><strong>74,910명</strong> · 1.4%</span>
+            </div>
+            <div class="region-card">
+              <span class="region-card__name">광주·전라</span>
+              <span class="region-card__figure"><strong>41,280명</strong> · 0.9%</span>
+            </div>
+            <div class="region-card" style="border-bottom:none;">
+              <span class="region-card__name">강원·기타 지방</span>
+              <span class="region-card__figure"><strong>22,940명</strong> · 0.5%</span>
+            </div>
+          </details>
+        </section>
+
+        <!-- Medical Status: 2x2 아이콘 카드 그리드 -->
+        <section class="panel">
+          <span class="corner-square"></span>
+          <div class="panel__eyebrow">Medical Status</div>
+          <div class="panel__title">의료 시스템 현황</div>
+
+          <div class="med-grid">
+            <div class="med-card">
+              <div class="med-card__inner">
+                <div class="med-card__icon-row">
+                  <span class="med-card__icon">💉</span>
+                  <span class="med-card__value">12%</span>
+                </div>
+                <div class="med-card__label">치료제 개발</div>
+                <div class="meter__track"><div class="meter__fill" style="width:12%"></div></div>
+              </div>
+            </div>
+            <div class="med-card">
+              <div class="med-card__inner">
+                <div class="med-card__icon-row">
+                  <span class="med-card__icon">🏥</span>
+                  <span class="med-card__value">34%</span>
+                </div>
+                <div class="med-card__label">병상 가동률</div>
+                <div class="meter__track"><div class="meter__fill" style="width:34%"></div></div>
+              </div>
+            </div>
+            <div class="med-card">
+              <div class="med-card__inner">
+                <div class="med-card__icon-row">
+                  <span class="med-card__icon">💊</span>
+                  <span class="med-card__value">78%</span>
+                </div>
+                <div class="med-card__label">의약품 비축량</div>
+                <div class="meter__track"><div class="meter__fill" style="width:78%"></div></div>
+              </div>
+            </div>
+            <div class="med-card">
+              <div class="med-card__inner">
+                <div class="med-card__icon-row">
+                  <span class="med-card__icon">🛂</span>
+                </div>
+                <div class="med-card__label">국경 통제 단계</div>
+                <span class="badge-tag badge-tag--warning">1단계 · 검역 강화</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Country Ranking Preview: top3 + 내 국가 항상 노출 + 더보기 -->
+        <section class="panel">
+          <span class="corner-square"></span>
+          <div class="panel__eyebrow">Global Ranking</div>
+          <div class="panel__title">세계 감염자 순위</div>
+
+          <div class="rank-card">
+            <span class="rank-card__index">1</span>
+            <span class="rank-card__flag">🇨🇳</span>
+            <span class="rank-card__name">중국</span>
+            <span class="rank-card__figure">18,204,552명</span>
+          </div>
+          <div class="rank-card">
+            <span class="rank-card__index">2</span>
+            <span class="rank-card__flag">🇮🇳</span>
+            <span class="rank-card__name">인도</span>
+            <span class="rank-card__figure">15,982,110명</span>
+          </div>
+          <div class="rank-card">
+            <span class="rank-card__index">3</span>
+            <span class="rank-card__flag">🇺🇸</span>
+            <span class="rank-card__name">미국</span>
+            <span class="rank-card__figure">11,540,280명</span>
+          </div>
+
+          <div class="rank-card rank-card--self" style="border-bottom:none;">
+            <span class="rank-card__index">14</span>
+            <span class="rank-card__flag">🇰🇷</span>
+            <span class="rank-card__name">대한민국 (현재 국가)</span>
+            <span class="rank-card__figure">796,340명</span>
+          </div>
+
+          <details>
+            <summary>4~5위 더보기 <span class="chevron">⌄</span></summary>
+            <div class="rank-card">
+              <span class="rank-card__index">4</span>
+              <span class="rank-card__flag">🇧🇷</span>
+              <span class="rank-card__name">브라질</span>
+              <span class="rank-card__figure">9,872,004명</span>
+            </div>
+            <div class="rank-card" style="border-bottom:none;">
+              <span class="rank-card__index">5</span>
+              <span class="rank-card__flag">🇮🇩</span>
+              <span class="rank-card__name">인도네시아</span>
+              <span class="rank-card__figure">8,340,552명</span>
+            </div>
+          </details>
+        </section>
+
+        <!-- Recent Events: top2 + 더보기 -->
+        <section class="panel">
+          <span class="corner-square"></span>
+          <div class="panel__eyebrow">Recent Events</div>
+          <div class="panel__title">최근 이벤트</div>
+
+          <div class="event-card">
+            <div class="event-card__meta">
+              <span class="badge-tag badge-tag--critical">Critical</span>
+              <span class="event-card__timestamp">2시간 전</span>
+            </div>
+            <div class="event-card__desc">대구 지역에서 변이 감지 — 잠복기 12% 단축 추정</div>
+          </div>
+
+          <div class="event-card" style="border-bottom:none;">
+            <div class="event-card__meta">
+              <span class="badge-tag badge-tag--warning">Warning</span>
+              <span class="event-card__timestamp">5시간 전</span>
+            </div>
+            <div class="event-card__desc">인천공항, 입국자 전원 대상 검역 강화 발표</div>
+          </div>
+
+          <details>
+            <summary>이전 이벤트 3건 더보기 <span class="chevron">⌄</span></summary>
+            <div class="event-card">
+              <div class="event-card__meta">
+                <span class="badge-tag badge-tag--warning">Warning</span>
+                <span class="event-card__timestamp">11시간 전</span>
+              </div>
+              <div class="event-card__desc">부산항, 화물 검역 절차 강화 조치 시행</div>
+            </div>
+            <div class="event-card">
+              <div class="event-card__meta">
+                <span class="badge-tag badge-tag--info">Info</span>
+                <span class="event-card__timestamp">18시간 전</span>
+              </div>
+              <div class="event-card__desc">WHO, 원인불명 발열 환자 급증 지역 조사 착수</div>
+            </div>
+            <div class="event-card" style="border-bottom:none;">
+              <div class="event-card__meta">
+                <span class="badge-tag badge-tag--info">Info</span>
+                <span class="event-card__timestamp">1일 전</span>
+              </div>
+              <div class="event-card__desc">서울시, 임시 선별진료소 12곳 추가 개설</div>
+            </div>
+          </details>
+        </section>
+
+      </div>
+
+      <!-- bottom-tab-bar: MainHud.html tabs-row 패턴 재사용(터치 44px) -->
+      <div class="bottom-tab-bar">
+        <button class="tab-button">업그레이드</button>
+        <button class="tab-button tab-button--active">국가현황</button>
+        <button class="tab-button">랭킹</button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

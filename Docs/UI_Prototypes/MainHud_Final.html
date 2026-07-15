@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Contagion Project — Main HUD Final (Tactical Command Center)</title>
+<link rel="stylesheet" href="MainHud_Final.css" />
+</head>
+<body>
+
+  <div class="device-frame">
+    <div class="hud-root">
+
+      <!-- utility-bar: CountryStatus_Final과 동일 -->
+      <div class="utility-bar">
+        <span class="utility-bar__brand">TACTICAL COMMAND CENTER</span>
+        <span class="utility-bar__day">DAY 17</span>
+      </div>
+
+      <!-- command-header: 설정/이벤트 피드 아이콘 + 단계 배지 -->
+      <div class="command-header">
+        <button class="icon-button" aria-label="설정">⚙</button>
+        <span class="command-header__phase">잠복기</span>
+        <button class="icon-button" aria-label="이벤트 피드">🗞</button>
+      </div>
+
+      <!-- Event Feed: CountryStatus_Final의 alert-row 그대로 재사용 -->
+      <section class="panel event-feed-panel">
+        <span class="corner-square corner-square--tl"></span>
+        <span class="corner-square corner-square--tr"></span>
+        <span class="corner-square corner-square--bl"></span>
+        <span class="corner-square corner-square--br"></span>
+        <div class="panel__header-row">
+          <span class="panel__eyebrow">Event Feed</span>
+          <span class="panel__status-pill">LIVE</span>
+        </div>
+        <div class="event-feed-list">
+          <div class="alert-row">
+            <div class="alert-row__meta">
+              <span class="badge-tag badge-tag--info">Info</span>
+              <span class="alert-row__timestamp">방금 전</span>
+            </div>
+            <div class="alert-row__desc">WHO, 원인불명 발열 환자 급증 지역 조사 착수</div>
+          </div>
+          <div class="alert-row" style="border-bottom:none;">
+            <div class="alert-row__meta">
+              <span class="badge-tag badge-tag--warning">Warning</span>
+              <span class="alert-row__timestamp">18분 전</span>
+            </div>
+            <div class="alert-row__desc">대한민국 — 공항 검역 강화 발표</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- map-frame: World Map 중심 영역(flex-grow, 화면 최대 공간) -->
+      <div class="map-frame">
+        <div class="map-frame__label-row">
+          <span class="panel__eyebrow">Global Surveillance</span>
+          <span class="panel__status-pill">TRACKING</span>
+        </div>
+
+        <div class="map-placeholder">
+          <span class="landmass landmass--eurasia"></span>
+          <span class="landmass landmass--africa"></span>
+          <span class="landmass landmass--namerica"></span>
+          <span class="landmass landmass--samerica"></span>
+          <span class="landmass landmass--australia"></span>
+
+          <span class="infection-dot infection-dot--origin" style="left:52%; top:34%;"></span>
+          <span class="infection-dot infection-dot--spreading" style="left:47%; top:31%;"></span>
+          <span class="infection-dot infection-dot--spreading" style="left:56%; top:38%;"></span>
+          <span class="infection-dot infection-dot--critical" style="left:23%; top:30%;"></span>
+          <span class="infection-dot infection-dot--spreading" style="left:60%; top:44%;"></span>
+
+          <div class="map-legend">
+            <span class="map-legend__item"><span class="map-legend__dot map-legend__dot--origin"></span>발원지</span>
+            <span class="map-legend__item"><span class="map-legend__dot map-legend__dot--spreading"></span>확산 중</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Status: DNA/감염자/사망자 readout-cell + Cure Progress -->
+      <section class="panel">
+        <span class="corner-square corner-square--tl"></span>
+        <span class="corner-square corner-square--tr"></span>
+        <span class="corner-square corner-square--bl"></span>
+        <span class="corner-square corner-square--br"></span>
+        <div class="panel__header-row">
+          <span class="panel__eyebrow">Global Status</span>
+          <span class="panel__status-pill">LIVE</span>
+        </div>
+
+        <div class="readout-row">
+          <div class="readout-cell">
+            <span class="readout-cell__value readout-cell__value--brand">24</span>
+            <span class="readout-cell__label">DNA</span>
+            <span class="readout-cell__delta readout-cell__delta--brand">+2/DAY</span>
+          </div>
+          <div class="readout-cell">
+            <span class="readout-cell__value">128,402,110</span>
+            <span class="readout-cell__label">감염자</span>
+            <span class="readout-cell__delta">▲+2.1M(24H)</span>
+          </div>
+          <div class="readout-cell">
+            <span class="readout-cell__value readout-cell__value--danger">4,208,553</span>
+            <span class="readout-cell__label">사망자</span>
+            <span class="readout-cell__delta readout-cell__delta--bad">▲+118K(24H)</span>
+          </div>
+        </div>
+
+        <div class="monitor-row">
+          <span class="monitor-row__label">치료제 개발 진행률</span>
+          <span class="monitor-row__value">12%</span>
+          <span class="monitor-row__badge"><span class="badge-tag badge-tag--info">Early</span></span>
+          <span class="monitor-row__bar"><div class="meter__track"><div class="meter__fill" style="width:12%"></div></div></span>
+        </div>
+      </section>
+
+      <!-- tabs-row: Action Buttons -->
+      <div class="tabs-row">
+        <button class="tab-button tab-button--primary">업그레이드</button>
+        <button class="tab-button">국가현황</button>
+        <button class="tab-button">랭킹</button>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

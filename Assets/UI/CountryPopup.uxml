@@ -7,15 +7,56 @@
         <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+
+        <!-- Header: 국기 + 국가명 + 대륙 + 닫기 버튼 -->
         <ui:VisualElement class="tactical-panel__header popup-header">
-            <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+            <ui:Label name="popup-flag" text="" class="popup-flag" />
+            <ui:VisualElement class="popup-header__titles">
+                <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+                <ui:Label name="popup-continent" text="" class="popup-continent" />
+            </ui:VisualElement>
             <ui:Button name="modal-close" text="✕" class="popup-close" />
         </ui:VisualElement>
-        <ui:VisualElement name="popup-donut-row" class="popup-donut-row">
-            <ui:VisualElement name="modal-donut" class="popup-donut" picking-mode="Ignore" />
-            <ui:VisualElement name="modal-donut-legend" class="popup-donut-legend" />
+
+        <!-- Body: quick-stat-grid — 5초 확인용 8개 핵심 지표 -->
+        <ui:VisualElement name="quick-stat-grid" class="quick-stat-grid">
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="인구" class="quick-stat-cell__label" />
+                <ui:Label name="population" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="감염자" class="quick-stat-cell__label" />
+                <ui:Label name="infected" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="사망자" class="quick-stat-cell__label" />
+                <ui:Label name="dead" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="감염률" class="quick-stat-cell__label" />
+                <ui:Label name="infection-rate" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="공항 상태" class="quick-stat-cell__label" />
+                <ui:Label name="airport" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="항만 상태" class="quick-stat-cell__label" />
+                <ui:Label name="seaport" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="의료 수준" class="quick-stat-cell__label" />
+                <ui:Label name="medical" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="국경 상태" class="quick-stat-cell__label" />
+                <ui:Label name="border-status" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="modal-rows" class="detail-rows" />
-        <ui:VisualElement name="modal-footer" class="modal-footer" />
+
+        <!-- Footer: 상세보기 버튼 -->
+        <ui:VisualElement name="modal-footer" class="modal-footer">
+            <ui:Button name="modal-detail" text="상세 보기" class="popup-detail-button" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,521 @@
+/* ============================================================
+   Contagion Project — Country Status "Final" (Variant B 베이스 +
+   Variant A 밀도 요소 결합)
+   Source of Truth: awesome-design-md-main/design-md/nvidia/DESIGN.md
+   (동일 문서 — 다른 design.md 혼합 없음)
+
+   구성 원칙:
+   - B에서 유지: utility-bar+status-header 구조, corner-square 4개,
+     panel__status-pill(LIVE/SCANNING/MONITORING/SYNCED/LOG), 내 국가
+     mini-panel 하이라이트, back-button/ghost-link 버튼 구성.
+   - A에서 흡수: 컬럼 헤더 행(ptable-row--header) 도입, Hero Stats
+     4셀(치명률 추가), 국가 순위 점유율(%) 컬럼, 의료 지표 임계값 비교,
+     지역 감염 표 형식(지역/감염자/비율/추이 4컬럼).
+
+   포터빌리티 규칙: box-shadow/gradient/position:fixed 금지, radius
+   단일 값, gap 대신 margin, :last-child 미사용, <table> 미사용(div+flex
+   의사 테이블) — 이전 Variant A/B/원본과 동일.
+   ============================================================ */
+
+:root {
+    --nv-primary: #76b900;
+    --nv-primary-dark: #5a8d00;
+    --nv-accent-green-pale: #bff230;
+
+    --nv-surface-dark: #000000;
+    --nv-surface-elevated: #1a1a1a;
+    --nv-hairline-strong: #5e5e5e;
+
+    --nv-on-dark: #ffffff;
+    --nv-on-dark-mute: rgba(255, 255, 255, 0.7);
+    --nv-mute: #757575;
+    --nv-stone: #898989;
+
+    --nv-error: #e52020;
+    --nv-warning: #df6500;
+    --nv-warning-bright: #ef9100;
+    --nv-success-deep: #3f8500;
+
+    --nv-error-dim: rgba(229, 32, 32, 0.16);
+    --nv-warning-dim: rgba(239, 145, 0, 0.16);
+    --nv-success-dim: rgba(118, 185, 0, 0.14);
+
+    --nv-radius-none: 0px;
+    --nv-radius-sm: 2px;
+    --nv-radius-full: 9999px;
+
+    --nv-space-4: 4px;
+    --nv-space-8: 8px;
+    --nv-space-12: 12px;
+    --nv-space-16: 16px;
+    --nv-space-20: 20px;
+
+    --nv-font: 'Inter', 'Noto Sans KR', 'Malgun Gothic', Arial, -apple-system, sans-serif;
+
+    --nv-text-display: 24px;   /* B(26px)보다 약간 축소 — Hero Stats가 3→4셀로 늘어난 밀도 보정 */
+    --nv-text-heading-md: 17px;
+    --nv-text-card-title: 14px;
+    --nv-text-body: 13px;
+    --nv-text-body-sm: 12px;
+    --nv-text-caption-md: 11px;
+    --nv-text-caption-sm: 10px;
+    --nv-text-caption-xs: 9px;
+    --nv-text-header-row: 9px; /* A에서 흡수한 컬럼 헤더 행 전용 크기 */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #2b2b2b;
+    font-family: var(--nv-font);
+}
+
+.device-frame {
+    width: 390px;
+    height: 844px;
+    margin: 24px auto;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--nv-hairline-strong);
+}
+
+.status-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nv-surface-dark);
+    color: var(--nv-on-dark);
+}
+
+/* ============================================================
+   utility-bar / status-header — B 그대로 유지.
+   ============================================================ */
+.utility-bar {
+    height: 26px;
+    min-height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.utility-bar__brand {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-mute);
+}
+
+.utility-bar__day {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+.status-header {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-12) var(--nv-space-16);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.back-button {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    color: var(--nv-on-dark);
+    font-size: 18px;
+    line-height: 1;
+    margin-right: var(--nv-space-12);
+    padding: 0;
+}
+
+.back-button:active {
+    background-color: var(--nv-primary-dark);
+    border-color: var(--nv-primary-dark);
+}
+
+.status-header__titles {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.status-header__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+    margin-bottom: var(--nv-space-4);
+}
+
+.status-header__country {
+    display: flex;
+    align-items: center;
+}
+
+.status-header__flag { font-size: 20px; margin-right: var(--nv-space-8); }
+.status-header__name { font-size: var(--nv-text-heading-md); font-weight: 700; }
+
+.status-header__phase-badge {
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-warning-bright);
+    background-color: var(--nv-warning-dim);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-4) var(--nv-space-8);
+    white-space: nowrap;
+}
+
+.status-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--nv-space-16);
+}
+
+/* ============================================================
+   panel — B의 4-corner corner-square + status-pill 헤더 유지.
+   ============================================================ */
+.panel {
+    position: relative;
+    background-color: var(--nv-surface-elevated);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-16);
+    margin-bottom: var(--nv-space-20);
+}
+
+.corner-square {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-none);
+}
+
+.corner-square--tl { top: -1px; left: -1px; }
+.corner-square--tr { top: -1px; right: -1px; }
+.corner-square--bl { bottom: -1px; left: -1px; }
+.corner-square--br { bottom: -1px; right: -1px; }
+
+.panel__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--nv-space-4);
+}
+
+.panel__eyebrow {
+    font-size: var(--nv-text-caption-md);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-primary);
+}
+
+.panel__status-pill {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nv-on-dark-mute);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+.panel__title {
+    font-size: var(--nv-text-heading-md);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    margin-bottom: var(--nv-space-12);
+}
+
+.panel__footer-link {
+    display: block;
+    font-size: var(--nv-text-body-sm);
+    font-weight: 700;
+    color: var(--nv-primary);
+    text-align: right;
+    margin-top: var(--nv-space-12);
+    text-decoration: none;
+}
+
+/* ============================================================
+   Hero Stats — B의 readout-cell(박스형) 유지 + A처럼 4셀로 밀도 강화
+   (치명률 추가).
+   ============================================================ */
+.readout-row {
+    display: flex;
+}
+
+.readout-cell {
+    flex-grow: 1;
+    flex-basis: 0;
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-8) var(--nv-space-4);
+    margin-right: var(--nv-space-8);
+    text-align: center;
+}
+
+.readout-cell:last-of-type {
+    margin-right: 0;
+}
+
+.readout-cell__value {
+    display: block;
+    font-size: var(--nv-text-display);
+    font-weight: 700;
+    color: var(--nv-on-dark);
+    line-height: 1.1;
+}
+
+.readout-cell__value--danger { color: var(--nv-error); }
+
+.readout-cell__label {
+    display: block;
+    font-size: 9px;
+    color: var(--nv-on-dark-mute);
+    margin-top: var(--nv-space-4);
+}
+
+.readout-cell__delta {
+    display: block;
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--nv-warning-bright);
+    margin-top: var(--nv-space-4);
+}
+
+.readout-cell__delta--bad { color: var(--nv-error); }
+.readout-cell__delta--flat { color: var(--nv-stone); font-weight: 400; }
+
+/* ============================================================
+   pseudo-table 헤더 행 — A에서 흡수. Infection Distribution/
+   Medical Status/Ranking 공용.
+   ============================================================ */
+.ptable-header {
+    display: flex;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+    padding-bottom: var(--nv-space-4);
+    margin-bottom: var(--nv-space-4);
+}
+
+.ptable-header__cell {
+    font-size: var(--nv-text-header-row);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--nv-stone);
+}
+
+/* ============================================================
+   Infection Distribution — B의 좌측 accent-bar(signal) 유지 +
+   A의 표 형식 컬럼(감염자/비율/추이) 결합.
+   ============================================================ */
+.col-region { flex-basis: 34%; }
+.col-count  { flex-basis: 30%; text-align: right; padding-right: var(--nv-space-8); }
+.col-rate   { flex-basis: 14%; text-align: right; padding-right: var(--nv-space-8); }
+.col-bar    { flex-basis: 22%; }
+
+.signal-row {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) var(--nv-space-4);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+    border-left: 2px solid var(--nv-hairline-strong);
+}
+
+.signal-row--hot {
+    border-left: 2px solid var(--nv-warning-bright);
+}
+
+.signal-row__cell {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark);
+}
+
+.signal-row__cell.col-count strong {
+    color: var(--nv-on-dark);
+    font-weight: 700;
+}
+
+.signal-row__cell.col-rate {
+    color: var(--nv-on-dark-mute);
+}
+
+.meter__track {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--nv-radius-sm);
+    position: relative;
+}
+
+.meter__fill {
+    height: 100%;
+    background-color: var(--nv-primary);
+    border-radius: var(--nv-radius-sm);
+}
+
+.meter__fill--warning { background-color: var(--nv-warning-bright); }
+
+/* 임계값 마커(A의 "비교 정보 강화" 요청 반영) — track 위에 절대배치되는
+   얇은 세로 틱. position:fixed가 아니라 relative 부모 내부 absolute라
+   포터빌리티 규칙 위반 아님. */
+.meter__threshold {
+    position: absolute;
+    top: -2px;
+    width: 2px;
+    height: 9px;
+    background-color: var(--nv-on-dark-mute);
+}
+
+/* ============================================================
+   Medical Status — A의 표 형식 + 임계값 비교, B의 badge-tag 상태 유지.
+   ============================================================ */
+.col-med-label { flex-basis: 34%; }
+.col-med-value { flex-basis: 14%; text-align: right; padding-right: var(--nv-space-8); }
+.col-med-status { flex-basis: 20%; }
+.col-med-bar { flex-basis: 32%; }
+
+.monitor-row {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.monitor-row__cell {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark);
+}
+
+.monitor-row__value {
+    font-weight: 700;
+}
+
+.badge-tag {
+    display: inline-block;
+    font-size: var(--nv-text-caption-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: var(--nv-radius-sm);
+    padding: 2px var(--nv-space-8);
+}
+
+.badge-tag--warning { color: var(--nv-warning-bright); background-color: var(--nv-warning-dim); }
+.badge-tag--critical { color: var(--nv-error); background-color: var(--nv-error-dim); }
+.badge-tag--info { color: var(--nv-on-dark-mute); background-color: rgba(255, 255, 255, 0.08); }
+.badge-tag--success { color: var(--nv-primary); background-color: var(--nv-success-dim); }
+
+/* ============================================================
+   Country Ranking Preview — A의 헤더 행 + 점유율(%) 컬럼,
+   B의 boxed rank chip + 내 국가 mini-panel 하이라이트 유지.
+   ============================================================ */
+.col-rank       { flex-basis: 14%; }
+.col-rank-name  { flex-basis: 36%; }
+.col-rank-count { flex-basis: 28%; text-align: right; padding-right: var(--nv-space-8); }
+.col-rank-share { flex-basis: 22%; text-align: right; }
+
+.rank-row {
+    display: flex;
+    align-items: center;
+    padding: var(--nv-space-8) 0;
+    border-bottom: 1px solid var(--nv-hairline-strong);
+}
+
+.rank-row__index {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--nv-on-dark-mute);
+    border: 1px solid var(--nv-hairline-strong);
+    border-radius: var(--nv-radius-sm);
+    margin-right: var(--nv-space-8);
+}
+
+.rank-row__flag { font-size: 15px; margin-right: var(--nv-space-4); }
+.rank-row__cell { font-size: var(--nv-text-body-sm); color: var(--nv-on-dark); }
+.rank-row__cell.col-rank-count { font-weight: 700; }
+.rank-row__cell.col-rank-share { color: var(--nv-on-dark-mute); }
+
+.rank-row--self {
+    border: 1px solid var(--nv-accent-green-pale);
+    border-radius: var(--nv-radius-sm);
+    padding: var(--nv-space-8);
+    background-color: var(--nv-success-dim);
+}
+
+.rank-row--self .rank-row__index {
+    border-color: var(--nv-accent-green-pale);
+    color: var(--nv-accent-green-pale);
+}
+
+.rank-row--self .col-rank-count,
+.rank-row--self .col-rank-share { color: var(--nv-accent-green-pale); }
+.rank-row--self .col-rank-name { font-weight: 700; }
+
+.rank-row__divider {
+    text-align: center;
+    font-size: var(--nv-text-caption-sm);
+    color: var(--nv-stone);
+    padding: var(--nv-space-4) 0;
+}
+
+/* ============================================================
+   Recent Events — B의 alert-row(critical 강조) 유지 + A처럼
+   타임스탬프 컬럼 폭 고정으로 정렬 가독성 강화.
+   ============================================================ */
+.col-ev-time { flex-basis: 22%; color: var(--nv-mute); }
+.col-ev-badge { flex-basis: 20%; }
+
+.alert-row {
+    padding: var(--nv-space-8) var(--nv-space-8);
+    border-bottom: 1px solid var(--nv-hairline-strong);
+    border-left: 1px solid var(--nv-hairline-strong);
+}
+
+.alert-row--critical {
+    border-left: 2px solid var(--nv-error);
+    background-color: var(--nv-error-dim);
+}
+
+.alert-row__meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--nv-space-4);
+}
+
+.alert-row__timestamp {
+    font-size: var(--nv-text-caption-sm);
+}
+
+.alert-row__desc {
+    font-size: var(--nv-text-body-sm);
+    color: var(--nv-on-dark-mute);
+}

@@ -1,36 +1,73 @@
-/* CountryPopup(Tactical Modal) 전용 확장 — Docs/UI_Design.md 12절/13절.
-   tactical-panel/corner-cut/data-row 등 공용 규칙은 Tactical.uss가 담당하고, 이 파일은
-   화면 고유 배치(위치/폭/헤더 가로배치/닫기 버튼 크기)만 추가한다.
-   로드 순서: Theme.uss -> Tactical.uss -> CountryPopup.uss */
+/* CountryPopup(Tactical Modal) 전용 확장 - Bottom Sheet 전환(2026-07-16).
+   tactical-panel, corner-cut 등 공용 규칙은 Tactical.uss가 담당하고, 이 파일은 화면 고유 배치만
+   추가한다. 로드 순서: Theme.uss, Tactical.uss, CountryPopup.uss 순(CountryPopup.uxml 참고)
+
+   설계 원칙: NVIDIA 디자인 시스템의 구조 규칙(항상 얇은 헤어라인 1px, 둥근 모서리 최소화,
+   그림자 없음, 단일 액센트를 아껴 쓰는 절제)을 이 프로젝트의 기존 Tactical 토큰(Theme.uss의
+   color-accent-glow 계열, color-status 계열, radius 계열)에 그대로 얹었다. 새 브랜드 색(#76b900 등)을
+   이 파일에 새로 들여오지 않는다. 이유: color-accent-glow(민트그린)가 이미 HUD, UpgradeTree,
+   다른 모든 tactical-panel 화면의 유일한 구조색으로 고정돼 있어(Docs DESIGN.md 구조용 발광색
+   축), 이 파일에만 다른 그린을 새로 쓰면 같은 화면 생태계 안에서 두 개의 그린이 충돌한다.
+   반경도 문서상의 2px 절제 원칙은 이 프로젝트의 radius-sm(3px, 코너컷 없는 판독창 계열
+   전용, Docs DESIGN.md Spacing System 참고)이 이미 같은 역할을 하므로 그 토큰을 그대로 쓴다.
+
+   제거: popup-donut-row, popup-donut, popup-donut-legend 계열 - CountryPopupController.cs가
+   더 이상 도넛 차트를 그리지 않으므로(Step 3, 2026-07-16) 대응하는 스타일도 전부 삭제했다.
+*/
 
 .popup-root {
     position: absolute;
-    left: 50%;
-    top: 16%; /* 국가 대시보드 확장(Step 78/79)으로 도넛+범례+행 다수가 늘어나 패널이 길어진 만큼,
-                 1440×3120 세로 화면에서 하단이 잘리지 않도록 기존 30%에서 위로 올림 */
-    width: 340px; /* 320px는 인구/공항·항구·국경처럼 긴 값에서 여유가 없어 340px로 소폭 확대
-                     (조사 결과: Docs/QA_Checklist.md 참고) — 세로 1440px 폭 기준 화면비 문제 없음 */
-    margin-left: -170px;
-    background-color: var(--color-bg-panel);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 45%; /* "지도는 항상 보인다" 원칙의 안전판 — 8칸 그리드+헤더+버튼의 실제 콘텐츠
+                        높이는 이보다 한참 작지만(자연 높이로 이미 화면 절반을 넘지 않음), 텍스트가
+                        길어지는 예외 상황에도 지도 영역이 55% 밑으로 줄지 않도록 상한을 건다. */
+    background-color: var(--color-bg-panel-strong); /* 지도 위에 얹히므로 배경이 비쳐 보이면 안 됨 */
     padding: var(--space-lg);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
-       않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
+       않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지, 기존 규칙 유지). */
 }
 
-/* modal-title(국가명) + modal-close(닫기)를 한 줄에 배치 — tactical-panel__header 기본값은
-   세로 스택이라 이 화면에서만 가로 배치로 확장한다. */
+/* ============================================================
+   Header — 국기 + (국가명/대륙) + 닫기 버튼, 한 줄 가로 배치.
+   ============================================================ */
 .popup-header {
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
 }
 
-/* Button System: Secondary(Docs/DESIGN.md) — background/border/radius를 명시하지 않으면
-   Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
-   패턴, 2026-07-14 수정). */
+.popup-flag {
+    width: 32px;
+    height: 22px;
+    margin-right: var(--space-sm);
+    flex-shrink: 0;
+    border-width: 1px;
+    border-color: var(--color-border);
+    background-color: var(--color-surface); /* 텍스처 로드 전/실패 시 빈 사각형으로 보이도록 */
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.popup-header__titles {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0; /* Tactical.uss .data-value와 동일한 이유 — 좁아질 때 강제 오버플로우 방지 */
+    margin-right: var(--space-sm);
+}
+
+.popup-continent {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-caption);
+    margin-top: 2px;
+}
+
+/* Button System: Secondary(Docs/DESIGN.md) — 닫기/취소 계열. 헤더 아이콘 버튼이라 28px보다
+   살짝 키워 탭 정확도를 확보(모바일 세로 요구사항). */
 .popup-close {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     flex-shrink: 0;
     border-width: var(--stroke-hairline);
@@ -40,81 +77,75 @@
     color: var(--color-text-primary);
 }
 
-/* 확인/취소 등 액션 버튼 슬롯 — CountryPopup은 닫기가 헤더로 옮겨가 지금은 비어있다(안 보임).
-   향후 다른 Tactical Modal 소비자(이벤트 상세/설정/확인창)를 위한 공용 배치 규칙만 미리 둔다. */
-.modal-footer {
+/* ============================================================
+   Body — quick-stat-grid: 8개 핵심 지표를 2열로 배치(5초 스캔용).
+   ============================================================ */
+.quick-stat-grid {
     flex-direction: row;
-    justify-content: flex-end;
-    margin-top: var(--space-sm);
+    flex-wrap: wrap;
+    margin-top: var(--space-md);
 }
 
-/* 감염 상태 도넛 차트 + 범례 — Docs/CountryStatus_Dashboard_Investigation.md 3절 1차 구현분.
-   data-row 목록(modal-rows) 위, 헤더 바로 아래 배치해 "이 나라 지금 상태"를 텍스트보다 먼저
-   보여준다. 구분선(border-bottom)은 data-row와 동일한 --color-grid-line 톤을 그대로 써서
-   아래 data-row 목록과 시각적으로 이어지게 한다. */
-.popup-donut-row {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: var(--space-sm);
-    padding-bottom: var(--space-sm);
-    border-bottom-width: 1px;
-    border-bottom-color: var(--color-grid-line);
+.quick-stat-cell {
+    width: 50%;
+    padding: var(--space-xs) var(--space-sm);
+    border-width: 1px;
+    border-color: var(--color-grid-line);
 }
 
-/* CountryDonutChart.cs가 이 엘리먼트에 generateVisualContent로 직접 그린다 — 크기는
-   여기서 고정하고 C# 쪽은 contentRect를 읽어 그 크기에 맞춰 그린다(HudSparkline과 동일 계약). */
-.popup-donut {
-    width: 96px;
-    height: 96px;
-    flex-shrink: 0;
-    margin-right: var(--space-md);
-}
-
-.popup-donut-legend {
-    flex-direction: column;
-    flex-grow: 1;
-    min-width: 0;
-}
-
-.popup-donut-legend__row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2px 0;
-}
-
-.popup-donut-legend__label-group {
-    flex-direction: row;
-    align-items: center;
-    min-width: 0;
-}
-
-/* news-entry-dot(Hud.uss)과 동일한 "색상 원형 칩" 언어 재사용 — 범례 색과 도넛 조각 색이
-   항상 같은 순서(건강/감염/사망)로 매핑되도록 CountryPopupController가 순서를 고정한다. */
-.popup-donut-legend__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-right: var(--space-xs);
-    flex-shrink: 0;
-}
-
-.popup-donut-legend__dot--healthy  { background-color: var(--color-status-info); }
-.popup-donut-legend__dot--infected { background-color: var(--color-status-infected); }
-.popup-donut-legend__dot--dead     { background-color: var(--color-status-dead); }
-
-.popup-donut-legend__label {
+.quick-stat-cell__label {
     color: var(--color-text-tertiary);
     font-size: var(--font-size-xs);
     letter-spacing: var(--tracking-label);
 }
 
-.popup-donut-legend__value {
+.quick-stat-cell__value {
     color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     -unity-font-style: bold;
     letter-spacing: var(--tracking-label);
+    margin-top: 2px;
     flex-shrink: 1;
     min-width: 0;
-    -unity-text-align: upper-right;
+    white-space: normal;
+}
+
+/* badge-tag — 공항/항만/의료/정부대응처럼 값이 아니라 "등급"인 필드용 칩.
+   quick-stat-cell__value 위에 얹는 추가 클래스(UXML: class="quick-stat-cell__value badge-tag"). */
+.badge-tag {
+    align-self: flex-start;
+    padding: 2px var(--space-xs);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm); /* 코너컷 없는 판독창 계열 — Docs/DESIGN.md 규칙대로 sm 유지 */
+}
+
+/* severity 모드파이어 — CountryPopupController.ApplySeverityClass()/DevValueClass()가 실제로
+   붙이는 4개 클래스명과 정확히 일치해야 한다(컨트롤러는 이번 작업에서 수정하지 않음). 색상은
+   Theme.uss --color-status-*(감염/사망/위험/정보, "정보/건강" 의미 포함)를 그대로 매핑 — 이
+   축의 의미를 재정의하지 않는다(Docs/DESIGN.md Status Semantics 축 분리 원칙). */
+.badge-tag--success { color: var(--color-status-info); border-color: var(--color-status-info); }
+.badge-tag--warning  { color: var(--color-status-infected); border-color: var(--color-status-infected); }
+.badge-tag--danger   { color: var(--color-status-dead); border-color: var(--color-status-dead); }
+.badge-tag--info     { color: var(--color-text-info); border-color: var(--color-text-info); }
+
+/* ============================================================
+   Footer — 상세보기(Primary Button, Docs/DESIGN.md Button System).
+   닫기는 헤더로 이미 옮겨갔으므로 이 자리엔 상세보기 하나만 전체 폭으로 배치.
+   ============================================================ */
+.modal-footer {
+    margin-top: var(--space-md);
+}
+
+.popup-detail-button {
+    width: 100%;
+    height: var(--touch-target-min);
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-accent-glow-soft);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
 }

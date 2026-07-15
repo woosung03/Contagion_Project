@@ -348,6 +348,23 @@ namespace Contagion.UI
             if (_root != null) _root.style.display = DisplayStyle.None;
         }
 
+        /// <summary>CountryPopup(Bottom Sheet)의 "상세 보기" 버튼 진입점 — Show()로 패널을 연 뒤,
+        /// 해당 국가가 속한 대륙 아코디언만 펼친다(48개국 목록 재구성/자동 스크롤/행 강조는 하지
+        /// 않음 — 이번 작업 범위 밖). 기존 대륙 펼침 재료(ContinentOf/_continentExpanded/
+        /// ApplyContinentExpandedState)를 그대로 재사용한다.</summary>
+        public void FocusCountry(Country country)
+        {
+            Show();
+
+            if (country == null) return;
+
+            string continent = ContinentOf(country);
+            if (!_continentExpanded.ContainsKey(continent)) return;
+
+            _continentExpanded[continent] = true;
+            ApplyContinentExpandedState(continent);
+        }
+
         // ------------------------------------------------------------
         // GLOBAL STATUS — 세계 상황 한 줄 평가
         // ------------------------------------------------------------

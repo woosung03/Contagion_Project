@@ -129,6 +129,12 @@ namespace Contagion.Managers
                 countryStatusPanelController.OnCountryRowSelected += HandleCountryRowSelected;
             }
 
+            if (countryPopupController != null)
+            {
+                countryPopupController.OnDetailRequested -= HandleCountryDetailRequested;
+                countryPopupController.OnDetailRequested += HandleCountryDetailRequested;
+            }
+
             if (rankingPanelController != null)
             {
                 rankingPanelController.OnCloseRequested -= HandleScreenCloseRequested;
@@ -183,6 +189,9 @@ namespace Contagion.Managers
                 countryStatusPanelController.OnCloseRequested -= HandleScreenCloseRequested;
                 countryStatusPanelController.OnCountryRowSelected -= HandleCountryRowSelected;
             }
+
+            if (countryPopupController != null)
+                countryPopupController.OnDetailRequested -= HandleCountryDetailRequested;
 
             if (rankingPanelController != null)
                 rankingPanelController.OnCloseRequested -= HandleScreenCloseRequested;
@@ -334,6 +343,16 @@ namespace Contagion.Managers
         private void HandleCountryRowSelected(Country country)
         {
             countryPopupController?.ShowCountry(country);
+        }
+
+        /// <summary>CountryPopup(Bottom Sheet)의 "상세 보기" 버튼 — AppScreen 상태 머신
+        /// (TransitionTo)을 그대로 통해 CountryStatusPanel을 열고, 그 국가로 포커스한다.
+        /// WorldMapInputLock 등 화면 상태 관리는 TransitionTo/BuildScreenMap이 전담하므로
+        /// countryStatusPanelController.Show()를 직접 호출하지 않는다.</summary>
+        private void HandleCountryDetailRequested(Country country)
+        {
+            TransitionTo(AppScreen.GlobalStatus);
+            countryStatusPanelController.FocusCountry(country);
         }
 
         /// <summary>탭 클릭 — Research Database UI Shell(Commit 1)로 좌우 화살표를 대체한 상단 탭
