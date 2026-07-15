@@ -1,318 +1,179 @@
----
-version: 1
-name: Contagion-Project-Tactical-Design-System
-description: >
-  Contagion Project(전염병 주식회사 클론)의 디자인 시스템 문서. "감염병 통제센터 콘솔" —
-  DEFCON/Frostpunk류 군사·전술 HUD를 참고한 다크 캔버스 + 발광 헤어라인 + 코너컷 브래킷
-  시스템이다. HashiCorp DESIGN.md의 surface-lift-not-shadow 철학과 hairline-first 테두리
-  규칙을 뼈대로 삼고, Binance의 dense data-row 패턴과 status color semantics, ClickHouse의
-  key:value 스펙 테이블 패턴을 선택적으로 얹었다. 새로운 철학이 아니라 이미 HUD(Hud.uss)와
-  UpgradeTree(UpgradeTree.uss)에서 검증되어 Tactical.uss로 승격된 토큰·컴포넌트를 그대로
-  문서화한 것이다.
+# Contagion Design System v2 (DRAFT)
 
-source_of_truth:
-  - Assets/UI/Theme.uss   # 색상·간격·폰트·트랜지션 토큰(:root)
-  - Assets/UI/Tactical.uss  # 화면 공용으로 승격된 tactical-panel/corner-cut/data-row
-  - Assets/UI/Hud.uss     # resource-strip/stat-chip/population-bar/graph-panel 등 HUD 구현
-  - Assets/UI/UpgradeTree.uss  # tree-node 4상태/detail-panel(연구 분석 콘솔) 구현
+> **이 문서의 지위**: 이것은 초안(DRAFT)이다. `Docs/DESIGN.md`(현재 Source of Truth)를 대체하지
+> 않았다 — 검토 후 승인되면 `Docs/DESIGN.md`를 이 문서 내용으로 교체하는 별도 작업이 필요하다.
+> 이 문서는 철학 문서가 아니라 **구현 명세서**다. "적절히"/"상황에 따라"/"권장" 같은 표현은
+> 의도적으로 배제했다 — 모든 규칙은 수치·표·계약으로 표현한다.
 
-colors:
-  canvas: "rgba(8, 8, 16, 0.97)"            # --color-bg-root
-  panel: "rgba(15, 15, 25, 0.95)"            # --color-bg-panel
-  panel-strong: "rgba(15, 15, 25, 0.97)"     # --color-bg-panel-strong
-  panel-alt: "rgba(10, 10, 20, 0.92)"        # --color-bg-panel-alt
-  scrim-strong: "rgba(0, 0, 0, 0.75)"        # --color-bg-scrim-strong
-  scrim-soft: "rgba(0, 0, 0, 0.55)"          # --color-bg-scrim-soft
-  surface: "rgba(255, 255, 255, 0.08)"       # --color-surface
-  surface-soft: "rgba(255, 255, 255, 0.06)"  # --color-surface-soft
-  surface-selected: "rgba(255, 210, 90, 0.12)" # --color-surface-selected
-  border: "rgba(255, 255, 255, 0.15)"        # --color-border
-  border-selected: "rgb(255, 210, 90)"       # --color-border-selected
-  text-primary: "rgb(255, 255, 255)"
-  text-secondary: "rgb(210, 210, 210)"
-  text-tertiary: "rgb(180, 180, 180)"
-  text-info: "rgb(180, 220, 255)"
-  brand-dna: "rgb(120, 220, 140)"            # --color-brand-dna
-  brand-gold: "rgb(255, 210, 90)"            # --color-brand-gold
-  brand-premium: "rgb(120, 80, 200)"         # --color-brand-premium
-  status-infected: "rgb(255, 170, 90)"
-  status-dead: "rgb(220, 90, 90)"
-  status-danger: "rgb(255, 140, 120)"
-  status-info: "rgb(140, 210, 255)"
-  node-transmission: "rgba(120, 190, 255, 0.4)"
-  node-symptom: "rgba(255, 140, 100, 0.4)"
-  node-ability: "rgba(200, 140, 255, 0.4)"
-  accent-glow: "rgb(150, 255, 185)"          # --color-accent-glow (구조용 발광색)
-  accent-glow-soft: "rgba(150, 255, 185, 0.35)"
-  grid-line: "rgba(150, 255, 185, 0.12)"
-
-typography:
-  scale: [13, 14, 16, 18, 20, 24, 26, 32, 40]  # --font-size-xs ~ --font-size-hero
-  tracking-caption: 1px
-  tracking-label: 0.5px
-  family: "프로젝트 기본 폰트(시스템/한글 지원 폰트) 단일 사용 — 별도 display/mono 서체 없음"
-
-spacing:
-  scale: [4, 8, 12, 16, 20, 24]   # --space-xs ~ --space-xxl
-  radius: [0, 3, 6, 8]            # tactical-panel(0) / --radius-sm(3) / --radius-md(6) / --radius-lg(8)
-  touch-target-min: 48px
-
-components:
-  tactical-panel: { border: 1px accent-glow-soft, radius: 0 }
-  corner-cut: { size: "13x2px", color: accent-glow, variants: [tl, tr, bl, br] }
-  data-row: { border-bottom: 1px grid-line, layout: "label(left) : value(right)" }
-  stat-chip: { size: "6x6px", color: accent-glow }
-  world-status-frame: { border: 1px accent-glow-soft, radius: radius-sm }
-  population-bar: { track-border: 1px accent-glow-soft, segments: [healthy, infected, dead] }
-  graph-frame: { size: "104x52px", border: 1px accent-glow-soft, baseline: accent-glow-soft }
-  tree-node: { border-left: 4px category-color, state-border: locked/available/active/maxed }
 ---
 
-> **문서 역할 안내**: 이 문서는 **디자인 시스템 문서**다. 화면별 배치·와이어프레임·구현
-> 우선순위는 `Docs/UI_Design.md`(화면 설계 문서)에 있다. 이 문서는 오직 (1) 디자인 토큰,
-> (2) 컴포넌트 규칙, (3) Do/Don't만 다루며, MainMenu·CountrySelect·EndingScreen 같은
-> 화면 단위 설계는 여기 쓰지 않는다. 두 문서가 충돌하면 **토큰 값은 이 문서, 화면 배치는
-> UI_Design.md**가 우선한다.
+## 0. Document Contract
 
-## Design Principles
+**목적**: 이 문서 하나만 읽고 HUD/CountryPopup/CountryStatus/UpgradeTree/Ranking/MainMenu/
+CountrySelect 및 향후 신규 화면을 동일한 품질·스타일로 구현할 수 있어야 한다.
 
-1. **판독 우선(Readout-first)** — 장식보다 데이터 가독성이 항상 위에 있다. `corner-cut`은
-   배경 도형에 영향을 주지 않는 순수 오버레이 장식이고(`position: absolute`, 자식 요소일
-   뿐), 레이아웃의 실제 최소 단위는 언제나 `data-row`(라벨:값 판독 행)다. 새 화면·새 패널을
-   설계할 때 "이 정보가 몇 개의 data-row/stat-chip으로 표현되는가"를 먼저 정하고, 장식은
-   그 위에 얹는다.
-2. **항상 다크 캔버스(Always-dark canvas)** — HashiCorp·ClickHouse처럼 라이트모드 파생이
-   없다. `--color-bg-root`(rgba(8,8,16,0.97))가 모든 화면의 바닥이며, 어떤 화면도 밝은
-   캔버스로 전환되지 않는다.
-3. **Hairline-first, No shadow** — UI Toolkit(USS)은 `box-shadow`를 지원하지 않는다(코드베이스
-   위키 `css-to-uss-support.md` 확인 사항). 이는 제약이 아니라 시스템의 근간이다 —
-   위계는 **테두리 유무·굵기·발광색**과 **배경 alpha 단계**로만 표현한다
-   (HashiCorp의 "surface lift, never shadow" 그대로 채택).
-4. **색상 축 분리(Color-axis separation)** — 브랜드 악센트(DNA그린/골드/프리미엄퍼플),
-   severity(감염/사망/위험/정보), 업그레이드 카테고리(전파/증상/능력), 구조용 발광색
-   (accent-glow)은 서로 다른 4개의 축이다. 한 축의 색을 다른 축의 의미로 재사용하지 않는다.
-5. **각짐(Angularity)** — `tactical-panel`은 `border-radius: 0`으로 고정, `corner-cut`은
-   45°/-45° 대각선 틱이다. pill 모양·둥근 카드는 이 시스템에 없다(브리핑룸 톤의
-   `country-row`/`pathogen-card` 같은 메뉴류 예외는 `UI_Design.md` 화면 설계 재량이며,
-   HUD/UpgradeTree 계열 "전술 디스플레이"에는 적용하지 않는다).
-6. **밀도와 절제(Density with restraint)** — 좁은 세로 모바일 폭(1440×3120 기준)에서
-   격자선·코너컷은 항상 얇게(1~2px) 유지하고, 판독 텍스트 크기는 화면 성격에 따라
-   차등한다(HUD는 압축된 `font-size-xs`, 메뉴류는 기존 크기 유지). 화면 전체를 HUD처럼
-   극단적으로 압축하지 않는다.
+**Source of Truth 정의**:
+- 이 문서(`Docs/DESIGN.md`, 승인 후)가 디자인 토큰·컴포넌트 계약·Do/Don't의 유일한 정본이다.
+- 실제 구현은 `Assets/UI/Theme.uss`(토큰)와 `Assets/UI/Tactical.uss`(공용 컴포넌트)가 담당하며,
+  두 파일의 값은 반드시 이 문서와 1:1로 일치해야 한다. 불일치가 발견되면 **이 문서가 아니라
+  코드를 문서에 맞게 고친다**(코드가 어쩌다 그렇게 됐다면 그건 버그다).
+- 화면별 `.uss`(Hud.uss, CountryPopup.uss 등)는 이 문서의 컴포넌트 계약을 소비만 한다 — 화면
+  전용 파일에서 새 색상 토큰, 새 radius 값, 새 stroke 굵기를 도입하지 않는다.
 
-## Visual Identity
+**문서 우선순위**: 토큰 값 충돌 시 이 문서가 화면별 설계 문서(`Docs/UI_Design.md` 등)보다
+항상 우선한다. 화면 배치/와이어프레임은 이 문서 범위 밖이다.
 
-정체성은 한 문장으로 "**감염병 통제센터 콘솔**"이다 — DEFCON의 전술 지도, Frostpunk의
-생존 관리 HUD 계열 참고. 시그니처 요소 5가지:
+**해석 규칙**: 이 문서에 없는 수치가 필요하면 새로 화면에서 정하지 않는다 — 이 문서에
+항목을 먼저 추가한 뒤 구현한다.
 
-- **코너컷(`corner-cut`)** — 패널 네 귀퉁이에 발광색 대각선 틱을 얹어 "각진 모서리"
-  인상을 만드는 장치. clip-path/mask 미지원의 대체재이자 이 시스템의 가장 눈에 띄는
-  지문(fingerprint)이다.
-- **발광 헤어라인(`accent-glow` / `accent-glow-soft`)** — 모든 패널·구분선·판독 프레임의
-  테두리 색. ClickHouse의 "단일 브랜드 전압" 개념과 같되, 콘텐츠색이 아니라 **구조 전용
-  색**이라는 점이 다르다.
-- **좌측 accent-bar(4px)** — 카테고리 식별을 전체 테두리 대신 얇은 좌측 바로 압축한 밀도
-  절약형 장치(`tree-node`, 향후 `country-row` 등에서 재사용).
-- **색상 사각 칩(`stat-chip`)** — 아이콘 폰트 글리프가 실기기에서 검증되지 않은 리스크를
-  피하기 위한 대체 언어. 6×6px 색상 사각형 + 텍스트 라벨 조합.
-- **영문 대문자 캡션(`tactical-caption` / `*__caption`)** — `TRANS-001`, `STATUS: ACTIVE`
-  류의 판독 코드 톤. 별도 모노스페이스 서체 없이 자간(`tracking-caption`)과 굵기만으로
-  "기술적" 인상을 만든다.
+---
 
-**참고 계보**: HashiCorp(surface ladder + hairline-only elevation) · Binance(색상으로
-2분화된 dense data row) · ClickHouse(key:value 스펙 테이블 밀도) — 세 시스템의 철학을
-선택적으로 흡수했을 뿐, 브랜드 악센트 자체는 늘리지 않는다. HashiCorp가 제품마다 새
-악센트 색을 추가하는 것과 달리, 이 시스템은 **3개의 브랜드 색(DNA그린/골드/프리미엄퍼플)
-으로 고정**하고 그 이상 늘리지 않는다.
+## 1. Design Principles
 
-## UI Density Modes
+1. **항상 다크(Always-Dark)** — 라이트모드 파생 없음. 모든 화면의 바닥은 `--color-bg-root`
+   계열이다.
+2. **각짐 우선(Angularity-first)** — 기본 radius는 0이다. 예외는 5절(Radius Rules)에 정확히
+   3개만 등재되며, 그 외 신규 radius 도입 금지.
+3. **헤어라인, 그림자 없음** — USS는 `box-shadow`를 지원하지 않는다(엔진 제약). 위계는 배경
+   alpha 단계(2절 Surface Ladder)와 테두리 굵기(6절 Stroke System)로만 표현한다.
+4. **4색 축 분리(Color-Axis Separation)** — 브랜드/Severity/노드카테고리/구조발광색은 서로
+   다른 4개의 독립 축이다. 한 축의 색을 다른 축의 의미로 재사용하지 않는다(자세한 규칙 2절).
+5. **판독 우선(Readout-first)** — 신규 수치 표시는 항상 14절(Data Row System) 또는
+   13절(Badge System)로 표현한다. 서술형 문단 텍스트로 되돌리지 않는다.
+6. **모바일 세로 고정** — 참조 해상도 1440×3120(19.5:9), 가로 모드 미지원. 터치 타겟 최소
+   48px(8절/9절에서 정확히 규정).
+7. **엔진 제약이 곧 규칙이다** — `box-shadow`/`clip-path`/`mask`/`background-repeat`/
+   `:last-child` 미지원은 "제약"이 아니라 이 시스템의 미학적 근거다. 코너컷·헤어라인·정적
+   라인 배치·"옅은 색이라 마지막 줄이 남아도 무방"이 그 대응책이며, 신규 컴포넌트 설계 시
+   이 4가지를 요구하는 방식을 먼저 배제한다.
 
-> **UI Design System Audit(감사) 결론**: 이 프로젝트에 "Gameplay UI"와 "Preparation UI"라는
-> 두 개의 분리된 디자인 시스템은 존재하지 않는다. 실제로는 **하나의 Tactical Design System**
-> (이 문서의 Color System/Typography/Stroke System/Surface Hierarchy/Component
-> Library/Button System 전부)을 모든 화면이 공유하며, 화면마다 다르게 느껴지는 이유는
-> 시스템이 달라서가 아니라 **정보 밀도 프리셋(Density Preset)** 이 다르기 때문이다. 즉
-> 화면을 고를 때 "이 화면은 어떤 디자인 시스템을 쓰는가"를 판단할 필요는 없다 — 시스템은
-> 항상 이 문서 하나다. 판단해야 할 것은 "이 화면이 Layer A/B/C 중 어디에 속하는가" 뿐이다.
-> 새 색상 체계·새 Button System·새 Stroke System·새 Corner Rule을 화면별로 만들지 않는다
-> — 아래 3개 레이어는 전부 이 문서에 이미 정의된 토큰·컴포넌트만 재사용하며, 차이는 오직
-> 폰트 스케일 선택과 정보 밀도(행 수·문단 허용 여부)뿐이다.
+---
 
-### Layer A — Tactical Readout Mode
+## 2. Color System
 
-- **목적**: 실시간으로 갱신되는 데이터를 빠르게 판독하게 한다 — "Global Surveillance
-  Center / Pandemic Monitoring Console" 컨셉.
-- **사용 화면**: HUD, Country Dock(HUD 하위), Event/News Dock(HUD 하위), CountryPopup,
-  UpgradeTree, ResearchPopup, CountryStatusPanel, RankingPanel.
-- **폰트 스케일**: `--font-size-xs`(13px) ~ `--font-size-sm`(14px) 위주. 헤더/타이틀에
-  한해 `--font-size-lg`(20px)까지만 예외 허용(예: `tactical-panel__title`).
-- **정보 밀도**: 높음 — 화면 하나에 수십 개의 판독 행이 반복될 수 있음(예: CountryStatusPanel
-  48개국 목록, UpgradeTree 45노드).
-- **허용 컴포넌트**: `data-row`/`data-label`/`data-value`(핵심 단위), `tactical-panel` +
-  `corner-cut`(패널 수가 적을 때만 4개, 많으면 `accent-bar-row`로 대체), `stat-chip`,
-  `world-status-frame`, `graph-frame`, severity 4색, 노드 상태 4색.
-- **금지 사항**: 서술형 문단 텍스트(항상 `data-row` 반복으로 분해), 리스트 행 단위의
-  코너컷(대신 좌측 accent bar), `--font-size-xl` 이상의 히어로 타이틀(판독 밀도를 깨뜨림).
+### 2.1 Brand Colors (고정 3색 — 늘리지 않는다)
 
-### Layer B — Briefing Terminal Mode
+| 토큰 | 값 | 의미 | 재정의 금지 범위 |
+|---|---|---|---|
+| `--color-brand-dna` | `rgb(120, 220, 140)` | 병원체 DNA/치료제 — 플레이어 자원 | severity·노드상태 축에 전용 금지 |
+| `--color-brand-gold` | `rgb(255, 210, 90)` | 강조/선택/화폐성 텍스트, 선택 테두리(`--color-border-selected`와 동일값) | 위와 동일 |
+| `--color-brand-premium` | `rgb(120, 80, 200)` | 프리미엄(광고 보상) 액션 전용 | 위와 동일 |
 
-- **목적**: 선택 이전 단계에서 여유 있게 설명하고 결정을 유도한다 — "Pathogen Briefing
-  Terminal / Global Deployment Terminal" 컨셉.
-- **사용 화면**: MainMenu, CountrySelect.
-- **폰트 스케일**: `--font-size-lg`(20px) ~ `--font-size-hero`(40px) 위주. 리스트 항목
-  (`pathogen-card`/`country-row`)의 메타 텍스트만 `--font-size-sm`까지 허용.
-- **정보 밀도**: 낮음 — 카드/행 수가 적거나(병원체 6종) 한 줄 요약 위주(국가 48행이라도
-  행당 정보는 1줄로 압축), 선택 후 상세 패널에서만 밀도가 일시적으로 올라간다(`data-row`
-  3~4줄).
-- **허용 컴포넌트**: `tactical-panel` + corner-cut(카드 수가 적으면 4개 전부),
-  `data-row`(상세 패널 한정), 서술형 설명 텍스트(문단 유지 허용 — `FlavorText`류),
-  영문 캡션 + 한글 타이틀 2줄 병기(`tracking-caption`), `pathogen-card--selected`/
-  `country-row--selected` 선택 강조.
-- **금지 사항**: 화면 전체를 HUD 수준(`font-size-xs`)으로 압축하지 않는다, 리스트 항목
-  1줄 요약을 억지로 `data-row` 다행으로 쪼개지 않는다(상세 패널에서만 분해).
+### 2.2 Severity Colors (국가 데이터 전용 4색 — 고정)
 
-### Layer C — Debrief Mode
+| 토큰 | 값 | 의미 |
+|---|---|---|
+| `--color-status-infected` | `rgb(255, 170, 90)` | 감염 |
+| `--color-status-dead` | `rgb(220, 90, 90)` | 사망 |
+| `--color-status-danger` | `rgb(255, 140, 120)` | 위험/경고 |
+| `--color-status-info` | `rgb(140, 210, 255)` | 정보/건강(양호 상태 포함) |
 
-- **목적**: 결과를 극적으로 보고하면서도 수치는 판독 가능하게 정리한다 — "Operation
-  Debrief Center" 컨셉.
-- **사용 화면**: EndingScreen.
-- **폰트 스케일**: 승/패 히어로 타이틀은 `--font-size-hero`(40px) 유지, 통계/스코어
-  패널 내부는 Layer A와 동일한 `data-row`(`--font-size-xs`/`sm`)로 전환.
-- **정보 밀도**: 혼합 — 상단은 낮음(히어로 타이틀 단독), 하단 통계·스코어 패널은
-  Layer A 수준으로 조밀.
-- **허용 컴포넌트**: 히어로 타이틀(그대로 유지, 캡션화 금지), `tactical-panel` +
-  corner-cut 4개(통계 패널, 스코어 패널 각각 1개), `data-row`(통계 항목),
-  `--color-brand-gold` 테두리 강조(최종 점수 패널 — MAXED 노드와 동일한 "완결" 신호 재사용).
-- **금지 사항**: 히어로 타이틀을 `data-row`로 대체하지 않는다(임팩트 손실), 통계 패널을
-  서술형 문단으로 되돌리지 않는다.
+**Do**: 국가 관련 신규 수치 UI(population-bar, status-row, distribution-item, badge-tag)는
+이 4색을 그대로 재사용한다.
+**Don't**: 노드 상태(2.4절), UI 크롬(대륙 헤더 등), 브랜드 강조에 이 4색을 쓰지 않는다.
 
-### 화면 → Density Mode 매핑 요약
+### 2.3 Node Category Colors (업그레이드 카테고리 3색, 40% 알파 고정)
 
-| 화면 | Density Mode |
-|---|---|
-| HUD / Country Dock / Event·News Dock | Tactical Readout Mode |
-| CountryPopup | Tactical Readout Mode |
-| UpgradeTree | Tactical Readout Mode |
-| ResearchPopup | Tactical Readout Mode |
-| CountryStatusPanel | Tactical Readout Mode |
-| RankingPanel | Tactical Readout Mode |
-| MainMenu | Briefing Terminal Mode |
-| CountrySelect | Briefing Terminal Mode |
-| EndingScreen | Debrief Mode |
+| 토큰 | 값 | 의미 |
+|---|---|---|
+| `--color-node-transmission` | `rgba(120, 190, 255, 0.4)` | 전파 계열 |
+| `--color-node-symptom` | `rgba(255, 140, 100, 0.4)` | 증상 계열 |
+| `--color-node-ability` | `rgba(200, 140, 255, 0.4)` | 능력 계열 |
 
-화면별 배치·와이어프레임 적용 방법은 `Docs/UI_Design.md`가 정본이다 — 이 문서는 각 Density
-Mode의 "무엇을 허용/금지하는가"만 정의하고, "이 화면에서 구체적으로 어떻게 배치하는가"는
-다루지 않는다.
+**적용 위치 고정**: 좌측 4px accent-bar(`border-left-width`)에만 사용한다. 카드 전체 배경에
+칠하지 않는다 — 2.5절 노드 상태 축과 위치를 분리해 같은 카드 안에서 두 축이 충돌하지 않게
+한다.
 
-## Color System
+### 2.4 노드 상태 축 (Severity와 별개 — 브랜드색 재사용)
 
-### 1. Canvas & Panel — 표면 계단 (배경)
+| 상태 | 텍스트/테두리 색 | 배경(있는 경우) |
+|---|---|---|
+| Locked | `--color-text-tertiary` | 없음, `opacity: 0.7` |
+| Available | `--color-accent-glow` | 없음 |
+| Active | `--color-brand-dna` | `rgba(120, 220, 140, 0.12)` |
+| Maxed | `--color-brand-gold` | `rgba(255, 210, 90, 0.10)` |
+
+### 2.5 구조용 발광색 (Structural Glow — 콘텐츠 색으로 사용 금지)
 
 | 토큰 | 값 | 용도 |
 |---|---|---|
-| `--color-bg-root` | rgba(8,8,16,0.97) | MainMenu/CountrySelect 등 전체화면 캔버스 |
-| `--color-bg-panel-alt` | rgba(10,10,20,0.92) | UpgradeTree 같은 전체화면 "패널형" 화면 |
-| `--color-bg-panel` | rgba(15,15,25,0.95) | 팝업/랭킹/Event Dock/Country Dock |
-| `--color-bg-panel-strong` | rgba(15,15,25,0.97) | 국가현황처럼 더 불투명해야 하는 패널 |
-| `--color-bg-scrim-strong` | rgba(0,0,0,0.75) | HUD 하단 바(population-bar/graph-panel/action-strip) |
-| `--color-bg-scrim-soft` | rgba(0,0,0,0.55) | HUD 상단 바(resource-strip)/뉴스피드 |
+| `--color-accent-glow` | `rgb(150, 255, 185)` | 패널 테두리, 코너컷, 캡션, 포커스 |
+| `--color-accent-glow-soft` | `rgba(150, 255, 185, 0.35)` | 약한 테두리(기본 tactical-panel 테두리) |
+| `--color-grid-line` | `rgba(150, 255, 185, 0.12)` | data-row 구분선, 격자선 |
 
-### 2. Surface & Border — 카드/행 표면
+### 2.6 Text Colors
 
 | 토큰 | 값 | 용도 |
 |---|---|---|
-| `--color-surface` | rgba(255,255,255,0.08) | tree-node, detail-panel 기본 배경 |
-| `--color-surface-soft` | rgba(255,255,255,0.06) | graph-frame, population-bar__track 배경 |
-| `--color-surface-selected` | rgba(255,210,90,0.12) | 선택된 카드/행 배경(금색 계열) |
-| `--color-border` | rgba(255,255,255,0.15) | 중립 테두리(비활성/기본) |
-| `--color-border-selected` | rgb(255,210,90) | 선택 강조(화면 전체에서 이 색 하나로 통일) |
-| `--color-surface-hover` / `--color-border-hover` | rgba(255,255,255,0.12) / 0.35 | 카드류 hover 트랜지션 타겟 |
+| `--color-text-primary` | `rgb(255, 255, 255)` | 헤드라인/강조 |
+| `--color-text-secondary` | `rgb(210, 210, 210)` | 값 텍스트 기본 |
+| `--color-text-tertiary` | `rgb(180, 180, 180)` | 라벨/캡션/잠금 상태 |
+| `--color-text-info` | `rgb(180, 220, 255)` | 정보성 텍스트(2.2절 `status-info`와 다른 토큰 — 혼동 금지) |
 
-### 3. Text
+### 2.7 Surface Ladder (배경 alpha 계단)
 
-`--color-text-primary`(백색, 헤드라인/강조) · `--color-text-secondary`(값 텍스트 기본) ·
-`--color-text-tertiary`(라벨/캡션/잠금 상태) · `--color-text-info`(청색 계열, 정보성 텍스트).
-
-### 4. 브랜드 악센트 — 자원/강조 의미 (3색 고정)
-
-| 토큰 | 색 | 의미 |
+| 토큰 | 값 | 사용처 |
 |---|---|---|
-| `--color-brand-dna` | rgb(120,220,140) 초록 | 병원체 DNA/치료제 — 플레이어 자원 |
-| `--color-brand-gold` | rgb(255,210,90) 금색 | 강조/선택/화폐성 텍스트 |
-| `--color-brand-premium` | rgb(120,80,200) 보라 | 프리미엄(광고 보상) 액션 전용 |
+| `--color-bg-root` | `rgba(8, 8, 16, 0.97)` | Fullscreen 화면 바닥(MainMenu/CountrySelect) |
+| `--color-bg-panel-alt` | `rgba(10, 10, 20, 0.92)` | Fullscreen "패널형" 화면(UpgradeTree) |
+| `--color-bg-panel` | `rgba(15, 15, 25, 0.95)` | Bottom Sheet — Compact(CountryPopup), 팝업류 |
+| `--color-bg-panel-strong` | `rgba(9, 9, 16, 1)` | Bottom Sheet — Extended(CountryStatus) 전용, 완전 불투명 |
+| `--color-bg-scrim` | `rgba(0, 0, 0, 0.85)` | 엔딩 스크림 |
+| `--color-bg-scrim-strong` | `rgba(0, 0, 0, 0.75)` | HUD 하단바(graph-panel/action-strip) |
+| `--color-bg-scrim-soft` | `rgba(0, 0, 0, 0.55)` | HUD 상단바(event-dock) — *실측: 실제로는 `--color-bg-panel` 사용 중, 3.x 정리 대상(18절 참고)* |
+| `--color-surface` | `rgba(255, 255, 255, 0.08)` | 카드/행 기본 배경(tree-node, pathogen-card 등) |
+| `--color-surface-soft` | `rgba(255, 255, 255, 0.06)` | 트랙/프레임 배경(population-bar__track 등) |
+| `--color-surface-selected` | `rgba(255, 210, 90, 0.12)` | 선택된 카드/행 배경 |
+| `--color-surface-hover` | `rgba(255, 255, 255, 0.12)` | hover 타겟(에디터/PC 확인용) |
 
-이 3색은 화면 전체에서 의미가 고정된다. HashiCorp가 제품마다 색을 추가하는 패턴을
-그대로 따르지 않는다 — 새 기능이 생겨도 이 3색 중 하나에 배정하거나, 배정할 수 없으면
-severity/카테고리 축을 쓴다.
+**Do**: 신규 패널은 위 8단계 중 하나를 반드시 선택한다. **Don't**: 중간 alpha 값을 임의로
+만들지 않는다.
 
-### 5. Severity — 국가 데이터 의미 (Binance 패턴 차용)
+---
 
-| 토큰 | 색 | 의미 |
+## 3. Typography
+
+폰트는 프로젝트 기본(시스템/한글 지원) 단일 서체를 쓴다 — 별도 display/mono 서체 도입 금지
+(한글 줄바꿈·자간 계산이 깨지는 리스크, 기존 검증 결론 유지).
+
+| 토큰 | font-size | weight | letter-spacing | usage |
+|---|---|---|---|---|
+| `--font-size-caption-2xs` | 9px | bold | 0.5px | badge-tag 최소 텍스트(CountryPopup) *[신규 등재 — 기존 하드코딩값을 토큰화]* |
+| `--font-size-caption-xs` | 10px | bold | 1px | world-status-frame__caption 등 초소형 유틸 라벨 *[신규 등재]* |
+| `--font-size-caption` | 11px | bold | 1px(`--tracking-caption`) | tactical-caption, lab-caption, section-caption, research-row__code *[신규 등재 — 4개 이상 화면에서 이미 반복 사용 중이던 값을 정식 토큰으로 승격]* |
+| `--font-size-xs` | 13px | bold | 0.5px(`--tracking-label`) | data-label/data-value, 판독 행 기본 크기 |
+| `--font-size-sm` | 14px | bold | 0.5px | stat-label, popup 값 텍스트 |
+| `--font-size-body` | 16px | regular | 0 | 일반 본문(그래프 라벨 등) |
+| `--font-size-md` | 18px | bold | 0 | status-row__name, hero-stat-tile__label |
+| `--font-size-lg` | 20px | bold | 0 | country-row__name, ranking-value |
+| `--font-size-xl` | 24px | bold | 0 | hero-stat-tile__value, upgrade-header__dna |
+| `--font-size-xxl` | 26px | bold | 0 | 예약(현재 미사용 확인 — 사용 전 이 문서 갱신 필수) |
+| `--font-size-display` | 32px | bold | 0 | mainmenu-title |
+| `--font-size-hero` | 40px | bold | 0 | 엔딩 판정 타이틀 |
+
+> **line-height는 이 문서에 포함하지 않는다.** 프로젝트 참고 위키
+> `codebase/wiki/unity-ui-toolkit/css-to-uss-support.md`(72~76행)에 `line-height: ❌`(미지원)로
+> 명시돼 있고, 실제 USS 11개 파일 전수 검색 결과 이 프로퍼티의 사용례가 0건이다. 지원되지
+> 않는 프로퍼티를 규정하면 그대로 구현 시도 시 실패하므로, weight/letter-spacing까지만
+> 규정하고 line-height는 컬럼 자체를 제거한다. 줄간격 표현이 필요하면 UI Toolkit이 지원하는
+> `-unity-paragraph-spacing` 등 대체 프로퍼티의 지원 여부를 먼저 확인한 뒤 이 문서에 별도
+> 항목으로 추가한다.
+
+**레거시 예외(하드코딩, 신규 작업 금지) — 1:1 매핑표**:
+
+| 레거시 값 | 위치 | 대체 토큰 |
 |---|---|---|
-| `--color-status-infected` | rgb(255,170,90) | 감염 |
-| `--color-status-dead` | rgb(220,90,90) | 사망 |
-| `--color-status-danger` | rgb(255,140,120) | 위험/경고 |
-| `--color-status-info` | rgb(140,210,255) | 정보/건강 |
+| `17px` | MainMenu `detail-panel__desc` | `--font-size-body`(16px) |
+| `19px` | MainMenu `mainmenu-subtitle` | `--font-size-lg`(20px) |
+| `21px` | MainMenu `pathogen-card__name` | `--font-size-lg`(20px) |
+| `22px` | MainMenu `detail-panel__title` | `--font-size-xl`(24px) |
 
-Binance의 `trading-up`(녹)/`trading-down`(적) 2색 상태 코딩을 국가 데이터 도메인에 맞게
-4색으로 확장한 것. **이 4색은 국가 데이터 전용 의미로 고정**되어 있으며(`population-bar`,
-`country-dock`, News 이벤트 dot 등), 노드 상태나 UI 크롬에는 쓰지 않는다.
+전부 토큰 미사용 하드코딩이다. 기존 화면은 그대로 두되(회귀 리스크), **신규 화면에서 이
+레거시 값을 복제하지 않는다** — 위 표의 대체 토큰만 쓴다.
 
-### 6. 업그레이드 카테고리 — 노드 정체성 (HashiCorp per-product 패턴 차용)
+---
 
-| 토큰 | 색(40% 알파) | 의미 |
-|---|---|---|
-| `--color-node-transmission` | rgba(120,190,255,0.4) 청 | 전파 계열 노드 |
-| `--color-node-symptom` | rgba(255,140,100,0.4) 주황 | 증상 계열 노드 |
-| `--color-node-ability` | rgba(200,140,255,0.4) 보라 | 능력 계열 노드 |
-
-HashiCorp가 Terraform/Vault/Waypoint마다 고유색을 쓰는 것과 같은 사고방식이나, 색은
-좌측 4px `accent-bar`에만 쓰고 카드 전체 배경에는 절대 칠하지 않는다 — 노드 **상태**
-색상(아래 7번)과 시각적으로 겹치지 않아야 하기 때문이다.
-
-### 7. 노드 상태 — 4단계 (severity와 별개 축)
-
-| 토큰(클래스) | 색 | 의미 |
-|---|---|---|
-| `.tree-node--locked` | border: `--color-border`, opacity 0.7 | 잠김 |
-| `.tree-node--available` | border: `accent-glow-soft` | 연구 가능 |
-| `.tree-node--active` | border: `accent-glow`(2px), bg: rgba(120,220,140,0.12) | 연구 중/활성 |
-| `.tree-node--maxed` | border: `brand-gold`(2px), bg: rgba(255,210,90,0.10) | 완료/최대 |
-
-카테고리색(6번)은 **좌측 바**, 상태색(7번)은 **테두리 전체+배경**으로 표현 위치를
-분리해 같은 카드 안에서 두 축이 시각적으로 충돌하지 않게 한다.
-
-### 8. 구조용 발광색 (Tactical Chrome)
-
-`--color-accent-glow`(rgb(150,255,185)) / `--color-accent-glow-soft`(35% 알파) /
-`--color-grid-line`(12% 알파) — 패널 테두리, 코너컷, 캡션, 격자선 전용. **콘텐츠 색이
-아니다** — 이 색이 데이터 값에 쓰이면 severity 축과 혼동되므로 금지.
-
-## Typography
-
-이 시스템은 별도의 display 서체나 모노스페이스 서체를 쓰지 않는다(한글 표시가 필수라
-모노스페이스 폰트를 도입하면 자간 계산이 깨지고 실기기 검증 리스크가 커진다 — ClickHouse의
-JetBrains Mono 스펙 테이블 패턴은 **서체가 아니라 레이아웃 구조**만 차용했다).
-
-| 토큰 | 크기 | 용도 |
-|---|---|---|
-| `--font-size-xs` | 13px | data-label/data-value, tree-node 캡션, stat-chip 라벨 |
-| `--font-size-sm` | 14px | stat-label, country-dock__name |
-| `--font-size-body` | 16px | graph 라벨 |
-| `--font-size-md` | 18px | 일반 본문 |
-| `--font-size-lg` | 20px | category-header, arrow 버튼 |
-| `--font-size-xl` | 24px | upgrade-header 타이틀/DNA 표시 |
-| `--font-size-xxl` | 26px | (예약) |
-| `--font-size-display` | 32px | (예약) |
-| `--font-size-hero` | 40px | 엔딩 등 최종 판정 강조 |
-
-**"기술적" 톤을 만드는 실제 수단**은 서체가 아니라 다음 3가지 조합이다:
-1. `letter-spacing: var(--tracking-caption)`(1px) — 영문 대문자 캡션/코드(`TRANS-001`).
-2. `letter-spacing: var(--tracking-label)`(0.5px) — data-label/data-value.
-3. `-unity-font-style: bold` + 작은 크기(`font-size-xs`) — 라벨과 값 모두 볼드로 통일해
-   서체 대비 대신 굵기로 판독 텍스트임을 표시.
-
-## Spacing System
+## 4. Spacing System — 4px Base Grid
 
 | 토큰 | 값 |
 |---|---|
@@ -322,301 +183,356 @@ JetBrains Mono 스펙 테이블 패턴은 **서체가 아니라 레이아웃 구
 | `--space-lg` | 16px |
 | `--space-xl` | 20px |
 | `--space-xxl` | 24px |
-| `--touch-target-min` | 48px (모바일 터치 최소 높이) |
 
-**모서리 반경** — `--radius-sm`(3px)/`--radius-md`(6px)/`--radius-lg`(8px) 스케일이
-존재하지만, `tactical-panel`/`corner-cut`이 붙는 모든 "전술 디스플레이" 패널은
-**항상 `border-radius: 0`**으로 이 스케일을 오버라이드한다 — 각짐(Angularity) 원칙이
-반경 스케일보다 우선한다. 반경 스케일은 `population-bar__track`, `graph-frame`,
-`world-status-frame`처럼 코너컷이 없는 "판독창" 계열에만 적용된다.
+**베이스는 4px다(8px 아님)** — 6단계 전부 4의 배수(4/8/12/16/20/24)이며, `20px`은 8의 배수가
+아니므로 과거 문서의 "8px 베이스" 서술은 폐기한다.
 
-## Stroke System
+**Do**: 패딩/마진은 항상 이 6개 값 중 하나를 쓴다. **Don't**: `14px`, `18px` 같은 임의 여백을
+만들지 않는다(단, 아이콘/작은 장식 요소의 `2px`/`3px`/`6px` 같은 미세 조정은 예외로
+허용한다 — data-row 하단 여백 2px, corner-cut 오프셋 등 이미 실측 확인된 관행).
 
-**"두께는 굵기가 아니라 의미다."** 같은 두께가 서로 다른 의미를 표현하면 안 된다 — 테두리를
-그릴 때는 항상 아래 5단계 중 하나를 선택하고, 임의의 중간값(예: 2.5px)을 만들지 않는다.
+---
 
-| 토큰 | 값 | 의미 | 용도 예시 |
+## 5. Radius Rules (현재 실사용 기준 재정의)
+
+과거 "3단계 스케일" 서술은 폐기한다. 실측 결과 각 토큰은 서로 다른 용도로 고정된 것이지
+"단계"가 아니다.
+
+| 토큰 | 값 | 용도 | 실사용 확인 |
 |---|---|---|---|
-| `--stroke-hairline` | 1px | 구조(기본 테두리) | `tactical-panel`, `data-row` 하단 구분선, `tree-node` 기본 테두리 |
-| `--stroke-active` | 2px | 진행 상태 | `tree-node--active`(연구 중) |
-| `--stroke-selected` | 3px | 선택 상태 | `country-row--selected`, `branch-row--selected` |
-| `--stroke-accent-bar` | 4px | 카테고리 강조(좌측 바) | `accent-bar-row`, `tree-node` 좌측 바 |
-| `--stroke-sub-accent` | 2px | 보조 강조(좌측 바, 격하) | `data-row--open`/`--closed` 좌측 바 |
+| `--radius-none`(암묵적 `0`) | 0px | **기본값.** tactical-panel, corner-cut 부착 패널, 모든 버튼, 모든 Modal/Bottom Sheet | 압도적 다수 |
+| `--radius-sm` | 3px | 코너컷이 없는 "판독 프레임" 계열 전용: population-bar__track, graph-frame, world-status-frame, branch-row, research-row, badge-tag | Hud.uss/UpgradeTree.uss/CountryPopup.uss 6곳 확인 |
+| `--radius-md` | 6px | **메뉴 카드 예외 전용.** `country-row`(MainMenu/CountrySelect 화면, 7절 Fullscreen 분류) 단 1곳 — 각짐 원칙(Design Principles 2)의 의도된 예외 | MainMenu.uss 1곳만 확인 |
+| `--radius-lg` | 8px | **재도입 금지.** `RankingPanel.uss`에서 `border-top-left/right-radius`로 실제 시도됐으나 코너컷과 충돌해 제거된 이력이 있다(해당 파일 주석에 기록) — "미사용"이 아니라 "시도 후 폐기됨". 코너컷이 붙는 어떤 패널에도 다시 쓰지 않는다 | RankingPanel.uss에 제거 이력 주석 확인, 현재 활성 사용처 없음 |
 
-**주의**: `--stroke-active`(2px, 전체 테두리)와 `--stroke-sub-accent`(2px, 좌측 바)는 값이
-같지만 **적용 위치가 다르다**. 전체 테두리(`border-width`) 자리에 2px를 쓸 때는 반드시
-"진행 상태"를 의미해야 하고, 좌측 바(`border-left-width`) 자리에 2px를 쓸 때는 "격하된
-accent bar"를 의미해야 한다 — 같은 숫자·다른 CSS 프로퍼티(전체 vs 좌측)로 두 의미를
-분리하며, 두 의미를 같은 프로퍼티 자리에서 혼용하지 않는다.
+**Do**: 새 패널/버튼/모달/Bottom Sheet는 항상 0. 코너컷 없는 판독 프레임만 `--radius-sm`.
+MainMenu/CountrySelect의 `country-row`(메뉴 카드)만 `--radius-md`.
+**Don't**: `--radius-lg`를 재도입하지 않는다(과거 시도 후 코너컷과 충돌해 제거된 이력 —
+위 표 참고). 임의의 radius 값(`2px`, `4px` 등)을 하드코딩하지 않는다 — `country-row__flag`의
+`2px` 하드코딩은 레거시 예외이며 신규 복제 금지.
 
-### Stroke Semantic Table
+---
 
-| 컴포넌트/상태 | 두께 | 역할 | 비고 |
+## 6. Stroke System — "두께는 굵기가 아니라 의미다"
+
+같은 두께가 서로 다른 의미를 표현하지 않는다. 항상 아래 5단계 중 하나를 선택한다.
+
+| 토큰 | 값 | 의미 | 실사용 예 |
 |---|---|---|---|
-| `tactical-panel` | 1px hairline | 구조 | |
-| `data-row` 하단 구분선 | 1px hairline | 구조 | |
-| `tree-node`(locked/available) | 1px hairline | 구조 | |
-| `tree-node--active` | 2px active | 진행 상태 | |
-| `tree-node--maxed` | 2px active(색: gold) | 진행 상태(완료) | |
-| `country-row--selected` | 3px selected | 선택 상태 | |
-| `branch-row--selected` | 3px selected | 선택 상태 | 기존 2px는 active와 혼동되어 수정 |
-| `accent-bar-row` / `tree-node` 좌측 바 | 4px accent-bar | 카테고리 강조 | |
-| `data-row--open`/`--closed` 좌측 바 | 2px sub-accent | 보조 이분 상태 | 기존 3px는 selected와 혼동되어 수정 |
-| `country-row`/`pathogen-card` 기본 테두리 | 2px(예외) | 메뉴카드 예외 | "브리핑룸 톤 메뉴류"(Design Principles 5번)로 이미 각짐 규칙에서 면제된 카드군. Stroke System 5단계에 억지로 맞추지 않는다 — 변경 시 MainMenu 6장+CountrySelect 48행 전체 시각 밀도가 바뀌므로 별도 검토 필요 |
+| `--stroke-hairline` | 1px | 구조(기본 테두리) | tactical-panel, data-row 하단선, research-row 기본 |
+| `--stroke-active` | 2px | 진행 상태(전체 테두리에만) | research-row--active/--maxed |
+| `--stroke-sub-accent` | 2px | 보조 이분 상태(좌측 바에만) | data-row--open/--closed |
+| `--stroke-selected` | 3px | 선택 상태 | research-row--selected, branch-row--selected, country-row--selected, pathogen-card--selected |
+| `--stroke-accent-bar` | 4px | 카테고리 강조(좌측 바) | tree-node/research-row 좌측 accent bar, status-row 좌측 severity bar |
 
-## Surface Hierarchy
+**주의**: `--stroke-active`(2px, `border-width`)와 `--stroke-sub-accent`(2px,
+`border-left-width`)는 값은 같지만 **적용 프로퍼티가 다르다** — 전체 테두리 자리의 2px는
+항상 "진행 상태", 좌측 바 자리의 2px는 항상 "보조 이분 상태"를 의미한다. 같은 프로퍼티
+자리에서 두 의미를 혼용하지 않는다.
 
-HashiCorp의 "surface lift, never shadow"를 그대로 채택하되, 회색 계단(charcoal ladder)
-대신 **알파값 계단 + 발광 테두리**로 구현한다. 5단계:
+---
 
-| 단계 | 배경 | 테두리 | 사용처 |
+## 7. Layout System — 화면 분류 4종
+
+| 분류 | 정의 | 해당 화면 |
+|---|---|---|
+| **Fullscreen** | 화면 전체를 차지하는 루트 캔버스. `--color-bg-root` 또는 `--color-bg-panel-alt` | MainMenu, CountrySelect, UpgradeTree, EndingScreen |
+| **Overlay Panel** | 화면 중앙에 뜨는 독립 모달(가장자리 비고정). `TacticalModalController` 상속 | ResearchPopup |
+| **Bottom Sheet** | 화면 하단에 고정 앵커, 지도/HUD를 완전히 가리지 않음(12절 참고) | CountryPopup(Compact), CountryStatusPanel·RankingPanel(Extended) |
+| **HUD Chrome** | Gameplay 화면에 상시 존재하는 크롬(도킹 패널 포함) | resource-strip, event-dock, population-bar, graph-panel, action-strip |
+
+신규 화면을 만들 때 반드시 이 4개 중 하나로 먼저 분류한 뒤 해당 절의 정확한 수치를 적용한다.
+분류 없이 임의 레이아웃을 만들지 않는다.
+
+---
+
+## 8. Panel System
+
+### `tactical-panel` (기본 패널 셸)
+
+| 속성 | 값 |
+|---|---|
+| `border-width` | 1px(`--stroke-hairline`) |
+| `border-color` | `--color-accent-glow-soft` |
+| `border-radius` | 0(고정, 5절 예외 미적용) |
+| 배경 | 지정하지 않음(맥락별 Surface Ladder에서 소비 측이 선택) |
+
+### `tactical-panel__header`
+
+| 속성 | 값 |
+|---|---|
+| `padding-bottom` | 3px |
+| `margin-bottom` | `--space-xs`(4px) |
+| `border-bottom-width` | 1px |
+| `border-bottom-color` | `--color-grid-line` |
+
+### Corner Cut(코너컷)
+
+| 속성 | 값 |
+|---|---|
+| 크기 | 13px × 2px |
+| 색상 | `--color-accent-glow` |
+| 위치(4종) | tl: `top:5px; left:-4px; rotate:45deg` / tr: `top:5px; right:-4px; rotate:-45deg` / bl: `bottom:5px; left:-4px; rotate:-45deg` / br: `bottom:5px; right:-4px; rotate:45deg` |
+| 부착 규칙 | 화면당 인스턴스 1~6개(적은 패널)에는 4개 전부. 수십 개 반복 리스트 행에는 부착 금지 — 대신 6절 `--stroke-accent-bar`(4px 좌측 바) 사용 |
+
+---
+
+## 9. Button System
+
+| 속성 | Primary | Secondary | Danger(예약) |
 |---|---|---|---|
-| 0. Canvas | `bg-root` / `bg-panel-alt` | 없음 | 전체화면 바닥 |
-| 1. Scrim bar | `bg-scrim-soft` / `bg-scrim-strong` | 상/하 1px `accent-glow-soft` | resource-strip, population-bar, graph-panel, action-strip — "떠있는 패널"이 아니라 화면에 고정된 크롬 바 |
-| 2. Docked panel | `bg-panel` / `bg-panel-strong` | 1px `accent-glow-soft`(전체) | event-dock, country-dock, tactical-panel, detail-panel |
-| 3. Card/row | `surface` / `surface-soft` | 1px `border`(중립) 또는 상태색 | tree-node, graph-frame, world-status-frame, population-bar__track |
-| 4. Selected/active emphasis | `surface-selected` 또는 상태별 rgba | 상태색 2px | tree-node--active/--maxed, border-selected 카드 |
+| `height` | `--touch-target-min`(48px) | 48px(단, 헤더 아이콘 버튼은 32px 예외 — 아래 참고) | 48px |
+| `border-width` | 1px | 1px(`--stroke-hairline`) | 1px |
+| `border-color` | `--color-accent-glow` | `--color-accent-glow` | `--color-status-danger` |
+| `border-radius` | 0 | 0 | 0 |
+| `background-color` | `--color-accent-glow-soft` (프리미엄 액션은 `--color-brand-premium`) | `--color-bg-panel` | `--color-bg-panel` |
+| `color` | `--color-text-primary` | `--color-text-primary` | `--color-status-danger` |
+| `:active` | `scale: 0.96 0.96`(색은 유지) | 동일 | 동일 |
+| `:disabled` | `opacity: 0.5` | 동일 | 동일 |
 
-규칙: **단계가 올라갈수록 배경 alpha가 진해지거나 테두리가 굵어질 뿐, 그림자는 절대
-추가하지 않는다.** 새 패널을 만들 때는 이 5단계 중 하나를 선택하고, 중간값을 임의로
-만들지 않는다.
+**헤더 아이콘 버튼 예외**: 팝업/패널 헤더의 닫기(✕) 버튼은 32×32px(Secondary 규격 상속,
+높이만 예외) — CountryPopup `popup-close`, CountryStatus `status-close-btn` 실측 기준.
 
-## Component Library
+**Fullscreen 판정 버튼 예외**: `EndingScreen`(Fullscreen/Debrief, 7절)의 재시작/부활 버튼은
+높이 56px(폭 180px 고정, Primary/Secondary 색상 규칙은 그대로 — `ending-button`은 Secondary
+배경+`--color-accent-glow` 테두리, `ending-button--revive`는 `--color-brand-premium` 배경).
+Fullscreen 판정 화면의 확정 액션에 한해 48px보다 큰 이 높이를 허용한다 — Bottom
+Sheet/Overlay Panel/HUD Chrome에서는 복제하지 않는다.
 
-화면 전용이 아닌, **재사용 가능한 시스템 컴포넌트**만 기록한다(화면 배치는
-`UI_Design.md`). 이미 `Tactical.uss`(공용) 또는 `Hud.uss`/`UpgradeTree.uss`(화면 로컬,
-2회 이상 재사용 시 `Tactical.uss`로 승격 예정)에 구현되어 있다.
+**Do**: `background-color`/`border`/`border-radius`를 항상 명시적으로 지정한다(미지정 시
+Unity 기본 회색 버튼이 노출되는 실패가 최소 5개 화면에서 반복 발생 — 20절 참고).
+**Don't**: 색이 있는 버튼(브랜드색 배경)에서 `:active` 시 배경색을 바꾸지 않는다 — `scale`만
+사용.
 
-### tactical-panel
-기본 패널 셸. `border: 1px accent-glow-soft`, `radius: 0`. `.tactical-panel__header`
-(하단 헤어라인 `grid-line`) + `.tactical-panel__title`(`accent-glow`, `tracking-caption`)
-조합으로 헤더를 구성한다.
+---
 
-### corner-cut
-`position: absolute` 대각선 틱 4종(`--tl/--tr/--bl/--br`, 13×2px, `accent-glow`,
-±45° 회전). `position: relative`인 부모(패널) 안에 자식으로 배치한다. 배경 도형에는
-영향을 주지 않는 순수 오버레이 — `picking-mode: Ignore`로 클릭을 통과시킨다.
+## 10. Card System
 
-### data-row / data-label / data-value — 판독 행 (Binance dense-row 차용)
-가장 기본이 되는 "라벨:값" 단위. `flex-direction: row; justify-content: space-between`,
-하단 1px `grid-line` 구분선. `data-label`은 `text-tertiary` + `tracking-label`,
-`data-value`는 `text-secondary` + bold + `tracking-label`. severity 수정자
-(`--infected`/`--dead`/`--danger`/`--info`)로 값 색상만 교체한다. Binance의
-`markets-row`+`price-up-cell`/`price-down-cell` 구조를 국가/노드 도메인에 맞게 옮긴
-것 — **새로운 수치 판독 UI가 필요하면 항상 이 컴포넌트부터 검토**한다.
+| 컴포넌트 | 배경 | 테두리 | radius | 비고 |
+|---|---|---|---|---|
+| `tree-node`/`research-row` | `--color-surface` | 1px `--color-border` + 좌측 4px 카테고리색 | `--radius-sm`(research-row만) | 상태 4단계는 2.4절 |
+| `pathogen-card` | `--color-surface` | tactical-panel 상속(코너컷 4개) | 0 | Fullscreen 메뉴 카드 |
+| `country-row` | `--color-surface` | 2px `--color-border` + 좌측 4px | `--radius-md`(6px, 5절 예외) | MainMenu/CountrySelect(7절 Fullscreen) |
+| `status-row` | `--color-surface-soft` | 좌측 4px severity색(2.2절) | 0 | CountryStatus 48개국 리스트 |
+| 선택 상태(공통) | `--color-surface-selected` | 3px `--color-border-selected`(골드) | 각 카드 규칙 유지 | `--stroke-selected` |
 
-### detail-rows — 스펙 테이블 (ClickHouse 패턴 차용)
-`data-row`를 세로로 쌓는 빈 컨테이너 계약(`margin: space-sm 0`). 컨트롤러가 런타임에
-`data-row`를 Add한다. UpgradeTree의 `detail-panel`("연구 분석 콘솔" — 업그레이드
-비용/효과/상태를 key:value로 나열)과 Country Dock이 이 패턴이다. ClickHouse의
-`code-window-card`(SQL key:value 스펙)와 동일한 정보 구조를, 모노스페이스 서체 없이
-`data-row` 반복으로 구현한 것 — **엔티티 상세 정보(업그레이드 노드, 국가, 향후 병원체
-등)는 항상 `detail-rows` + `data-row` 반복으로 표현**하고, 문단형 설명 텍스트로
-되돌리지 않는다.
+---
 
-### stat-chip / stat-chip-row / stat-label
-아이콘 폰트 대체 언어. `stat-chip`(6×6px 색상 사각형) + `stat-label`(볼드, 말줄임
-처리). `stat-label--day`/`--dna`/`--phase` 등 고정폭 변형으로 자릿수 변화 시 레이아웃
-흔들림을 방지한다.
+## 11. Modal System (현재 `TacticalModalController` 기준)
 
-### world-status-frame
-상시 표시되는 상태 판독창. 평시엔 라벨 폭이 0에 가깝게 줄고, 위험 상태일 때만
-(`--mortality--active`) 배경/테두리가 danger 색으로 강조된다 — "값이 있을 때만 크롬이
-등장"하는 패턴의 표준 예시.
+**계약(고정 UXML 이름)**: `modal-root`(class: `tactical-panel` + 분류에 맞는 위치 클래스),
+`modal-title`(Label), `modal-close`(Button), `modal-rows`(class: `detail-rows`, 컨트롤러가
+`data-row`를 동적으로 Add), `modal-footer`(비어있어도 됨, 액션 버튼 슬롯).
 
-### population-bar
-3세그먼트(healthy/infected/dead) 스택형 막대. `flex-basis: 0` + `flex-grow` 비율만으로
-폭이 정해지는 순수 비율 컴포넌트(Painter2D 없음). 세그먼트 색은 severity 축(5번)을
-그대로 사용.
+**API 계약**: `Show(string title)`(display:Flex + 타이틀 대입), `Hide()`(display:None),
+`ClearRows()`, `AddRow(label, value, valueClass?, rowClass?)`, `AddSectionCaption(text)`.
 
-### graph-panel / stat-graph-item (+ graph-frame/baseline/gridline)
-고정 프레임(104×52px) 안에 절대배치 스파크라인을 얹는 구조. `baseline`(50%, `accent-glow-soft`)
-+ `gridline--upper/--lower`(25%/75%, `grid-line`, 더 옅음) 2단계 밝기로 "기준선은
-밝게, 보조 격자는 옅게" 위계를 준다.
+**Do**: 신규 Overlay Panel/Modal은 이 계약을 그대로 상속한다(`TacticalModalController` 상속,
+새 베이스 클래스 만들지 않음).
+**Don't**: `modal-rows`/`AddRow` 계약을 그리드형 UI(13절 Badge/14절 Data Row 이외의 구조)로
+억지로 확장하지 않는다 — 그런 화면은 자체 named-Label 캐싱 패턴(12절 CountryPopup 참고)을
+쓴다.
 
-### tree-node
-`background: surface`, `border-left: 4px 카테고리색`, 상태 클래스(`--locked/--available/
---active/--maxed`)로 테두리·배경·opacity 결정. 내부는 `__code`(캡션) → `__label`
-(본문, `white-space: normal`로 한글 줄바꿈 허용) → `__status` → `__cost` 4줄 세로 스택.
+---
 
-### tab-button / tab-button--secondary
-주 액션(발광 테두리, `accent-glow`) vs 보조 액션(중립 테두리, `border`)을 테두리 색
-하나로 구분하는 하단 액션 바 버튼.
+## 12. Bottom Sheet System (신규 정의 — 이전에 없던 규격)
 
-## Usage Rules
+Bottom Sheet는 두 변형(Compact/Extended)으로 표준화한다. 신규 화면은 반드시 이 중 하나를
+선택한다 — 임의의 top/bottom % 값을 새로 정하지 않는다.
 
-Component Library 각 항목의 "언제 이렇게, 언제 이렇게 하지 않는지"를 명문화한다. 원래
-`UI_Design.md`(화면 설계 문서) 여러 절에 흩어져 있던 컴포넌트 사용 규칙 — 코너컷 배치/밀도
-기준, severity와 노드 상태 색상을 분리한 이유 — 를 디자인 시스템 규칙으로 이곳에 통합했다.
+### 12.1 Compact (예: CountryPopup)
 
-### Corner Cut
+| 항목 | 규격 |
+|---|---|
+| **Anchoring** | `position: absolute; left:0; right:0; bottom:0` — `top` 지정하지 않음(콘텐츠 높이 기반) |
+| **Width** | 100% |
+| **Height** | 콘텐츠 기반, **`max-height: 60%`**(신규 규정 — 상한 없던 기존 관행 수정) |
+| **Safe Area** | 하단 `padding-bottom`에 모바일 제스처 바 인셋 반영(신규 규정 — 기존 미반영) |
+| **Header** | 높이 자유(콘텐츠 기반), 국기/타이틀/부제/닫기(32px) 가로 배치 |
+| **Content** | `padding: --space-lg`(16px), 내부 그리드는 13/14절 컴포넌트 사용 |
+| **Footer** | 버튼 0~2개, 높이 `--touch-target-min`(48px), Primary 규격(9절) |
+| 배경 | `--color-bg-panel-strong` |
+| radius | 0 |
 
-**Do**
-- 카드/패널(개별 컴포넌트) 단위에만 부착한다. `position: relative`인 부모 안에 자식으로
-  4개(또는 2개)를 절대배치한다.
-- 화면당 인스턴스 수가 적은 패널(1~6개 내외 — 예: pathogen-card 6장, 화면별 detail-panel/
-  모달/엔딩 스코어 패널)에는 **4개 전부** 사용한다.
-- 강조 정도를 낮추고 싶으면 2개(tl/br)만 쓰는 축소형도 허용한다.
-- 항상 `picking-mode: Ignore`로 설정해 아래 실제 콘텐츠의 클릭/터치를 막지 않는다.
+### 12.2 Extended (예: CountryStatus, Ranking)
 
-**Don't**
-- 화면 루트(전체화면 컨테이너)에는 절대 붙이지 않는다 — 모바일 SafeArea 인셋과 겹칠 수
-  있다. 코너컷은 항상 화면 안의 개별 패널에만 붙인다.
-- 수십 개가 반복되는 리스트 행이나 노드(예: 48행 리스트, 카테고리당 9노드)에는 코너컷을
-  쓰지 않는다 — 대신 좌측 4px `accent-bar-row`로 대체해 밀도를 확보한다.
+| 항목 | 규격 |
+|---|---|
+| **Anchoring** | `position: absolute; left:0; right:0; bottom:12.5%`(Hud 하단 action-strip 항상 노출) |
+| **top 프리셋(신규 표준화 — 기존 3%/42% 임의값 대체)** | **Dense**(대시보드형, 콘텐츠 많음): `top: 5%` / **Compact**(확인·액션형, 콘텐츠 적음): `top: 40%` — 이 둘 중 하나만 선택, 새 % 금지 |
+| **Width** | 100% |
+| **Safe Area** | 상단 SafeArea 인셋을 `top` 프리셋에 더한다(신규 규정) |
+| **Header** | `tactical-panel__header` 가로 배치(타이틀 + 닫기 28px) |
+| **Content** | `ScrollView`(`flex-grow:1; flex-basis:0; overflow` 상위 컨테이너는 `overflow:hidden` 필수 — 세로 오버플로우 버그 재발 방지, 20절 참고) |
+| **Footer** | 없음(콘텐츠 내부 버튼으로 대체) |
+| 배경 | Dense: `--color-bg-panel-strong`(완전 불투명) / Compact: `--color-bg-panel` |
+| radius | 0 |
 
-### Severity Colors
+**Do**: CountryStatus(콘텐츠 많음) = Dense, Ranking(콘텐츠 적음) = Compact로 이미 실측과
+일치한다 — 두 화면 모두 마이그레이션 없이 새 표준에 그대로 부합.
+**Don't**: `top` 값을 3%/42% 외의 임의 값으로 만들지 않는다.
 
-**Do**
-- `--color-status-infected/dead/danger/info` 4색은 **국가 데이터**(감염/사망/위험/정보)에만
-  사용한다 — population-bar, Country Dock, 국가 리스트 행, 뉴스 이벤트 dot 등.
-- 새로운 국가 관련 수치 UI를 추가할 때는 이 4색을 그대로 재사용하고 새 색을 만들지 않는다.
+---
 
-**Don't**
-- 노드 상태(잠김/가능/활성/완료), UI 크롬(테두리/헤더/코너컷), 브랜드 강조(자원/프리미엄)에
-  이 4색을 가져다 쓰지 않는다. **이유**: severity 색은 "국가가 처한 상황"이라는 의미로 화면
-  전체에 고정되어 있어, 다른 맥락(예: 업그레이드 노드)에 재사용하면 "이 노드가 위험하다"는
-  잘못된 신호를 줄 수 있다.
+## 13. Badge System (CountryPopup `badge-tag` 기준)
 
-### Node State Colors
+| 속성 | 값 |
+|---|---|
+| `padding` | `2px --space-xs`(2px 4px) |
+| `border-width` | 1px |
+| `border-radius` | `--radius-sm`(3px) |
+| `align-self` | `flex-start`(부모 폭 전체로 늘어나지 않음) |
+| 배경 | 지정하지 않음(투명, 테두리+텍스트 색으로만 표현) |
 
-**Do**
-- LOCKED/AVAILABLE/ACTIVE/MAXED 4단계는 **브랜드 색상**(`--color-brand-dna` 초록 = 진행 중,
-  `--color-brand-gold` 금색 = 완료)과 중립색(`--color-text-tertiary`/`--color-border` = 잠김·
-  대기)으로 표현한다.
-- 카테고리 정체성(전파/증상/능력)은 좌측 4px accent-bar, 상태는 테두리 전체+배경으로 위치를
-  분리해 한 카드 안에서 두 축이 겹치지 않게 한다.
+### Severity 모디파이어(4종 고정 — `CountryPopupController.ApplySeverityClass()`가 배타 적용)
 
-**Don't**
-- Severity 색상을 노드 상태에 재사용하지 않는다. **이유**: severity는 "국가 데이터" 축,
-  노드 상태는 "플레이어 진행도" 축으로 의미가 완전히 다르다. 이미 업그레이드 화면 전용으로
-  쓰이는 DNA초록/금색 두 브랜드색을 "진행 중/완료" 축으로 재사용하는 편이 두 축을 혼동하지
-  않으면서 의미상으로도 더 맞다.
+| 클래스 | 텍스트/테두리 색 | 의미 |
+|---|---|---|
+| `.badge-tag--success` | `--color-status-info` | 개방/양호/선진국 |
+| `.badge-tag--warning` | `--color-status-infected` | 폐쇄/주의/개발도상국 |
+| `.badge-tag--danger` | `--color-status-dead` | 위험/저개발국 |
+| `.badge-tag--info` | `--color-text-info` | 중립 정보(현재 예약, 실사용 대기) |
 
-### Tactical Panel
+**Do**: 4개 모디파이어는 항상 배타적으로 적용(이전 클래스 전부 제거 후 하나만 추가).
+**Don't**: badge-tag에 배경색을 채우지 않는다(테두리+텍스트만 — 구조용 발광색과 시각적으로
+구분되게).
 
-**Do**
-- 테두리는 항상 1px `--color-accent-glow-soft`, `border-radius: 0`. 배경은 화면 맥락에 맞는
-  Surface Hierarchy 단계(`--color-bg-panel` 등)를 그대로 쓴다.
-- `tactical-panel`은 **테두리 + 헤더 규약만 제공**하고 배경색을 강제하지 않는다 — 카드 배경이
-  화면마다 다를 수 있음을 허용한다(예: `pathogen-card`는 `--color-surface`를 유지한 채
-  `tactical-panel` 테두리만 병기해도 된다).
+---
 
-**Don't**
-- `box-shadow`, 그라디언트, 둥근 모서리를 추가하지 않는다.
-- 인스턴스 수가 많은 리스트 행에는 전체 패널이 아니라 `data-row`/`accent-bar-row`만
-  적용한다 — `tactical-panel`은 "화면당 개수가 적은 핵심 패널"에만 쓴다(Corner Cut 규칙과
-  같은 기준).
+## 14. Data Row System (HUD/CountryStatus/UpgradeTree 공통)
 
-## Button System
+`Tactical.uss`의 `data-row`/`data-label`/`data-value` 계약 — 이 문서가 정의하는 **가장 기본이
+되는 수치 판독 단위**다. 신규 수치 판독 UI가 필요하면 항상 이 컴포넌트부터 검토한다.
 
-Unity 기본 런타임 버튼(둥근 회색)이 방치되면 Tactical Design System과 바로 충돌한다(과거
-`EndingScreen.uss .ending-button`이 이 버그였다가 수정된 전례가 있음, 파일 내 주석 참고).
-새 버튼을 만들 때는 항상 아래 3종 중 하나로 분류하고, `background-color`/`border`/
-`border-radius`를 **반드시 명시적으로 지정**한다 — width/height/padding/margin만 지정하고
-끝내지 않는다.
+| 요소 | 속성 |
+|---|---|
+| `data-row` | `flex-direction:row; justify-content:space-between; padding-bottom:2px; margin-bottom:2px; border-bottom-width:1px; border-bottom-color: --color-grid-line` |
+| `data-label` | `color: --color-text-tertiary; font-size: --font-size-xs(13px); letter-spacing: --tracking-label(0.5px); flex-shrink:0` |
+| `data-value` | `color: --color-text-secondary; font-size: --font-size-xs; bold; letter-spacing: --tracking-label; flex-shrink:1; min-width:0; white-space:normal; -unity-text-align: upper-right` |
 
-### Primary Button
-확정/진행 액션(다음 단계, 연구 시작, 부활 등). `background-color: --color-accent-glow-soft`
-(또는 문맥에 맞는 브랜드색 — 프리미엄 액션은 `--color-brand-premium`), `border: 1px
---color-accent-glow`(또는 브랜드색과 동일), `border-radius: 0`, `color: --color-text-primary`.
-예: `popup-footer-button--confirm`, `ending-button--revive`, `mainmenu-next`.
+### Severity 모디파이어(값 텍스트 색상만 교체)
+`.data-value--infected`(`--color-status-infected`) / `.data-value--dead`(`--color-status-dead`)
+/ `.data-value--danger`(`--color-status-danger`) / `.data-value--info`(`--color-status-info`)
 
-### Secondary Button
-중립/취소/닫기/뒤로가기 액션. `background-color: --color-bg-panel`, `border: 1px
---color-accent-glow`, `border-radius: 0`, `color: --color-text-primary`. 예:
-`popup-footer-button`(기본), `ending-button`(기본), `popup-close`, `status-close-btn`,
-`mainmenu-back`.
+### 노드 상태 모디파이어(UpgradeTree 전용 축 — Severity와 교차 금지)
+`.data-value--locked`(`--color-text-tertiary`) / `.data-value--available`(`--color-accent-glow`)
+/ `.data-value--active`(`--color-brand-dna`) / `.data-value--maxed`(`--color-brand-gold`)
 
-### Danger Button
-파괴적 확인 액션(예: 진행 중 게임 포기, 저장 데이터 삭제 — 현재 코드베이스에 아직 인스턴스
-없음, 예약 정의). `background-color: --color-bg-panel`, `border: 1px --color-status-danger`,
-`color: --color-status-danger`, `border-radius: 0`. Severity 색(`--color-status-danger`)을
-버튼 크롬에 쓰는 유일한 예외다 — "파괴적 액션 경고"라는 의미가 국가 데이터 severity와
-자연스럽게 겹치기 때문에 허용한다(Usage Rules > Severity Colors의 예외 조항으로 취급).
+**소비처**: HUD(없음, 직접 소비 안 함) / CountryStatus(world-summary-rows, ranking-infected/dead)
+/ UpgradeTree(detail-rows) — 3개 화면이 물리적으로 동일한 클래스를 공유해야 한다(로컬 재정의
+금지, 18절 참고).
 
-### Action Color 규칙 (Amber — 예약 토큰, 미적용)
-신규 Action Color로 **Amber**를 지정한다. 이번 작업에서는 토큰을 문서에 예약만 해두고
-코드(Theme.uss)에는 적용하지 않는다 — 전면 적용은 별도 작업으로 남긴다. 향후 Primary
-Button의 CTA 강조색으로 `--color-accent-glow` 대신(또는 함께) 도입할 후보이며, 실제 도입
-시 아래 Semantic Color 규칙과 마찬가지로 Status Semantics 표에 "Action" 축을 추가해야
-한다 — 임의로 기존 4축 중 하나에 끼워 넣지 않는다.
+---
 
-### Semantic Color 규칙 (Red/Blue/Orange/Gray — 신규 축, 미적용)
-"전염병 vs 인류" 대립 구도를 색으로 표현하는 신규 개념 축이다: **Red = 전염병에게 유리**,
-**Blue = 인류에게 유리**, **Orange = 주의**, **Gray = 중립**. **기존 Severity 축(Color
-System 5번 — 감염/사망/위험/정보, 국가 데이터 전용)과는 다른 축**이며, 현재 코드베이스에
-아직 와이어링되지 않은 상태다. 이후 게임플레이 밸런스 UI(예: 특정 업그레이드가 전염병에
-유리한지/인류 저항에 유리한지 표시)에 적용할 때는 기존 `--color-status-*` 토큰과 이름이
-겹치지 않는 새 토큰(`--color-semantic-red` 등)을 Theme.uss에 만들고, 이 문서의 Status
-Semantics 표에 5번째 축으로 추가한다. 이번 작업 범위에서는 문서화만 하고 실제 컴포넌트에
-적용하지 않는다.
+## 15. HUD Rules
 
-## Interaction Rules
-
-- **버튼**: `:active` 시 `scale: 0.96 0.96`만 적용, 배경색은 절대 건드리지 않는다(색
-  버튼 위에서도 자연스럽게 동작). `:disabled`는 `opacity: 0.5`.
-- **선택 가능 카드/행** (`pathogen-card`, `country-row`, `tree-node`, `status-row`):
-  hover 시 `border-color`/`background-color`가 `--transition-normal`(0.18s ease-out)로
-  부드럽게 전환된다. 새 선택형 컴포넌트를 추가할 때 이 트랜지션 계약을 그대로 재사용하고,
-  임의의 hover 스타일을 새로 만들지 않는다.
-- **USS 기술적 제약(모든 규칙의 전제)**: `box-shadow`, `clip-path`/`mask`,
-  `background-repeat`, `:last-child` 미지원. 따라서 그림자 대신 헤어라인, 코너 절삭
-  대신 코너컷 오버레이, 반복 배경 대신 정적 라인 배치, 마지막 행 예외 처리 대신
-  "옅은 색이라 안 보여도 무방"으로 설계한다. 새 컴포넌트 설계 시 이 4가지 미지원 기능을
-  요구하는 방식을 먼저 배제한다.
-
-## Status Semantics
-
-이 시스템은 **서로 다른 4개의 색상 축**을 유지한다(5번 항목 색상 표 참고). 요약:
-
-| 축 | 토큰 그룹 | 의미 | 재정의 금지 범위 |
+| 컴포넌트 | 높이/폭 | 배경 | 테두리 |
 |---|---|---|---|
-| 브랜드 악센트 | brand-dna/gold/premium | 자원/강조/프리미엄 | 3색 고정, 신규 추가 금지 |
-| Severity | status-infected/dead/danger/info | 국가 데이터(감염/사망/위험/정보) | 노드 상태·UI 크롬에 사용 금지 |
-| 노드 카테고리 | node-transmission/symptom/ability | 업그레이드 계열 정체성 | 카드 전체 배경에 칠하지 않음(좌측 바만) |
-| 구조용 발광색 | accent-glow(-soft), grid-line | 테두리/캡션/격자 | 데이터 값에 사용 금지 |
+| `resource-strip` | 34px | `--color-bg-panel` | 좌우하단 1px `--color-accent-glow-soft` |
+| `event-dock` | 폭 168px, 좌상단 절대배치 | `--color-bg-panel` | 1px `--color-accent-glow-soft`, 코너컷 4개 |
+| `population-bar__track` | 높이 14px | `--color-surface-soft` | 1px, radius `--radius-sm` |
+| `graph-panel` 프레임 | 104×52px | `--color-surface-soft` | 1px, radius `--radius-sm` |
+| `action-strip` 버튼 | `--touch-target-min`(48px) | 9절 Button System 그대로 |
 
-새 기능이 생겼을 때 "이게 4축 중 어디에 속하는가"를 먼저 판정한다. 어느 축에도 속하지
-않는다면 새 축을 만들기 전에 이 문서를 먼저 갱신한다(임의로 5번째 색을 끼워 넣지 않는다).
+3세그먼트 비율형 데이터(population-bar)는 항상 healthy→infected→dead 고정 순서,
+`flex-basis:0` + `flex-grow` 비율로만 표현(절대 픽셀 계산 금지). 추세형(graph-panel)은
+프레임 고정(104×52px) + 기준선 1개(`--color-accent-glow-soft`) + 보조 격자 2개(25%/75%,
+`--color-grid-line`).
 
-## Data Visualization Rules
+---
 
-- **비율형 데이터(population-bar)**: 항상 3세그먼트 고정 순서(healthy→infected→dead),
-  `flex-basis: 0` + `flex-grow` 비율로만 표현. 절대 픽셀 폭을 계산해 대입하지 않는다.
-- **추세형 데이터(graph-frame/sparkline)**: 프레임 크기 고정(104×52px), 기준선 1개
-  (밝은 `accent-glow-soft`) + 보조 격자 2개(옅은 `grid-line`, 25%/75%) — 격자는
-  많을수록 좋은 게 아니라 "기준선만 밝고 나머지는 옅다"는 밝기 위계가 핵심이다.
-- **수치형 데이터(data-row/stat-chip)**: 아이콘 글리프를 실기기 검증 없이 먼저 쓰지
-  않는다 — 항상 색상 칩(`stat-chip`) 또는 라벨:값(`data-row`) 조합이 기본값이고,
-  아이콘은 검증 후에만 대체재로 승격한다.
-- **신규 판독 UI 추가 규칙**: 위 3가지(비율/추세/수치) 중 하나로 분류되지 않는 새로운
-  시각화가 필요하면, 이 문서의 Component Library를 먼저 확장하고 화면에 바로 구현하지
-  않는다.
+## 16. Country Status Rules
 
-## Do / Don't
+- 분류: Bottom Sheet — Extended / Dense(`top:5%`, 12.2절).
+- Hero Stats: 2×2 타일, 타일 폭 48%, 값 폰트 `--font-size-xl`(24px).
+- 대륙 아코디언: 코너컷 금지(리스트 반복 요소), 좌측 `--color-accent-glow-soft` accent-bar만
+  사용 — 대륙 헤더는 "국가 데이터"가 아니라 "UI 크롬"이라 Severity 4색 사용 금지(2.2절 Don't).
+- 48개국 리스트 행(`status-row`): 좌측 4px severity accent-bar(2.2절 4색), radius 0.
+- `overflow: hidden` + `flex-direction: column`을 status-root에 항상 명시(세로 오버플로우로
+  콘텐츠가 배경 밖으로 새어나가 지도가 비치는 버그 재발 방지, 20절 사례 참고).
 
-### Do
-- 새 패널은 항상 5단계 Surface Hierarchy 중 하나를 선택하고 `accent-glow-soft` 헤어라인으로
-  시작한다.
-- 새 수치 판독은 `data-row` 또는 `stat-chip` 패턴을 재사용한다.
-- 카테고리색은 좌측 `accent-bar`(4px), 상태색은 테두리+배경 — 위치를 분리해 같은 카드
-  안에서 두 축이 겹치지 않게 한다.
-- 업그레이드/국가 등 엔티티 상세 정보는 `detail-rows` + `data-row` 반복(스펙 테이블)으로
-  표현한다.
-- 위계는 배경 alpha 단계와 테두리 굵기/색으로만 표현한다.
+---
 
-### Don't
-- `box-shadow`, 그라디언트, 둥근 pill 버튼을 도입하지 않는다 — `tactical-panel`은 항상
-  `radius: 0`.
-- 실기기에서 검증되지 않은 아이콘 폰트 글리프를 먼저 쓰지 않는다 — `stat-chip`이 검증된
-  대체재다.
-- 모노스페이스 서체를 도입하지 않는다 — 한글 줄바꿈/자간 문제가 있고, 기술적 톤은
-  자간(tracking) + 굵기로 이미 표현되고 있다.
-- 브랜드 악센트 색을 3개(DNA그린/골드/프리미엄퍼플) 이상으로 늘리지 않는다 — HashiCorp식
-  "기능마다 새 색"을 이 시스템은 채택하지 않는다.
-- Severity 4색·노드 상태 4색·카테고리 3색·구조용 발광색을 서로의 의미로 교차 사용하지
-  않는다.
-- 라이트모드 파생을 만들지 않는다 — 캔버스는 항상 다크.
-- 화면 전용 레이아웃(배치, 화면 흐름, 우선순위)은 이 문서에 쓰지 않는다 — `UI_Design.md`
-  역할이다.
+## 17. UpgradeTree Rules
+
+- 분류: Fullscreen(`--color-bg-panel-alt`).
+- 탭 3개 고정, 높이 `--touch-target-min`(48px), 선택 강조는 새 색상 없이 하단 2px
+  `--color-border-selected`(골드) 밑줄로만 표현.
+- `research-row`: 좌측 4px 카테고리색(2.3절) + 상태 4단계(2.4절, 테두리 전체+배경)는 위치
+  분리 — 카테고리는 좌측 바, 상태는 전체 테두리/배경.
+- `branch-board`: 진행률 바는 population-bar와 동일 기법(`flex-basis:0` + `flex-grow`),
+  트랙 radius `--radius-sm`.
+- `detail-panel`: `position:relative`(코너컷 기준점), radius 0(코너컷과 충돌 방지).
+
+---
+
+## 18. Component Registry (실제 USS 파일 기준)
+
+| 파일 | 역할 | 이 문서와의 관계 |
+|---|---|---|
+| `Theme.uss` | 전 토큰(`:root`) 정의 | **1차 Source of Truth 구현체** — 이 문서 2~6절과 값이 반드시 일치 |
+| `Tactical.uss` | 공용 컴포넌트: tactical-panel/corner-cut/data-row | **2차 Source of Truth 구현체** — 8/14절 |
+| `Hud.uss` | resource-strip/event-dock/population-bar/graph-panel/action-strip | 15절 소비처. `tactical-panel`/`corner-cut` **로컬 재정의 존재 — 제거 대상**(20절) |
+| `CountryPopup.uss` | Bottom Sheet(Compact), quick-stat-grid, badge-tag | 12.1/13절 최초 구현체 — badge-tag의 정본 |
+| `CountryStatusPanel.uss` | Bottom Sheet(Extended/Dense) | 12.2/16절 소비처 |
+| `RankingPanel.uss` | Bottom Sheet(Extended/Compact) | 12.2절 소비처 |
+| `UpgradeTree.uss` | Fullscreen, research-row/branch-board | 17절 소비처. `tactical-panel`/`corner-cut`/`data-row` **로컬 재정의 존재 — 제거 대상**(20절) |
+| `MainMenu.uss` | Fullscreen, pathogen-card/country-row/detail-panel | 10절 소비처, `--radius-md` 유일 사용처(5절) |
+| `CountrySelect.uss` | MainMenu.uss 확장(개발수준 accent bar 색만 추가) | 10절 소비처 |
+| `ResearchPopup.uss` | Overlay Panel(중앙 모달) | 11절 Modal 계약 소비처 |
+| `EndingScreen.uss` | Fullscreen(Debrief) | 9절 Button System 소비처, 과거 실패 사례 발생 파일(20절) |
+
+---
+
+## 19. Do
+
+- 신규 패널은 항상 7절 4분류 중 하나로 먼저 분류하고, 해당 절의 정확한 수치를 그대로 쓴다.
+- 신규 수치 판독은 14절 Data Row 또는 13절 Badge System을 재사용한다 — 새 판독 컴포넌트를
+  만들기 전에 이 둘로 표현 가능한지 먼저 검토한다.
+- 카테고리색은 좌측 accent-bar(4px), 상태색은 테두리 전체+배경 — 위치를 분리한다.
+- 버튼은 항상 9절 표의 `background-color`/`border`/`border-radius`를 전부 명시적으로
+  지정한다.
+- Bottom Sheet는 12절의 두 변형(Compact/Extended) 중 하나만 쓴다.
+- 공용으로 쓰일 가능성이 있는 컴포넌트는 **처음부터** `Tactical.uss`에 정의한다("나중에 승격"
+  금지, 20절 근거).
+
+## 20. Don't — 실제 발생했던 실패 사례 기반
+
+- **Unity 기본 버튼 노출**: `background-color`/`border`/`border-radius` 중 하나라도 누락하면
+  회색 기본 버튼이 그대로 보인다 — `EndingScreen.uss .ending-button`에서 최초 발생, 이후
+  동일 패턴이 최소 4개 화면(RankingPanel/MainMenu/CountryStatusPanel/CountryPopup)에서
+  반복 확인·수정됨. **신규 버튼은 9절 표를 그대로 복사해서 시작한다.**
+- **Severity 색상 오용**: 대륙 헤더(UI 크롬)에 Severity 4색을 쓰려다 "이건 국가 데이터가
+  아니라 크롬"이라는 이유로 금지된 사례(CountryStatusPanel.uss 주석에 실제 기록) — 노드 상태
+  축(2.4절)에도 Severity색을 재사용하지 않는다.
+- **Surface 계층/오버플로우 위반**: `status-root`에 `flex-direction`/`overflow`를 명시하지
+  않아 콘텐츠가 박스 경계 밖으로 흘러넘쳐 배경이 비치는(지도가 보이는) 버그가 실제 발생 —
+  Bottom Sheet Extended는 항상 `overflow:hidden` + `flex-direction:column` 명시(16절).
+- **Local Component 중복 생성**: `tactical-panel`/`corner-cut`/`data-row`가 `Tactical.uss`
+  승격 이후에도 `Hud.uss`/`UpgradeTree.uss`에 로컬로 재정의된 채 남아있다(18절 표에 명시) —
+  같은 값을 이중 정의하는 것 자체가 버그는 아니지만, 두 곳이 어긋나기 시작하면 화면마다 다른
+  결과가 나오는 근본 원인이 된다. **정리 완료 전까지 이 두 파일의 tactical-panel/corner-cut을
+  참고하지 않는다 — 항상 `Tactical.uss` 것을 기준으로 삼는다.**
+- **Stroke 의미 충돌**: 좌측 accent-bar(보조 이분 상태)에 `--stroke-selected`(3px)를 쓰다가
+  "선택 상태"와 굵기가 겹쳐 혼동된 사례, `--stroke-active`(2px)를 좌측 바에 썼다가 "보조
+  이분 상태"와 혼동된 사례 — 둘 다 실제로 발생해 수정됨. 6절 표의 프로퍼티별 의미를 정확히
+  지킨다.
+- **Radius 임의 도입**: `country-row__flag`에 `2px`를 하드코딩한 사례처럼, 5절 표에 없는
+  radius 값을 새로 만들지 않는다.
+
+---
+
+## 부록 A. 기존 DESIGN.md 대비 변경 요약
+
+| 항목 | v1(현재) | v2(이 초안) |
+|---|---|---|
+| 문서 성격 | 철학 설명 위주 | 수치/표/계약 위주 |
+| Typography | 크기 9개 나열만 | 12개(캡션 3단계 신규 등재) + weight/letter-spacing/usage 전부 명시(line-height는 UI Toolkit 미지원 확인 후 제외) |
+| Spacing 베이스 서술 | "8px" (실제는 4px 배수) | "4px" 로 정정 |
+| Radius | 3단계 스케일(대부분 미사용) | 실사용 기준 3개 값 + 각각의 정확한 용도 고정, `--radius-lg`는 시도 후 제거된 이력 명시(재도입 금지) |
+| Source of Truth 목록 | 4개 파일만 | 11개 파일 전부(18절 Component Registry) |
+| Bottom Sheet | 개념 없음, 화면마다 임의 % | Compact/Extended 2변형, 정확한 anchoring 표(12절) |
+| Modal | 문서화 안 됨 | `TacticalModalController` 계약 명문화(11절) |
+| Badge System | 없음 | CountryPopup `badge-tag` 기준 정식 컴포넌트화(13절) |
+| UI Density Modes(3분류) | 있음, Country Dock 등 최신성 저하 | 폐기 — 7절 Layout System(4분류)으로 대체 |
+| Do/Don't | 일반론 | 실제 발생한 실패 사례 기반(20절) |

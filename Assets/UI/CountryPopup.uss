@@ -21,9 +21,9 @@
     right: 0;
     bottom: 0;
     width: 100%;
-    max-height: 45%; /* "지도는 항상 보인다" 원칙의 안전판 — 8칸 그리드+헤더+버튼의 실제 콘텐츠
-                        높이는 이보다 한참 작지만(자연 높이로 이미 화면 절반을 넘지 않음), 텍스트가
-                        길어지는 예외 상황에도 지도 영역이 55% 밑으로 줄지 않도록 상한을 건다. */
+    max-height: 60%; /* Docs/DESIGN.md 12.1절 규격 — "지도는 항상 보인다" 원칙의 안전판. 8칸
+                        그리드+헤더+버튼의 실제 콘텐츠 높이는 이보다 한참 작지만, 텍스트가
+                        길어지는 예외 상황에도 지도 영역이 40% 밑으로 줄지 않도록 상한을 건다. */
     background-color: var(--color-bg-panel-strong); /* 지도 위에 얹히므로 배경이 비쳐 보이면 안 됨 */
     padding: var(--space-lg);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지

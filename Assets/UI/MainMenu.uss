@@ -6,7 +6,7 @@
     bottom: 0;
     flex-grow: 1;
     background-color: var(--color-bg-root);
-    padding: 28px;
+    padding: var(--space-xxl);
 }
 
 .mainmenu-caption {
@@ -37,7 +37,7 @@
 .pathogen-card {
     position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
     background-color: var(--color-surface);
-    padding: 10px 14px;
+    padding: var(--space-sm) var(--space-md);
     margin-bottom: var(--space-md);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지 않음 */
 }
@@ -162,10 +162,10 @@
     flex-shrink: 0;
     font-size: var(--font-size-lg);
     -unity-font-style: bold;
-    background-color: var(--color-brand-dna);
-    color: rgb(10, 30, 15);
+    background-color: var(--color-accent-glow-soft);
+    color: var(--color-text-primary);
     border-width: 1px;
-    border-color: var(--color-brand-dna);
+    border-color: var(--color-accent-glow);
     border-radius: 0;
 }
 
@@ -173,7 +173,7 @@
    Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
    패턴, 2026-07-14 수정). ending-button/popup-footer-button 기본형과 동일 톤으로 통일. */
 .mainmenu-back {
-    height: 46px;
+    height: var(--touch-target-min);
     flex-shrink: 0;
     margin-bottom: var(--space-md);
     border-width: var(--stroke-hairline);

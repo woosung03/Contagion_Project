@@ -78,6 +78,12 @@
     --radius-lg: 8px;
 
     /* ---- 폰트 크기 ---- */
+    /* Docs/DESIGN.md 3절 Typography — 캡션 3단계(신규 등재, v2). 화면 여러 곳(tactical-caption/
+       lab-caption/section-caption/badge-tag 등)에서 반복되던 하드코딩 값을 토큰화한 것 — 값 자체는
+       기존 하드코딩과 동일(9/10/11px), 신규 크기 도입 아님. */
+    --font-size-caption-2xs: 9px;
+    --font-size-caption-xs: 10px;
+    --font-size-caption: 11px;
     --font-size-xs: 13px;
     --font-size-sm: 14px;
     --font-size-body: 16px;

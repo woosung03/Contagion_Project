@@ -70,8 +70,8 @@
    Unity 기본 회색 버튼이 그대로 노출된다(EndingScreen.uss .ending-button 과거 버그와 동일
    패턴, 2026-07-14 수정). CountryPopup.uss .popup-close와 동일 톤으로 통일. */
 .status-close-btn {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     flex-shrink: 0;
     border-width: var(--stroke-hairline);
