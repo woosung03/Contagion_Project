@@ -92,6 +92,40 @@
     margin-top: var(--space-xs);
 }
 
+/* [Hero Stats, 2026-07-15 사용자 승인] GLOBAL STATUS 바로 아래 2x2 KPI 그리드 — 작은
+   data-row가 아니라 성과 대시보드의 "히어로 숫자"처럼 보이도록 타일 폭(48%)과 큰 숫자
+   (--font-size-xl, 24px)를 쓴다. 색상은 새로 만들지 않고 Tactical.uss의 기존 data-value--*
+   modifier(색상만 지정하는 클래스)를 hero-stat-tile__value에 그대로 얹어 재사용한다. */
+.hero-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.hero-stat-tile {
+    width: 48%;
+    align-items: center;
+    background-color: var(--color-surface-soft);
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.hero-stat-tile__label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-caption);
+}
+
+.hero-stat-tile__value {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+    -unity-font-style: bold;
+    margin-top: 2px;
+}
+
 /* population-bar 관련 클래스(population-bar, population-bar__track, population-bar__segment,
    population-bar__summary)는 Hud.uss 클래스를 그대로 재사용(CountryStatusPanel.uxml에
    <Style src="Hud.uss" /> 추가) — 로컬 재정의 없음.

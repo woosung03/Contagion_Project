@@ -8,6 +8,23 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] CountryStatusPanel v5 Hero Stats/ADVANCED DIAGNOSTICS 검증 (근거: DevLog Step 89) — Unity
+      에디터 미접속으로 작성돼 실기기/에디터 검증 전부 미완료.
+  - [ ] GLOBAL STATUS 배너 바로 아래에 INFECTED/DEATHS/CURE/EXTINCT 2x2 Hero Stats 타일이
+        보이고, 각 값이 실제 WorldState 값(감염자 수/사망자 수/치료제 진행률/소멸 국가 수)과
+        일치하는지 확인
+  - [ ] Hero Stats 타일이 2열×2행으로 정렬되고(타일 폭 48%, 줄바꿈 정상), 숫자가 라벨보다
+        눈에 띄게 크게(24px) 보이는지 육안 확인
+  - [ ] WORLD OVERVIEW에서 "총 감염자"/"총 사망자"/"무감염 국가 수" 행이 더 이상 보이지 않고,
+        세계 인구/세계 감염률/치사율(추정)/경과 일수/감염 국가/소멸 국가/population-bar는
+        그대로 남아있는지 확인
+  - [ ] ADVANCED DIAGNOSTICS 헤더가 기본 접힘(▶) 상태로 시작하는지, 클릭 시 펼쳐지며(▼) 국가
+        상태 분포(SAFE/WARNING/DANGER/COLLAPSE)와 의료 시스템 현황(정상/주의/과부하/붕괴)이
+        정상 표시되는지 확인
+  - [ ] ADVANCED DIAGNOSTICS를 펼친 상태로 두고 틱이 진행돼도(감염 확산) 각 버킷 수치가 정상
+        갱신되는지, 48개국 목록 대륙 아코디언의 펼침 상태와 서로 간섭하지 않는지 확인
+  - [ ] Hero Stats 값 색상(감염=infected색, 사망=dead색, 치료제=info색)이 severity 4색 체계와
+        일치하고 새로운 색이 추가되지 않았는지 육안 확인
 - [ ] CountryStatusPanel 대륙별 접기/펼치기 아코디언 검증 (근거: DevLog Step 86) — Unity 에디터
       미접속으로 작성돼 실기기/에디터 검증 전부 미완료.
   - [ ] GLOBAL STATUS CENTER를 열면 ASIA 섹션만 펼쳐져 있고 나머지 5개 대륙(EUROPE/NORTH

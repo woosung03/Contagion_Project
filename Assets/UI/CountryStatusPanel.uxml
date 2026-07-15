@@ -19,8 +19,39 @@
             <!-- GLOBAL STATUS — 세계 상황 한 줄 평가 -->
             <ui:Label name="global-status-banner" text="GLOBAL STATUS" class="global-status-banner" />
 
-            <!-- 세계 요약 -->
-            <ui:Label text="세계 요약" class="modal-section-caption" />
+            <!-- [Hero Stats, 2026-07-15 사용자 승인] "성과 대시보드" 정체성 확정에 따라 GLOBAL
+                 STATUS 바로 아래·WORLD OVERVIEW 위에 2x2 KPI 그리드를 추가했다. "내가 얼마나
+                 퍼뜨렸는가/죽였는가/승리까지 얼마나 남았는가"를 가장 먼저 보여준다. 신규 데이터
+                 모델·계산식 없음 — WorldState.infectedCount/deadCount/cureProgress와
+                 CountryStatusPanelController.ExtinctCountryCount() 헬퍼(기존 소멸 국가 집계를
+                 그대로 추출)만 사용한다. 캡션은 의도적으로 없음(GLOBAL STATUS 배너 바로 다음에
+                 KPI가 곧바로 이어지도록). -->
+            <ui:VisualElement name="hero-stats" class="hero-stats">
+                <ui:VisualElement class="hero-stat-tile">
+                    <ui:Label text="INFECTED" class="hero-stat-tile__label" />
+                    <ui:Label name="hero-infected-value" text="0" class="hero-stat-tile__value data-value--infected" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hero-stat-tile">
+                    <ui:Label text="DEATHS" class="hero-stat-tile__label" />
+                    <ui:Label name="hero-deaths-value" text="0" class="hero-stat-tile__value data-value--dead" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hero-stat-tile">
+                    <ui:Label text="CURE" class="hero-stat-tile__label" />
+                    <ui:Label name="hero-cure-value" text="0.0%" class="hero-stat-tile__value data-value--info" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hero-stat-tile">
+                    <ui:Label text="EXTINCT" class="hero-stat-tile__label" />
+                    <ui:Label name="hero-extinct-value" text="0" class="hero-stat-tile__value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- [Performance Dashboard v5, 2026-07-15 사용자 승인] WORLD OVERVIEW 중복 정리 —
+                 "총 감염자"/"총 사망자"(world-summary-rows)와 "무감염 국가 수"(infection-summary-rows)는
+                 위 Hero Stats(INFECTED/DEATHS/EXTINCT)와 중복돼 컨트롤러에서 해당 AddDataRow() 호출을
+                 제거했다. 세계 인구/세계 감염률/치사율(추정)/경과 일수/감염 국가 수/소멸 국가는
+                 Hero Stats와 겹치지 않아 그대로 유지. 요소 이름/클래스/계산식은 그대로이고 UXML
+                 구조 변경 없음(컨트롤러가 채우는 행 개수만 줄었다). -->
+            <ui:Label text="WORLD OVERVIEW" class="modal-section-caption" />
             <ui:VisualElement name="population-bar" class="population-bar">
                 <ui:VisualElement name="population-bar-track" class="population-bar__track">
                     <ui:VisualElement name="population-bar-healthy" class="population-bar__segment population-bar__segment--healthy" picking-mode="Ignore" />
@@ -31,68 +62,84 @@
             </ui:VisualElement>
             <ui:VisualElement name="world-summary-rows" class="detail-rows" />
 
-            <!-- 감염 국가 현황 -->
-            <ui:Label text="감염 국가 현황" class="modal-section-caption" />
             <ui:VisualElement name="infection-summary-rows" class="detail-rows" />
 
-            <!-- 국가 상태 분포 -->
-            <ui:Label text="국가 상태 분포" class="modal-section-caption" />
-            <ui:VisualElement name="distribution-row" class="distribution-row">
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
-                    <ui:Label text="SAFE" class="distribution-item__label" />
-                    <ui:Label name="distribution-safe-count" text="0" class="distribution-item__count" />
+            <!-- [Performance Dashboard v5, 2026-07-15 사용자 승인] 국가 상태 분포/의료 시스템
+                 현황은 삭제하지 않고 기본 접힘 상태의 "ADVANCED DIAGNOSTICS" 섹션으로 강등했다
+                 (정보 보존 + 초기 화면 단순화). 접기/펼치기 UI는 48개국 목록의 대륙 아코디언과
+                 동일한 continent-header/continent-body 클래스를 재사용(신규 CSS 없음) —
+                 다만 상태(펼침 여부)는 대륙별 Dictionary가 아니라 컨트롤러의 별도 bool 필드
+                 하나로 관리한다(대륙 아코디언과 무관한 단일 섹션이라 재사용 범위를 최소화).
+                 BucketOf()/MedicalLoad()/MedicalLoadStatus() 계산식과 distribution-row/
+                 stat-chip UI는 그대로 유지했다. -->
+            <ui:VisualElement name="advanced-diagnostics-header" class="continent-header accent-bar-row">
+                <ui:Label name="advanced-diagnostics-arrow" text="▶" class="continent-header__arrow" />
+                <ui:Label text="ADVANCED DIAGNOSTICS" class="continent-header__label" />
+            </ui:VisualElement>
+            <ui:VisualElement name="advanced-diagnostics-body" class="continent-body" style="display: none;">
+                <ui:Label text="국가 상태 분포" class="modal-section-caption" />
+                <ui:VisualElement name="distribution-row" class="distribution-row">
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
+                        <ui:Label text="SAFE" class="distribution-item__label" />
+                        <ui:Label name="distribution-safe-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
+                        <ui:Label text="WARNING" class="distribution-item__label" />
+                        <ui:Label name="distribution-warning-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
+                        <ui:Label text="DANGER" class="distribution-item__label" />
+                        <ui:Label name="distribution-danger-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
+                        <ui:Label text="COLLAPSE" class="distribution-item__label" />
+                        <ui:Label name="distribution-collapse-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
-                    <ui:Label text="WARNING" class="distribution-item__label" />
-                    <ui:Label name="distribution-warning-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
-                    <ui:Label text="DANGER" class="distribution-item__label" />
-                    <ui:Label name="distribution-danger-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
-                    <ui:Label text="COLLAPSE" class="distribution-item__label" />
-                    <ui:Label name="distribution-collapse-count" text="0" class="distribution-item__count" />
+
+                <!-- 의료 시스템 현황 — distribution-row/stat-chip 패턴 재사용(신규 CSS 없음) -->
+                <ui:Label text="의료 시스템 현황" class="modal-section-caption" />
+                <ui:VisualElement name="medical-distribution-row" class="distribution-row">
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
+                        <ui:Label text="정상" class="distribution-item__label" />
+                        <ui:Label name="medical-normal-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
+                        <ui:Label text="주의" class="distribution-item__label" />
+                        <ui:Label name="medical-caution-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
+                        <ui:Label text="과부하" class="distribution-item__label" />
+                        <ui:Label name="medical-overload-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="distribution-item">
+                        <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
+                        <ui:Label text="붕괴" class="distribution-item__label" />
+                        <ui:Label name="medical-collapse-count" text="0" class="distribution-item__count" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- 의료 시스템 현황 — distribution-row/stat-chip 패턴 재사용(신규 CSS 없음) -->
-            <ui:Label text="의료 시스템 현황" class="modal-section-caption" />
-            <ui:VisualElement name="medical-distribution-row" class="distribution-row">
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--safe" picking-mode="Ignore" />
-                    <ui:Label text="정상" class="distribution-item__label" />
-                    <ui:Label name="medical-normal-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--warning" picking-mode="Ignore" />
-                    <ui:Label text="주의" class="distribution-item__label" />
-                    <ui:Label name="medical-caution-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--danger" picking-mode="Ignore" />
-                    <ui:Label text="과부하" class="distribution-item__label" />
-                    <ui:Label name="medical-overload-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-                <ui:VisualElement class="distribution-item">
-                    <ui:VisualElement class="stat-chip stat-chip--collapse" picking-mode="Ignore" />
-                    <ui:Label text="붕괴" class="distribution-item__label" />
-                    <ui:Label name="medical-collapse-count" text="0" class="distribution-item__count" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-
-            <!-- 랭킹 (TOP 10) -->
-            <ui:Label text="종합 위협도 TOP 10" class="modal-section-caption" />
-            <ui:VisualElement name="ranking-threat" class="detail-rows" />
-
+            <!-- [Performance Dashboard v4] 종합 위협도 TOP10은 "전략 콘솔" 시절 설계라 성과
+                 대시보드 정체성과 맞지 않아 제거(사용자 승인). 감염자 TOP10은 유지, 승리 조건과
+                 직접 연결되는 사망자 TOP10을 그 아래 신규 추가했다 — 둘 다 RebuildTopRows()
+                 재사용, 신규 계산식 없음(사망자는 기존 Country.deadCount). -->
             <ui:Label text="감염자 TOP 10" class="modal-section-caption" />
             <ui:VisualElement name="ranking-infected" class="detail-rows" />
 
-            <!-- 48개국 목록 -->
+            <ui:Label text="사망자 TOP 10" class="modal-section-caption" />
+            <ui:VisualElement name="ranking-dead" class="detail-rows" />
+
+            <!-- [Performance Dashboard v4] 48개국 목록 — "핵심 콘텐츠"가 아니라 "상세 조회
+                 도구"라는 재정의에 따라 최하단으로 이동(기존엔 최상단 그룹). 대륙 아코디언/
+                 CountryPopup 드릴다운 등 기존 기능은 전부 그대로 유지. -->
             <ui:Label text="48개국 목록" class="modal-section-caption" />
             <ui:VisualElement name="status-list" class="status-list" />
         </ui:ScrollView>

@@ -12,6 +12,17 @@ namespace Contagion.UI
     /// <summary>
     /// HUD "국가현황" 버튼으로 여는 "GLOBAL STATUS CENTER" — 세계 감염 현황 센터.
     ///
+    /// [Performance Dashboard v4, 2026-07-15 사용자 승인] 정체성 최종 확정: 이 화면은 "전파
+    /// 전략 콘솔"이 아니라 "성과 대시보드"다. WorldMap=전략 판단, CountryPopup=국가 상세
+    /// 브리핑, UpgradeTree=업그레이드 의사결정, CountryStatusPanel=성과/진행 상황 확인으로
+    /// 역할을 분리했다. 화면 구성(위→아래): GLOBAL STATUS 배너 → WORLD OVERVIEW(세계 요약+
+    /// 감염 국가 현황+국가 상태 분포+의료 시스템 현황을 캡션 하나로 통합) → 감염자 TOP10 →
+    /// 사망자 TOP10(신규, 승리 조건과 직접 연결) → 48개국 목록(핵심 콘텐츠가 아닌 상세 조회
+    /// 도구라 최하단). "전략 정보(공항/항구/국경 등)는 향후 WorldMap으로 이관"이라는 정체성
+    /// 재정의 원칙에 따라 신규 전략 오버레이는 이번 범위에서 추가하지 않았다 — 단, 48개국
+    /// 목록 각 행의 기존 공항/항구/국경 표시(FlagsLabel)는 "목록의 기존 상세 정보"로 판단해
+    /// 유지했다(사용자 확인, 2026-07-15). 종합 위협도 TOP10은 "전략 콘솔" 시절 설계라 제거.
+    ///
     /// [역할 재정의, 2026-07-10 사용자 승인] 이 컨트롤러는 원래(Step 28-2) CountryPopupController를
     /// 대체하는 "48개국 목록 화면"이었으나, CountryPopupController가 이미 개별 국가 상세 브리핑
     /// 역할로 확장 완료된 지금은 이 화면을 "국가 하나가 아니라 세계 전체 상황"을 보여주는 Tactical
@@ -22,12 +33,17 @@ namespace Contagion.UI
     /// (CountrySelectController.DevValueClass()가 CountryPopupController와 동일 규약을 별도로
     /// 구현해둔 것과 같은 방식 — 두 화면이 서로 의존하지 않게 하기 위함).
     ///
-    /// 화면 구성(위→아래): GLOBAL STATUS 배너(세계 상황 한 줄 평가) → 세계 요약(population-bar
-    /// 재사용 + data-row 6줄) → 감염 국가 현황(감염/무감염/소멸 국가 수) → 국가 상태 분포
-    /// (GetCollapseStage() 6단계를 SAFE/WARNING/DANGER/COLLAPSE 4버킷으로 집계) → 의료 시스템 현황
-    /// (정상/주의/과부하/붕괴 4버킷, 국가 상태 분포와 동일 UI 재사용) → 랭킹 2종(종합 위협도 TOP10
-    /// +감염자 TOP10) → 48개국 목록(기존 유지, 좌측 accent bar로 버킷 색상 표시). 신규 데이터
-    /// 모델 없음 — Country/WorldState/WorldDataManager의 기존 필드와 계산식만 사용한다.
+    /// [UX Reorder, 2026-07-15] 화면 구성(위→아래): GLOBAL STATUS 배너(세계 상황 한 줄 평가) →
+    /// 48개국 목록(대륙별 접기/펼치기, CountryPopup 진입점 — 최상단 그룹) → 종합 위협도 TOP10
+    /// (플레이어의 다음 행동 결정에 가장 실행 가능성이 높은 정보) → 감염자 TOP10(기존 유지) →
+    /// 세계 요약(population-bar 재사용 + data-row 6줄) → 국가 상태 분포(GetCollapseStage() 6단계를
+    /// SAFE/WARNING/DANGER/COLLAPSE 4버킷으로 집계) → 의료 시스템 현황(정상/주의/과부하/붕괴 4버킷,
+    /// 국가 상태 분포와 동일 UI 재사용) → 감염 국가 현황(감염/무감염/소멸 국가 수 — 가장 파생적인
+    /// 집계라 최하단). "세계 통계 리포트"에서 "플레이어 의사결정 콘솔"로 UX Audit 결과에 따라
+    /// 섹션 순서만 재배치했다 — UXML 자식 순서만 바꿨고 요소 이름/클래스/데이터 바인딩(아래
+    /// OnEnable()의 root.Q&lt;T&gt;() 조회는 이름 기반이라 DOM 순서 무관)·계산식·기능은 전부
+    /// 그대로다. 신규 데이터 모델 없음 — Country/WorldState/WorldDataManager의 기존 필드와
+    /// 계산식만 사용한다.
     ///
     /// [2차 확장, 2026-07-11 사용자 승인] GLOBAL STATUS/감염 국가 현황/의료 시스템 현황/종합
     /// 위협도(THREAT INDEX)를 추가하고, 기존 감염률/치사율(추정)/의료 부하 TOP10 랭킹 3개는
@@ -102,6 +118,14 @@ namespace Contagion.UI
 
         private Label _globalStatusBanner;
 
+        /// <summary>[Hero Stats, 2026-07-15 사용자 승인] GLOBAL STATUS 바로 아래 2x2 KPI —
+        /// INFECTED/DEATHS/CURE/EXTINCT. 신규 데이터 없음: WorldState.infectedCount/deadCount/
+        /// cureProgress + ExtinctCountryCount() 헬퍼(기존 소멸 국가 집계 추출)만 사용한다.</summary>
+        private Label _heroInfectedValue;
+        private Label _heroDeathsValue;
+        private Label _heroCureValue;
+        private Label _heroExtinctValue;
+
         private VisualElement _populationHealthySegment;
         private VisualElement _populationInfectedSegment;
         private VisualElement _populationDeadSegment;
@@ -120,8 +144,18 @@ namespace Contagion.UI
         private Label _medicalOverloadCount;
         private Label _medicalCollapseCount;
 
-        private VisualElement _rankingThreat;
         private VisualElement _rankingInfected;
+        private VisualElement _rankingDead;
+
+        /// <summary>[Performance Dashboard v5, 2026-07-15 사용자 승인] 국가 상태 분포/의료
+        /// 시스템 현황을 삭제하지 않고 강등한 "ADVANCED DIAGNOSTICS" 접기/펼치기 섹션.
+        /// 48개국 목록의 대륙 아코디언(_continentExpanded 등)과는 별개의 단일 bool로 관리한다
+        /// — 대륙별 Dictionary를 재사용하면 이 섹션 하나만을 위해 불필요한 키 관리가 생긴다.
+        /// 기본값 false(접힘)는 요구사항 그대로.</summary>
+        private VisualElement _advancedDiagnosticsHeader;
+        private Label _advancedDiagnosticsArrow;
+        private VisualElement _advancedDiagnosticsBody;
+        private bool _advancedDiagnosticsExpanded;
 
         private VisualElement _statusList;
 
@@ -177,6 +211,11 @@ namespace Contagion.UI
 
             _globalStatusBanner = root.Q<Label>("global-status-banner");
 
+            _heroInfectedValue = root.Q<Label>("hero-infected-value");
+            _heroDeathsValue = root.Q<Label>("hero-deaths-value");
+            _heroCureValue = root.Q<Label>("hero-cure-value");
+            _heroExtinctValue = root.Q<Label>("hero-extinct-value");
+
             _populationHealthySegment = root.Q<VisualElement>("population-bar-healthy");
             _populationInfectedSegment = root.Q<VisualElement>("population-bar-infected");
             _populationDeadSegment = root.Q<VisualElement>("population-bar-dead");
@@ -195,8 +234,13 @@ namespace Contagion.UI
             _medicalOverloadCount = root.Q<Label>("medical-overload-count");
             _medicalCollapseCount = root.Q<Label>("medical-collapse-count");
 
-            _rankingThreat = root.Q<VisualElement>("ranking-threat");
             _rankingInfected = root.Q<VisualElement>("ranking-infected");
+            _rankingDead = root.Q<VisualElement>("ranking-dead");
+
+            _advancedDiagnosticsHeader = root.Q<VisualElement>("advanced-diagnostics-header");
+            _advancedDiagnosticsArrow = root.Q<Label>("advanced-diagnostics-arrow");
+            _advancedDiagnosticsBody = root.Q<VisualElement>("advanced-diagnostics-body");
+            _advancedDiagnosticsHeader?.RegisterCallback<ClickEvent>(_ => ToggleAdvancedDiagnostics());
 
             _statusList = root.Q<VisualElement>("status-list");
 
@@ -278,6 +322,7 @@ namespace Contagion.UI
             var countries = WorldDataManager.Instance?.Countries;
             if (countries == null) return;
 
+            PopulateHeroStats(state, countries);
             PopulateInfectionSummary(countries);
             PopulateDistribution(countries);
             PopulateMedicalDistribution(countries);
@@ -343,6 +388,26 @@ namespace Contagion.UI
         }
 
         // ------------------------------------------------------------
+        // Hero Stats — INFECTED / DEATHS / CURE / EXTINCT 2x2 KPI
+        // ------------------------------------------------------------
+
+        /// <summary>신규 계산식 없음 — WorldState.infectedCount/deadCount/cureProgress(HudController와
+        /// 동일한 %표기 규약)와 ExtinctCountryCount() 헬퍼만 사용한다.</summary>
+        private void PopulateHeroStats(WorldState state, IReadOnlyList<Country> countries)
+        {
+            if (_heroInfectedValue != null) _heroInfectedValue.text = $"{state.infectedCount:N0}";
+            if (_heroDeathsValue != null) _heroDeathsValue.text = $"{state.deadCount:N0}";
+            if (_heroCureValue != null) _heroCureValue.text = $"{state.cureProgress * 100f:F1}%";
+            if (_heroExtinctValue != null) _heroExtinctValue.text = ExtinctCountryCount(countries).ToString();
+        }
+
+        /// <summary>[헬퍼 추출, 2026-07-15] 기존 PopulateInfectionSummary()의 "소멸 국가" 집계식을
+        /// 그대로 뽑아냈다 — Hero Stats(EXTINCT)와 WORLD OVERVIEW(소멸 국가) 둘 다 같은 값을
+        /// 단일 소스에서 읽도록 하기 위함(신규 계산식 아님, 기존 식 재사용).</summary>
+        private static int ExtinctCountryCount(IReadOnlyList<Country> countries) =>
+            countries.Count(c => c.GetCollapseStage() == CountryCollapseStage.Extinct);
+
+        // ------------------------------------------------------------
         // 세계 요약 — population-bar(Hud.uss 재사용) + data-row 6줄
         // ------------------------------------------------------------
 
@@ -391,9 +456,10 @@ namespace Contagion.UI
             // 결론이 국가 단위와 동일하게 적용된다(Docs/CountryStatus_Dashboard_Investigation.md 2.2절).
             float worldCfr = (dead + infected) > 0 ? (float)dead / (dead + infected) : 0f;
 
+            // [Performance Dashboard v5, 2026-07-15 사용자 승인] "총 감염자"/"총 사망자" 행은
+            // 위 Hero Stats(INFECTED/DEATHS)와 중복돼 제거했다 — 계산식은 그대로, 표시 위치만
+            // Hero Stats로 옮겨졌다(신규 계산식 없음).
             AddDataRow(_worldSummaryRows, "세계 인구", $"{total:N0}");
-            AddDataRow(_worldSummaryRows, "총 감염자", $"{infected:N0}", "data-value--infected");
-            AddDataRow(_worldSummaryRows, "총 사망자", $"{dead:N0}", "data-value--dead");
             AddDataRow(_worldSummaryRows, "세계 감염률", $"{worldInfectionRate * 100f:F1}%",
                        worldInfectionRate >= 0.5f ? "data-value--danger" : "data-value--infected");
             AddDataRow(_worldSummaryRows, "치사율(추정)", $"{worldCfr * 100f:F1}%",
@@ -416,11 +482,12 @@ namespace Contagion.UI
 
             int total = countries.Count;
             int infectedCountries = countries.Count(c => c.infectedCount > 0);
-            int extinctCountries = countries.Count(c => c.GetCollapseStage() == CountryCollapseStage.Extinct);
+            int extinctCountries = ExtinctCountryCount(countries);
 
+            // [Performance Dashboard v5, 2026-07-15 사용자 승인] "무감염 국가 수" 행은
+            // Hero Stats(EXTINCT)·감염 국가 행과 함께 두면 정보가 중복돼 제거했다.
             AddDataRow(_infectionSummaryRows, "감염 국가", $"{infectedCountries} / {total}",
                        infectedCountries > 0 ? "data-value--infected" : "data-value--info");
-            AddDataRow(_infectionSummaryRows, "무감염 국가", $"{total - infectedCountries}", "data-value--info");
             AddDataRow(_infectionSummaryRows, "소멸 국가", $"{extinctCountries}",
                        extinctCountries > 0 ? "data-value--dead" : null);
         }
@@ -489,33 +556,27 @@ namespace Contagion.UI
         }
 
         // ------------------------------------------------------------
-        // 랭킹 — 종합 위협도 / 감염자 각 TOP 10
+        // 랭킹 — 감염자 / 사망자 각 TOP 10
         // ------------------------------------------------------------
 
-        /// <summary>[통합, 2026-07-11] 기존엔 감염자/감염률/치사율/의료부하 4개 랭킹(40행)이
-        /// 각각 독립 리스트였다 — 정보량만 늘어나고 "이 나라가 종합적으로 얼마나 위험한지"는
-        /// 플레이어가 4개 리스트를 직접 대조해야 알 수 있었다. 감염률/치사율/의료부하 3개를
-        /// ThreatIndex() 가중합 하나로 통합하고, 감염자 TOP10(원시 수치, 규모 파악용)만 별도로
-        /// 남겨 랭킹 섹션을 4개→2개로 줄였다.</summary>
+        /// <summary>[Performance Dashboard v4, 2026-07-15 사용자 승인] 종합 위협도 TOP10("전략
+        /// 콘솔" 시절 설계, ThreatIndex() 가중합)은 성과 대시보드 정체성과 맞지 않아 제거했다.
+        /// 대신 승리 조건과 직접 연결되는 사망자 TOP10을 추가 — 감염자 TOP10과 동일하게
+        /// RebuildTopRows()에 기존 Country.deadCount만 넘긴다(신규 계산식 없음). ThreatIndex()가
+        /// 유일하게 쓰던 CaseFatalityRate()(치사율 근사 계산)도 이제 다른 곳에서 참조되지 않아
+        /// 함께 제거했다 — 세계 요약의 치사율(추정)은 별도 인라인 계산(worldCfr)이라 영향 없다.</summary>
         private void PopulateRankings(IReadOnlyList<Country> countries)
         {
-            RebuildTopRows(_rankingThreat, countries,
-                c => (double)ThreatIndex(c),
-                c => $"{ThreatIndex(c) * 100f:F0}",
-                c => ThreatIndex(c) >= 0.5f ? "data-value--danger" : "data-value--infected");
-
             RebuildTopRows(_rankingInfected, countries,
                 c => (double)c.infectedCount,
                 c => $"{c.infectedCount:N0}",
                 _ => "data-value--infected");
-        }
 
-        /// <summary>종합 위협도(0~1) — 감염률 40% + 치사율(추정) 30% + 의료 부하 30% 가중합.
-        /// 세 값 모두 기존 계산식(InfectionRatio/CaseFatalityRate/MedicalLoad) 재사용, 신규 데이터
-        /// 없음. 가중치는 "감염 확산이 1차 위협, 중증도·의료 붕괴가 2차 위협"이라는 설계 의도로
-        /// 잡은 제안값 — 플레이테스트로 조정 필요(Docs/QA_Checklist.md 참고).</summary>
-        private static float ThreatIndex(Country country) =>
-            InfectionRatio(country) * 0.4f + CaseFatalityRate(country) * 0.3f + MedicalLoad(country) * 0.3f;
+            RebuildTopRows(_rankingDead, countries,
+                c => (double)c.deadCount,
+                c => $"{c.deadCount:N0}",
+                _ => "data-value--dead");
+        }
 
         private static void RebuildTopRows(
             VisualElement container,
@@ -538,15 +599,6 @@ namespace Contagion.UI
 
         private static float InfectionRatio(Country country) =>
             country.LivingPopulation > 0 ? (float)country.infectedCount / country.LivingPopulation : 0f;
-
-        /// <summary>CountryPopupController.CaseFatalityRate()와 동일 공식(사망/(사망+감염) 근사치)을
-        /// 독립적으로 복제 — CountryPopupController는 이번 작업에서 수정 대상이 아니라 공유 헬퍼로
-        /// 추출하지 않고 그대로 복제했다(두 화면이 서로 의존하지 않도록).</summary>
-        private static float CaseFatalityRate(Country country)
-        {
-            long denominator = country.deadCount + country.infectedCount;
-            return denominator > 0 ? (float)country.deadCount / denominator : 0f;
-        }
 
         /// <summary>CountryPopupController.MedicalLoadStatus()와 동일 공식(감염 비율 × (1-의료수준))을
         /// 독립적으로 복제.</summary>
@@ -700,6 +752,21 @@ namespace Contagion.UI
 
             if (_continentArrows.TryGetValue(continentLabel, out var arrow))
                 arrow.text = expanded ? "▼" : "▶";
+        }
+
+        /// <summary>ADVANCED DIAGNOSTICS 헤더 클릭 — ToggleContinent()/ApplyContinentExpandedState()와
+        /// 동일한 토글+표시 로직이지만, 이 섹션은 대륙별 Dictionary에 속하지 않는 단일 섹션이라
+        /// 별도 bool 필드로 관리한다(48개국 목록 아코디언과 무관, 서로 영향 없음).</summary>
+        private void ToggleAdvancedDiagnostics()
+        {
+            _advancedDiagnosticsExpanded = !_advancedDiagnosticsExpanded;
+
+            if (_advancedDiagnosticsBody != null)
+                _advancedDiagnosticsBody.style.display =
+                    _advancedDiagnosticsExpanded ? DisplayStyle.Flex : DisplayStyle.None;
+
+            if (_advancedDiagnosticsArrow != null)
+                _advancedDiagnosticsArrow.text = _advancedDiagnosticsExpanded ? "▼" : "▶";
         }
 
         private RowRefs BuildRow(Country country)
