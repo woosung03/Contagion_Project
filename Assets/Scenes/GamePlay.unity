@@ -3865,7 +3865,6 @@ GameObject:
   - component: {fileID: 543881992}
   - component: {fileID: 543881995}
   - component: {fileID: 543881994}
-  - component: {fileID: 543881996}
   - component: {fileID: 3400000101}
   m_Layer: 5
   m_Name: HUD
@@ -3937,18 +3936,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9af0e62b154126642b3b832108a83c1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.HudController
---- !u!114 &543881996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 543881991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03d2a5f4b33123845a800ef1995c3836, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.CountryDockController
 --- !u!61 &544314452
 BoxCollider2D:
   m_ObjectHideFlags: 0
