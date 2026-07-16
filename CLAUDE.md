@@ -36,15 +36,10 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 
 ## 현재 구현된 시스템
 
-기능 단위 요약만 남긴다. 구현 배경·이유는 `Docs/DevLog.md`, 코드/폴더 구조는 `Docs/Archive/Architecture.md`
-참고.
-
-**UI 시스템 전제**: Contagion Project UI는 "Gameplay UI"/"Preparation UI"로 분리된 두 개의
-디자인 시스템이 아니라, **단일 Tactical Design System**을 사용한다(`Docs/DESIGN.md`가
-정본). 화면별 차이는 별도 시스템이 아니라 **Layout System**(화면 분류) 차이다 — Fullscreen
-(MainMenu/CountrySelect/UpgradeTree/EndingScreen), Overlay Panel(ResearchPopup), Bottom Sheet
-(CountryPopup/CountryStatusPanel/RankingPanel), HUD Chrome(resource-strip/event-dock/
-population-bar/graph-panel/action-strip) 4가지. 정의는 `Docs/DESIGN.md` > 7. Layout System 참고.
+기능 단위 요약만 남긴다. 구현 배경·이유·Step별 상세는 `Docs/DevLog.md`, 코드/폴더 구조는
+`Docs/Archive/Architecture.md` 참고. UI는 단일 Tactical Design System 사용(정본:
+`Docs/DESIGN.md`), 화면 분류(Fullscreen/Overlay Panel/Bottom Sheet/HUD Chrome)는 `DESIGN.md`
+§7 Layout System 참고.
 
 - 핵심 데이터/시뮬레이션 — `Pathogen`/`Country`/`WorldState`, 틱 기반 감염·사망·치료제 진행
   (`SimulationManager`), `WorldDataManager`, `GameManager`(페이즈/난이도/일시정지)
@@ -57,59 +52,20 @@ population-bar/graph-panel/action-strip) 4가지. 정의는 `Docs/DESIGN.md` > 7
 - 교통 유닛 그래픽 — 이모지 기반(✈️ / `Ship 1.png`), carrier(감염)는 색상 윤곽선으로 구분
 - 게임플레이 시스템 — `UpgradeManager`(DNA 트리, 국가 48개·병원체 6종·업그레이드 45노드),
   `HumanResistanceManager`(인류 저항 AI), `EventManager`(뉴스피드 이벤트)
-- UI Toolkit 전체 — HUD/업그레이드 트리/국가 상태 패널/뉴스피드/엔딩/랭킹, 공통 `Theme.uss` 디자인 토큰
-- Tactical Design System 전환 — CountrySelect(country-row accent bar+data-row, detail-panel
-  tactical-panel)/MainMenu(pathogen-card tactical-panel+corner-cut+data-row, detail-panel)/
-  EndingScreen(통계+스코어 패널 tactical-panel+corner-cut, data-row 4줄, hero 스코어)/
-  CountryPopup(`TacticalModalController` 공용 프레임 상속 — 이후 Bottom Sheet로 전환, 아래 참고)/
-  RankingPanel(tactical-panel+corner-cut 4개+tactical-panel__header+data-row+popup-footer-button
-  2개 균등폭, UI Audit C등급 해소 — Tactical Design System 전체 화면 적용 완료)
-- CountryPopup → Bottom Sheet 전환 완료 — 화면 하단 고정(지도를 가리지 않음), `quick-stat-grid`
-  11개 필드(국기·대륙·인구·감염자·사망자·감염률·공항·항만·의료·국경 상태 + 상세보기 버튼),
-  `badge-tag` severity 칩(공항/항만/의료/국경 상태). 기존 도넛 차트/세계 순위/이동 통제 섹션은
-  제거되고 "상세 보기" 버튼으로 CountryStatusPanel과 연결됨(아래 참고). Country Dock
-  (`CountryDockController`, 우측 상단 상시 표시 패널)은 중복 UI로 판단돼 완전히 제거됨
-  (UXML/USS/씬 컴포넌트 포함)
-- CountryStatusPanel → GLOBAL STATUS CENTER, 정체성 확정: "전파 전략 콘솔"이 아니라 "성과
-  대시보드"(세계 감염 진행 상황 확인 화면, 근거: DevLog Step 88). GLOBAL STATUS 한줄평가/
-  Hero Stats(INFECTED·DEATHS·CURE·EXTINCT 2x2 KPI, 근거: DevLog Step 89)/WORLD OVERVIEW(세계
-  요약+감염 국가 현황 통합 캡션, Hero Stats와 중복되는 총 감염자·총 사망자·무감염 국가 수 행은
-  제거)/ADVANCED DIAGNOSTICS(국가 상태 분포+의료 시스템 현황, 기본 접힘 아코디언)/감염자 TOP 10/
-  사망자 TOP 10/48개국 목록(대륙 아코디언, accent bar, 최하단 상세 조회 도구) 순 Performance
-  Dashboard, tactical-panel+코너컷+data-row+severity 4색 체계
-- CountryStatusPanel 리스트→상세 팝업 드릴다운 — Research Database와 동일 패턴(리스트 행 클릭 →
-  이벤트 발행 → `UIManager` → 상세 팝업). 48개국 목록의 `status-row` 클릭 시
-  `CountryStatusPanelController.OnCountryRowSelected` → `UIManager` → `CountryPopupController.
-  ShowCountry()`로 지도 클릭과 동일한 국가 상세 팝업이 열린다. 새 화면은 만들지 않고 기존
-  `CountryPopupController`/`CountryStatusPanelController`를 재사용, `CountryPopupUI`의
-  `m_SortingOrder`를 2로 올려 `CountryStatusPanelUI`(1) 위에 항상 렌더링되도록 수정
-- CountryPopup Bottom Sheet → CountryStatusPanel 연결(반대 방향) — 팝업의 "상세 보기" 버튼 →
-  `CountryPopupController.OnDetailRequested`(Country) 발행 → `UIManager`가
-  `TransitionTo(AppScreen.GlobalStatus)`(AppScreen 상태 머신 경유, WorldMapInputLock 처리 포함)로
-  연 뒤 `CountryStatusPanelController.FocusCountry(country)` 호출 — 해당 국가의 대륙 아코디언만
-  자동으로 펼쳐진다(자동 스크롤/행 강조는 미구현, 후속 과제). 국가 클릭 → Bottom Sheet →
-  상세보기 → Country Status 흐름 완성
-- CountryStatusPanel 48개국 목록 → 대륙별 접기/펼치기 아코디언 — 6대륙(ASIA/EUROPE/NORTH
-  AMERICA/SOUTH AMERICA/AFRICA/OCEANIA) 헤더 클릭으로 토글, ASIA만 초기 펼침. 국가 행
-  클릭(`OnCountryRowSelected`)·`CountryPopup` 재사용 구조는 그대로 유지, `Country`에 대륙
-  필드를 추가하지 않고 컨트롤러 전용 id→대륙 매핑으로 처리
-- Research Database v2 — 업그레이드 트리 화면을 절대좌표 캔버스에서 브랜치 보드(계열 3+통합 1,
-  진행률 n/m) + 세로 스크롤 리스트(선택된 브랜치만)로 전환, `UpgradeManager.Tree`의 실제 45개
-  `UpgradeNode`에 연결 완료(코드/이름/상태/비용 전부 실데이터). 연구 항목 행 클릭 →
-  `UpgradeTreeView.OnResearchItemSelected(UpgradeNode)` 발행 → `UIManager`가 3개 뷰 모두 구독해
-  `ResearchPopupController.Show()` 호출까지 배선 완료 — 연구 항목을 클릭하면 이름/브랜치/설명이
-  담긴 상세 팝업이 실제로 뜬다(Close 버튼 포함). `UpgradeManager.OnNodeUnlocked` 구독으로 활성
-  뷰의 브랜치 보드/요약을 갱신하는 부분과 팝업의 "연구 시작"/"취소" 버튼 로직은 아직 미구현
+- UI Toolkit 전체 — HUD/업그레이드 트리/국가 상태 패널/뉴스피드/엔딩/랭킹, 공통 `Theme.uss` 디자인
+  토큰, Tactical Design System 전체 화면 적용 완료
+- CountryPopup — Bottom Sheet 전환 완료(지도를 가리지 않는 하단 고정, `quick-stat-grid` 11필드+
+  `badge-tag` severity 칩+상세보기 버튼). Country Dock(중복 UI)은 완전히 제거됨(커밋 2e4483e)
+- CountryStatusPanel — GLOBAL STATUS CENTER(Performance Dashboard: Hero Stats 2x2 KPI/
+  WORLD OVERVIEW/ADVANCED DIAGNOSTICS/감염자·사망자 TOP 10/48개국 대륙 아코디언). 목록 행 클릭 시
+  CountryPopup 상세 팝업으로 드릴다운, CountryPopup "상세 보기" 버튼으로 역방향 연결도 완성
+- Research Database v2 — 업그레이드 트리를 브랜치 보드(계열 3+통합 1)+연구 목록으로 전환,
+  `UpgradeManager.Tree`의 실제 45개 `UpgradeNode` 전부 연동. 연구 항목 클릭 시 상세 팝업 표시까지
+  완료(잔여 작업은 아래 TODO 참고)
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
 - 모바일 타겟팅 — 세로 화면 고정, SafeArea 적용, 국가 지리적 재배치(경도/위도 기반)
-
-최근 작업 이력(Step 단위)은 `Docs/DevLog.md` 참고 — 가장 최근 기록은 Step 85(CountryStatusPanel
-리스트→상세 팝업 드릴다운 확장, `CountryPopupUI` sortingOrder 충돌 수정 포함). Step 84 이후
-`UIManager`가 3개 뷰의 `OnResearchItemSelected`를 구독해 `ResearchPopupController.Show()`를
-호출하는 배선(커밋 7 절반)을 완료했으나 아직 DevLog에 Step으로 기록되지 않음 — 다음 DevLog 갱신
-시 반영 필요. 검증은 `Docs/Archive/QA_Checklist.md` 참고.
 
 ---
 
@@ -121,11 +77,8 @@ population-bar/graph-panel/action-strip) 4가지. 정의는 `Docs/DESIGN.md` > 7
 **Research Database v2 — 커밋 7 나머지 절반** (근거:
 `Docs/Archive/ResearchDatabase_V2_ImplementationPlan.md` §1/§4)
 
-- 커밋 1~6 완료. 커밋 7 중 "`UIManager`가 3개 `UpgradeTreeView.OnResearchItemSelected` 구독 →
-  `ResearchPopupController.Show()` 호출"까지 완료 — 연구 항목 행을 클릭하면 이름/브랜치/설명이
-  담긴 팝업이 실제로 뜬다.
-- `UpgradeManager.OnNodeUnlocked` 구독으로 활성 뷰(브랜치 보드/요약)를 갱신하는 나머지 절반이
-  남음(계획서 §4 커밋 7 표 3번째 항목).
+- `UpgradeManager.OnNodeUnlocked` 구독으로 활성 뷰(브랜치 보드/요약)를 갱신하는 부분이 남음
+  (계획서 §4 커밋 7 표 3번째 항목).
 - 이후 폴리싱(`LockReason()`/CTA 버튼 문구 4갈래, 커밋 8) → 구 코드 정리(`buy-button` UXML 제거
   등, 커밋 9) → 문서 반영(`DESIGN.md`/`QA_Checklist.md`/`unity-editor-task.md`, 커밋 10) → 에디터
   씬 배선(`ResearchPopupUI` GameObject)+실기기 검증(커밋 11)까지 계획서 §1/§4 순서 그대로 진행.
@@ -133,14 +86,16 @@ population-bar/graph-panel/action-strip) 4가지. 정의는 `Docs/DESIGN.md` > 7
   아님)는 `Docs/Archive/ResearchDatabase_RuntimeSystems.md` §9 순서를 따르고, 그 문서 §11의 미결정
   항목과 `NodeMapping.md` §8의 잔여 항목(DNA 비용 프리미엄·항원 변이 확률 밸런스)을 착수 전 확인.
 
-**UI 기술 부채 — Tactical.uss 로컬 중복 정의 제거** (근거: `Docs/Archive/UI_Design.md` §15
-Historical Notes, §16.1)
+**UI 기술 부채 — Tactical.uss 로컬 중복 정의 잔여분 제거** (근거: UI Audit 1~4차 작업)
 
-- `Hud.uss`(155~165행)에 `tactical-panel`/`corner-cut`/`data-row`가 `Tactical.uss`와
-  별개로 로컬 정의되어 있음 — `Tactical.uss` 참조로 교체하고 로컬 정의 제거 필요.
-- `UpgradeTree.uss`(84~145행)도 동일한 로컬 중복(노드 상태 variant는 UpgradeTree 전용이라
-  잔류 유지). 두 파일 모두 기능상 문제는 없음(같은 값 이중 정의일 뿐) — 제거 후 45노드/
-  코너컷/상태색 회귀 확인 필요.
+- `corner-cut`/`tactical-panel`/`tactical-panel__header`/`tactical-panel__title`/
+  `popup-footer-button`/`modal-footer`는 정리 완료(Hud.uss/UpgradeTree.uss/RankingPanel.uss/
+  ResearchPopup.uss가 전부 Tactical.uss 참조로 전환됨).
+- `UpgradeTree.uss`에 `data-row`(셀렉터 자체)가 아직 로컬 중복으로 남아있음 — Tactical.uss
+  참조로 교체 필요.
+- `UpgradeTree.uss`의 `data-label`/`data-value`는 Tactical.uss 정본의 오버플로우 버그 픽스
+  (`flex-shrink`/`min-width`/`white-space`/`text-align`)가 소급 반영되지 않은 상태 — 단순 삭제가
+  아니라 값 갱신 후 45개 연구 노드 회귀 확인이 선행되어야 함.
 
 **조사 필요**
 

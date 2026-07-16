@@ -153,28 +153,11 @@
 
 /* ============================================================
    Tactical Display 공용 요소 (UI_Design.md 3절/11절) — HUD(event-dock/country-dock)에서
-   확립된 코너컷/판독 패널 문법을 UpgradeTree에 이식. 화면이 늘어나면 Tactical.uss로 승격해
-   중복을 없앨 예정(현재는 UpgradeTree 전용으로 로컬 정의, 클래스명은 승격을 염두에 두고
-   범용 이름을 그대로 사용 — 승격 시 이름 변경 불필요).
+   확립된 코너컷/판독 패널 문법을 UpgradeTree에 이식.
    ============================================================ */
-.tactical-panel {
-    border-width: 1px;
-    border-color: var(--color-accent-glow-soft);
-}
 
-.tactical-panel__header {
-    padding-bottom: 3px;
-    margin-bottom: var(--space-xs);
-    border-bottom-width: 1px;
-    border-bottom-color: var(--color-grid-line);
-}
-
-.tactical-panel__title {
-    color: var(--color-accent-glow);
-    font-size: var(--font-size-xs);
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-caption);
-}
+/* tactical-panel/tactical-panel__header/tactical-panel__title — Tactical.uss 공용 정의 사용
+   (로컬 재정의 제거, UI Audit 4차 작업). */
 
 /* corner-cut — Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). */
 
