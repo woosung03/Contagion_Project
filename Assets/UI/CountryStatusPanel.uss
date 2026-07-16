@@ -106,9 +106,10 @@
 .hero-stat-tile {
     width: 48%;
     align-items: center;
-    background-color: var(--color-surface-soft);
+    /* Direction C Color Pass 2 — 배경 자체를 없애 "검은 공간 위 데이터"로. 4개뿐인 저반복
+       KPI라 테두리는 full accent-glow 유지(Color Pass 1). */
     border-width: var(--stroke-hairline);
-    border-color: var(--color-border);
+    border-color: var(--color-accent-glow);
     padding: var(--space-sm) var(--space-md);
     margin-bottom: var(--space-sm);
 }
@@ -195,13 +196,16 @@
         무변경, align-items:center로 내용은 그대로 세로 중앙 정렬됨. advanced-diagnostics-header도
         동일 클래스를 공유해 함께 적용된다. */
     padding: var(--space-sm);
-    background-color: var(--color-surface-soft);
-    border-left-color: var(--color-accent-glow-soft);
+    /* Direction C Color Pass 2 — 배경 제거. 좌측바는 Color Pass 1에서 soft(hover 전용 강조)→
+       상시 full accent-glow로 이미 승격됨(터치 기기에서 :hover가 거의 안 걸려 soft 상태로만
+       보이던 문제 해결). */
+    border-left-color: var(--color-accent-glow);
 }
 
 .continent-header:hover {
+    /* border-left-color는 기본값이 이미 full accent-glow로 승격되어 더 이상 :hover에서 바뀔
+       색이 없다 — hover 피드백은 background-color만 담당(에디터/PC 확인용). */
     background-color: var(--color-surface-hover);
-    border-left-color: var(--color-accent-glow);
 }
 
 /* 화살표(▼ 펼침 / ▶ 접힘) — 구조용 발광색, 고정폭으로 옆 라벨이 흔들리지 않게 한다. */
@@ -236,11 +240,14 @@
 }
 
 .status-row {
-    background-color: var(--color-surface-soft);
+    /* Direction C Color Pass 2 — 배경 완전 제거, 좌측 severity accent-bar와 여백만으로 행을
+       구분한다(hairline 구분선은 별도 검증 후 다음 라운드에서 재검토). 좌측 폴백 색은 Color
+       Pass 1에서 회색→민트 soft로 정리됨(48행 전부 버킷 클래스가 덮어써 실제로는 거의
+       노출되지 않음). */
     padding: 8px 10px;
     margin-bottom: var(--space-sm);
     border-left-width: 4px;
-    border-left-color: var(--color-border);
+    border-left-color: var(--color-accent-glow-soft);
 }
 
 .status-row--safe     { border-left-color: var(--color-status-info); }

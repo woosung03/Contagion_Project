@@ -15,7 +15,13 @@
 
 :root {
     /* ---- 배경 (격리소/브리핑룸 톤 다크 배경, 화면별 패널 성격에 따라 구분) ---- */
-    --color-bg-root: rgba(8, 8, 16, 0.97);          /* MainMenu/CountrySelect 전체화면 */
+    --color-bg-root: rgba(8, 8, 16, 1);             /* MainMenu/CountrySelect 전체화면 —
+                                                         0.97이던 시절 뒤에서 계속 렌더링되는
+                                                         WorldMap(WorldMapInputLock은 입력만
+                                                         잠글 뿐 렌더링은 안 멈춤)이 옅게 비쳐
+                                                         카드마다 다른 얼룩으로 보였다(Direction C
+                                                         Color Pass 2, 2026-07-17) — bg-panel-strong과
+                                                         동일하게 완전 불투명으로 고정. */
     --color-bg-panel: rgba(15, 15, 25, 0.95);        /* 팝업/랭킹 등 뜨는 패널 */
     --color-bg-panel-strong: rgba(9, 9, 16, 1);      /* CountryStatusPanel(GLOBAL STATUS CENTER) 전용 —
                                                          지도/항로선이 전혀 비치지 않아야 하는 풀스크린급
@@ -114,6 +120,11 @@
     --color-accent-glow: rgb(150, 255, 185);
     --color-accent-glow-soft: rgba(150, 255, 185, 0.35);
     --color-grid-line: rgba(150, 255, 185, 0.12);
+    /* Direction C(Data Wall Terminal) Color Pass 1 — 카드/행 배경 전용 초저알파 민트 틴트.
+       Surface Ladder(위, 백색 alpha 8단계)와는 별도 축이다 — "회색 카드"를 투명이 아니라
+       accent-glow 색 자체의 극히 옅은 틴트로 채워 "회색 관리자 페이지" 인상을 줄이면서도
+       카드 형태(Data Wall)는 유지한다(2026-07-17, CountryStatusPanel 1차 적용). */
+    --color-surface-mint: rgba(150, 255, 185, 0.04);
 
     /* ---- 자간 스케일 (Docs/UI_Design.md 2절/11.9 — Tactical Display 캡션/라벨 리듬 통일,
        UpgradeTree부터 적용 시작, 이후 화면 확장 시 동일 토큰 재사용) ---- */

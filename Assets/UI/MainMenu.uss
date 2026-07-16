@@ -46,7 +46,8 @@
 
 .pathogen-card {
     position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
-    background-color: var(--color-surface);
+    /* Direction C Color Pass 2 — 배경 제거(--color-surface였음). 코너컷+hairline만으로
+       "브리핑 슬롯"을 표현, 안쪽은 검은 공간 위 데이터로 남긴다. */
     padding: var(--space-sm) var(--space-md);
     margin-bottom: var(--space-md);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지 않음 */
@@ -109,14 +110,16 @@
 }
 
 .country-row {
-    background-color: var(--color-surface);
+    /* Direction C Color Pass 2 — 배경 제거(--color-surface였음), 외곽 테두리 회색
+       (--color-border)→민트(--color-accent-glow-soft). 48행이 "카드 더미"가 아니라
+       "리스트"로 읽히게 한다. */
     border-width: 2px;
     /* border-left-width는 이 rule 안에서 override — accent-bar-row(Tactical.uss)에 맡기면
        Theme.uss->Tactical.uss->MainMenu.uss 로드 순서상 이 shorthand가 나중에 적용되어
        4px accent bar가 2px로 눌려버린다(UpgradeTree.uss .tree-node와 동일한 단일 rule
        패턴으로 고정 — Docs/UI_Design.md 16.2 ①). */
     border-left-width: 4px;
-    border-color: var(--color-border);
+    border-color: var(--color-accent-glow-soft);
     border-radius: var(--radius-md);
     padding: 8px 12px;
     margin-bottom: 10px;
@@ -176,7 +179,8 @@
 
 .detail-panel {
     position: relative; /* tactical-panel의 corner-cut(position:absolute 자식) 기준점 확보용 */
-    background-color: var(--color-surface);
+    /* Direction C Color Pass 2 — 배경 제거(--color-surface였음). hairline+코너컷 4개가
+       경계를 이미 명확히 그려서 안쪽 채움 없이도 판독창으로 읽힌다. */
     padding: var(--space-lg);
     border-radius: 0; /* tactical-panel의 코너컷과 둥근 모서리가 충돌해 각짐으로 통일 */
     margin-bottom: var(--space-lg);
