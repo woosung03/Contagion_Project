@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="UpgradeTree.uss" />
     <ui:VisualElement name="upgrade-root" class="upgrade-root">
         <!-- Research Database UI Shell (Commit 1) — 좌우 화살표(◀▶) 카테고리 순환 대신 상단 고정

@@ -149,22 +149,9 @@
     border-bottom-color: var(--color-grid-line);
 }
 
-/* [SF 전술 디스플레이] 모서리 컷팅 — USS는 clip-path/mask를 지원하지 않아(css-to-uss-support.md)
-   패널 배경 자체를 잘라낼 수 없다. 대신 DEFCON/Frostpunk류 UI에서 흔한 "코너 브래킷" 관례를
-   채택했다 — 패널 네 귀퉁이에 짧은 발광 대각선 틱을 얹어 "각진 모서리" 느낌을 낸다(배경 도형
-   자체는 그대로 사각형이라 레이아웃에는 영향 없음, picking-mode Ignore로 클릭 통과).
-   event-dock/country-dock처럼 position:absolute인 패널이 이 자식들의 위치 기준(anchor)이 된다. */
-.corner-cut {
-    position: absolute;
-    width: 13px;
-    height: 2px;
-    background-color: var(--color-accent-glow);
-}
-
-.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
-.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
-.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
-.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+/* corner-cut — Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). 패널 네
+   귀퉁이에 짧은 발광 대각선 틱을 얹어 "각진 모서리" 느낌을 낸다. event-dock/country-dock처럼
+   position:absolute인 패널이 이 자식들의 위치 기준(anchor)이 된다. */
 
 .event-dock .news-scroll {
     height: 130px;

@@ -176,19 +176,7 @@
     letter-spacing: var(--tracking-caption);
 }
 
-/* 코너컷 — Hud.uss .corner-cut과 동일 값(발광 대각선 틱, clip-path 미지원 대체재).
-   화면 간 톤을 맞추기 위해 크기/색상을 그대로 복제했다. */
-.corner-cut {
-    position: absolute;
-    width: 13px;
-    height: 2px;
-    background-color: var(--color-accent-glow);
-}
-
-.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
-.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
-.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
-.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+/* corner-cut — Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). */
 
 /* data-row/data-label/data-value — country-dock__row와 동일 계약(11.4 상세 패널, 국가현황
    패널·Country Dock과 동일한 "판독 행" 문법). */

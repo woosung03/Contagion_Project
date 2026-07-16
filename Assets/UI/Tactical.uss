@@ -132,3 +132,32 @@
     border-left-color: var(--color-status-danger);
     padding-left: var(--space-xs);
 }
+
+/* Modal Footer 버튼 — RankingPanel.uss/ResearchPopup.uss에 동일하게 정의되어 있던 것을 공용
+   승격(UI Audit 1차 작업). 버튼 2개 균등폭 배치(modal-footer) + 확인/보조 액션
+   구분(popup-footer-button--confirm). */
+.modal-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: var(--space-sm);
+}
+
+.popup-footer-button {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: var(--touch-target-min);
+    margin: 0 4px;
+    border-width: 1px;
+    border-color: var(--color-accent-glow);
+    border-radius: 0;
+    background-color: var(--color-bg-panel);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    letter-spacing: var(--tracking-label);
+}
+
+.popup-footer-button--confirm {
+    background-color: var(--color-accent-glow-soft);
+    border-color: var(--color-accent-glow);
+}

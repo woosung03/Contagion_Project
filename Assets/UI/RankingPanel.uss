@@ -43,31 +43,6 @@
     margin-bottom: var(--space-md);
 }
 
-/* 확인/보조 액션 2개 균등폭 — ResearchPopup.uss .modal-footer/.popup-footer-button과 동일
-   톤(radius:0 + accent-glow 테두리 + bg-panel 배경). "토스 리더보드 열기"가 확정 액션이라
-   --confirm 변형(accent-glow-soft 배경)을 얹어 "닫기"와 시각적으로 구분한다. */
-.modal-footer {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: var(--space-sm);
-}
-
-.popup-footer-button {
-    flex-grow: 1;
-    flex-basis: 0;
-    height: var(--touch-target-min);
-    margin: 0 4px;
-    border-width: 1px;
-    border-color: var(--color-accent-glow);
-    border-radius: 0;
-    background-color: var(--color-bg-panel);
-    color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-label);
-}
-
-.popup-footer-button--confirm {
-    background-color: var(--color-accent-glow-soft);
-    border-color: var(--color-accent-glow);
-}
+/* 확인/보조 액션 2개 균등폭 — .modal-footer/.popup-footer-button/.popup-footer-button--confirm은
+   Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). "토스 리더보드 열기"가
+   확정 액션이라 --confirm 변형(accent-glow-soft 배경)을 얹어 "닫기"와 시각적으로 구분한다. */

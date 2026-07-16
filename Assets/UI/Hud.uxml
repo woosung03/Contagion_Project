@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="Theme.uss" />
+    <Style src="Tactical.uss" />
     <Style src="Hud.uss" />
     <ui:VisualElement name="hud-root" class="hud-root" picking-mode="Ignore">
 

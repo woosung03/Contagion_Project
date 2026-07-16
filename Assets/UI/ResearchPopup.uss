@@ -56,36 +56,6 @@
 
 /* 확인/취소 액션 버튼 슬롯 — CountryPopup의 modal-footer는 비어있었지만(닫기가 헤더로
    이동), Research Popup은 "연구 시작"이라는 확정 액션이 있어 버튼 2개를 가로로 균등폭
-   배치한다. */
-.modal-footer {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: var(--space-sm);
-}
-
-/* 버튼 2개 균등폭 — flex-grow:1 + flex-basis:0로 modal-footer 폭을 정확히 절반씩 나눠
-   가진다(고정 width를 쓰면 팝업 폭(320px)이 바뀔 때마다 버튼 폭을 같이 손봐야 해서 회피).
-   EndingScreen.uss .ending-button과 동일한 Tactical Design System 버튼 톤
-   (radius:0 + accent-glow 테두리 + bg-panel 배경)을 기본으로 삼는다. */
-.popup-footer-button {
-    flex-grow: 1;
-    flex-basis: 0;
-    height: var(--touch-target-min);
-    margin: 0 4px;
-    border-width: 1px;
-    border-color: var(--color-accent-glow);
-    border-radius: 0;
-    background-color: var(--color-bg-panel);
-    color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-label);
-}
-
-/* "연구 시작" — 확정 액션이라 EndingScreen.uss .ending-button--revive와 같은 방식으로
-   accent-glow 배경을 얹어 "취소"와 시각적으로 구분한다(별도 색상 축 신설 없이 기존
-   --color-accent-glow-soft 재사용, DESIGN.md 색상 축 분리 원칙 준수). */
-.popup-footer-button--confirm {
-    background-color: var(--color-accent-glow-soft);
-    border-color: var(--color-accent-glow);
-}
+   배치한다. .modal-footer/.popup-footer-button/.popup-footer-button--confirm은 Tactical.uss
+   공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). "연구 시작"은 --confirm 변형으로
+   "취소"와 시각적으로 구분한다. */
