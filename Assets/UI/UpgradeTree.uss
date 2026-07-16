@@ -161,30 +161,8 @@
 
 /* corner-cut — Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). */
 
-/* data-row/data-label/data-value — country-dock__row와 동일 계약(11.4 상세 패널, 국가현황
-   패널·Country Dock과 동일한 "판독 행" 문법). */
-.data-row {
-    flex-direction: row;
-    justify-content: space-between;
-    padding-bottom: 2px;
-    margin-bottom: 2px;
-    border-bottom-width: 1px;
-    border-bottom-color: var(--color-grid-line);
-}
-
-.data-label {
-    color: var(--color-text-tertiary);
-    font-size: var(--font-size-xs);
-    letter-spacing: var(--tracking-label);
-}
-
-.data-value {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-xs);
-    -unity-font-style: bold;
-    letter-spacing: var(--tracking-label);
-}
-
+/* data-row/data-label/data-value — Tactical.uss 공용 정의 사용(로컬 재정의 제거, UI Audit
+   5차 작업). 아래 4종 상태 모디파이어만 UpgradeTree 전용 노드 상태 축(DESIGN.md §14)이라 잔류. */
 .data-value--locked    { color: var(--color-text-tertiary); }
 .data-value--available { color: var(--color-accent-glow); }
 .data-value--active     { color: var(--color-brand-dna); }
