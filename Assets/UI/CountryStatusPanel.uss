@@ -241,13 +241,28 @@
 
 .status-row {
     /* Direction C Color Pass 2 — 배경 완전 제거, 좌측 severity accent-bar와 여백만으로 행을
-       구분한다(hairline 구분선은 별도 검증 후 다음 라운드에서 재검토). 좌측 폴백 색은 Color
-       Pass 1에서 회색→민트 soft로 정리됨(48행 전부 버킷 클래스가 덮어써 실제로는 거의
-       노출되지 않음). */
-    padding: 8px 10px;
-    margin-bottom: var(--space-sm);
+       구분한다. 좌측 폴백 색은 Color Pass 1에서 회색→민트 soft로 정리됨(48행 전부 버킷
+       클래스가 덮어써 실제로는 거의 노출되지 않음).
+       [밀도 Pass, Tier A] padding/margin을 8px/10px 하드코딩 → 토큰(4px/8px)으로 정리하며
+       동시에 세로 여백 축소(2026-07-17).
+       [Direction C Color Pass 5A] "리스트가 아니라 데이터 월"로 보이도록 하단 hairline 구분선
+       추가 — 기존 --color-grid-line 재사용, 신규 토큰 없음. padding/margin/height/flex는
+       무변경. */
+    padding: var(--space-xs) var(--space-sm);
+    margin-bottom: var(--space-xs);
     border-left-width: 4px;
     border-left-color: var(--color-accent-glow-soft);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-grid-line);
+}
+
+/* [밀도 Pass, Tier A] status-row 안의 감염률/사망률 data-row 2줄이 Tactical.uss 기본
+   hairline+padding-bottom/margin-bottom(각 2px)을 그대로 가져와 줄마다 여백이 누적됐다.
+   Tactical.uss 원본은 건드리지 않고(UpgradeTree/CountryPopup 등 다른 소비처엔 영향 없음)
+   이 자손 셀렉터로만 무효화한다. */
+.status-row .data-row {
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
 .status-row--safe     { border-left-color: var(--color-status-info); }
@@ -275,6 +290,15 @@
     margin-top: 2px;
 }
 
+/* [Direction C Phase 5B] 감염률/사망률 data-row 2개(각자 hairline+padding 보유)를 Hud.uss
+   .population-bar__summary와 동일한 값의 한 줄 요약으로 대체 — 신규 토큰/색상 없음, 기존
+   --font-size-xs/--color-text-secondary 재사용. */
+.status-row__stats-summary {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    margin-top: 2px;
+}
+
 /* status-row__badges — 공항/항구/국경 badge-tag 3개를 한 줄에 배치하는 컨테이너.
    badge-tag 자체는 Tactical.uss 공용 정의(align-self:flex-start라 늘어나지 않음) 사용. */
 .status-row__badges {
@@ -283,6 +307,13 @@
     margin-top: var(--space-xs);
 }
 
+/* [밀도 Pass, Tier A] Tactical.uss .badge-tag는 font-size/font-weight를 지정하지 않아
+   Unity 기본 Label 크기로 렌더링되고 있었다 — DESIGN.md 3절에 "badge-tag 최소 텍스트"로
+   이미 등재됐지만 실사용처가 없던 --font-size-caption-2xs(9px)를 여기서 처음 적용한다.
+   Tactical.uss 원본은 건드리지 않고 이 자손 셀렉터로만 지정(다른 badge-tag 소비처인
+   CountryPopup엔 영향 없음). */
 .status-row__badges .badge-tag {
+    font-size: var(--font-size-caption-2xs);
+    -unity-font-style: bold;
     margin-right: var(--space-xs);
 }

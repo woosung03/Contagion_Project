@@ -109,6 +109,27 @@
     background-color: var(--color-accent-glow);
 }
 
+/* [Direction C Color Pass 4] 스탯 4종을 색으로 구분하는 실험 — width/flex는 절대 재정의하지
+   않고 background-color만 modifier로 덮어쓴다. 신규 색상 토큰 없이 기존 severity 축
+   (Theme.uss --color-status-*)만 재사용(치사율=danger, 중증도=infected(주황), 내성=info(파랑)
+   — 국가 데이터 severity 축을 병원체 스탯에 재사용하는 것이라 DESIGN.md 2.2절의 "국가 데이터
+   전용" 경계를 넘는 실험적 적용이다, 검증 후 유지 여부 판단). 전염력만 기존 accent-glow(민트) 유지. */
+.pathogen-card__stat-fill--infectivity { background-color: var(--color-accent-glow); }
+.pathogen-card__stat-fill--severity    { background-color: var(--color-status-infected); }
+.pathogen-card__stat-fill--lethality   { background-color: var(--color-status-danger); }
+.pathogen-card__stat-fill--resistance  { background-color: var(--color-status-info); }
+
+/* [정보 밀도 개선] 막대(track) 옆 수치 병기 — 고정폭이라 track(flex-grow:1)이 남는 폭을
+   자동으로 흡수한다. 새 색/새 크기 토큰 없이 이미 같은 행의 라벨(--font-size-xs)과 data-value
+   기본색(--color-text-secondary)을 재사용. */
+.pathogen-card__stat-value {
+    width: 44px;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+}
+
 .country-row {
     /* Direction C Color Pass 2 — 배경 제거(--color-surface였음), 외곽 테두리 회색
        (--color-border)→민트(--color-accent-glow-soft). 48행이 "카드 더미"가 아니라

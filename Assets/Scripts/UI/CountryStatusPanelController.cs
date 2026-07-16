@@ -73,8 +73,7 @@ namespace Contagion.UI
             public VisualElement Row;
             public Label NameLabel;
             public Label StageCaption;
-            public Label InfectionValue;
-            public Label DeathValue;
+            public Label StatsSummary;
             public Label AirportBadge;
             public Label PortBadge;
             public Label BorderBadge;
@@ -813,25 +812,12 @@ namespace Contagion.UI
             stageCaption.AddToClassList("status-row__stage");
             row.Add(stageCaption);
 
-            var infectionRow = new VisualElement();
-            infectionRow.AddToClassList("data-row");
-            var infectionLabel = new Label("감염률");
-            infectionLabel.AddToClassList("data-label");
-            infectionRow.Add(infectionLabel);
-            var infectionValue = new Label();
-            infectionValue.AddToClassList("data-value");
-            infectionRow.Add(infectionValue);
-            row.Add(infectionRow);
-
-            var deathRow = new VisualElement();
-            deathRow.AddToClassList("data-row");
-            var deathLabel = new Label("사망률");
-            deathLabel.AddToClassList("data-label");
-            deathRow.Add(deathLabel);
-            var deathValue = new Label();
-            deathValue.AddToClassList("data-value");
-            deathRow.Add(deathValue);
-            row.Add(deathRow);
+            // [Direction C Phase 5B] 감염률/사망률을 각자 data-row(2줄)로 쌓지 않고
+            // population-bar__summary와 동일한 "감염 N% · 사망 N%" 한 줄 문법을 재사용한다
+            // (HudController/CountryStatusPanelController가 이미 쓰고 있는 관례, RefreshRow 참고).
+            var statsSummary = new Label();
+            statsSummary.AddToClassList("status-row__stats-summary");
+            row.Add(statsSummary);
 
             var badges = new VisualElement();
             badges.AddToClassList("status-row__badges");
@@ -858,8 +844,7 @@ namespace Contagion.UI
                 Row = row,
                 NameLabel = nameLabel,
                 StageCaption = stageCaption,
-                InfectionValue = infectionValue,
-                DeathValue = deathValue,
+                StatsSummary = statsSummary,
                 AirportBadge = airportBadge,
                 PortBadge = portBadge,
                 BorderBadge = borderBadge
@@ -881,17 +866,42 @@ namespace Contagion.UI
             refs.NameLabel.text = country.name;
             refs.StageCaption.text = StageLabel(stage);
 
-            refs.InfectionValue.text = $"{infectionRatio:P0}";
-            refs.DeathValue.text = $"{deadRatio:P0}";
+            // [Direction C Phase 5B] population-bar__summary와 동일 포맷("감염 N% · 사망 N%")
+            // — 새 계산식 없이 기존 infectionRatio/deadRatio를 한 줄로 결합만 한다.
+            refs.StatsSummary.text = $"감염 {infectionRatio:P0} · 사망 {deadRatio:P0}";
 
             refs.AirportBadge.text = $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")}";
             refs.PortBadge.text = $"항구 {(country.isPortOpen ? "개방" : "폐쇄")}";
             refs.BorderBadge.text = $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}";
 
+            // [Direction C Color Pass 5A] CountryPopupController.ApplySeverityClass()와 동일 패턴 —
+            // 텍스트만 갱신하고 severity 클래스를 부여하지 않아 개방/폐쇄가 항상 같은 회색 테두리로
+            // 보이던 문제를 해결. 신규 CSS/색상 없음(badge-tag--success/warning은 Tactical.uss에
+            // 이미 존재), 기존 isAirportOpen/isPortOpen/isBorderClosed 데이터만 사용.
+            ApplySeverityClass(refs.AirportBadge, country.isAirportOpen ? "badge-tag--success" : "badge-tag--warning");
+            ApplySeverityClass(refs.PortBadge, country.isPortOpen ? "badge-tag--success" : "badge-tag--warning");
+            ApplySeverityClass(refs.BorderBadge, country.isBorderClosed ? "badge-tag--warning" : "badge-tag--success");
+
             refs.Row.EnableInClassList("status-row--safe", bucket == StatusBucket.Safe);
             refs.Row.EnableInClassList("status-row--warning", bucket == StatusBucket.Warning);
             refs.Row.EnableInClassList("status-row--danger", bucket == StatusBucket.Danger);
             refs.Row.EnableInClassList("status-row--collapse", bucket == StatusBucket.Collapse);
+        }
+
+        /// <summary>badge-tag 계열 severity 수정자 클래스를 서로 배타적으로 적용한다 —
+        /// CountryPopupController.ApplySeverityClass()와 동일 규약(이전 값이 남아있으면 색이
+        /// 겹쳐 보일 수 있어 항상 전부 지운 뒤 하나만 붙인다).</summary>
+        private static readonly string[] BadgeSeverityClasses =
+        {
+            "badge-tag--success", "badge-tag--warning", "badge-tag--danger", "badge-tag--info"
+        };
+
+        private static void ApplySeverityClass(Label label, string cssClass)
+        {
+            foreach (var cls in BadgeSeverityClasses)
+                label.RemoveFromClassList(cls);
+            if (!string.IsNullOrEmpty(cssClass))
+                label.AddToClassList(cssClass);
         }
 
         private static string StageLabel(CountryCollapseStage stage) => stage switch
