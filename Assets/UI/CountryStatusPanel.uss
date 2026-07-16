@@ -190,6 +190,10 @@
 .continent-header {
     flex-direction: row;
     align-items: center;
+    min-height: var(--touch-target-min); /* DESIGN.md 1절/9절 터치 타겟 최소 48px — 기존 실측
+        약 34px(padding 8px×2 + 18px 화살표)로 미달이던 것을 보정. padding/색상/폰트는
+        무변경, align-items:center로 내용은 그대로 세로 중앙 정렬됨. advanced-diagnostics-header도
+        동일 클래스를 공유해 함께 적용된다. */
     padding: var(--space-sm);
     background-color: var(--color-surface-soft);
     border-left-color: var(--color-accent-glow-soft);
@@ -253,13 +257,25 @@
     white-space: nowrap;
 }
 
-.status-row__detail {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+/* status-row__stage — 상태단계(StageLabel) 전용 캡션 줄. 중립색 고정 — accent-bar가 이미
+   심각도 신호를 담당하므로 이 텍스트는 severity색을 쓰지 않는다(Contagion UI Language 원칙 3,
+   신호 중복 금지). NearAnarchy/FullAnarchy/Extinct가 accent-bar에서는 전부 collapse 한 색으로
+   뭉치므로(BucketOf() 참고) 이 캡션이 유일하게 그 3단계를 구분해서 보여준다. */
+.status-row__stage {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-caption);
+    letter-spacing: var(--tracking-caption);
     margin-top: 2px;
-    white-space: normal;
 }
 
-.status-row__detail--danger {
-    color: var(--color-status-danger);
+/* status-row__badges — 공항/항구/국경 badge-tag 3개를 한 줄에 배치하는 컨테이너.
+   badge-tag 자체는 Tactical.uss 공용 정의(align-self:flex-start라 늘어나지 않음) 사용. */
+.status-row__badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: var(--space-xs);
+}
+
+.status-row__badges .badge-tag {
+    margin-right: var(--space-xs);
 }

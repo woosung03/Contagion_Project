@@ -3,9 +3,10 @@
     <Style src="Tactical.uss" />
     <Style src="MainMenu.uss" />
     <ui:VisualElement name="mainmenu-root" class="mainmenu-root">
-        <ui:Label text="병원체 브리핑 터미널" class="mainmenu-caption tactical-caption" />
+        <ui:Label text="병원체 브리핑" class="mainmenu-caption tactical-caption" />
         <ui:Label name="mainmenu-title" text="전염병 주식회사" class="mainmenu-title" />
-        <ui:Label text="병원체를 선택하세요" class="mainmenu-subtitle" />
+        <ui:VisualElement class="mainmenu-header-divider" picking-mode="Ignore" />
+        <ui:Label text="병원체 목록" class="mainmenu-list-caption tactical-caption" />
         <ui:ScrollView name="pathogen-list" class="mainmenu-list" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
         <ui:VisualElement name="detail-panel" class="detail-panel tactical-panel">
             <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
@@ -13,7 +14,7 @@
             <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
             <ui:VisualElement class="tactical-panel__header">
-                <ui:Label name="detail-title" text="" class="detail-panel__title" />
+                <ui:Label name="detail-title" text="선택 대기" class="detail-panel__title" />
             </ui:VisualElement>
             <ui:Label name="detail-desc" text="" class="detail-panel__desc" />
         </ui:VisualElement>

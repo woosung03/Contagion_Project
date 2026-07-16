@@ -20,8 +20,13 @@ namespace Contagion.UI
     /// 사망자 TOP10(신규, 승리 조건과 직접 연결) → 48개국 목록(핵심 콘텐츠가 아닌 상세 조회
     /// 도구라 최하단). "전략 정보(공항/항구/국경 등)는 향후 WorldMap으로 이관"이라는 정체성
     /// 재정의 원칙에 따라 신규 전략 오버레이는 이번 범위에서 추가하지 않았다 — 단, 48개국
-    /// 목록 각 행의 기존 공항/항구/국경 표시(FlagsLabel)는 "목록의 기존 상세 정보"로 판단해
-    /// 유지했다(사용자 확인, 2026-07-15). 종합 위협도 TOP10은 "전략 콘솔" 시절 설계라 제거.
+    /// 목록 각 행의 기존 공항/항구/국경 표시는 "목록의 기존 상세 정보"로 판단해 유지했다
+    /// (사용자 확인, 2026-07-15). 종합 위협도 TOP10은 "전략 콘솔" 시절 설계라 제거.
+    /// [Contagion UI Language 리디자인] 문장형(라벨:값 미분리, 상태 신호 중복) status-row를
+    /// data-row(감염률/사망률)+badge(공항/항구/국경)+중립 상태캡션으로 재구성 — 공항/항구/국경
+    /// 표시(위 문단의 FlagsLabel)는 이제 badge-tag 3개(BuildRow/RefreshRow 참고)로 형태만
+    /// 바뀌었을 뿐 "유지" 결정 자체는 그대로다. 인구/의료수준은 CountryPopup으로 위임(중복
+    /// 노출 아님, 이미 그 화면의 quick-stat-grid에 있음).
     ///
     /// [역할 재정의, 2026-07-10 사용자 승인] 이 컨트롤러는 원래(Step 28-2) CountryPopupController를
     /// 대체하는 "48개국 목록 화면"이었으나, CountryPopupController가 이미 개별 국가 상세 브리핑
@@ -67,8 +72,12 @@ namespace Contagion.UI
         {
             public VisualElement Row;
             public Label NameLabel;
-            public Label StatsLabel;
-            public Label FlagsLabel;
+            public Label StageCaption;
+            public Label InfectionValue;
+            public Label DeathValue;
+            public Label AirportBadge;
+            public Label PortBadge;
+            public Label BorderBadge;
         }
 
         /// <summary>[대륙별 접기/펼치기, 2026-07-14 사용자 요청] 48개국 단일 리스트를 대륙 단위로
@@ -786,6 +795,11 @@ namespace Contagion.UI
                 _advancedDiagnosticsArrow.text = _advancedDiagnosticsExpanded ? "▼" : "▶";
         }
 
+        /// <summary>Contagion UI Language 리디자인(설계 검증 완료) — 라벨:값이 붙은 문장 3줄 대신
+        /// 이름/상태캡션/data-row 2개/badge 3개로 분해한다. accent-bar(EnableInClassList 아래)가
+        /// 유일한 상태 신호이고, StageCaption은 중립색 텍스트로 accent-bar 4버킷이 뭉개는
+        /// NearAnarchy/FullAnarchy/Extinct 구분만 보완한다(원칙 3 — 신호는 하나, 단 다른 차원의
+        /// 정보를 신호 없이 추가 노출하는 것은 중복이 아니다).</summary>
         private RowRefs BuildRow(Country country)
         {
             var row = new VisualElement();
@@ -795,13 +809,42 @@ namespace Contagion.UI
             nameLabel.AddToClassList("status-row__name");
             row.Add(nameLabel);
 
-            var statsLabel = new Label();
-            statsLabel.AddToClassList("status-row__detail");
-            row.Add(statsLabel);
+            var stageCaption = new Label();
+            stageCaption.AddToClassList("status-row__stage");
+            row.Add(stageCaption);
 
-            var flagsLabel = new Label();
-            flagsLabel.AddToClassList("status-row__detail");
-            row.Add(flagsLabel);
+            var infectionRow = new VisualElement();
+            infectionRow.AddToClassList("data-row");
+            var infectionLabel = new Label("감염률");
+            infectionLabel.AddToClassList("data-label");
+            infectionRow.Add(infectionLabel);
+            var infectionValue = new Label();
+            infectionValue.AddToClassList("data-value");
+            infectionRow.Add(infectionValue);
+            row.Add(infectionRow);
+
+            var deathRow = new VisualElement();
+            deathRow.AddToClassList("data-row");
+            var deathLabel = new Label("사망률");
+            deathLabel.AddToClassList("data-label");
+            deathRow.Add(deathLabel);
+            var deathValue = new Label();
+            deathValue.AddToClassList("data-value");
+            deathRow.Add(deathValue);
+            row.Add(deathRow);
+
+            var badges = new VisualElement();
+            badges.AddToClassList("status-row__badges");
+            var airportBadge = new Label();
+            airportBadge.AddToClassList("badge-tag");
+            badges.Add(airportBadge);
+            var portBadge = new Label();
+            portBadge.AddToClassList("badge-tag");
+            badges.Add(portBadge);
+            var borderBadge = new Label();
+            borderBadge.AddToClassList("badge-tag");
+            badges.Add(borderBadge);
+            row.Add(badges);
 
             // research-row와 동일한 규약 — 행 자체가 클릭 대상이며, 상태(LOCKED 포함)와 무관하게
             // 항상 상세를 열 수 있다(research-row도 LOCKED 상태에서 선행조건 확인을 위해 클릭 가능).
@@ -810,7 +853,17 @@ namespace Contagion.UI
             // 나중에 클릭해도 항상 최신 데이터를 가리킨다.
             row.RegisterCallback<ClickEvent>(_ => OnCountryRowSelected?.Invoke(country));
 
-            return new RowRefs { Row = row, NameLabel = nameLabel, StatsLabel = statsLabel, FlagsLabel = flagsLabel };
+            return new RowRefs
+            {
+                Row = row,
+                NameLabel = nameLabel,
+                StageCaption = stageCaption,
+                InfectionValue = infectionValue,
+                DeathValue = deathValue,
+                AirportBadge = airportBadge,
+                PortBadge = portBadge,
+                BorderBadge = borderBadge
+            };
         }
 
         /// <summary>이미 생성된 행의 라벨 텍스트만 갱신한다 — VisualElement/Label을 새로 만들지 않는다
@@ -825,16 +878,15 @@ namespace Contagion.UI
             var stage = country.GetCollapseStage();
             var bucket = BucketOf(stage);
 
-            refs.NameLabel.text = $"{country.name} — {StageLabel(stage)}";
+            refs.NameLabel.text = country.name;
+            refs.StageCaption.text = StageLabel(stage);
 
-            refs.StatsLabel.text =
-                $"인구 {country.population:N0} · 감염 {infectionRatio:P0} · 사망 {deadRatio:P0} · 의료 {DevLabel(country.developmentLevel)}";
-            refs.StatsLabel.EnableInClassList("status-row__detail--danger", stage >= CountryCollapseStage.Disorder);
+            refs.InfectionValue.text = $"{infectionRatio:P0}";
+            refs.DeathValue.text = $"{deadRatio:P0}";
 
-            refs.FlagsLabel.text =
-                $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")} · " +
-                $"항구 {(country.isPortOpen ? "개방" : "폐쇄")} · " +
-                $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}";
+            refs.AirportBadge.text = $"공항 {(country.isAirportOpen ? "개방" : "폐쇄")}";
+            refs.PortBadge.text = $"항구 {(country.isPortOpen ? "개방" : "폐쇄")}";
+            refs.BorderBadge.text = $"국경 {(country.isBorderClosed ? "봉쇄" : "개방")}";
 
             refs.Row.EnableInClassList("status-row--safe", bucket == StatusBucket.Safe);
             refs.Row.EnableInClassList("status-row--warning", bucket == StatusBucket.Warning);
@@ -851,14 +903,6 @@ namespace Contagion.UI
             CountryCollapseStage.FullAnarchy => "완전 무정부",
             CountryCollapseStage.Extinct => "소멸",
             _ => stage.ToString()
-        };
-
-        private static string DevLabel(DevelopmentLevel level) => level switch
-        {
-            DevelopmentLevel.High => "선진국",
-            DevelopmentLevel.Mid => "개발도상국",
-            DevelopmentLevel.Low => "저개발국",
-            _ => level.ToString()
         };
     }
 }

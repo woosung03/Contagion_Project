@@ -126,12 +126,18 @@
 
 /* ---- event-dock: 좌상단 도킹(Event Dock). 기존 news-scroll을 감싼 컨테이너 —
    news-scroll 자체 name/class는 그대로라 NewsFeedController.cs 변경 없음(단, AddEntry가
-   dot+label 구조로 바뀌었다 — 아래 news-entry-row 참고). ---- */
+   dot+label 구조로 바뀌었다 — 아래 news-entry-row 참고).
+   [Contagion UI Language 리디자인] 168×166px 정사각형에 가까운 비율이 "게시판/메모장"처럼
+   읽혀 상황실의 다른 요소(resource-strip/action-strip/graph-panel, 전부 가로로 넓고 얇은 띠)와
+   형태 언어가 어긋났다. 폭을 넓히고(168→360) news-scroll 높이를 줄여(아래) "흐르는 속보
+   로그" 형태로 재구성했다 — 자동 스크롤/티커 애니메이션은 추가하지 않았다(기존 ScrollView
+   그대로). 면적은 기존(168×166≈27,900px²)과 거의 동일(360×~92≈33,100px²)하게 맞춰 지도
+   가림 면적이 늘어나지 않도록 했다. ---- */
 .event-dock {
     position: absolute;
     left: 0;
     top: 0;
-    width: 168px;
+    width: 360px;
     background-color: var(--color-bg-panel);
     padding: var(--space-xs);
     border-width: 1px;
@@ -154,7 +160,7 @@
    position:absolute인 패널이 이 자식들의 위치 기준(anchor)이 된다. */
 
 .event-dock .news-scroll {
-    height: 130px;
+    height: 56px; /* 가로로 넓어진 만큼(168→360) 문장당 줄바꿈이 줄어 2~3줄이면 충분 */
 }
 
 .news-scroll {

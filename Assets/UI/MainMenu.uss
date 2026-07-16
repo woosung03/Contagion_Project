@@ -21,11 +21,21 @@
     margin-bottom: var(--space-xs);
 }
 
-.mainmenu-subtitle {
-    color: var(--color-text-secondary);
-    font-size: 19px;
-    -unity-text-align: middle-center;
-    margin-bottom: var(--space-md);
+/* Contagion UI Language 리디자인 — 헤더(캡션+타이틀)와 리스트 사이 hairline 구분선.
+   새 패널/배경 추가 없이 tactical-panel__header의 하단 헤어라인 사양(1px, --color-grid-line)만
+   독립 요소로 재사용한다. MainMenu.uss가 CountrySelect.uxml에도 로드되므로 두 화면이 함께
+   이 클래스를 공유한다. */
+.mainmenu-header-divider {
+    height: 1px;
+    background-color: var(--color-grid-line);
+    margin: var(--space-sm) 0 var(--space-xs);
+}
+
+/* mainmenu-list-caption — 예전 mainmenu-subtitle(완전한 문장, "병원체를 선택하세요")를
+   대체한다. 서술형 안내문 대신 UpgradeTree lab-caption과 동일한 "리스트 분류 캡션" 문법
+   (명사구, tactical-caption 톤)으로 리스트 바로 위에 배치 — 원칙 5(대화하지 않는다) 준수. */
+.mainmenu-list-caption {
+    margin-bottom: var(--space-xs);
 }
 
 .mainmenu-list {
@@ -57,10 +67,45 @@
     white-space: nowrap;
 }
 
-/* pathogen-card 전용 data-row 래퍼 — Tactical.uss의 범용 data-row/data-label/data-value를
-   4줄(전염력/중증도/치사율/내성)로 감싸는 컨테이너. MainMenuController.CreatePathogenCard() 참고. */
+/* pathogen-card 전용 스탯 막대 래퍼 — 4줄(전염력/중증도/치사율/내성)을 감싸는 컨테이너.
+   MainMenuController.CreatePathogenCard() 참고. */
 .pathogen-card__stats-rows {
     margin-top: var(--space-xs);
+}
+
+/* Contagion UI Language 리디자인 — 유니코드 블록 문자(■■■□□) 대신 이 앱이 이미 검증한
+   CSS 비율 막대 기법(population-bar__track/__segment, branch-row__progress/__progress-fill과
+   동일한 flex-basis:0 + flex-grow 비율)을 재사용한다. */
+.pathogen-card__stat-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.pathogen-card__stat-label {
+    width: 52px;
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+}
+
+.pathogen-card__stat-track {
+    flex-direction: row;
+    flex-grow: 1;
+    height: 6px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--color-surface-soft);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+}
+
+.pathogen-card__stat-fill {
+    height: 100%;
+    flex-basis: 0;
+    flex-shrink: 0;
+    background-color: var(--color-accent-glow);
 }
 
 .country-row {

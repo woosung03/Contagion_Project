@@ -161,3 +161,19 @@
     background-color: var(--color-accent-glow-soft);
     border-color: var(--color-accent-glow);
 }
+
+/* Badge Tag — CountryPopup.uss에 정의돼 있던 것을 공용 승격(국가 목록 리디자인으로 두 번째
+   소비처 CountryStatusPanel 추가, Tactical.uss 정본화). "등급"인 필드(공항/항구/국경 등)용
+   칩 — 값이 아니라 상태를 표시할 때 쓴다. */
+.badge-tag {
+    align-self: flex-start;
+    padding: 2px var(--space-xs);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.badge-tag--success { color: var(--color-status-info); border-color: var(--color-status-info); }
+.badge-tag--warning  { color: var(--color-status-infected); border-color: var(--color-status-infected); }
+.badge-tag--danger   { color: var(--color-status-dead); border-color: var(--color-status-dead); }
+.badge-tag--info     { color: var(--color-text-info); border-color: var(--color-text-info); }

@@ -95,7 +95,7 @@ namespace Contagion.UI
             _countryList.Clear();
             _selectedCountryId = null;
             _startButton.SetEnabled(false);
-            _detailTitle.text = "";
+            _detailTitle.text = "선택 대기";
             _detailRows?.Clear();
 
             IReadOnlyList<Country> countries = GameDataBootstrapper.Instance?.AvailableCountries;
@@ -140,6 +140,12 @@ namespace Contagion.UI
             // (Docs/UI_Design.md 9절 "Country Dock 시각 언어 재사용"). 48행 스크롤 높이 제약 때문에
             // data-row를 세로로 쌓지 않고 이 한 줄 안에서만 label:value로 구조화한다(정보량 동일,
             // 표현 문법만 판독행으로 전환 — country-row__meta CSS가 기본 data-row 하단 헤어라인은 무효화).
+            //
+            // [Contagion UI Language 리디자인] 값에서 의료수준(DevLabel)을 제거했다 — 이 행의 좌측
+            // accent-bar(DevAccentClass, 위 121~122행)가 이미 같은 정보를 색상 신호로 표시하고
+            // 있어 텍스트로 다시 노출하면 원칙 3(상태 신호는 하나만) 위반이 된다. 의료수준 "텍스트"는
+            // 선택 시 detail-panel의 기존 "의료 수준" data-row(SelectCountry 참고)에서 계속 확인 가능
+            // — 정보 손실 아님.
             var meta = new VisualElement();
             meta.AddToClassList("country-row__meta");
             meta.AddToClassList("data-row");
@@ -148,7 +154,7 @@ namespace Contagion.UI
             metaLabel.AddToClassList("data-label");
             meta.Add(metaLabel);
 
-            var metaValue = new Label($"{country.population:N0} · {DevLabel(country.developmentLevel)}");
+            var metaValue = new Label($"{country.population:N0}");
             metaValue.AddToClassList("data-value");
             meta.Add(metaValue);
 

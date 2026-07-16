@@ -59,7 +59,7 @@ namespace Contagion.UI
             _pathogenList.Clear();
             _selected = null;
             _nextButton.SetEnabled(false);
-            _detailTitle.text = "";
+            _detailTitle.text = "선택 대기";
             _detailDesc.text = "";
 
             IReadOnlyList<PathogenDefinition> pathogens = GameDataBootstrapper.Instance?.AvailablePathogens;
@@ -93,13 +93,14 @@ namespace Contagion.UI
             name.AddToClassList("pathogen-card__name");
             card.Add(name);
 
-            // 스탯 4종을 한 Label에 몰아넣던 것을 data-row 4줄로 분해(12절) — 읽는 데이터는 동일.
+            // 스탯 4종 — Contagion UI Language 리디자인: 유니코드 블록 문자 대신 이 앱의 기존
+            // CSS 비율 막대 기법(population-bar/branch-row__progress와 동일 기법)을 재사용한다.
             var statsRows = new VisualElement();
             statsRows.AddToClassList("pathogen-card__stats-rows");
-            statsRows.Add(MakeStatRow("전염력", StatBar(pathogen.Infectivity)));
-            statsRows.Add(MakeStatRow("중증도", StatBar(pathogen.Severity)));
-            statsRows.Add(MakeStatRow("치사율", StatBar(pathogen.Lethality)));
-            statsRows.Add(MakeStatRow("내성", StatBar(pathogen.DrugResistance)));
+            statsRows.Add(MakeStatRow("전염력", pathogen.Infectivity));
+            statsRows.Add(MakeStatRow("중증도", pathogen.Severity));
+            statsRows.Add(MakeStatRow("치사율", pathogen.Lethality));
+            statsRows.Add(MakeStatRow("내성", pathogen.DrugResistance));
             card.Add(statsRows);
 
             card.RegisterCallback<ClickEvent>(_ => SelectPathogen(pathogen, card));
@@ -115,28 +116,35 @@ namespace Contagion.UI
             return el;
         }
 
-        /// <summary>data-row 한 줄(라벨+값)을 만든다 — Tactical.uss data-row/data-label/data-value 계약.</summary>
-        private static VisualElement MakeStatRow(string label, string value)
+        /// <summary>스탯 한 줄(라벨+비율 막대)을 만든다 — population-bar__track/__segment,
+        /// branch-row__progress/__progress-fill과 동일한 flex-basis:0 + flex-grow 비율 기법.</summary>
+        private static VisualElement MakeStatRow(string label, float value01)
         {
             var row = new VisualElement();
-            row.AddToClassList("data-row");
+            row.AddToClassList("pathogen-card__stat-row");
 
             var labelEl = new Label(label);
-            labelEl.AddToClassList("data-label");
+            labelEl.AddToClassList("pathogen-card__stat-label");
             row.Add(labelEl);
 
-            var valueEl = new Label(value);
-            valueEl.AddToClassList("data-value");
-            row.Add(valueEl);
+            var track = new VisualElement();
+            track.AddToClassList("pathogen-card__stat-track");
 
+            float filled = Mathf.Clamp01(value01);
+
+            var fill = new VisualElement();
+            fill.AddToClassList("pathogen-card__stat-fill");
+            fill.style.flexGrow = filled;
+            track.Add(fill);
+
+            var remainder = new VisualElement();
+            remainder.style.flexBasis = 0;
+            remainder.style.flexGrow = 1f - filled;
+            remainder.style.flexShrink = 0;
+            track.Add(remainder);
+
+            row.Add(track);
             return row;
-        }
-
-        /// <summary>0~1 값을 5칸짜리 텍스트 막대로 대충 시각화 — 실제 그래픽 바는 비주얼/연출 단계에서.</summary>
-        private static string StatBar(float value01)
-        {
-            int filled = Mathf.Clamp(Mathf.RoundToInt(value01 * 5f), 0, 5);
-            return new string('■', filled) + new string('□', 5 - filled);
         }
 
         private void SelectPathogen(PathogenDefinition pathogen, VisualElement card)

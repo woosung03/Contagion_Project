@@ -26,6 +26,10 @@
                         길어지는 예외 상황에도 지도 영역이 40% 밑으로 줄지 않도록 상한을 건다. */
     background-color: var(--color-bg-panel-strong); /* 지도 위에 얹히므로 배경이 비쳐 보이면 안 됨 */
     padding: var(--space-lg);
+    /* DESIGN.md §12.1 Safe Area 규정 — 하단은 제스처 내비게이션 바 회피를 위해
+       --touch-target-min(48px)만큼 추가 확보한다(위 padding: --space-lg 다음에 와서 하단만
+       덮어씀 — 상/좌/우는 16px 그대로). "상세 보기" 버튼이 화면 최하단 인셋에 가려지지 않도록. */
+    padding-bottom: var(--touch-target-min);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지, 기존 규칙 유지). */
 }
