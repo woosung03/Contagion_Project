@@ -8,17 +8,25 @@
         <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
 
-        <!-- Header: 국기 + 국가명 + 대륙 + 닫기 버튼 -->
+        <!-- Header: 국기 + 국가명 + (대륙 + 붕괴 단계 배지) + 닫기 버튼.
+             붕괴 단계는 CountryPopup Expansion Phase 1(2026-07-17) — Country.GetCollapseStage()
+             기존 계산식 재사용, 새 섹션이 아니라 대륙 라벨과 같은 줄(popup-subtitle-row)에 배치해
+             헤더 높이를 늘리지 않는다. -->
         <ui:VisualElement class="tactical-panel__header popup-header">
             <ui:Label name="popup-flag" text="" class="popup-flag" />
             <ui:VisualElement class="popup-header__titles">
                 <ui:Label name="modal-title" text="" class="tactical-panel__title" />
-                <ui:Label name="popup-continent" text="" class="popup-continent" />
+                <ui:VisualElement class="popup-subtitle-row">
+                    <ui:Label name="popup-continent" text="" class="popup-continent" />
+                    <ui:Label name="popup-collapse-stage" text="-" class="popup-collapse-stage badge-tag" />
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:Button name="modal-close" text="✕" class="popup-close" />
         </ui:VisualElement>
 
-        <!-- Body: quick-stat-grid — 5초 확인용 8개 핵심 지표 -->
+        <!-- Body: quick-stat-grid — CountryPopup Expansion Phase 1(2026-07-17)로 8칸→11칸 확장.
+             신규 섹션 추가 없이 기존 grid 안에 사망률/의료 부하/세계 순위 3칸만 추가(전부 기존
+             계산식 재사용, Compact Bottom Sheet max-height 60% 유지). -->
         <ui:VisualElement name="quick-stat-grid" class="quick-stat-grid">
             <ui:VisualElement class="quick-stat-cell">
                 <ui:Label text="인구" class="quick-stat-cell__label" />
@@ -37,16 +45,28 @@
                 <ui:Label name="infection-rate" text="-" class="quick-stat-cell__value" />
             </ui:VisualElement>
             <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="사망률" class="quick-stat-cell__label" />
+                <ui:Label name="death-rate" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="의료 수준" class="quick-stat-cell__label" />
+                <ui:Label name="medical" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="의료 부하" class="quick-stat-cell__label" />
+                <ui:Label name="medical-load" text="-" class="quick-stat-cell__value badge-tag" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
+                <ui:Label text="세계 순위" class="quick-stat-cell__label" />
+                <ui:Label name="world-rank" text="-" class="quick-stat-cell__value" />
+            </ui:VisualElement>
+            <ui:VisualElement class="quick-stat-cell">
                 <ui:Label text="공항 상태" class="quick-stat-cell__label" />
                 <ui:Label name="airport" text="-" class="quick-stat-cell__value badge-tag" />
             </ui:VisualElement>
             <ui:VisualElement class="quick-stat-cell">
                 <ui:Label text="항만 상태" class="quick-stat-cell__label" />
                 <ui:Label name="seaport" text="-" class="quick-stat-cell__value badge-tag" />
-            </ui:VisualElement>
-            <ui:VisualElement class="quick-stat-cell">
-                <ui:Label text="의료 수준" class="quick-stat-cell__label" />
-                <ui:Label name="medical" text="-" class="quick-stat-cell__value badge-tag" />
             </ui:VisualElement>
             <ui:VisualElement class="quick-stat-cell">
                 <ui:Label text="국경 상태" class="quick-stat-cell__label" />

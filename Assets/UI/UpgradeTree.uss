@@ -8,12 +8,13 @@
    기존엔 위 줄이 ◀ 제목 ▶ 내비게이션이었는데, 탭 3개 상시 노출로 교체(ScreenDesign.md §2). */
 .upgrade-header {
     flex-direction: column;
-    margin-bottom: 14px;
+    margin-bottom: var(--space-md); /* 2026-07-17 UI Polish Audit: 14px 하드코딩(DESIGN.md
+        4절이 Don't 예시로 직접 지목한 값) → 4px 그리드 토큰 정리, 12px(-2px, 시각적으로 무의미) */
 }
 
 .upgrade-header__tabs {
     flex-direction: row;
-    margin-bottom: 10px;
+    margin-bottom: var(--space-sm); /* 2026-07-17 UI Polish Audit: 10px → 8px 토큰 정리(-2px) */
 }
 
 /* 탭 버튼 — 3개 고정, 터치 영역 48px 이상(--touch-target-min). 선택 강조는 새 색상 축을 만들지
@@ -69,7 +70,7 @@
 /* ScreenDesign.md §3 — 영문 LAB 캡션(예: "TRANSMISSION LAB")을 목록 영역 상단에 유지. */
 .lab-caption {
     color: var(--color-accent-glow);
-    font-size: 11px;
+    font-size: var(--font-size-caption);
     -unity-font-style: bold;
     letter-spacing: var(--tracking-caption);
     margin-bottom: var(--space-sm);

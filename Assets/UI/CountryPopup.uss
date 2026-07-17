@@ -60,11 +60,23 @@
     margin-right: var(--space-sm);
 }
 
+/* CountryPopup Expansion Phase 1(2026-07-17) — 대륙 라벨 + 붕괴 단계 배지를 같은 줄에 배치해
+   헤더가 세로로 늘어나지 않게 한다(신규 섹션 아님, 기존 popup-header__titles 안 배치만 변경). */
+.popup-subtitle-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
 .popup-continent {
     color: var(--color-text-tertiary);
     font-size: var(--font-size-xs);
     letter-spacing: var(--tracking-caption);
-    margin-top: 2px;
+}
+
+/* 붕괴 단계 배지 — badge-tag(13절, Tactical.uss 정본) 위에 여백만 얹는다(신규 색상/토큰 없음). */
+.popup-collapse-stage {
+    margin-left: var(--space-xs);
 }
 
 /* Button System: Secondary(Docs/DESIGN.md) — 닫기/취소 계열. 헤더 아이콘 버튼이라 28px보다
@@ -115,23 +127,11 @@
 }
 
 /* badge-tag — 공항/항만/의료/정부대응처럼 값이 아니라 "등급"인 필드용 칩.
-   quick-stat-cell__value 위에 얹는 추가 클래스(UXML: class="quick-stat-cell__value badge-tag"). */
-.badge-tag {
-    align-self: flex-start;
-    padding: 2px var(--space-xs);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: var(--radius-sm); /* 코너컷 없는 판독창 계열 — Docs/DESIGN.md 규칙대로 sm 유지 */
-}
-
-/* severity 모드파이어 — CountryPopupController.ApplySeverityClass()/DevValueClass()가 실제로
-   붙이는 4개 클래스명과 정확히 일치해야 한다(컨트롤러는 이번 작업에서 수정하지 않음). 색상은
-   Theme.uss --color-status-*(감염/사망/위험/정보, "정보/건강" 의미 포함)를 그대로 매핑 — 이
-   축의 의미를 재정의하지 않는다(Docs/DESIGN.md Status Semantics 축 분리 원칙). */
-.badge-tag--success { color: var(--color-status-info); border-color: var(--color-status-info); }
-.badge-tag--warning  { color: var(--color-status-infected); border-color: var(--color-status-infected); }
-.badge-tag--danger   { color: var(--color-status-dead); border-color: var(--color-status-dead); }
-.badge-tag--info     { color: var(--color-text-info); border-color: var(--color-text-info); }
+   quick-stat-cell__value 위에 얹는 추가 클래스(UXML: class="quick-stat-cell__value badge-tag").
+   정의/severity 모디파이어는 Tactical.uss 공용 정본을 그대로 사용한다(로컬 재정의 제거,
+   2026-07-17 UI Polish Audit — 값이 100% 동일한 중복이었다). CountryPopupController가
+   실제로 붙이는 4개 클래스명(--success/--warning/--danger/--info)은 Tactical.uss 쪽과
+   정확히 일치해야 한다(컨트롤러는 이번 작업에서 수정하지 않음). */
 
 /* ============================================================
    Footer — 상세보기(Primary Button, Docs/DESIGN.md Button System).

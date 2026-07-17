@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Contagion.Data;
 using Contagion.Gameplay;
 using Contagion.Managers;
@@ -39,13 +40,17 @@ namespace Contagion.UI
 
         private Label _flagValue;
         private Label _continentValue;
+        private Label _collapseStageValue;
         private Label _populationValue;
         private Label _infectedValue;
         private Label _deadValue;
         private Label _infectionRateValue;
+        private Label _deathRateValue;
         private Label _airportValue;
         private Label _seaportValue;
         private Label _medicalValue;
+        private Label _medicalLoadValue;
+        private Label _worldRankValue;
         private Label _borderStatusValue;
 
         private readonly Dictionary<string, Texture2D> _flagCache = new Dictionary<string, Texture2D>();
@@ -89,25 +94,31 @@ namespace Contagion.UI
 
             _flagValue = root.Q<Label>("popup-flag");
             _continentValue = root.Q<Label>("popup-continent");
+            _collapseStageValue = root.Q<Label>("popup-collapse-stage");
             _populationValue = root.Q<Label>("population");
             _infectedValue = root.Q<Label>("infected");
             _deadValue = root.Q<Label>("dead");
             _infectionRateValue = root.Q<Label>("infection-rate");
+            _deathRateValue = root.Q<Label>("death-rate");
             _airportValue = root.Q<Label>("airport");
             _seaportValue = root.Q<Label>("seaport");
             _medicalValue = root.Q<Label>("medical");
+            _medicalLoadValue = root.Q<Label>("medical-load");
+            _worldRankValue = root.Q<Label>("world-rank");
             _borderStatusValue = root.Q<Label>("border-status");
             _detailButton = root.Q<Button>("modal-detail");
 
-            if (_flagValue == null || _continentValue == null || _populationValue == null ||
-                _infectedValue == null || _deadValue == null || _infectionRateValue == null ||
-                _airportValue == null || _seaportValue == null || _medicalValue == null ||
-                _borderStatusValue == null || _detailButton == null)
+            if (_flagValue == null || _continentValue == null || _collapseStageValue == null ||
+                _populationValue == null || _infectedValue == null || _deadValue == null ||
+                _infectionRateValue == null || _deathRateValue == null || _airportValue == null ||
+                _seaportValue == null || _medicalValue == null || _medicalLoadValue == null ||
+                _worldRankValue == null || _borderStatusValue == null || _detailButton == null)
             {
                 Debug.LogWarning("[CountryPopupController] OnEnable — quick-stat-grid Label 중 일부를 " +
                     "찾지 못했습니다. CountryPopup.uxml의 name 속성(popup-flag/popup-continent/" +
-                    "population/infected/dead/infection-rate/airport/seaport/medical/" +
-                    "border-status/modal-detail)을 확인하세요.");
+                    "popup-collapse-stage/population/infected/dead/infection-rate/death-rate/" +
+                    "airport/seaport/medical/medical-load/world-rank/border-status/modal-detail)을 " +
+                    "확인하세요.");
             }
 
             _detailButton?.RegisterCallback<ClickEvent>(_ => OnDetailRequested?.Invoke(_shownCountry));
@@ -180,8 +191,9 @@ namespace Contagion.UI
             base.Hide();
         }
 
-        /// <summary>quick-stat-grid 8개 필드 + 헤더(국기/대륙) 갱신. 기존의 ClearRows()+AddRow() 반복
-        /// 생성 방식 대신, OnEnable에서 캐싱해둔 고정 Label들의 텍스트/클래스만 바꾼다.</summary>
+        /// <summary>quick-stat-grid 11개 필드(Phase 1로 8→11 확장) + 헤더(국기/대륙/붕괴 단계) 갱신.
+        /// 기존의 ClearRows()+AddRow() 반복 생성 방식 대신, OnEnable에서 캐싱해둔 고정 Label들의
+        /// 텍스트/클래스만 바꾼다.</summary>
         private void Populate(Country country)
         {
             _shownCountry = country;
@@ -189,16 +201,43 @@ namespace Contagion.UI
             float infectionRatio = country.LivingPopulation > 0
                 ? (float)country.infectedCount / country.LivingPopulation
                 : 0f;
+            // CountryStatusPanelController.RefreshRow()와 동일 공식(deadCount / population) —
+            // 신규 계산식 아님, Phase 1 조사 결과 기준 그대로 재사용.
+            float deathRatio = country.population > 0
+                ? (float)country.deadCount / country.population
+                : 0f;
 
             if (_flagValue != null)
                 _flagValue.style.backgroundImage = new StyleBackground(GetFlagTexture(country.id));
             if (_continentValue != null)
                 _continentValue.text = ContinentOf(country);
 
+            if (_collapseStageValue != null)
+            {
+                var collapseStage = country.GetCollapseStage();
+                _collapseStageValue.text = CollapseStageLabel(collapseStage);
+                ApplySeverityClass(_collapseStageValue, CollapseStageBadgeClass(collapseStage));
+            }
+
             if (_populationValue != null) _populationValue.text = $"{country.population:N0}";
             if (_infectedValue != null) _infectedValue.text = $"{country.infectedCount:N0}";
             if (_deadValue != null) _deadValue.text = $"{country.deadCount:N0}";
             if (_infectionRateValue != null) _infectionRateValue.text = $"{infectionRatio * 100f:F1}%";
+            if (_deathRateValue != null) _deathRateValue.text = $"{deathRatio * 100f:F2}%";
+
+            if (_medicalLoadValue != null)
+            {
+                float medicalLoad = MedicalLoad(country, infectionRatio);
+                var (label, valueClass) = MedicalLoadStatus(medicalLoad);
+                _medicalLoadValue.text = label;
+                ApplySeverityClass(_medicalLoadValue, valueClass);
+            }
+
+            if (_worldRankValue != null)
+            {
+                int rank = WorldInfectedRank(country);
+                _worldRankValue.text = rank > 0 ? $"세계 {rank}위" : "-";
+            }
 
             if (_airportValue != null)
             {
@@ -272,5 +311,62 @@ namespace Contagion.UI
             DevelopmentLevel.Low => "저개발국",
             _ => level.ToString()
         };
+
+        /// <summary>CountryStatusPanelController.StageLabel()과 동일 규약(라벨 문구 1:1) —
+        /// 그 메서드는 private이라 공유 불가, 이 파일 기존 관례(MedicalLoad/DevValueClass 등)를
+        /// 따라 독립 사본으로 복제한다(CountryPopup Expansion Phase 1).</summary>
+        private static string CollapseStageLabel(CountryCollapseStage stage) => stage switch
+        {
+            CountryCollapseStage.Normal => "평시",
+            CountryCollapseStage.FullCollapse => "붕괴 시작",
+            CountryCollapseStage.Disorder => "무질서",
+            CountryCollapseStage.NearAnarchy => "무정부 근접",
+            CountryCollapseStage.FullAnarchy => "완전 무정부",
+            CountryCollapseStage.Extinct => "소멸",
+            _ => stage.ToString()
+        };
+
+        /// <summary>CountryStatusPanelController.BucketOf()와 동일한 4단계 묶음(Safe/Warning/
+        /// Danger/Collapse)을 badge-tag 3색(success/warning/danger)에 매핑한다 — badge-tag에는
+        /// severity 4색 중 danger(사망) 하나만 있어 Danger/Collapse 두 묶음을 danger 하나로
+        /// 합쳤다(새 배지 색상 축 도입 없음, 13절 기존 3색만 사용).</summary>
+        private static string CollapseStageBadgeClass(CountryCollapseStage stage) => stage switch
+        {
+            CountryCollapseStage.Normal => "badge-tag--success",
+            CountryCollapseStage.FullCollapse => "badge-tag--warning",
+            CountryCollapseStage.Disorder => "badge-tag--danger",
+            _ => "badge-tag--danger" // NearAnarchy / FullAnarchy / Extinct
+        };
+
+        /// <summary>CountryStatusPanelController.MedicalLoad()와 동일 공식(감염 비율 × (1-의료수준))을
+        /// 독립적으로 복제 — 새 공식 아님(CountryPopup Expansion Phase 1 조사 결과 그대로).</summary>
+        private static float MedicalLoad(Country country, float infectionRatio) =>
+            infectionRatio * (1f - country.HealthLevel);
+
+        /// <summary>CountryStatusPanelController.MedicalLoadStatus()와 동일 임계값(0.1/0.3/0.6)·
+        /// 라벨(정상/주의/과부하/붕괴)을 복제하되, 이 화면은 data-value--*가 아니라 badge-tag를
+        /// 쓰므로 값 클래스만 badge-tag--*로 바꿨다(위 CollapseStageBadgeClass와 동일 이유로
+        /// 과부하/붕괴 둘 다 danger로 합침).</summary>
+        private static (string label, string badgeClass) MedicalLoadStatus(float load)
+        {
+            if (load < 0.1f) return ("정상", "badge-tag--success");
+            if (load < 0.3f) return ("주의", "badge-tag--warning");
+            if (load < 0.6f) return ("과부하", "badge-tag--danger");
+            return ("붕괴", "badge-tag--danger");
+        }
+
+        /// <summary>감염자 수 기준 세계 순위(1-based) — WorldDataManager.Instance.Countries를
+        /// 내림차순 정렬해 이 국가의 위치를 찾는다. CountryStatusPanelController.RebuildTopRows()가
+        /// 이미 매 틱 같은 정렬을 수행하고 있어(TOP10 랭킹) 비용 문제 없음(48개국 정렬,
+        /// CountryPopup Expansion Phase 1 조사 결과 그대로).</summary>
+        private static int WorldInfectedRank(Country country)
+        {
+            var countries = WorldDataManager.Instance?.Countries;
+            if (countries == null) return 0;
+
+            var sorted = countries.OrderByDescending(c => c.infectedCount).ToList();
+            int index = sorted.FindIndex(c => c.id == country.id);
+            return index >= 0 ? index + 1 : 0;
+        }
     }
 }
