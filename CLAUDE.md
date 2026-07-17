@@ -59,9 +59,9 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 - CountryStatusPanel — GLOBAL STATUS CENTER(Performance Dashboard: Hero Stats 2x2 KPI/
   WORLD OVERVIEW/ADVANCED DIAGNOSTICS/감염자·사망자 TOP 10/48개국 대륙 아코디언). 목록 행 클릭 시
   CountryPopup 상세 팝업으로 드릴다운, CountryPopup "상세 보기" 버튼으로 역방향 연결도 완성
-- Research Database v2 — 업그레이드 트리를 브랜치 보드(계열 3+통합 1)+연구 목록으로 전환,
-  `UpgradeManager.Tree`의 실제 45개 `UpgradeNode` 전부 연동. 연구 항목 클릭 시 상세 팝업 표시까지
-  완료(잔여 작업은 아래 TODO 참고)
+- UpgradeTree — Painter2D 기반 절대좌표 트리 캔버스(`TreePathElement` 연결선 + `tree-node`,
+  경로/합류/최종 진화 시각화), `UpgradeManager.Tree`의 실제 45개 `UpgradeNode` 전부 연동.
+  연구 항목 클릭 시 ResearchPopup(비용/효과/주의/구매 버튼 4갈래/고급 정보 Foldout)까지 완료
 - 플랫폼 연동 — 앱인토스 보상형 광고(`GameAds`), 랭킹(게임센터 리더보드), 저장(로컬 폴백 + AIT Storage 훅)
 - 화면 플로우 — `MainMenu`(병원체 선택)/`CountrySelect`(발원 국가 선택, 국기 48/48)/`GamePlay`,
   재시작 루프 안정화
@@ -74,28 +74,15 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 지금 실행해야 할 **다음 작업**만 남긴다. "확인/검증"류 항목은 `Docs/Archive/QA_Checklist.md`,
 배포 점검은 `Docs/Archive/Release_Checklist.md`, 에디터 수동 배선은 `Docs/Archive/unity-editor-task.md`로 이동됨.
 
-**Research Database v2 — 커밋 7 나머지 절반** (근거:
-`Docs/Archive/ResearchDatabase_V2_ImplementationPlan.md` §1/§4)
+**ResearchPopup — 잠금 사유 구체화**
 
-- `UpgradeManager.OnNodeUnlocked` 구독으로 활성 뷰(브랜치 보드/요약)를 갱신하는 부분이 남음
-  (계획서 §4 커밋 7 표 3번째 항목).
-- 이후 폴리싱(`LockReason()`/CTA 버튼 문구 4갈래, 커밋 8) → 구 코드 정리(`buy-button` UXML 제거
-  등, 커밋 9) → 문서 반영(`DESIGN.md`/`QA_Checklist.md`/`unity-editor-task.md`, 커밋 10) → 에디터
-  씬 배선(`ResearchPopupUI` GameObject)+실기기 검증(커밋 11)까지 계획서 §1/§4 순서 그대로 진행.
-- Phase 2~4(`environmentResistance`/`medicalBurdenModifier`/`unlockedFlags` 소비, 이번 범위
-  아님)는 `Docs/Archive/ResearchDatabase_RuntimeSystems.md` §9 순서를 따르고, 그 문서 §11의 미결정
-  항목과 `NodeMapping.md` §8의 잔여 항목(DNA 비용 프리미엄·항원 변이 확률 밸런스)을 착수 전 확인.
+- 선행조건 미충족 시 버튼이 "선행 연구 필요"로만 표시되고 구체적으로 어떤 노드가 필요한지는
+  안 보여준다 — `LockReason()`(예: "다음 선행: 폐렴") 구현 필요.
 
-**UI 기술 부채 — Tactical.uss 로컬 중복 정의 잔여분 제거** (근거: UI Audit 1~4차 작업)
+**에디터 배선 확인**
 
-- `corner-cut`/`tactical-panel`/`tactical-panel__header`/`tactical-panel__title`/
-  `popup-footer-button`/`modal-footer`는 정리 완료(Hud.uss/UpgradeTree.uss/RankingPanel.uss/
-  ResearchPopup.uss가 전부 Tactical.uss 참조로 전환됨).
-- `UpgradeTree.uss`에 `data-row`(셀렉터 자체)가 아직 로컬 중복으로 남아있음 — Tactical.uss
-  참조로 교체 필요.
-- `UpgradeTree.uss`의 `data-label`/`data-value`는 Tactical.uss 정본의 오버플로우 버그 픽스
-  (`flex-shrink`/`min-width`/`white-space`/`text-align`)가 소급 반영되지 않은 상태 — 단순 삭제가
-  아니라 값 갱신 후 45개 연구 노드 회귀 확인이 선행되어야 함.
+- `ResearchPopupUI` GameObject가 씬에 정상 배선돼 있는지 재확인(DNA 구매 버그 수정 세션에서
+  Play Mode로 동작은 확인됐으나, 이번 UpgradeTree 캔버스 승격 이후 별도 재확인 없음).
 
 **조사 필요**
 
