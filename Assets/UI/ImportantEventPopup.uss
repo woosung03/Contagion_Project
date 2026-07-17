@@ -1,0 +1,26 @@
+/* ImportantEventPopup(Tactical Modal) — Overlay Panel, 화면 중앙(Important Event Popup System).
+   ResearchPopup.uss와 동일한 중앙 배치 좌표(DESIGN.md 7절 Overlay Panel 분류)를 재사용하되,
+   콘텐츠는 제목+설명+확인 버튼 1개뿐인 최소 구조로 새로 설계했다(ResearchPopup 콘텐츠 구조 미복제).
+   tactical-panel/corner-cut/modal-footer/popup-footer-button 등 공용 규칙은 Tactical.uss가 담당하고
+   이 파일은 화면 고유 배치(위치/폭/설명 문단)만 추가한다.
+   로드 순서: Theme.uss -> Tactical.uss -> ImportantEventPopup.uss */
+
+.popup-root {
+    position: absolute;
+    left: 50%;
+    top: 30%;
+    width: 320px;
+    margin-left: -160px;
+    background-color: var(--color-bg-panel);
+    padding: var(--space-lg);
+    /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지 않는다
+       (CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지, 기존 규칙 유지). */
+}
+
+.popup-description {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-lg);
+}

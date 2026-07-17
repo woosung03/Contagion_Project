@@ -31,6 +31,11 @@ namespace Contagion.Gameplay
         Leaderboard,
         EndingScreen,
         ResearchPopup,
+
+        /// <summary>Important Event Popup System — 국면 전환급 이벤트(첫 국가 붕괴/첫 완전 무정부/
+        /// 치료제 개발 시작) 팝업. 기존 값 중 재사용 가능한 범용 사유가 없어(전부 특정 화면 전용)
+        /// 신규 추가— ResearchPopup 등 다른 사유와 동시에 열려 있어도 서로 독립적으로 잠금/해제된다.</summary>
+        ImportantEvent,
     }
 
     public static class WorldMapInputLock

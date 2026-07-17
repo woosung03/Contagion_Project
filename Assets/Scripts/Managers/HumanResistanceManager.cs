@@ -62,6 +62,20 @@ namespace Contagion.Managers
         private WorldMortalityStage _lastMortalityStage = WorldMortalityStage.Stable;
         private readonly Dictionary<string, CountryCollapseStage> _lastCollapseStage = new Dictionary<string, CountryCollapseStage>();
 
+        /// <summary>Important Event Popup System — 게임 전체 최초 1회 판정용 플래그. 국가별 상태를
+        /// 담는 _lastCollapseStage와 달리 이건 "어떤 국가든 이 단계에 처음 도달했는지"를 전역으로
+        /// 추적한다. SaveData 연동 없음(세션 한정, ResetForNewGame()에서만 초기화).</summary>
+        private bool _firstCollapseShown;
+        private bool _firstFullAnarchyShown;
+
+        /// <summary>게임 전체에서 어떤 국가든 최초로 Normal 상태를 벗어났을 때 딱 1회 발행 —
+        /// ImportantEventPopupController가 구독.</summary>
+        public event Action<Country> OnFirstCountryCollapse;
+
+        /// <summary>게임 전체에서 어떤 국가든 최초로 FullAnarchy에 도달했을 때 딱 1회 발행 —
+        /// ImportantEventPopupController가 구독.</summary>
+        public event Action<Country> OnFirstFullAnarchy;
+
         /// <summary>저항 단계가 바뀔 때만 발행 — 뉴스 피드(Step 7)에서 활용 예정.</summary>
         public event Action<ResistanceStage> OnResistanceStageChanged;
 
@@ -115,6 +129,8 @@ namespace Contagion.Managers
             _lastStage = ResistanceStage.NoAwareness;
             _lastMortalityStage = WorldMortalityStage.Stable;
             _lastCollapseStage.Clear();
+            _firstCollapseShown = false;
+            _firstFullAnarchyShown = false;
         }
 
         private void HandleTick(WorldState state)
@@ -189,11 +205,28 @@ namespace Contagion.Managers
             // [Step 55] "이 부류 디버그 로그 지워줘" 요청으로 국가별 붕괴 단계 변경 로그를 제거했다 — 48개국이
             // 각자 붕괴 단계가 바뀔 때마다 콘솔에 로그를 남겨 스팸이 심했다(CountryView의 목표색 갱신 로그를
             // 지웠던 Step 54와 같은 종류의 요청). _lastCollapseStage 갱신 자체는 funding 배율 계산에 필요한
-            // 로직이라 그대로 유지하고, 로그 호출만 제거했다.
-            if (!_lastCollapseStage.TryGetValue(country.id, out var lastCollapseStage) || lastCollapseStage != collapseStage)
+            // 로직이라 그대로 유지했다.
+            bool hadPrevious = _lastCollapseStage.TryGetValue(country.id, out var lastCollapseStage);
+            if (hadPrevious && lastCollapseStage != collapseStage)
             {
-                _lastCollapseStage[country.id] = collapseStage;
+                // Important Event Popup System — 게임 전체 최초 1회만. 안전 조건(이전 단계가 정확히
+                // Normal이었는지)을 명시적으로 확인해 hadPrevious==false인 초기화 프레임과 확실히
+                // 구분한다(사망률 단조 비감소라 Normal 재진입은 불가능 — 이 조건은 평생 최대 1번만 참).
+                if (lastCollapseStage == CountryCollapseStage.Normal && collapseStage != CountryCollapseStage.Normal
+                    && !_firstCollapseShown)
+                {
+                    _firstCollapseShown = true;
+                    OnFirstCountryCollapse?.Invoke(country);
+                }
+
+                if (lastCollapseStage != CountryCollapseStage.FullAnarchy && collapseStage == CountryCollapseStage.FullAnarchy
+                    && !_firstFullAnarchyShown)
+                {
+                    _firstFullAnarchyShown = true;
+                    OnFirstFullAnarchy?.Invoke(country);
+                }
             }
+            _lastCollapseStage[country.id] = collapseStage;
 
             switch (collapseStage)
             {
