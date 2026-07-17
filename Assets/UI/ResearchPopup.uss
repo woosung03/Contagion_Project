@@ -55,7 +55,91 @@
 }
 
 /* 확인/취소 액션 버튼 슬롯 — CountryPopup의 modal-footer는 비어있었지만(닫기가 헤더로
-   이동), Research Popup은 "연구 시작"이라는 확정 액션이 있어 버튼 2개를 가로로 균등폭
+   이동), Research Popup은 "연구하기"라는 확정 액션이 있어 버튼 2개를 가로로 균등폭
    배치한다. .modal-footer/.popup-footer-button/.popup-footer-button--confirm은 Tactical.uss
-   공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). "연구 시작"은 --confirm 변형으로
-   "취소"와 시각적으로 구분한다. */
+   공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). "연구하기"는 --confirm 변형으로
+   "취소"와 시각적으로 구분한다. 버튼 텍스트/활성화는 이제 ResearchPopupController가 상태별로
+   동적으로 채운다(Commit 4) — UXML의 "연구하기"는 초기값일 뿐. */
+
+/* ================================================================
+   Commit 4 — 정보 위계: DNA 비용 / 효과 / 주의 / 고급 정보(Foldout).
+   ================================================================ */
+
+/* DNA 비용 — 위계 2순위, 설명 바로 아래에서 가장 먼저 눈에 들어와야 한다. */
+.popup-cost {
+    color: var(--color-brand-gold);
+    font-size: var(--font-size-lg);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-sm);
+}
+
+/* 효과/주의 공용 섹션 — 컨트롤러가 내용이 없으면 이 컨테이너 자체를 display:none 처리한다. */
+.popup-section {
+    margin-bottom: var(--space-sm);
+}
+
+.popup-section__caption {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-caption);
+    letter-spacing: var(--tracking-caption);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-xs);
+}
+
+.popup-bullet {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    margin-bottom: 2px;
+}
+
+/* 주의 불릿 — severity 축(4색) 재사용 금지(DESIGN.md 2.2절 Don't) 원칙에 따라 severity 색이
+   아니라 브랜드 골드로만 구분한다. 스탯 자체의 "좋음"을 왜곡하지 않고 부작용만 별도 신호. */
+.popup-bullet--warn {
+    color: var(--color-brand-gold);
+}
+
+/* 고급 정보(Foldout) — 기본 접힘. Foldout 자체 헤더 스타일은 Unity 기본을 따르고, 내부
+   막대 비교 영역만 이 파일에서 배치한다. */
+.popup-advanced {
+    margin-top: var(--space-sm);
+}
+
+.popup-advanced-bars {
+    margin-top: var(--space-xs);
+}
+
+.popup-bar-row {
+    margin-bottom: var(--space-sm);
+}
+
+.popup-bar-row__label {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--tracking-label);
+    margin-bottom: 2px;
+}
+
+/* 현재 값(어두운 회색)과 적용 후 값(구조용 발광색)을 같은 트랙 스타일로 2줄 배치해 비교한다 —
+   population-bar/branch-row__progress와 동일한 "트랙+채움" 문법 재사용, 새 컴포넌트 없음. */
+.popup-bar-track {
+    height: 10px;
+    background-color: var(--color-surface-soft);
+    border-width: 1px;
+    border-color: var(--color-accent-glow-soft);
+    border-radius: var(--radius-sm);
+    margin-bottom: 3px;
+    overflow: hidden;
+}
+
+.popup-bar-fill {
+    height: 100%;
+}
+
+.popup-bar--before {
+    background-color: var(--color-text-tertiary);
+}
+
+.popup-bar--after {
+    background-color: var(--color-accent-glow);
+}
