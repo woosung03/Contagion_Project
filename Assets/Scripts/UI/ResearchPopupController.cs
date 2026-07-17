@@ -1,4 +1,5 @@
 using Contagion.Gameplay;
+using Contagion.Managers;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,16 +15,21 @@ namespace Contagion.UI
     /// Hide()" 요구사항을 그대로 충족), 이 클래스가 추가로 담당하는 것은 ResearchPopup.uxml 고유
     /// 요소(popup-description) 바인딩과 Show(title, branch, description) 오버로드뿐이다.
     ///
-    /// [이번 커밋 범위] Popup 표시 / 숨김 / 텍스트 갱신 / Close 버튼 처리만 구현한다.
-    /// modal-footer의 research-popup-confirm-button("연구 시작")/research-popup-cancel-button
-    /// ("취소")은 ResearchPopup.uxml에 이미 존재하지만 이 커밋에서는 클릭 콜백을 연결하지 않는다 —
-    /// 노드 선택 이벤트 연결, 연구 구매(UpgradeManager.TryUnlock) 로직, Popup 자동 호출
-    /// (UpgradeTreeView/UIManager 연동), 씬 배선(GameObject에 UIDocument 연결)은 모두 이후
-    /// 커밋/에디터 작업의 범위이며 이 커밋에서는 손대지 않는다.
+    /// [구매 플로우 복구] modal-footer의 research-popup-confirm-button("연구 시작")/
+    /// research-popup-cancel-button("취소")이 이번에 UpgradeManager.TryUnlock()에 연결됐다.
+    /// TryUnlock()의 bool 반환값으로 성공/실패를 분기한다 — 성공 시에만 Hide(), 실패 시 팝업을
+    /// 유지한다(실패 사유를 알려주는 UI는 이번 범위 밖, CLAUDE.md TODO 커밋 8 LockReason()/CTA
+    /// 문구 작업 참고). UpgradeManager 내부 로직/DNA 계산은 전혀 건드리지 않았다.
     /// </summary>
     public class ResearchPopupController : TacticalModalController
     {
         private Label _popupDescription;
+        private Button _confirmButton;
+        private Button _cancelButton;
+
+        /// <summary>Show()가 대입한, 지금 팝업이 보여주고 있는 연구 노드 id — 확인 버튼 클릭 시
+        /// TryUnlock()에 넘길 대상을 기억해둔다.</summary>
+        private string _currentNodeId;
 
         protected override void OnEnable()
         {
@@ -33,6 +39,17 @@ namespace Contagion.UI
 
             var root = GetComponent<UIDocument>().rootVisualElement;
             _popupDescription = root.Q<Label>("popup-description");
+            _confirmButton = root.Q<Button>("research-popup-confirm-button");
+            _cancelButton = root.Q<Button>("research-popup-cancel-button");
+
+            _confirmButton?.RegisterCallback<ClickEvent>(_ => HandleConfirmClicked());
+            _cancelButton?.RegisterCallback<ClickEvent>(_ => Hide());
+        }
+
+        private void HandleConfirmClicked()
+        {
+            bool success = UpgradeManager.Instance != null && UpgradeManager.Instance.TryUnlock(_currentNodeId);
+            if (success) Hide();
         }
 
         /// <summary>
@@ -44,7 +61,8 @@ namespace Contagion.UI
         /// "브랜치" data-row를 추가하는 방식으로 표시한다(CountryPopupController 등 기존 화면과
         /// 동일한 data-row 재사용 패턴).</param>
         /// <param name="description">popup-description(Label)에 표시할 설명 문단.</param>
-        public void Show(string title, string branch, string description)
+        /// <param name="nodeId">확인 버튼 클릭 시 UpgradeManager.TryUnlock()에 넘길 노드 id.</param>
+        public void Show(string title, string branch, string description, string nodeId)
         {
             // [WorldMap Input Lock System] ResearchPopup은 요구사항상 잠금 사유 목록에 명시적으로
             // 포함된 화면이다(CountryPopup과 달리) — 지금은 Research 화면(AppScreen.Research) 위에서만
@@ -53,6 +71,7 @@ namespace Contagion.UI
             WorldMapInputLock.Lock(WorldMapLockReason.ResearchPopup);
             base.Show(title);
 
+            _currentNodeId = nodeId;
             if (_popupDescription != null) _popupDescription.text = description;
 
             // 재호출 시 이전 브랜치 행이 중복 누적되지 않도록 비우고 다시 추가한다.

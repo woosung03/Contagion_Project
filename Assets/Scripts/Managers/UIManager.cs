@@ -371,8 +371,9 @@ namespace Contagion.Managers
         }
 
         /// <summary>연구 항목 행 클릭 — UpgradeTreeView.OnResearchItemSelected 구독(V2 계획 커밋 7).
-        /// node.id로 표시명/브랜치/설명을 조회해 ResearchPopupController.Show()를 호출한다. 구매
-        /// 로직(TryUnlock)이나 상태 변경은 전혀 건드리지 않는다 — 이번 커밋은 팝업 표시까지만.</summary>
+        /// node.id로 표시명/브랜치/설명을 조회해 ResearchPopupController.Show()를 호출한다.
+        /// 실제 구매(TryUnlock)는 ResearchPopupController의 확인 버튼이 담당한다 — 이 메서드는
+        /// nodeId를 팝업에 전달만 할 뿐 구매 로직/상태 변경에는 관여하지 않는다.</summary>
         private void HandleResearchItemSelected(UpgradeNode node)
         {
             if (node == null || researchPopupController == null) return;
@@ -381,7 +382,7 @@ namespace Contagion.Managers
             string branch = UpgradeTreeView.GetBranch(node.id);
             string description = UpgradeTreeView.GetDescription(node.id);
 
-            researchPopupController.Show(displayName, branch, description);
+            researchPopupController.Show(displayName, branch, description, node.id);
         }
 
         /// <summary>지정한 인덱스의 UpgradeTreeView만 보이고 나머지 둘은 닫는다.</summary>

@@ -106,6 +106,8 @@ namespace Contagion.Managers
             EventManager.Instance?.ResetForNewGame();
             SaveManager.Instance?.ResetForNewGame();
             TransportManager.Instance?.ResetForNewGame();
+            BottleneckAnalyzer.Instance?.ResetForNewGame();
+            ResearchRecommender.Instance?.ResetForNewGame();
         }
 
         /// <summary>

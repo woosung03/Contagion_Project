@@ -171,8 +171,9 @@ namespace Contagion.UI
         };
 
         /// <summary>
-        /// node.id → 소속 갈래(브랜치) 라벨. 이번 커밋부터 <see cref="BuildBranches"/>가 실제
-        /// 그룹핑 기준으로 사용한다. 4브랜치 구조(기반 갈래 3개 + 통합 갈래 1개)는
+        /// node.id → 소속 갈래(브랜치) 라벨. GetBranch()를 통해 ResearchPopup이 조회하는 데
+        /// 쓰인다(트리 캔버스 승격 이후 자체 그룹핑 용도의 소비처는 사라짐). 4브랜치 구조(기반
+        /// 갈래 3개 + 통합 갈래 1개)는
         /// DefaultUpgradeTreeFactory.cs의 prerequisites 그래프가 실제로 강제하는 구조다(카테고리당
         /// 15개 = 4+4+4+3, ResearchDatabase_V2_UI_StructureDesign.md §0이 이미 확인). 라벨
         /// 문자열 자체는 기존 더미 데이터가 이미 쓰던 값(공기 계열/수인성 계열/접촉·동물매개
@@ -230,19 +231,6 @@ namespace Contagion.UI
             { "abl_finalevo", "통합 연구" },
         };
 
-        /// <summary>
-        /// 카테고리별 브랜치 표시 순서(브랜치 보드 4행 + 리스트 섹션 순서). NodeBranch 딕셔너리의
-        /// 값 자체는 순서를 보장하지 않으므로(Dictionary 순회 순서에 의존하지 않기 위해) 별도로
-        /// 명시한다. 값은 기존 더미 데이터(BuildDummyBranches, 이번 커밋에서 제거)가 쓰던 순서와
-        /// 동일 — 계열 3개(각 4개 노드) + 통합 연구(3개 노드) 순.
-        /// </summary>
-        private static readonly Dictionary<UpgradeCategory, string[]> BranchOrder = new Dictionary<UpgradeCategory, string[]>
-        {
-            { UpgradeCategory.Transmission, new[] { "공기 계열", "수인성 계열", "접촉·동물매개 계열", "통합 연구" } },
-            { UpgradeCategory.Symptom, new[] { "표준형 — 기침 계열", "은신형 — 발진 계열", "공격형 — 구토 계열", "통합 연구" } },
-            { UpgradeCategory.Ability, new[] { "변이 계열", "은신 계열", "구조 강화 계열", "통합 연구" } },
-        };
-
         /// <summary>node.id → 한국어 표시명.</summary>
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
@@ -270,20 +258,19 @@ namespace Contagion.UI
         private Label _dnaLabel;
         private Label _labCaptionLabel;
         private ScrollView _nodeScroll;
-        private VisualElement _branchBoardRows;
-        private Label _detailTitle;
-        private VisualElement _detailRows;
-        private Button _buyButton;
         private Button _closeButton;
         private Button _adBonusButton;
         private Button _tabTransmissionButton;
         private Button _tabSymptomButton;
         private Button _tabAbilityButton;
 
-        /// <summary>node.id → 표시용 코드(예: "TRANS-001"). <see cref="AssignCodes"/>가 카테고리
-        /// 전체(선택된 브랜치와 무관하게)를 브랜치 순서대로 훑으며 채운다 — 브랜치를 옮겨 다녀도
-        /// 코드가 흔들리지 않도록 하기 위함.</summary>
-        private readonly Dictionary<string, string> _codeByNodeId = new Dictionary<string, string>();
+        // ================================================================
+        // 트리 캔버스(Painter2D 절대좌표 트리) — node-scroll의 실제 콘텐츠로 렌더링한다.
+        // branch-board(Commit 2)/research-row(Commit 3A)/detail-panel(Commit 3B) 전부 제거되어
+        // 이 화면 안에는 캔버스만 존재한다.
+        // ================================================================
+
+        private TreePathElement _treePathElement;
 
         /// <summary>탭 클릭 — 다른 카테고리를 요청하면 발생. 실제 화면 전환(다른 UIDocument
         /// Show/Hide)은 UIManager가 담당한다.</summary>
@@ -300,13 +287,6 @@ namespace Contagion.UI
         /// 타면서 Unlock() 호출이 누락되던 버그(WorldMap Input Lock 영구 유지)의 근본 수정.</summary>
         public event System.Action OnCloseRequested;
 
-        /// <summary>이 카테고리의 4개 브랜치(계열 3 + 통합 연구 1). Show()/RequestCategory 시점마다
-        /// UpgradeManager.Tree로부터 다시 계산한다.</summary>
-        private List<ResearchBranch> _branches = new List<ResearchBranch>();
-
-        /// <summary>현재 브랜치 보드/리스트/하단 요약이 가리키는 브랜치.</summary>
-        private ResearchBranch _selectedBranch;
-
         [SerializeField, Tooltip("광고 시청 보상 DNA — 설계 문서 13절 표 1행")]
         private int adBonusDna = 10;
 
@@ -317,10 +297,6 @@ namespace Contagion.UI
             _dnaLabel = root.Q<Label>("dna-label");
             _labCaptionLabel = root.Q<Label>("lab-caption-label");
             _nodeScroll = root.Q<ScrollView>("node-scroll");
-            _branchBoardRows = root.Q<VisualElement>("branch-board__rows");
-            _detailTitle = root.Q<Label>("detail-title");
-            _detailRows = root.Q<VisualElement>("detail-rows");
-            _buyButton = root.Q<Button>("buy-button");
             _closeButton = root.Q<Button>("close-button");
             _adBonusButton = root.Q<Button>("ad-bonus-button");
             _tabTransmissionButton = root.Q<Button>("tab-transmission-button");
@@ -347,32 +323,163 @@ namespace Contagion.UI
             if (UpgradeManager.Instance == null) return;
             UpgradeManager.Instance.OnDnaChanged -= HandleDnaChanged;
             UpgradeManager.Instance.OnDnaChanged += HandleDnaChanged;
+            UpgradeManager.Instance.OnNodeUnlocked -= HandleNodeUnlockedForCanvas;
+            UpgradeManager.Instance.OnNodeUnlocked += HandleNodeUnlockedForCanvas;
         }
 
         private void OnDisable()
         {
             if (UpgradeManager.Instance == null) return;
             UpgradeManager.Instance.OnDnaChanged -= HandleDnaChanged;
+            UpgradeManager.Instance.OnNodeUnlocked -= HandleNodeUnlockedForCanvas;
+        }
+
+        /// <summary>구매 직후 캔버스 경로가 즉시 밝아지도록 갱신한다(Commit 1부터 항상 실행).</summary>
+        private void HandleNodeUnlockedForCanvas(UpgradeNode node)
+        {
+            BuildTreeCanvas();
         }
 
         /// <summary>HUD "업그레이드" 버튼 또는 탭 클릭에서 호출 — 이 창은 인스펙터에 지정된
-        /// <see cref="category"/> 하나만 그린다. 매번 브랜치 목록을 다시 계산하고 "미완료 항목이
-        /// 있는 첫 브랜치"로 선택을 초기화한다(V2 계획 §5 기본값 — 마지막 선택 기억은 이번 범위
-        /// 밖).</summary>
+        /// <see cref="category"/> 하나만 그린다. detail-panel 제거(Commit 3B) 이후로는 캔버스만
+        /// 다시 그리면 된다.</summary>
         public void Show()
         {
             _upgradeRoot.style.display = DisplayStyle.Flex;
             UpdateTabHighlight();
-            _branches = BuildBranches(category);
-            AssignCodes(_branches);
-            SelectBranch(FirstIncompleteBranch(_branches));
             RefreshDna();
+
+            BuildTreeCanvas();
         }
 
         public void Hide()
         {
             if (_upgradeRoot != null) _upgradeRoot.style.display = DisplayStyle.None;
         }
+
+        // ================================================================
+        // 트리 캔버스(Painter2D 절대좌표 트리) — node-scroll.contentContainer를 직접 채운다.
+        // research-row 리스트(BuildResearchList 등)는 Commit 3A에서 완전히 제거됨 — 이제 이
+        // 컨테이너의 유일한 콘텐츠 소스다.
+        // ================================================================
+
+        /// <summary>node.position(월드 좌표, DefaultUpgradeTreeFactory.cs)을 이 카테고리 노드들의
+        /// 최소값 기준으로 정규화해 캔버스 로컬 좌표로 그린다 — 카테고리별 x 오프셋(예: 증상=640)을
+        /// 하드코딩하지 않고 런타임에 계산해서, factory 데이터가 나중에 바뀌어도 매직넘버가 깨지지
+        /// 않게 한다. LAB 캡션 갱신도 여기서 겸한다 — 기존에 BuildResearchList()가 맡던 역할인데,
+        /// 그 메서드가 제거되면서 카테고리별 콘텐츠를 그리는 이 메서드로 옮겼다(캡션 로직 자체는
+        /// 무변경).</summary>
+        private void BuildTreeCanvas()
+        {
+            if (_nodeScroll == null || UpgradeManager.Instance == null) return;
+
+            if (_labCaptionLabel != null)
+                _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} LAB";
+
+            var categoryNodes = UpgradeManager.Instance.Tree
+                .Where(n => n != null && n.category == category)
+                .ToList();
+            if (categoryNodes.Count == 0) return;
+
+            const float NodeWidth = 110f;
+            const float NodeHeight = 50f;
+            const float Margin = 60f;
+
+            float minX = categoryNodes.Min(n => n.position.x);
+            float minY = categoryNodes.Min(n => n.position.y);
+            float maxX = categoryNodes.Max(n => n.position.x);
+            float maxY = categoryNodes.Max(n => n.position.y);
+
+            float canvasWidth = (maxX - minX) + NodeWidth + Margin * 2f;
+            float canvasHeight = (maxY - minY) + NodeHeight + Margin * 2f;
+
+            Vector2 ToLocal(UpgradeNode n) => new Vector2(
+                n.position.x - minX + Margin,
+                n.position.y - minY + Margin);
+
+            var container = _nodeScroll.contentContainer;
+            container.Clear();
+            container.style.position = Position.Relative;
+            container.style.width = canvasWidth;
+            container.style.height = canvasHeight;
+
+            _treePathElement = new TreePathElement
+            {
+                style = { width = canvasWidth, height = canvasHeight }
+            };
+            container.Add(_treePathElement);
+            _treePathElement.SetSegments(BuildLineSegments(categoryNodes, ToLocal));
+
+            foreach (var node in categoryNodes)
+                container.Add(CreateTreeNode(node, ToLocal(node), NodeWidth, NodeHeight));
+        }
+
+        /// <summary>prerequisites 그래프를 그대로 선분으로 변환한다 — 일반 체인이든 합류 지점(선행
+        /// 2개)이든 "선행 -> 자신" 한 쌍이 곧 선분 하나이므로 별도 분기 없이 전 노드를 한 번만
+        /// 순회한다. 목적지 노드가 해금됐으면 밝고 굵게, 아니면 흐리고 얇게(Round 1~4 프로토타입과
+        /// 동일한 시각 규칙).</summary>
+        private List<TreePathElement.LineSegment> BuildLineSegments(
+            List<UpgradeNode> categoryNodes, System.Func<UpgradeNode, Vector2> toLocal)
+        {
+            var segments = new List<TreePathElement.LineSegment>();
+            var lookup = categoryNodes.ToDictionary(n => n.id, n => n);
+
+            var brightColor = new Color(0.588f, 1f, 0.725f, 0.9f); // --color-accent-glow
+            var dimColor = new Color(0.588f, 1f, 0.725f, 0.28f);
+
+            foreach (var node in categoryNodes)
+            {
+                foreach (var prereqId in node.prerequisites)
+                {
+                    if (!lookup.TryGetValue(prereqId, out var prereq)) continue;
+
+                    bool bright = node.isUnlocked;
+                    segments.Add(new TreePathElement.LineSegment(
+                        toLocal(prereq), toLocal(node),
+                        bright ? brightColor : dimColor,
+                        bright ? 6f : 3f));
+                }
+            }
+
+            return segments;
+        }
+
+        /// <summary>캔버스 노드 하나 — 즉석 조립한 VisualElement를 반환한다(별도 노드 클래스
+        /// 없음). 상태 판정은 기존 DetermineState()를 그대로 재사용(읽기 전용 호출, 수정 없음).</summary>
+        private VisualElement CreateTreeNode(UpgradeNode node, Vector2 localPos, float width, float height)
+        {
+            string state = DetermineState(node);
+
+            var el = new VisualElement();
+            el.AddToClassList("tree-node");
+            el.AddToClassList($"tree-node--{state}");
+            if (IsMergeNode(node)) el.AddToClassList("tree-node--merge");
+            if (IsFinalNode(node)) el.AddToClassList("tree-node--final");
+
+            el.style.left = localPos.x - width / 2f;
+            el.style.top = localPos.y - height / 2f;
+            el.style.width = width;
+            el.style.height = height;
+
+            var label = new Label(DisplayName(node.id));
+            label.AddToClassList("tree-node__label");
+            el.Add(label);
+
+            el.RegisterCallback<ClickEvent>(_ => OnResearchItemSelected?.Invoke(node));
+
+            return el;
+        }
+
+        /// <summary>합류 노드 = 선행이 2개 이상이고 리프가 아님(리프까지 포함하면 sym_organfailure류
+        /// 최종 노드도 선행 2개라 합류로 오분류된다 — 반드시 IsFinalNode와 배타적으로 판정).</summary>
+        private static bool IsMergeNode(UpgradeNode node) =>
+            node.prerequisites.Count > 1 && !IsFinalNode(node);
+
+        /// <summary>최종 진화 = 이 노드를 선행으로 삼는 다른 노드가 하나도 없음(리프).
+        /// DetermineState()가 이미 같은 계산을 하고 있지만(로컬 변수), 이번 범위는 기존 메서드를
+        /// 수정하지 않고 순수 추가만 하기로 했으므로 별도 헬퍼로 중복 정의한다.</summary>
+        private static bool IsFinalNode(UpgradeNode node) =>
+            !UpgradeManager.Instance.Tree.Any(n => n.prerequisites.Contains(node.id));
 
         private void RefreshDna()
         {
@@ -404,226 +511,6 @@ namespace Contagion.UI
             OnCategoryRequested?.Invoke(target);
         }
 
-        // ================================================================
-        // 브랜치 데이터 — UpgradeManager.Tree(실제 45개 UpgradeNode)를 NodeBranch 기준으로
-        // 그룹핑한다. Docs/ResearchDatabase_V2_ImplementationPlan.md §1 Step 8.
-        // ================================================================
-
-        private class ResearchBranch
-        {
-            public readonly string Label;
-            public readonly List<UpgradeNode> Items;
-
-            public ResearchBranch(string label, List<UpgradeNode> items)
-            {
-                Label = label;
-                Items = items;
-            }
-        }
-
-        /// <summary>UpgradeManager.Tree에서 이 카테고리 노드만 추려 <see cref="NodeBranch"/> 기준으로
-        /// <see cref="BranchOrder"/> 순서대로 4개 브랜치를 만든다. 각 브랜치 내부는 position.y(티어)
-        /// → position.x(열) 순으로 정렬 — DefaultUpgradeTreeFactory.cs가 이미 이 좌표로 티어/열을
-        /// 인코딩해뒀으므로 별도 깊이 계산이 필요 없다.</summary>
-        private static List<ResearchBranch> BuildBranches(UpgradeCategory targetCategory)
-        {
-            var branches = new List<ResearchBranch>();
-            if (UpgradeManager.Instance == null) return branches;
-
-            var labels = BranchOrder.TryGetValue(targetCategory, out var order) ? order : System.Array.Empty<string>();
-            var categoryNodes = UpgradeManager.Instance.Tree.Where(n => n != null && n.category == targetCategory).ToList();
-
-            foreach (var label in labels)
-            {
-                var items = categoryNodes
-                    .Where(n => NodeBranch.TryGetValue(n.id, out var branchLabel) && branchLabel == label)
-                    .OrderBy(n => n.position.y)
-                    .ThenBy(n => n.position.x)
-                    .ToList();
-                branches.Add(new ResearchBranch(label, items));
-            }
-            return branches;
-        }
-
-        /// <summary>브랜치 순서대로 전체 카테고리를 훑으며 _codeByNodeId를 채운다 — 어느 브랜치가
-        /// 선택돼 있는지와 무관하게 코드가 고정되도록 브랜치를 옮길 때마다 다시 계산하지 않고
-        /// Show()/RequestCategory 시점(카테고리 전체 재계산 시점)에만 갱신한다.</summary>
-        private void AssignCodes(List<ResearchBranch> branches)
-        {
-            _codeByNodeId.Clear();
-            int order = 0;
-            foreach (var branch in branches)
-            {
-                foreach (var node in branch.Items)
-                {
-                    order++;
-                    _codeByNodeId[node.id] = $"{CategoryPrefix(category)}-{order:000}";
-                }
-            }
-        }
-
-        /// <summary>기본 선택 브랜치 — "미완료 항목이 있는 첫 브랜치", 전부 완료됐으면 첫 브랜치.
-        /// V2 계획 §1 Step 10.</summary>
-        private static ResearchBranch FirstIncompleteBranch(List<ResearchBranch> branches)
-        {
-            if (branches.Count == 0) return null;
-            return branches.FirstOrDefault(b => b.Items.Any(n => !n.isUnlocked)) ?? branches[0];
-        }
-
-        /// <summary>브랜치 보드/리스트/하단 요약을 모두 선택된 브랜치 기준으로 다시 그린다.</summary>
-        private void SelectBranch(ResearchBranch branch)
-        {
-            _selectedBranch = branch;
-            BuildBranchBoard();
-            BuildResearchList();
-            BuildBranchSummary();
-        }
-
-        // ================================================================
-        // 브랜치 보드 — branch-board__rows(UpgradeTree.uxml, 커밋 1에서 이미 추가된 빈 컨테이너)를
-        // 채운다. V2 계획 §1 Step 9.
-        // ================================================================
-
-        private void BuildBranchBoard()
-        {
-            if (_branchBoardRows == null) return;
-            _branchBoardRows.Clear();
-            foreach (var branch in _branches)
-                _branchBoardRows.Add(CreateBranchRow(branch));
-        }
-
-        private VisualElement CreateBranchRow(ResearchBranch branch)
-        {
-            var row = new VisualElement();
-            row.AddToClassList("branch-row");
-
-            int total = branch.Items.Count;
-            int unlocked = branch.Items.Count(n => n.isUnlocked);
-            // "통합 연구" 브랜치처럼 진입 노드의 선행조건이 다른 브랜치에 걸쳐 있는 경우, 아직
-            // 아무것도 해금하지 못했고 진입 노드 자체가 잠겨 있으면 브랜치 전체를 잠김으로 표시한다
-            // (V2 계획 §1 Step 2 — 실제 해금 가능 여부 판정은 UpgradeManager.CanUnlock()이 담당,
-            // 여기서는 표시 문구만 결정).
-            bool locked = unlocked == 0 && total > 0 && DetermineState(branch.Items[0]) == "locked";
-            if (locked) row.AddToClassList("branch-row--locked");
-            if (branch == _selectedBranch) row.AddToClassList("branch-row--selected");
-
-            var label = new Label($"{branch.Label} ({unlocked}/{total})");
-            label.AddToClassList("branch-row__label");
-            row.Add(label);
-
-            var track = new VisualElement();
-            track.AddToClassList("branch-row__progress");
-
-            var fill = new VisualElement();
-            fill.AddToClassList("branch-row__progress-fill");
-            fill.style.flexGrow = unlocked;
-            track.Add(fill);
-
-            // 잔여(미해금) 구간 — population-bar류와 달리 이 트랙은 세그먼트가 2개(해금/잔여)뿐이고
-            // 이번 커밋은 UpgradeTreeView.cs만 수정 범위라 UpgradeTree.uss에 새 클래스를 추가하지
-            // 않는다. 트랙 자체 배경(.branch-row__progress의 --color-surface-soft)이 빈 구간처럼
-            // 보이도록 인라인 스타일로만 비율을 잡는다.
-            var remainder = new VisualElement();
-            remainder.style.flexBasis = 0;
-            remainder.style.flexGrow = Mathf.Max(total - unlocked, 0);
-            remainder.style.flexShrink = 0;
-            track.Add(remainder);
-
-            row.Add(track);
-
-            row.RegisterCallback<ClickEvent>(_ => SelectBranch(branch));
-            return row;
-        }
-
-        // ================================================================
-        // 연구 목록 — node-scroll 안에 "선택된 브랜치 하나"만 그린다(V2 계획 §1 Step 11, 이전
-        // 커밋까지는 카테고리 전체 브랜치를 순서대로 다 그렸다).
-        // ================================================================
-
-        private void BuildResearchList()
-        {
-            var container = _nodeScroll.contentContainer;
-            container.Clear();
-
-            if (_labCaptionLabel != null)
-                _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} LAB";
-
-            if (_selectedBranch == null) return;
-
-            container.Add(CreateBranchSectionHeader(_selectedBranch.Label));
-            foreach (var node in _selectedBranch.Items)
-                container.Add(CreateResearchRow(node));
-        }
-
-        private VisualElement CreateBranchSectionHeader(string branchLabel)
-        {
-            var caption = new Label(branchLabel);
-            caption.AddToClassList("section-caption");
-            caption.AddToClassList($"section-caption--{CategoryClass(category)}");
-            return caption;
-        }
-
-        /// <summary>연구 항목 행 — 실제 UpgradeNode 기반. 클릭 시 <see cref="OnResearchItemSelected"/>를
-        /// 발행한다(V2 계획 커밋 6). LOCKED 상태를 포함해 모든 상태에서 발행한다 — 잠긴 항목도
-        /// 상세 팝업에서 선행조건("잠긴 이유")을 확인할 수 있어야 하고, 그 열람 자체를 막을 이유가
-        /// 없다(팝업의 "연구 시작" 버튼 활성화 여부만 상태에 따라 갈리며, 이는 팝업 쪽 책임이다).
-        /// UIManager가 아직 이 이벤트를 구독하지 않으므로(V2 계획 커밋 7) 지금 탭해도 화면상
-        /// 변화는 없다(안전한 중간 상태).</summary>
-        private VisualElement CreateResearchRow(UpgradeNode node)
-        {
-            var row = new VisualElement();
-            row.AddToClassList("research-row");
-            row.AddToClassList($"research-row--{CategoryClass(category)}");
-
-            string state = DetermineState(node);
-            row.AddToClassList($"research-row--{state}");
-
-            var codeLabel = new Label(_codeByNodeId.TryGetValue(node.id, out var code) ? code : node.id);
-            codeLabel.AddToClassList("research-row__code");
-            row.Add(codeLabel);
-
-            var nameLabel = new Label(DisplayName(node.id));
-            nameLabel.AddToClassList("research-row__name");
-            row.Add(nameLabel);
-
-            var statusLabel = new Label(StateCaption(state));
-            statusLabel.AddToClassList("research-row__status");
-            row.Add(statusLabel);
-
-            var costLabel = new Label(CostText(node, state));
-            costLabel.AddToClassList("research-row__cost");
-            row.Add(costLabel);
-
-            row.RegisterCallback<ClickEvent>(_ => OnResearchItemSelected?.Invoke(node));
-
-            return row;
-        }
-
-        /// <summary>LOCKED/AVAILABLE/ACTIVE/MAXED 4단계 캡션.</summary>
-        private static string StateCaption(string state) => state switch
-        {
-            "locked" => "잠김",
-            "available" => "연구 가능",
-            "active" => "진행 중",
-            "maxed" => "완료",
-            _ => state.ToUpperInvariant()
-        };
-
-        /// <summary>비용 열 텍스트 — locked는 "—", available은 실제 구매 비용(GetEffectiveCost,
-        /// 읽기 전용 조회라 비용 로직 자체는 건드리지 않는다), active/maxed(둘 다 이미 해금됨)는
-        /// "완료".</summary>
-        private static string CostText(UpgradeNode node, string state)
-        {
-            if (node == null || UpgradeManager.Instance == null) return "—";
-            return state switch
-            {
-                "available" => $"{UpgradeManager.Instance.GetEffectiveCost(node)} DNA",
-                "active" => "완료",
-                "maxed" => "완료",
-                _ => "—"
-            };
-        }
-
         /// <summary>UpgradeNode 기반 상태 판정. isUnlocked==true면 이 노드를 선행조건으로 삼는
         /// 다른 노드가 있는지로 active(중간 티어)/maxed(말단) 구분, isUnlocked==false면 선행조건
         /// 충족 여부로 available/locked 구분.</summary>
@@ -637,59 +524,6 @@ namespace Contagion.UI
 
             bool prereqsMet = node.prerequisites.All(pid => UpgradeManager.Instance.IsUnlocked(pid));
             return prereqsMet ? "available" : "locked";
-        }
-
-        // ================================================================
-        // 하단 상세 패널 — 개별 항목이 아니라 "선택된 브랜치" 요약(진행률 + 다음 추천 연구) 2행을
-        // 보여준다(V2 계획 §1 Step 12). 개별 항목 상세는 Research Popup(커밋 6~7)의 역할이다.
-        // ================================================================
-
-        private void BuildBranchSummary()
-        {
-            if (_detailRows == null) return;
-
-            if (_selectedBranch == null)
-            {
-                if (_detailTitle != null) _detailTitle.text = "연구를 선택하세요";
-                _detailRows.Clear();
-                return;
-            }
-
-            int total = _selectedBranch.Items.Count;
-            int unlocked = _selectedBranch.Items.Count(n => n.isUnlocked);
-
-            if (_detailTitle != null) _detailTitle.text = _selectedBranch.Label;
-            _detailRows.Clear();
-            AddDetailRow("진행률", $"{unlocked}/{total}");
-
-            var next = _selectedBranch.Items.FirstOrDefault(n => DetermineState(n) == "available");
-            if (next != null)
-                AddDetailRow("다음 추천 연구", DisplayName(next.id));
-            else if (total > 0 && unlocked == total)
-                AddDetailRow("다음 추천 연구", "브랜치 완료");
-            else
-                AddDetailRow("다음 추천 연구", "선행 조건 필요");
-        }
-
-        /// <summary>data-row 한 줄을 만들어 detail-rows 컨테이너에 추가한다(country-dock__row와
-        /// 동일 계약 — UI_Design.md 3절/11.4).</summary>
-        private void AddDetailRow(string label, string value, string valueStateClass = null)
-        {
-            if (_detailRows == null) return;
-
-            var row = new VisualElement();
-            row.AddToClassList("data-row");
-
-            var labelEl = new Label(label);
-            labelEl.AddToClassList("data-label");
-            row.Add(labelEl);
-
-            var valueEl = new Label(value);
-            valueEl.AddToClassList("data-value");
-            if (!string.IsNullOrEmpty(valueStateClass)) valueEl.AddToClassList(valueStateClass);
-            row.Add(valueEl);
-
-            _detailRows.Add(row);
         }
 
         /// <summary>node.effects의 statName -> 상세 패널 표시 라벨. 개별 항목 상세(Research Popup)
@@ -719,24 +553,8 @@ namespace Contagion.UI
 
         private void HandleDnaChanged(int totalDna) => RefreshDna();
 
-        private static string CategoryLabel(UpgradeCategory category) => category switch
-        {
-            UpgradeCategory.Transmission => "감염 경로",
-            UpgradeCategory.Symptom => "증상",
-            UpgradeCategory.Ability => "적응", // ResearchDatabase_Design.md 권장안 — "능력"에서 개명
-            _ => category.ToString()
-        };
-
-        private static string CategoryClass(UpgradeCategory category) => category switch
-        {
-            UpgradeCategory.Transmission => "transmission",
-            UpgradeCategory.Symptom => "symptom",
-            UpgradeCategory.Ability => "ability",
-            _ => "unknown"
-        };
-
-        /// <summary>탭 라벨(짧은 한글) — CategoryLabel()보다 더 축약된 표기가 필요한 전파 탭만
-        /// 다르고("감염 경로" 대신 "전파"), 나머지는 CategoryLabel()과 동일.</summary>
+        /// <summary>탭 라벨(짧은 한글) — 전파 탭만 축약형("감염 경로" 대신 "전파")이고 나머지는
+        /// 그대로.</summary>
         private static string CategoryTabLabel(UpgradeCategory category) => category switch
         {
             UpgradeCategory.Transmission => "전파",
@@ -752,15 +570,6 @@ namespace Contagion.UI
             UpgradeCategory.Symptom => "SYMPTOM",
             UpgradeCategory.Ability => "ADAPTATION",
             _ => category.ToString().ToUpperInvariant()
-        };
-
-        /// <summary>노드 표시코드(TRANS-001 등) 접두어. "능력"→"적응" 개명에 맞춰 접두어도 갱신.</summary>
-        private static string CategoryPrefix(UpgradeCategory category) => category switch
-        {
-            UpgradeCategory.Transmission => "감염",
-            UpgradeCategory.Symptom => "증상",
-            UpgradeCategory.Ability => "적응",
-            _ => "노드"
         };
     }
 }

@@ -59,6 +59,12 @@ namespace Contagion.Managers
         /// </summary>
         public event Action<WorldMortalityStage> OnMortalityStageChanged;
 
+        /// <summary>그 틱의 국가별 봉쇄/연구기여도 갱신(ApplyPolicy)이 전부 끝난 뒤 발행 —
+        /// BottleneckAnalyzer가 이 이벤트를 구독하면 SimulationManager.OnTickCompleted를 직접 구독할
+        /// 때 생기는 실행 순서 문제(HumanResistanceManager의 봉쇄 갱신보다 먼저 읽어버릴 위험,
+        /// Unity가 서로 다른 컴포넌트의 OnEnable/Start 순서를 보장하지 않음)를 코드로 원천 차단한다.</summary>
+        public event Action<WorldState> OnPolicyApplied;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -116,9 +122,13 @@ namespace Contagion.Managers
                 OnMortalityStageChanged?.Invoke(mortalityStage);
             }
 
-            if (Data == null) return;
-            foreach (var country in Data.Countries)
-                ApplyPolicy(country, state, stage);
+            if (Data != null)
+            {
+                foreach (var country in Data.Countries)
+                    ApplyPolicy(country, state, stage);
+            }
+
+            OnPolicyApplied?.Invoke(state);
         }
 
         private void ApplyPolicy(Country country, WorldState state, ResistanceStage stage)
