@@ -226,8 +226,14 @@ namespace Contagion.Managers
                 float bloodMultiplier = pathogen.HasTransmissionRoute(TransmissionRoute.Blood)
                     ? 1f + bloodLowHealthBonusScale * (1f - country.HealthLevel) : 1f;
 
+                // National Infection Dynamics Design Phase — Population Density(최소 구현안).
+                // 국가별 population 5분위 등급에 따른 국내 확산 배율(0.70~1.30) — 같은 병원체라도
+                // 인구가 많은 나라(중국/인도 등)는 더 빨리, 적은 나라는 더 느리게 퍼진다.
+                float densityMultiplier = country.DensityMultiplier;
+
                 long newInfected = StochasticRound(preTickInfected * (pathogen.infectivity + insectBonus) * globalSpreadFactor
-                                           * difficultySpreadMultiplier * (1f - effectiveHealthLevel) * climateModifier * bloodMultiplier);
+                                           * difficultySpreadMultiplier * (1f - effectiveHealthLevel) * climateModifier
+                                           * bloodMultiplier * densityMultiplier);
                 newInfected = Math.Clamp(newInfected, 0, country.SusceptibleCount);
 
                 country.deadCount += newDeaths;

@@ -175,10 +175,12 @@ namespace Contagion.UI
             _warnList.Add(item);
         }
 
-        /// <summary>버튼 상태 4갈래 — 이미 해금(연구 완료, 비활성) > 선행조건 미충족(선행 연구
-        /// 필요, 비활성) > DNA 부족(비활성) > 구매 가능(N DNA · 연구하기, 활성). 선행조건 판정은
-        /// UpgradeTreeView.DetermineState()와 동일 로직이지만, 이번 커밋 범위(호출부 무변경)상
-        /// 그 메서드를 공개로 승격하지 않고 여기서 동일한 조건을 다시 계산한다.</summary>
+        /// <summary>버튼 상태 4갈래 — 이미 해금(연구 완료, 비활성) > 선행조건 미충족(구체적으로
+        /// 부족한 선행 연구 이름 나열, 비활성) > DNA 부족(부족한 양 명시, 비활성) > 구매 가능
+        /// (N DNA · 연구하기, 활성). 선행조건 판정은 UpgradeManager.GetMissingPrerequisites()가
+        /// CanUnlock()과 동일한 IsUnlocked 기준으로 계산해준다 — 이 메서드가 그 결과를
+        /// UpgradeTreeView.GetDisplayName()으로 한국어 이름으로 바꿔 문장만 조립한다
+        /// (LockReason System: 사유 계산은 UpgradeManager, 문장 생성은 UI 계층).</summary>
         private void RefreshButton(UpgradeNode node, bool owned, int cost, int dna)
         {
             if (_confirmButton == null) return;
@@ -190,17 +192,18 @@ namespace Contagion.UI
                 return;
             }
 
-            bool prereqsMet = node.prerequisites.All(pid => UpgradeManager.Instance.IsUnlocked(pid));
-            if (!prereqsMet)
+            var missingPrereqs = UpgradeManager.Instance.GetMissingPrerequisites(_currentNodeId);
+            if (missingPrereqs.Count > 0)
             {
-                _confirmButton.text = "선행 연구 필요";
+                string names = string.Join(", ", missingPrereqs.Select(UpgradeTreeView.GetDisplayName));
+                _confirmButton.text = $"다음 필요 연구: {names}";
                 _confirmButton.SetEnabled(false);
                 return;
             }
 
             if (dna < cost)
             {
-                _confirmButton.text = "DNA 부족";
+                _confirmButton.text = $"DNA {cost - dna} 부족";
                 _confirmButton.SetEnabled(false);
                 return;
             }

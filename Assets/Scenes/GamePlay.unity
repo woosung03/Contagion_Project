@@ -12085,6 +12085,8 @@ MonoBehaviour:
   highDevLockdownThreshold: 0.5
   midDevLockdownThreshold: 0.7
   sequentialClosureMargin: 0.1
+  qaFastClosureMode: 0
+  qaClosureThresholdOverride: 0.05
   highDevMaxFunding: 1
   midDevMaxFunding: 0.5
   lowDevMaxFunding: 0.05

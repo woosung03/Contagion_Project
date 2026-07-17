@@ -31,6 +31,21 @@ namespace Contagion.Data
         High
     }
 
+    /// <summary>
+    /// 인구 밀도 등급. National Infection Dynamics Design Phase — Population Density.
+    /// Country.population(원본 데이터, 큐레이션 불필요) 기준 5단계 정성 분류로, 국내 확산 속도에
+    /// densityMultiplier로 반영된다. 경계값은 CountryDatabase.asset 48개국 실측 분포 기준
+    /// (최소 약 2,700만~최대 약 14.8억) 5등분 근사치 — Country.GetPopulationDensityTier() 참고.
+    /// </summary>
+    public enum PopulationDensityTier
+    {
+        VeryLow,
+        Low,
+        Normal,
+        High,
+        VeryHigh
+    }
+
     /// <summary>감염 경로. 설계 문서 2절 트리 업그레이드 항목.</summary>
     public enum TransmissionRoute
     {

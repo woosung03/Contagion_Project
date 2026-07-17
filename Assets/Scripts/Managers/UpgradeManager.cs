@@ -88,6 +88,18 @@ namespace Contagion.Managers
             return node.prerequisites.All(IsUnlocked);
         }
 
+        /// <summary>
+        /// 아직 해금되지 않은 선행 노드 id 목록 — CanUnlock()과 동일한 판정 기준(IsUnlocked)을
+        /// 재사용해 "왜 선행 연구가 필요한지"를 구체화하는 데 쓴다(LockReason System).
+        /// node.prerequisites 순서를 그대로 유지한다. 노드가 없으면 빈 리스트.
+        /// </summary>
+        public List<string> GetMissingPrerequisites(string id)
+        {
+            var node = GetNode(id);
+            if (node == null) return new List<string>();
+            return node.prerequisites.Where(pid => !IsUnlocked(pid)).ToList();
+        }
+
         /// <summary>노드를 해금하고 DNA를 소모, 병원체 스탯에 효과를 적용한다.</summary>
         public bool TryUnlock(string id)
         {
