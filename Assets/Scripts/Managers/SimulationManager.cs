@@ -56,6 +56,20 @@ namespace Contagion.Managers
         [SerializeField, Range(0f, 1f)] private float landBorderSpreadChance = 0.08f;
         [SerializeField] private long seedInfectedAmount = 10;
 
+        [Header("TransmissionRoute Phase 2 — 전문화 경로")]
+        [SerializeField, Range(0f, 1f), Tooltip("Animal 경로 해금 시, 국경이 폐쇄된 인접국에도 이 배율만큼 " +
+            "낮은 확률로 육상 전파가 계속된다(철새·야생동물은 국경 통제로 못 막는다는 설정). 기존 " +
+            "landBorderSpreadChance * sourceRatio 호출과는 별개의 추가 호출이라, 이 경로를 안 켠 병원체의 " +
+            "기존 확산에는 전혀 영향을 주지 않는다.")]
+        private float animalBypassFactor = 0.15f;
+        [SerializeField, Tooltip("Insect 경로 해금 시, Humid 기후 국가의 국내 확산 공식에서 infectivity에 " +
+            "가산되는 보너스(곱연산이 아니라 가산 — pathogen.environmentResistance와 축을 분리하기 위함, " +
+            "TransmissionRoute Design Phase 2 §5 참고).")]
+        private float insectHumidBonus = 0.05f;
+        [SerializeField, Tooltip("Blood 경로 해금 시, 국내 확산 공식에 곱해지는 배율 — " +
+            "1 + 이 값 * (1 - country.HealthLevel). 의료 수준이 낮은 국가일수록 보너스가 커진다.")]
+        private float bloodLowHealthBonusScale = 0.5f;
+
         [Header("DNA 마일스톤 (설계 문서 4.4 — 원본 게임 방식: 국가별 최초 감염 1회 + 국가별 인구 대비 퍼센트 단위)")]
         [SerializeField, Tooltip("국가에 감염자가 최초로 발생하는 순간 무조건 1회 지급되는 DNA 보상 — 절대값/퍼센트와" +
             " 무관하게 항상 발동. 원본 게임의 '신규 감염 국가 발견' 보상.")]
@@ -203,8 +217,17 @@ namespace Contagion.Managers
                 // 고난이도의 긴장감이 약했음.
                 float difficultySpreadMultiplier = GameManager.Instance != null
                     ? GameManager.Instance.GetDifficultySpreadMultiplier() : 1f;
-                long newInfected = StochasticRound(preTickInfected * pathogen.infectivity * globalSpreadFactor
-                                           * difficultySpreadMultiplier * (1f - effectiveHealthLevel) * climateModifier);
+
+                // TransmissionRoute Phase 2 — Insect(가산)/Blood(곱연산) 전문화 보너스. Insect는
+                // pathogen.GetEnvironmentResistance()(병원체 고유 기후 생존력, climateModifier)와
+                // 축을 분리하기 위해 곱연산이 아니라 infectivity에 직접 가산한다(Design Phase 2 §5).
+                float insectBonus = pathogen.HasTransmissionRoute(TransmissionRoute.Insect)
+                    && country.climate == ClimateType.Humid ? insectHumidBonus : 0f;
+                float bloodMultiplier = pathogen.HasTransmissionRoute(TransmissionRoute.Blood)
+                    ? 1f + bloodLowHealthBonusScale * (1f - country.HealthLevel) : 1f;
+
+                long newInfected = StochasticRound(preTickInfected * (pathogen.infectivity + insectBonus) * globalSpreadFactor
+                                           * difficultySpreadMultiplier * (1f - effectiveHealthLevel) * climateModifier * bloodMultiplier);
                 newInfected = Math.Clamp(newInfected, 0, country.SusceptibleCount);
 
                 country.deadCount += newDeaths;
@@ -287,8 +310,20 @@ namespace Contagion.Managers
                 if (source.infectedCount <= 0) continue;
                 float sourceRatio = source.LivingPopulation > 0 ? (float)source.infectedCount / source.LivingPopulation : 0f;
 
-                TrySpreadRoute(source, source.neighborCountryIds, landBorderSpreadChance * sourceRatio,
+                // TransmissionRoute Phase 2 — Contact 효율(기본 0.7, trans_contact1 연구 후 1.0)을
+                // 기존 확률에 곱한다. 봉쇄(isBorderClosed) 판정은 무변경.
+                TrySpreadRoute(source, source.neighborCountryIds,
+                    landBorderSpreadChance * sourceRatio * pathogen.contactRouteEfficiency,
                     target => !source.isBorderClosed && !target.isBorderClosed);
+
+                // Animal 경로 — 국경 폐쇄를 낮은 확률로 우회하는 추가 호출. 기존 호출과 완전히
+                // 별개라 이 경로를 안 켠 병원체의 확산에는 영향이 없다.
+                if (pathogen.HasTransmissionRoute(TransmissionRoute.Animal))
+                {
+                    TrySpreadRoute(source, source.neighborCountryIds,
+                        landBorderSpreadChance * sourceRatio * animalBypassFactor,
+                        target => true);
+                }
             }
         }
 

@@ -34,6 +34,13 @@ namespace Contagion.Data
 
         public List<TransmissionRoute> transmissionRoutes = new List<TransmissionRoute>();
 
+        // TransmissionRoute Phase 2 — "해금"이 아니라 "효율 강화" 방향. Air/Water/Contact는 항상
+        // 어느 정도 작동하되(기본값), 연구로 1.0까지 끌어올린다. transmissionRoutes 리스트(위)는
+        // 이제 Animal/Insect/Blood 전문화 경로 전용으로 쓰인다(이진 unlock).
+        [Range(0f, 1f)] public float airRouteEfficiency = 0.5f;
+        [Range(0f, 1f)] public float waterRouteEfficiency = 0.5f;
+        [Range(0f, 1f)] public float contactRouteEfficiency = 0.7f;
+
         /// <summary>
         /// 해당 기후에서의 환경 내성 값(0~1). 등록되지 않은 기후는 1(중립, 영향 없음)을 반환한다.
         /// 0을 기본값으로 두면 데이터 미설정 시 전파가 완전히 막혀버리므로 중립값 1을 기본으로 한다.
@@ -64,7 +71,10 @@ namespace Contagion.Data
                 lethality = lethality,
                 drugResistance = drugResistance,
                 environmentResistance = new List<ClimateResistanceEntry>(environmentResistance),
-                transmissionRoutes = new List<TransmissionRoute>(transmissionRoutes)
+                transmissionRoutes = new List<TransmissionRoute>(transmissionRoutes),
+                airRouteEfficiency = airRouteEfficiency,
+                waterRouteEfficiency = waterRouteEfficiency,
+                contactRouteEfficiency = contactRouteEfficiency
             };
         }
     }

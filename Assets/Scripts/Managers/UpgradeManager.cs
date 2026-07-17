@@ -119,7 +119,10 @@ namespace Contagion.Managers
 
         /// <summary>
         /// node.effects의 statName을 Pathogen 필드에 매핑해 가산 적용한다.
-        /// 지원 stat: infectivity / severity / lethality / drugResistance (모두 0~1 클램프).
+        /// 지원 stat: infectivity / severity / lethality / drugResistance (모두 0~1 클램프),
+        /// airRouteEfficiency / waterRouteEfficiency / contactRouteEfficiency(TransmissionRoute
+        /// Phase 2 — 연속값, 동일한 가산+클램프 패턴), unlockAnimal / unlockInsect / unlockBlood
+        /// (TransmissionRoute Phase 2 — 이진, transmissionRoutes 리스트에 추가).
         /// </summary>
         private void ApplyEffectsToPathogen(UpgradeNode node)
         {
@@ -141,6 +144,29 @@ namespace Contagion.Managers
                         break;
                     case "drugResistance":
                         pathogen.drugResistance = Mathf.Clamp01(pathogen.drugResistance + effect.amount);
+                        break;
+                    // TransmissionRoute Phase 2 — 효율 강화(연속값, 기존 4개 스탯과 동일한
+                    // 가산+클램프 패턴) / 전문화 경로 해금(이진, transmissionRoutes 리스트에 추가).
+                    case "airRouteEfficiency":
+                        pathogen.airRouteEfficiency = Mathf.Clamp01(pathogen.airRouteEfficiency + effect.amount);
+                        break;
+                    case "waterRouteEfficiency":
+                        pathogen.waterRouteEfficiency = Mathf.Clamp01(pathogen.waterRouteEfficiency + effect.amount);
+                        break;
+                    case "contactRouteEfficiency":
+                        pathogen.contactRouteEfficiency = Mathf.Clamp01(pathogen.contactRouteEfficiency + effect.amount);
+                        break;
+                    case "unlockAnimal":
+                        if (!pathogen.transmissionRoutes.Contains(TransmissionRoute.Animal))
+                            pathogen.transmissionRoutes.Add(TransmissionRoute.Animal);
+                        break;
+                    case "unlockInsect":
+                        if (!pathogen.transmissionRoutes.Contains(TransmissionRoute.Insect))
+                            pathogen.transmissionRoutes.Add(TransmissionRoute.Insect);
+                        break;
+                    case "unlockBlood":
+                        if (!pathogen.transmissionRoutes.Contains(TransmissionRoute.Blood))
+                            pathogen.transmissionRoutes.Add(TransmissionRoute.Blood);
                         break;
                     default:
                         Debug.LogWarning($"[UpgradeManager] 알 수 없는 stat '{effect.statName}' (node={node.id}) — 무시됨");

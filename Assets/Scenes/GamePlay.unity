@@ -11427,7 +11427,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.UpgradeTreeView
   category: 0
-  debugShowTreeCanvas: 0
   adBonusDna: 10
 --- !u!1 &1568159513
 GameObject:
@@ -12120,18 +12119,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f8b15a6912f4d44d93459ec442b942e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.SimulationManager
-  tickIntervalSeconds: 0.1
+  tickIntervalSeconds: 0.3
   autoStart: 1
   globalSpreadFactor: 0.5
   visibilityGainRate: 0.02
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0001
+  cureProgressCoefficient: 0.0004
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05
   seaRouteSpreadChance: 0.03
   landBorderSpreadChance: 0.08
   seedInfectedAmount: 10
+  animalBypassFactor: 0.15
+  insectHumidBonus: 0.05
+  bloodLowHealthBonusScale: 0.5
   grantDnaOnFirstInfection: 1
   infectionMilestonePercentStep: 0.25
   deathMilestonePercentStep: 0.15
@@ -12156,6 +12158,9 @@ MonoBehaviour:
     drugResistance: 0
     environmentResistance: []
     transmissionRoutes: 
+    airRouteEfficiency: 0.5
+    waterRouteEfficiency: 0.5
+    contactRouteEfficiency: 0.7
   worldState:
     totalPopulation: 0
     infectedCount: 0
@@ -12486,7 +12491,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.UpgradeTreeView
   category: 1
-  debugShowTreeCanvas: 1
   adBonusDna: 10
 --- !u!1 &3300000501
 GameObject:
@@ -12558,7 +12562,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.UpgradeTreeView
   category: 2
-  debugShowTreeCanvas: 0
   adBonusDna: 10
 --- !u!114 &3400000101
 MonoBehaviour:

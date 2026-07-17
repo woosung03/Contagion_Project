@@ -49,26 +49,34 @@ namespace Contagion.Data
             // ================= 감염 경로 (Transmission) — x: 40~400 (열 간격 140), 3갈래(공기/수인성/접촉) =================
             // 최종 결정안(UpgradeTree_FinalDecision.md) §1: 1~2티어 순수 감염력(예외 유지),
             // 3티어↑(9개, 60%)에 발각도(severity) 소폭 부착. 갈래 비용 약한 차등(동물매개 할인 등).
+            // TransmissionRoute Phase 2 — 각 갈래 첫 노드가 해당 경로 효율을 기본값에서 1.0으로
+            // 복구한다(airRouteEfficiency 0.5→1.0, waterRouteEfficiency 0.5→1.0,
+            // contactRouteEfficiency 0.7→1.0). 나머지 노드(air2/droplet1/droplet2/water2)는
+            // 기존 infectivity/severity 효과만 유지 — 신규 effect 없음.
             nodes.Add(Node("trans_air1", UpgradeCategory.Transmission, 2, 40, 40, null,
-                ("infectivity", 0.05f)));
+                ("infectivity", 0.05f), ("airRouteEfficiency", 0.5f)));
             nodes.Add(Node("trans_water1", UpgradeCategory.Transmission, 2, 180, 40, null,
-                ("infectivity", 0.05f)));
+                ("infectivity", 0.05f), ("waterRouteEfficiency", 0.5f)));
             nodes.Add(Node("trans_contact1", UpgradeCategory.Transmission, 2, 320, 40, null,
-                ("infectivity", 0.05f)));
+                ("infectivity", 0.05f), ("contactRouteEfficiency", 0.3f)));
 
             nodes.Add(Node("trans_air2", UpgradeCategory.Transmission, 4, 40, 150, new[] { "trans_air1" },
                 ("infectivity", 0.08f)));
             nodes.Add(Node("trans_water2", UpgradeCategory.Transmission, 4, 180, 150, new[] { "trans_water1" },
                 ("infectivity", 0.08f)));
+            // TransmissionRoute Phase 2 — 전문화 경로 해금(이진). amount=1f는 관례적 표시값일 뿐
+            // 실제로는 unlockInsect case가 amount를 쓰지 않고 무조건 Insect를 추가한다.
             nodes.Add(Node("trans_insect1", UpgradeCategory.Transmission, 4, 320, 150, new[] { "trans_contact1" },
-                ("infectivity", 0.07f)));
+                ("infectivity", 0.07f), ("unlockInsect", 1f)));
 
             nodes.Add(Node("trans_droplet1", UpgradeCategory.Transmission, 7, 40, 260, new[] { "trans_air2" },
                 ("infectivity", 0.06f), ("severity", 0.01f)));
+            // TransmissionRoute Phase 2 — Animal 전문화 경로 해금(국경 폐쇄 우회, SimulationManager 참고).
             nodes.Add(Node("trans_animal1", UpgradeCategory.Transmission, 6, 180, 260, new[] { "trans_water2" },
-                ("infectivity", 0.05f), ("severity", 0.02f)));
+                ("infectivity", 0.05f), ("severity", 0.02f), ("unlockAnimal", 1f)));
+            // TransmissionRoute Phase 2 — Blood 전문화 경로 해금(의료 취약국 추가 확산, SimulationManager 참고).
             nodes.Add(Node("trans_blood1", UpgradeCategory.Transmission, 6, 320, 260, new[] { "trans_insect1" },
-                ("infectivity", 0.07f), ("severity", 0.01f)));
+                ("infectivity", 0.07f), ("severity", 0.01f), ("unlockBlood", 1f)));
 
             nodes.Add(Node("trans_droplet2", UpgradeCategory.Transmission, 9, 40, 370, new[] { "trans_droplet1" },
                 ("infectivity", 0.05f), ("severity", 0.02f)));

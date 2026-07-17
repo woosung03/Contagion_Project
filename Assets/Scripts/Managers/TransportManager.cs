@@ -367,8 +367,15 @@ namespace Contagion.Managers
             var destination = WorldDataManager.Instance?.GetCountry(_hubLookup.TryGetValue(unit.DestinationHubId, out var h) ? h.countryId : null);
             if (destination == null || destination.infectedCount > 0) return;
 
+            // TransmissionRoute Phase 2 — 항공/해운 효율(기본 0.5, trans_air1/trans_water1 연구 후
+            // 1.0)을 도착 성공률에 곱한다. isAirportOpen/isPortOpen 봉쇄 판정(IsRouteOpen)은 무변경 —
+            // 봉쇄되면 유닛 자체가 그 항로를 선택하지 않으므로 여기까지 오지 않는다.
+            var pathogen = WorldDataManager.Instance?.CurrentPathogen;
+            if (pathogen == null) return;
+
             bool isAir = unit.HubType == TransportHubType.Air;
-            float chance = isAir ? airArrivalInfectionChance : seaArrivalInfectionChance;
+            float routeEfficiency = isAir ? pathogen.airRouteEfficiency : pathogen.waterRouteEfficiency;
+            float chance = (isAir ? airArrivalInfectionChance : seaArrivalInfectionChance) * routeEfficiency;
             if (Random.value > chance) return;
 
             long seedAmount = isAir ? airSeedAmount : seaSeedAmount;

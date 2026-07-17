@@ -28,6 +28,18 @@ namespace Contagion.Managers
         [SerializeField, Tooltip("위 임계값 기준으로 공항은 이만큼 일찍, 항구는 이만큼 늦게 닫힘")]
         private float sequentialClosureMargin = 0.1f;
 
+        [Header("QA 지원 — Animal Route(TransmissionRoute) 검증용. 기본값 false, 실제 밸런스 무관")]
+        [SerializeField, Tooltip("켜면 High/Mid 개발국의 봉쇄 기준 임계값이 아래 qaClosureThresholdOverride로 " +
+            "강제 대체된다 — 공항(-margin)/국경(그대로)/항구(+margin) 순차 구조는 그대로 유지되고 기준점만 " +
+            "낮아져 봉쇄가 훨씬 빨리 발생한다. plagueVisibility 증가율(SimulationManager.visibilityGainRate)이나 " +
+            "다른 어떤 확산 공식도 건드리지 않는다 — 순수하게 이 매니저의 봉쇄 판정 임계값만 바뀐다. " +
+            "Animal(국경 폐쇄 우회) 검증용으로만 켜고, 실제 플레이/밸런스 검증 시에는 반드시 꺼둘 것.")]
+        private bool qaFastClosureMode = false;
+        [SerializeField, Range(0.01f, 1f), Tooltip("qaFastClosureMode가 켜졌을 때 High/Mid 개발국 봉쇄 기준 " +
+            "임계값을 이 값으로 강제 대체한다. 기본 0.05면 국경이 visibility=0.05에서 닫힌다(원래 High 0.5/" +
+            "Mid 0.7 대비 10~14배 빠름).")]
+        private float qaClosureThresholdOverride = 0.05f;
+
         [Header("국가 등급별 최대 연구 기여도 (healthFunding)")]
         [SerializeField] private float highDevMaxFunding = 1.0f;
         [SerializeField] private float midDevMaxFunding = 0.5f;
@@ -138,13 +150,16 @@ namespace Contagion.Managers
             switch (country.developmentLevel)
             {
                 case DevelopmentLevel.High:
-                    ApplySequentialClosure(country, visibility, highDevLockdownThreshold);
+                    ApplySequentialClosure(country, visibility,
+                        qaFastClosureMode ? qaClosureThresholdOverride : highDevLockdownThreshold);
                     break;
                 case DevelopmentLevel.Mid:
-                    ApplySequentialClosure(country, visibility, midDevLockdownThreshold);
+                    ApplySequentialClosure(country, visibility,
+                        qaFastClosureMode ? qaClosureThresholdOverride : midDevLockdownThreshold);
                     break;
                 case DevelopmentLevel.Low:
-                    // 저개발국: 봉쇄 없음 (설계 문서 5절) — 국경 상태를 건드리지 않는다.
+                    // 저개발국: 봉쇄 없음 (설계 문서 5절) — QA 모드에서도 건드리지 않는다(저개발국
+                    // 봉쇄 없음은 밸런스 설계 그 자체이지 "느려서 못 보는" 문제가 아니므로 QA 대상이 아님).
                     break;
             }
 
