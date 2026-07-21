@@ -209,24 +209,38 @@
     padding: var(--space-lg);
     border-radius: 0; /* tactical-panel의 코너컷과 둥근 모서리가 충돌해 각짐으로 통일 */
     margin-bottom: var(--space-lg);
-    /* 제목(22px) + desc 3줄(인구/기후/의료 수준, 17px) + 상하 패딩 32px을 담기에 70px는 부족해서
-       텍스트(특히 인구 줄)가 패널 박스 아래로 삐져나왔음 — 실측 필요 높이(~126px)에 여유를 더해 고정. */
+    /* 제목(Title Role 24px) + desc 3줄(인구/기후/의료 수준, Body Role 16px) + 상하 패딩 32px을
+       담기에 70px는 부족해서 텍스트(특히 인구 줄)가 패널 박스 아래로 삐져나왔음 — 실측 필요
+       높이(~126px)에 여유를 더해 고정. [Master Design Migration Phase 2, 2026-07-21] 기존
+       22px/17px 하드코딩 기준으로 정한 값이지만 Title Role(24px)/Body Role(16px)과 합이 거의
+       동일해(24+16=40 vs 22+17=39) 이 min-height를 다시 계산할 필요는 없다. */
     min-height: 140px;
     flex-shrink: 0; /* mainmenu-list가 공간을 양보하는 동안 이 패널 자체는 줄어들지 않도록 */
 }
 
+/* [Master Design Migration Phase 2, 2026-07-21] Design Debt #3 해결 — 22px 하드코딩(Boundary
+   Analysis Legacy 잔재) 제거, MASTER_DESIGN.md 5절 Detail Panel 규칙("제목은 Title Role,
+   24px")을 그대로 적용. CountrySelect.uss가 이 셀렉터를 Phase 1에서 이미 같은 값(var(--font-title))
+   으로 캐스케이드 override 해뒀으므로, 로드 순서(Theme→Tactical→MainMenu→CountrySelect)상
+   CountrySelect 화면에서는 값이 그대로 유지되며 시각적 변화가 없다 — 이 override는 이제
+   중복이지만 CountrySelect.uss는 이번 작업 범위 밖이라 건드리지 않는다(§ CountrySelect 영향
+   여부 참고). */
 .detail-panel__title {
     color: var(--color-brand-gold);
-    font-size: 22px;
+    font-size: var(--font-title);
     -unity-font-style: bold;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* [Master Design Migration Phase 2, 2026-07-21] Design Debt #3 해결 — 17px 하드코딩 제거,
+   MASTER_DESIGN.md 5절 Detail Panel 규칙("본문 설명은 Body Role, 16px")을 그대로 적용.
+   CountrySelect.uss의 동일 셀렉터 override(var(--font-body))와 값이 일치해 CountrySelect
+   화면은 영향받지 않는다. */
 .detail-panel__desc {
     color: var(--color-text-secondary);
-    font-size: 17px;
+    font-size: var(--font-body);
     white-space: normal;
     margin-top: 6px;
 }
