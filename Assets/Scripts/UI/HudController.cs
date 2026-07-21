@@ -31,6 +31,12 @@ namespace Contagion.UI
         private Button _countryStatusButton;
         private Button _rankingButton;
 
+        // [HUD Full Screen Panel 개편] resource-strip/action-strip 사이의 "메인 플레이 화면"
+        // (WORLD NEWS/지도/막대 그래프/선 그래프) 전체를 담는 래퍼 — UIManager.TransitionTo()가
+        // 관리 화면(Research/GlobalStatus/Leaderboard) 전환 시 SetGameplayContentVisible()로
+        // 이것 하나만 토글한다(Hud.uxml gameplay-content 참고).
+        private VisualElement _gameplayContent;
+
         // 감염자/사망자/치료제 — 텍스트 라벨만으론 가시성이 떨어진다는 피드백으로 추가한 인라인
         // 스파크라인 그래프 (HudSparkline.cs 참고).
         private HudSparkline _infectedGraph;
@@ -63,6 +69,8 @@ namespace Contagion.UI
             _tabUpgrade = root.Q<Button>("tab-upgrade");
             _countryStatusButton = root.Q<Button>("tab-country-status");
             _rankingButton = root.Q<Button>("ranking-button");
+
+            _gameplayContent = root.Q<VisualElement>("gameplay-content");
 
             _infectedGraph = new HudSparkline(root.Q<VisualElement>("infected-graph"), new Color(1f, 0.67f, 0.35f));
             _deadGraph = new HudSparkline(root.Q<VisualElement>("dead-graph"), new Color(0.86f, 0.35f, 0.35f));
@@ -182,6 +190,17 @@ namespace Contagion.UI
             WorldMortalityStage.ExtinctionImminent => "인류 멸종 임박",
             _ => stage.ToString()
         };
+
+        /// <summary>
+        /// [HUD Full Screen Panel 개편] 메인 플레이 화면(WORLD NEWS/지도/막대 그래프/선 그래프)
+        /// 전체를 한 번에 표시/숨김. resource-strip/action-strip은 이 래퍼 바깥(형제)이라 영향
+        /// 받지 않는다 — UIManager.TransitionTo()가 AppScreen.Gameplay 여부로 호출한다.
+        /// </summary>
+        public void SetGameplayContentVisible(bool visible)
+        {
+            if (_gameplayContent != null)
+                _gameplayContent.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
         private void HandlePhaseChanged(GamePhase phase)
         {

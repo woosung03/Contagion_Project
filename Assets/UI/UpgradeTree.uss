@@ -1,7 +1,23 @@
+/* [Layout Architecture Refactoring, 2026-07-21] upgrade-root는 이 UIDocument(보통 화면 전체
+   크기) 안에서 순수 flex-column 배치만 담당 — 배경/테두리/패딩 없음, 시각적으로 완전히
+   투명하다. 예전엔 top:3%/bottom:12.5%(해상도 의존 %)로 직접 자기 크기를 잡았는데, 이제는
+   자식 3개(top-spacer/upgrade-box/bottom-spacer)의 flex 계산에 전부 맡긴다. */
 .upgrade-root {
     flex-grow: 1;
+    flex-direction: column;
+}
+
+/* upgrade-box — 실제로 보이는 패널 표면. content-area-top/bottom-spacer(Tactical.uss) 사이에서
+   flex-grow:1 + flex-basis:0으로 남는 공간만 정확히 차지한다(§12.2 ScrollView 규칙과 동일한
+   flex-basis:0 원칙을 컨테이너 자신에도 적용). overflow:hidden은 안의 node-scroll이 이 박스
+   경계를 넘어 새어나가지 않도록 막는다(DESIGN.md §20 세로 오버플로우 버그 재발 방지 원칙). */
+.upgrade-box {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: column;
     background-color: var(--color-bg-panel-alt);
     padding: var(--space-xl);
+    overflow: hidden;
 }
 
 /* Research Database UI Shell (Commit 1) — 헤더를 2줄로 유지: 위(탭 3개) / 아래(DNA·광고·닫기 액션).
@@ -78,6 +94,7 @@
 
 .node-scroll {
     flex-grow: 1;
+    flex-basis: 0; /* DESIGN.md §12.2/§20 ScrollView 규칙 — 누락 시 세로 오버플로우 위험(Audit 발견) */
     margin-bottom: var(--space-lg);
 }
 

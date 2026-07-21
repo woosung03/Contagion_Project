@@ -299,6 +299,12 @@ namespace Contagion.Managers
             if (_currentScreen != next && _screens.TryGetValue(_currentScreen, out var currentScreen))
                 currentScreen.Hide();
 
+            // [HUD Full Screen Panel 개편] Research/GlobalStatus/Leaderboard로 전환되면 메인 플레이
+            // 화면(WORLD NEWS/지도/막대 그래프/선 그래프)을 통째로 숨기고, Gameplay로 돌아오면 다시
+            // 보인다 — resource-strip/action-strip은 HudController.SetGameplayContentVisible()이
+            // 건드리는 gameplay-content 바깥(형제)이라 항상 유지된다.
+            hudController?.SetGameplayContentVisible(next == AppScreen.Gameplay);
+
             nextScreen.Show();
             _currentScreen = next;
         }

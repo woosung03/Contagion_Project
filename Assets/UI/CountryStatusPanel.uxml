@@ -3,7 +3,16 @@
     <Style src="Tactical.uss" />
     <Style src="Hud.uss" />
     <Style src="CountryStatusPanel.uss" />
-    <ui:VisualElement name="status-root" class="status-root tactical-panel">
+    <!-- [Layout Architecture Refactoring, 2026-07-21] status-root는 이 UIDocument 전체를 채우는
+         순수 flex-column일 뿐, 시각적 패널이 아니다. 실제 패널은 안의 status-box 하나뿐 —
+         content-area-top/bottom-spacer(Tactical.uss)가 Hud의 resource-strip/action-strip과
+         동일한 높이만큼 위아래를 비워두고, status-box가 flex-grow:1로 남는 공간만 차지한다
+         (%(top:3%/bottom:12.5%) 제거 — UpgradeTree.uxml과 동일한 구조). CountryStatusPanelController.cs는
+         여전히 "status-root"만 이름으로 찾아 display를 토글하므로 컨트롤러 변경 없음. -->
+    <ui:VisualElement name="status-root" class="status-root">
+        <ui:VisualElement name="status-top-spacer" class="content-area-top-spacer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="status-box" class="status-box tactical-panel">
         <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
@@ -143,5 +152,8 @@
             <ui:Label text="48개국 목록" class="modal-section-caption" />
             <ui:VisualElement name="status-list" class="status-list" />
         </ui:ScrollView>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="status-bottom-spacer" class="content-area-bottom-spacer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

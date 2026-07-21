@@ -6,22 +6,36 @@
          이름("ranking-root"/"pb-label"/"note-label"/"open-leaderboard-button"/"close-button")은
          전부 그대로 유지했다. 구조/클래스만 CountryPopup.uxml·ResearchPopup.uxml과 동일한
          Tactical Modal 언어(tactical-panel+corner-cut+tactical-panel__header+data-row+
-         popup-footer-button)로 교체 — 기능/데이터 변경 없음, 순수 Visual Redesign. -->
-    <ui:VisualElement name="ranking-root" class="ranking-root tactical-panel">
-        <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
-        <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
-        <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
-        <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
-        <ui:VisualElement class="tactical-panel__header">
-            <ui:Label name="ranking-title" text="LEADERBOARD TERMINAL" class="tactical-panel__title" />
+         popup-footer-button)로 교체 — 기능/데이터 변경 없음, 순수 Visual Redesign.
+
+         [Layout Architecture Refactoring, 2026-07-21] ranking-root는 이 UIDocument 전체를
+         채우는 순수 flex-column일 뿐, 시각적 패널이 아니다. 실제 패널은 안의 ranking-box
+         하나뿐 — content-area-top/bottom-spacer(Tactical.uss)가 Hud의 resource-strip/
+         action-strip과 동일한 높이만큼 위아래를 비워두고, ranking-box가 flex-grow:1로 남는
+         공간만 차지한다(%(top:3%/bottom:12.5%) 제거 — UpgradeTree.uxml/CountryStatusPanel.uxml과
+         동일한 구조). RankingPanelController.cs는 여전히 "ranking-root"만 이름으로 찾아
+         display를 토글하므로 컨트롤러 변경 없음. -->
+    <ui:VisualElement name="ranking-root" class="ranking-root">
+        <ui:VisualElement name="ranking-top-spacer" class="content-area-top-spacer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="ranking-box" class="ranking-box tactical-panel">
+            <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
+            <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
+            <ui:VisualElement class="tactical-panel__header">
+                <ui:Label name="ranking-title" text="LEADERBOARD TERMINAL" class="tactical-panel__title" />
+            </ui:VisualElement>
+            <ui:VisualElement class="data-row ranking-pb-row">
+                <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-value" />
+            </ui:VisualElement>
+            <ui:Label name="note-label" text="" class="ranking-note" />
+            <ui:VisualElement name="ranking-footer" class="modal-footer">
+                <ui:Button name="open-leaderboard-button" text="토스 리더보드 열기" class="popup-footer-button popup-footer-button--confirm" />
+                <ui:Button name="close-button" text="닫기" class="popup-footer-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement class="data-row ranking-pb-row">
-            <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-value" />
-        </ui:VisualElement>
-        <ui:Label name="note-label" text="" class="ranking-note" />
-        <ui:VisualElement name="ranking-footer" class="modal-footer">
-            <ui:Button name="open-leaderboard-button" text="토스 리더보드 열기" class="popup-footer-button popup-footer-button--confirm" />
-            <ui:Button name="close-button" text="닫기" class="popup-footer-button" />
-        </ui:VisualElement>
+
+        <ui:VisualElement name="ranking-bottom-spacer" class="content-area-bottom-spacer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

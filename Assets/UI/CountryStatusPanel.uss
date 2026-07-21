@@ -5,35 +5,32 @@
    Tactical.uss가 담당하고, 이 파일은 이 화면 고유의 배치만 추가한다.
    로드 순서: Theme.uss -> Tactical.uss -> Hud.uss(population-bar 재사용) -> CountryStatusPanel.uss
 
-   기존엔 top:42%/bottom:12.5%(지도 상단이 항상 보이는 bottom sheet)였으나, 세계 요약/
-   국가 상태 분포/랭킹 4종/48개국 목록까지 담으면서 콘텐츠 길이가 크게 늘어 top을 8%로
-   낮춰 거의 풀스크린에 가깝게 확장했다(1차 조정, 사용자 승인). bottom 12.5%는 그대로 유지해
-   Hud 하단 tabs-row는 계속 노출·클릭 가능하다(기존 bottom sheet의 설계 의도 유지).
-
-   [가독성 재조정, 2026-07-10] "반투명 오버레이처럼 보이고 지도/항로선이 비쳐 정보가 묻힌다"는
-   피드백 — 이 화면은 국가 선택 화면이 아니라 Global Status Center이므로 지도는 배경일 뿐,
-   SAFE/WARNING/DANGER/COLLAPSE·랭킹·세계 통계 가독성이 최우선이다. 두 가지로 대응:
-   1) top을 8%->3%로 더 낮춰 거의 풀스크린에 가깝게(지도 노출 영역을 최소화).
-   2) 배경색 자체를 훨씬 불투명하게 — `--color-bg-panel-strong`을 CountryPopup의
-      `--color-bg-panel`(0.95)보다 명백히 더 불투명한 0.99로 올렸다(Theme.uss 참고, 이 토큰은
-      CountryStatusPanel 전용이라 다른 화면 영향 없음). */
+   [Layout Architecture Refactoring, 2026-07-21] 기존엔 top:3%/bottom:12.5%(해상도 의존 %)로
+   이 화면 자체가 자기 위치를 잡았으나, 이제 status-root는 순수 flex-column 컨테이너로
+   바뀌고(배경/패딩 없음), 실제 패널(.status-box, 아래)이 content-area-top/bottom-spacer
+   (Tactical.uss, Hud의 resource-strip/action-strip과 동일 높이) 사이에서 flex-grow:1로 남는
+   공간만 차지한다 — UpgradeTree.uss와 동일한 구조. */
 .status-root {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 3%;
-    bottom: 12.5%;
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* status-box — 실제로 보이는 패널 표면. [가독성 재조정, 2026-07-10] "반투명 오버레이처럼
+   보이고 지도/항로선이 비쳐 정보가 묻힌다"는 피드백으로 배경색을 CountryPopup의
+   `--color-bg-panel`(0.95)보다 더 불투명한 `--color-bg-panel-strong`(0.99, Theme.uss,
+   CountryStatusPanel 전용 토큰)으로 올렸다 — 이 화면은 지도가 아니라 SAFE/WARNING/DANGER/
+   COLLAPSE·랭킹·세계 통계 가독성이 최우선이기 때문.
+   [레이아웃 버그 수정, 2026-07-10] flex-direction/overflow를 명시하지 않아 실제로는
+   status-scroll이 자기 콘텐츠 크기(세계 요약+분포+랭킹 40행+48개국 목록 = 매우 김)만큼
+   커지면서 이 박스 경계를 넘어 흘러넘쳤다 — overflow:hidden으로 박스 경계 밖 렌더링을
+   원천 차단하고, flex-direction을 명시해 자식(헤더/스크롤)이 항상 세로로 쌓이도록 고정했다.
+   flex-grow:1 + flex-basis:0은 §12.2 ScrollView 규칙과 동일한 원칙을 컨테이너 자신에도
+   적용한 것 — top/bottom-spacer 사이 남는 공간만 정확히 차지하게 한다. */
+.status-box {
+    flex-grow: 1;
+    flex-basis: 0;
     background-color: var(--color-bg-panel-strong);
     padding: var(--space-lg);
-    /* [레이아웃 버그 수정, 2026-07-10] flex-direction/overflow를 명시하지 않아 실제로는
-       status-scroll이 자기 콘텐츠 크기(세계 요약+분포+랭킹 40행+48개국 목록 = 매우 김)만큼
-       커지면서 이 박스의 top/bottom 고정 높이를 넘어 흘러넘쳤다 — 그 넘친 부분은 배경색이
-       칠해지는 이 박스 바깥이라 투명하게(지도가 비치는 것처럼) 보였다. UI Builder에서
-       상단(헤더+세계 요약)까지만 불투명하고 그 아래(국가 상태 분포~)부터 checkerboard로
-       보인 것이 이 증거. Tactical.uss data-value의 flex-shrink/min-width 오버플로우 수정
-       (Step 76, 가로 방향)과 같은 종류의 버그를 세로 방향에서 놓친 것 — overflow:hidden으로
-       박스 경계 밖 렌더링을 원천 차단하고, flex-direction을 명시해 자식(헤더/스크롤)이
-       항상 세로로 쌓이도록 고정했다. */
     flex-direction: column;
     overflow: hidden;
 }

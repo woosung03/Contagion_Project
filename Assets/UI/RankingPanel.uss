@@ -5,18 +5,29 @@
    로드 순서: Theme.uss -> Tactical.uss -> RankingPanel.uss
 
    모바일 팝업 패턴: 고정폭+음수 margin-left로 중앙 정렬하던 데스크톱 트릭 대신
-   좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다. 국가현황 패널(status-root)과
-   동일한 "부분 슬라이드 패널" 톤으로 top을 42% / bottom을 12.5%로 고정해 화면 상단(지도)과
-   Hud 하단바(tabs-row)가 항상 함께 보이게 했다. */
+   좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다.
+
+   [Layout Architecture Refactoring, 2026-07-21] 기존엔 top:3%/bottom:12.5%(해상도 의존 %)로
+   이 화면 자체가 자기 위치를 잡았으나, 이제 ranking-root는 순수 flex-column 컨테이너로
+   바뀌고(배경/패딩 없음), 실제 패널(.ranking-box, 아래)이 content-area-top/bottom-spacer
+   (Tactical.uss, Hud의 resource-strip/action-strip과 동일 높이) 사이에서 flex-grow:1로 남는
+   공간만 차지한다 — UpgradeTree.uss/CountryStatusPanel.uss와 동일한 구조. */
 .ranking-root {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 42%;
-    bottom: 12.5%;
-    background-color: var(--color-bg-panel);
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* ranking-box — 실제로 보이는 패널 표면. flex-grow:1 + flex-basis:0은 §12.2 ScrollView 규칙과
+   동일한 원칙을 컨테이너 자신에도 적용한 것 — top/bottom-spacer 사이 남는 공간만 정확히
+   차지하게 한다. */
+.ranking-box {
+    flex-grow: 1;
+    flex-basis: 0;
+    background-color: var(--color-bg-panel-strong);
     padding: var(--space-xxl);
     align-items: stretch;
+    flex-direction: column;
+    overflow: hidden;
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(각짐 원칙: 기존 border-top-left/right-radius: --radius-lg는 코너컷과 충돌해
        제거). */

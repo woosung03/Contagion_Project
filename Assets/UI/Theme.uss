@@ -83,10 +83,21 @@
     --radius-md: 6px;
     --radius-lg: 8px;
 
+    /* ---- Foundation(Docs/MASTER_DESIGN.md 2절) ----
+       Base = 이 프로젝트 Typography/Spacing/Component 전 치수의 공통 분모. USS가 calc()를
+       지원하지 않아(코드베이스 위키 css-to-uss-support.md) 다른 토큰이 이 값에서 실시간으로
+       연산되지는 않지만, 신규 토큰을 추가할 때 "Base × 배수"인지 반드시 검산하는 기준점이다. */
+    --scale-base: 16px;
+
     /* ---- 폰트 크기 ---- */
     /* Docs/DESIGN.md 3절 Typography — 캡션 3단계(신규 등재, v2). 화면 여러 곳(tactical-caption/
        lab-caption/section-caption/badge-tag 등)에서 반복되던 하드코딩 값을 토큰화한 것 — 값 자체는
-       기존 하드코딩과 동일(9/10/11px), 신규 크기 도입 아님. */
+       기존 하드코딩과 동일(9/10/11px), 신규 크기 도입 아님.
+       [Master Design Integration, 2026-07-21] 이 3개(caption-2xs/xs/caption)는 Docs/MASTER_DESIGN.md
+       3절이 정의한 Typography Role(Hero/Display/Panel Title/Title/Subtitle/Body/Caption/
+       Caption-Dense) 밖에 있다 — Master Commit(Legacy) 실측에도 없던, Tactical 시대에 별도로
+       추가된 값이다. 기존 소비처(badge-tag 등)가 있어 삭제하지 않고 유지하되, 신규 화면에서는
+       쓰지 않는다(Role 밖 값 — MASTER_DESIGN.md 10절 체크리스트 위반). */
     --font-size-caption-2xs: 9px;
     --font-size-caption-xs: 10px;
     --font-size-caption: 11px;
@@ -100,8 +111,46 @@
     --font-size-display: 32px;
     --font-size-hero: 40px;
 
+    /* ---- Typography Role(Docs/MASTER_DESIGN.md 3절) ----
+       위 --font-size-* 크기 토큰과 동일한 값을 역할(Role) 이름으로 다시 정의한다. 신규 코드는
+       이제부터 크기 이름이 아니라 이 Role 이름을 참조한다 — "몇 px인가"가 아니라 "무슨
+       역할인가"로 고르게 하기 위함. USS가 변수 체이닝(`--a: var(--b)`)을 안정적으로 지원하는지
+       검증되지 않아(코드베이스 위키 css-to-uss-support.md는 "var() 함수 내 중첩 불가"만 명시하고
+       변수 간 참조는 언급 없음) 리터럴로 중복 선언한다 — 아래 각 줄은 반드시 대응하는
+       --font-size-* 값과 같아야 하며, 크기 토큰이 바뀌면 이 값도 함께 갱신해야 한다
+       (--hud-status-bar-height와 동일한 동기화 관례). */
+    --font-hero: 40px;           /* = --font-size-hero,    Base×2.5  — 화면 대표 결과 문구(승/패 등) */
+    --font-display: 32px;        /* = --font-size-display, Base×2.0  — Fullscreen 화면 대표 타이틀 */
+    --font-panel-title: 26px;    /* = --font-size-xxl,     Base×1.625 — Bottom Sheet 전체 패널 헤더 */
+    --font-title: 24px;          /* = --font-size-xl,      Base×1.5  — Section/Dialog 제목 */
+    --font-subtitle: 18px;       /* = --font-size-md,      Base×1.125 — 보조 제목, 리스트 행 주요 값 */
+    --font-body: 16px;           /* = --font-size-body,    Base×1.0  — 기본 읽기 텍스트 */
+    --font-caption: 14px;        /* = --font-size-sm,      Base×0.875 — 보조 정보, 작은 라벨 */
+    --font-caption-dense: 13px;  /* = --font-size-xs,      Base×0.8125 — 트리 노드 등 밀집 요소 전용 */
+
     /* ---- 모바일 터치 타겟 최소 높이 ---- */
     --touch-target-min: 48px;
+
+    /* ---- Button Tier(Docs/MASTER_DESIGN.md 7절) ----
+       버튼 높이는 항상 이 3개 Tier 중 하나여야 한다. Tier 1은 값이 --touch-target-min과 반드시
+       같아야 한다(리터럴 중복 선언 이유는 위 Typography Role 주석과 동일 — 변수 체이닝 미검증). */
+    --button-height-primary: 48px;  /* = --touch-target-min, Tier 1, Base×3.0 — 기본 액션/내비게이션 */
+    --button-height-icon: 36px;     /* Tier 2, Base×2.25 — 아이콘 전용 소형 버튼 */
+    --button-height-confirm: 56px;  /* Tier 3, Base×3.5 — 되돌릴 수 없는 최종 결정 */
+
+    /* ---- HUD Content Area 아키텍처(Layout Architecture Refactoring, 2026-07-21) ----
+       Hud.uss의 resource-strip/action-strip 실제 높이를 그대로 옮겨온 단일 소스. Gameplay는
+       hud-root 안에서 이 두 값 사이(gameplay-content, flex-grow:1)로 자동 계산되지만, Upgrade/
+       CountryStatus/Ranking은 각자 별도 UIDocument라 같은 자리를 얻으려면 이 값과 동일한 높이의
+       투명 스페이서(Tactical.uss의 .content-area-top-spacer/.content-area-bottom-spacer)를
+       자기 root 맨 위/맨 아래에 똑같이 둬야 한다 — 그래야 %(해상도 의존적) 없이 순수 Flex로
+       "Status Bar 아래 · Bottom Navigation 위"만 정확히 차지한다.
+       --hud-status-bar-height는 resource-strip의 실제 height(34px)와 반드시 같아야 하고,
+       --hud-bottom-nav-height는 action-strip의 실측 높이(padding-top --space-sm 8px + 버튼
+       --touch-target-min 48px + padding-bottom 14px = 70px)와 반드시 같아야 한다 — 둘 중
+       하나라도 바뀌면 이 값도 같이 갱신해야 어긋나지 않는다. */
+    --hud-status-bar-height: 34px;
+    --hud-bottom-nav-height: 70px;
 
     /* ---- 인터랙션 트랜지션 (box-shadow 미지원 — codebase 위키 css-to-uss-support.md 확인,
        대신 scale/색상 트랜지션으로 눌림感·선택感을 표현) ---- */
@@ -141,6 +190,17 @@
     --stroke-selected: 3px;
     --stroke-accent-bar: 4px;
     --stroke-sub-accent: 2px;
+
+    /* ---- Border Scale(Docs/MASTER_DESIGN.md 5절 Card/Row Border) ----
+       [Master Design Integration, 2026-07-21] Legacy Master Commit 실측 기준 Card 테두리는
+       2px(Base×0.125)였다 — 위 Stroke System의 --stroke-hairline(1px)과 값이 다르다. 이건
+       실수가 아니라 두 체계가 서로 다른 시점(Stroke System=Tactical 시대, Border Scale=
+       Master Design/Legacy 시대)에 정의된 결과다. 이번 통합에서는 기존 --stroke-hairline
+       소비처(tactical-panel 등 전 화면 패널 테두리)를 건드리지 않기 위해 새 토큰만 추가한다 —
+       --stroke-hairline을 이 값으로 바꾸는 것은 전 화면 시각 변경(패널 테두리가 2배 굵어짐)이라
+       별도 승인 없이는 수행하지 않는다(Docs/Archive/GrammarValidation.md 참고). */
+    --border-hairline: 2px;  /* Master Design Card Border, Base×0.125 */
+    --border-selected: 3px;  /* Master Design 선택 강조 Border, Base×0.1875 */
 }
 
 /* ============================================================

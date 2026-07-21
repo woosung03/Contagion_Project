@@ -8,15 +8,35 @@
    ============================================================ */
 
 .tactical-panel {
-    border-width: 1px;
+    border-width: var(--stroke-hairline);
     border-color: var(--color-accent-glow-soft);
     border-radius: 0; /* 코너컷의 각진 인상과 둥근 모서리가 충돌해 tactical-panel은 항상 각짐 */
+}
+
+/* content-area-*-spacer — HUD Content Area 아키텍처(Layout Architecture Refactoring,
+   2026-07-21). Upgrade/CountryStatus/Ranking처럼 Hud와 별도 UIDocument인 화면이 "Status Bar
+   아래 · Bottom Navigation 위" 영역만 차지하게 만드는 공용 부품. 각 화면 root(예: upgrade-root)
+   맨 위/맨 아래에 투명 스페이서로 하나씩 두면, root 자체는 그 화면의 전체 UIDocument(보통
+   화면 전체 크기)를 채우는 순수 flex-column이 되고, 실제 보이는 패널 박스는 두 스페이서
+   사이에서 flex-grow:1로 남는 공간만 차지한다 — %(해상도 의존) 없이 Hud.uss의 resource-strip/
+   action-strip과 동일한 높이(Theme.uss --hud-status-bar-height/--hud-bottom-nav-height)만큼만
+   비워두므로, Hud 쪽 실제 Status Bar/Bottom Navigation이 그 자리에서 그대로 비쳐 보인다.
+   SafeAreaApplier(targetClass=해당 root 클래스)가 root에 적용하는 상하 padding이 이 스페이서
+   영역을 안전영역만큼 자동으로 늘려준다(hud-root가 이미 쓰는 것과 동일한 방식). */
+.content-area-top-spacer {
+    height: var(--hud-status-bar-height);
+    flex-shrink: 0;
+}
+
+.content-area-bottom-spacer {
+    height: var(--hud-bottom-nav-height);
+    flex-shrink: 0;
 }
 
 .tactical-panel__header {
     padding-bottom: 3px;
     margin-bottom: var(--space-xs);
-    border-bottom-width: 1px;
+    border-bottom-width: var(--stroke-hairline);
     border-bottom-color: var(--color-grid-line);
 }
 
@@ -48,7 +68,7 @@
     justify-content: space-between;
     padding-bottom: 2px;
     margin-bottom: 2px;
-    border-bottom-width: 1px;
+    border-bottom-width: var(--stroke-hairline);
     border-bottom-color: var(--color-grid-line);
 }
 
@@ -86,7 +106,7 @@
    upgrade-header__caption과 동일 톤). 화면별 .uss가 색상/자간 외의 배치만 조정. */
 .tactical-caption {
     color: var(--color-accent-glow);
-    font-size: 11px;
+    font-size: var(--font-size-caption);
     -unity-font-style: bold;
     letter-spacing: var(--tracking-caption);
     -unity-text-align: middle-center;
@@ -95,7 +115,7 @@
 /* 리스트 행(48개 국가 등)용 좌측 accent bar — 코너컷 대신 쓰는 밀도 절약형 강조.
    색상은 화면별 .uss가 상황(개발수준 등)에 맞는 색을 지정. */
 .accent-bar-row {
-    border-left-width: 4px;
+    border-left-width: var(--stroke-accent-bar);
 }
 
 /* data-row가 채워지는 빈 컨테이너 — UpgradeTree.uss의 동일 클래스와 같은 계약
@@ -109,7 +129,7 @@
    폰트 아이콘 글리프 대신 텍스트+accent bar 조합으로 시인성을 높이는 용도(CountryPopup 참고). */
 .modal-section-caption {
     color: var(--color-accent-glow);
-    font-size: 11px;
+    font-size: var(--font-size-caption);
     -unity-font-style: bold;
     letter-spacing: var(--tracking-caption);
     margin-top: var(--space-sm);
@@ -147,7 +167,7 @@
     flex-basis: 0;
     height: var(--touch-target-min);
     margin: 0 4px;
-    border-width: 1px;
+    border-width: var(--stroke-hairline);
     border-color: var(--color-accent-glow);
     border-radius: 0;
     background-color: var(--color-bg-panel);
@@ -168,7 +188,7 @@
 .badge-tag {
     align-self: flex-start;
     padding: 2px var(--space-xs);
-    border-width: 1px;
+    border-width: var(--stroke-hairline);
     border-color: var(--color-border);
     border-radius: var(--radius-sm);
 }

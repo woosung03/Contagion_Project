@@ -70,24 +70,31 @@ namespace Contagion.UI
         /// </summary>
         private void HandleCureResearchStarted()
         {
-            AddEntry("[상황 변화] 정체불명의 질병이 세계 보건당국에 의해 공식 확인됨 — 치료제 연구가 시작됩니다.", "news-entry--negative");
+            AddEntry("[상황 변화] 정체불명의 질병이 세계 보건당국에 의해 공식 확인됨 — 치료제 연구가 시작됩니다.", CurrentDay(), "news-row__dot--negative", "news-row__title--negative");
         }
 
         private void HandleNewsEvent(NewsEvent evt)
         {
-            string extraClass = evt.category switch
+            string dotClass = evt.category switch
             {
-                NewsEventCategory.Positive => "news-entry--positive",
-                NewsEventCategory.Negative => "news-entry--negative",
-                NewsEventCategory.Flavor => "news-entry--flavor",
+                NewsEventCategory.Positive => "news-row__dot--positive",
+                NewsEventCategory.Negative => "news-row__dot--negative",
+                NewsEventCategory.Flavor => "news-row__dot--flavor",
                 _ => null
             };
-            AddEntry($"[{evt.day}일차] {evt.text}", extraClass);
+            string titleClass = evt.category switch
+            {
+                NewsEventCategory.Positive => "news-row__title--positive",
+                NewsEventCategory.Negative => "news-row__title--negative",
+                NewsEventCategory.Flavor => "news-row__title--flavor",
+                _ => null
+            };
+            AddEntry(evt.text, evt.day, dotClass, titleClass);
         }
 
         private void HandleResistanceStageChanged(ResistanceStage stage)
         {
-            AddEntry($"[상황 변화] 인류 저항 단계 — {StageLabel(stage)}", null);
+            AddEntry($"[상황 변화] 인류 저항 단계 — {StageLabel(stage)}", CurrentDay(), null, null);
         }
 
         /// <summary>
@@ -98,8 +105,10 @@ namespace Contagion.UI
         {
             // Stable은 "아직 사망자가 없다"는 기본값이라 별도 뉴스로 띄울 필요가 없음(진입 시점에만 스킵).
             if (stage == WorldMortalityStage.Stable) return;
-            AddEntry($"[상황 변화] 세계 위험도 — {MortalityStageLabel(stage)}", "news-entry--negative");
+            AddEntry($"[상황 변화] 세계 위험도 — {MortalityStageLabel(stage)}", CurrentDay(), "news-row__dot--negative", "news-row__title--negative");
         }
+
+        private static int CurrentDay() => WorldDataManager.Instance?.State.currentDay ?? 0;
 
         private static string StageLabel(ResistanceStage stage) => stage switch
         {
@@ -121,42 +130,43 @@ namespace Contagion.UI
         };
 
         /// <summary>
-        /// [Event Dock 심각도 표시] 한 줄 = 심각도 점(news-entry-dot) + 텍스트(news-entry).
-        /// EventManager.NewsEventCategory(Positive/Negative/Flavor) 분류를 그대로 재사용해 점
-        /// 색상을 정한다 — extraClass(뉴스 텍스트 색상 클래스)에서 대응하는 점 클래스를 유도하므로
-        /// 이 메서드를 부르는 6개 호출부(HandleNewsEvent 등)는 전혀 바꿀 필요가 없다.
+        /// [WORLD NEWS 심각도 표시] 한 줄 = 심각도 점(news-row__dot) + 제목(news-row__title) +
+        /// DAY(news-row__day). 최신 뉴스가 항상 맨 위에 오도록 index 0에 삽입하고, 초과분은
+        /// 맨 아래(가장 오래된 항목)부터 제거한다. 자동 스크롤은 하지 않는다 — 플레이어가
+        /// 필요할 때만 직접 스크롤해 과거 기록을 본다(News Feed는 "기록", Important Event
+        /// Popup이 "즉시 알림" 역할을 담당).
         /// </summary>
-        private void AddEntry(string text, string extraClass)
+        private void AddEntry(string title, int day, string dotClass, string titleClass)
         {
             if (_newsScroll == null) return;
 
-            string dotClass = extraClass switch
-            {
-                "news-entry--positive" => "news-entry-dot--positive",
-                "news-entry--negative" => "news-entry-dot--negative",
-                _ => "news-entry-dot--flavor"
-            };
-
             var row = new VisualElement();
-            row.AddToClassList("news-entry-row");
+            row.AddToClassList("news-row");
 
             var dot = new VisualElement();
-            dot.AddToClassList("news-entry-dot");
-            dot.AddToClassList(dotClass);
+            dot.AddToClassList("news-row__dot");
+            dot.AddToClassList(dotClass ?? "news-row__dot--flavor");
             row.Add(dot);
 
-            var label = new Label(text);
-            label.AddToClassList("news-entry");
-            if (extraClass != null) label.AddToClassList(extraClass);
-            row.Add(label);
+            var body = new VisualElement();
+            body.AddToClassList("news-row__body");
 
-            _newsScroll.Add(row);
+            var titleLabel = new Label(title);
+            titleLabel.AddToClassList("news-row__title");
+            if (titleClass != null) titleLabel.AddToClassList(titleClass);
+            body.Add(titleLabel);
+
+            var dayLabel = new Label($"DAY {day}");
+            dayLabel.AddToClassList("news-row__day");
+            body.Add(dayLabel);
+
+            row.Add(body);
 
             var content = _newsScroll.contentContainer;
-            while (content.childCount > MaxEntries)
-                content.RemoveAt(0);
+            content.Insert(0, row);
 
-            _newsScroll.ScrollTo(row);
+            while (content.childCount > MaxEntries)
+                content.RemoveAt(content.childCount - 1);
         }
     }
 }
