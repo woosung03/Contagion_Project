@@ -374,7 +374,7 @@ namespace Contagion.UI
             if (_nodeScroll == null || UpgradeManager.Instance == null) return;
 
             if (_labCaptionLabel != null)
-                _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} LAB";
+                _labCaptionLabel.text = $"{CategoryEnglishCaption(category)} 연구소";
 
             var categoryNodes = UpgradeManager.Instance.Tree
                 .Where(n => n != null && n.category == category)
@@ -563,13 +563,17 @@ namespace Contagion.UI
             _ => category.ToString()
         };
 
-        /// <summary>목록 영역 상단 영문 LAB 캡션(예: "TRANSMISSION LAB").</summary>
+        /// <summary>목록 영역 상단 "OO 연구소" 캡션의 카테고리명(예: "전파 연구소").
+        /// [UI Localization Migration, 2026-07-21] Language Policy에 따라 반환값을 영문 대문자에서
+        /// 한글로 교체(탭 버튼과 동일한 "전파"/"증상"/"적응" 표기 재사용) — 메서드 이름
+        /// "CategoryEnglishCaption"은 코드 식별자라 이번 작업에서 바꾸지 않았으나 더 이상 실제
+        /// 반환값을 정확히 설명하지 않는다(이름 자체는 향후 별도 리팩터링에서 정리 대상).</summary>
         private static string CategoryEnglishCaption(UpgradeCategory category) => category switch
         {
-            UpgradeCategory.Transmission => "TRANSMISSION",
-            UpgradeCategory.Symptom => "SYMPTOM",
-            UpgradeCategory.Ability => "ADAPTATION",
-            _ => category.ToString().ToUpperInvariant()
+            UpgradeCategory.Transmission => "전파",
+            UpgradeCategory.Symptom => "증상",
+            UpgradeCategory.Ability => "적응",
+            _ => category.ToString()
         };
     }
 }

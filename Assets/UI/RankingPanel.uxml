@@ -24,7 +24,7 @@
             <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
             <ui:VisualElement class="tactical-panel__header">
-                <ui:Label name="ranking-title" text="LEADERBOARD TERMINAL" class="tactical-panel__title" />
+                <ui:Label name="ranking-title" text="랭킹" class="tactical-panel__title" />
             </ui:VisualElement>
             <ui:VisualElement class="data-row ranking-pb-row">
                 <ui:Label name="pb-label" text="개인 최고 기록: -" class="ranking-value" />

@@ -398,12 +398,12 @@ namespace Contagion.UI
             float infectionRate = WorldInfectionRate(state);
 
             if (mortalityStage == WorldMortalityStage.ExtinctionImminent)
-                return ("WORLD COLLAPSE IMMINENT", "global-status-banner--dead");
+                return ("세계 붕괴 임박", "global-status-banner--dead");
             if (infectionRate >= 0.5f)
-                return ("GLOBAL PANDEMIC", "global-status-banner--danger");
+                return ("세계적 대유행", "global-status-banner--danger");
             if (infectionRate >= 0.05f || mortalityStage == WorldMortalityStage.WorldThreatened)
-                return ("OUTBREAK EXPANDING", "global-status-banner--infected");
-            return ("CONTAINMENT SUCCESS", "global-status-banner--info");
+                return ("확산 진행 중", "global-status-banner--infected");
+            return ("봉쇄 성공", "global-status-banner--info");
         }
 
         private static float WorldInfectionRate(WorldState state)

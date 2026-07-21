@@ -45,7 +45,7 @@
                  event-dock을 대체). news-scroll의 name/class는 그대로라 NewsFeedController.cs의
                  쿼리는 안 깨진다. -->
             <ui:VisualElement name="news-panel" class="news-panel">
-                <ui:Label text="WORLD NEWS" class="news-panel__header" />
+                <ui:Label text="세계 뉴스" class="news-panel__header" />
                 <ui:ScrollView name="news-scroll" class="news-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
             </ui:VisualElement>
 

@@ -299,3 +299,90 @@ Action(하단, 고정)**. Status/Bottom Action의 높이는 5절 Component Rule(
 - [ ] Panel을 새로 만든다면 화면 목적에 따라 인셋을 독립적으로 설계했는가(6절 — 공통 배수 강제
       아님)
 - [ ] Safe Area 보정이 최상위 컨테이너에 적용됐는가
+- [ ] Player-facing 텍스트가 11절 Language Policy(한국어 기본, 영어는 등재된 예외만)를 따르는가
+
+---
+
+## 11. Language Policy
+
+### 기본 원칙
+
+Player가 보는 모든 UI 텍스트는 **기본적으로 한국어**를 사용한다. 새 UI는 영어로 초안을 작성한
+뒤 번역하는 방식이 아니라, **처음부터 한국어로 설계**한다.
+
+### 용어집(공식 번역 매핑)
+
+새 UI 텍스트를 작성할 때는 아래 매핑을 그대로 따른다 — 화면마다 다른 번역어를 새로 만들지
+않는다.
+
+| English | 한국어 |
+|---|---|
+| Main Menu | 메인 메뉴 |
+| Continue | 이어하기 |
+| New Game | 새 게임 |
+| Upgrade | 진화 |
+| Research | 연구 |
+| Severity | 증상 |
+| Infectivity | 감염력 |
+| Lethality | 치사율 |
+| Transmission | 전파 |
+| Population | 인구 |
+| Dead | 사망자 |
+| Healthy | 건강 |
+| News | 뉴스 |
+| World | 세계 |
+| Ranking | 순위 |
+| Game Over | 게임 오버 |
+
+**참고**: `업그레이드`(외래어 표기)는 이미 한글 표기이므로 이 정책상 "영어 미번역" 위반은
+아니다. `진화`는 언어 정책 준수를 위한 교체가 아니라, 이 게임의 주제(병원체 진화)에 더 맞는
+용어로의 **별도 창작 결정**이다 — 실제 UI 문자열 변경 여부는 이번 문서화와 별개로 판단한다.
+
+### 영어 유지 대상(국제 통용 고유 용어)
+
+다음은 번역하지 않고 영어를 그대로 유지한다.
+
+- `DNA`, `RNA` — 과학적 고유 명칭
+- `FPS`, `CPU`, `GPU` — 필요 시, 기술 고유 약어
+- 그 외 게임 시스템이 고유 명칭으로 채택한 약어(신규 도입 시 아래 "예외 등재 규칙"을 따른다)
+
+### 코드 식별자 정책
+
+코드 식별자(클래스명·변수명·네임스페이스·파일명)는 이 정책의 적용 대상이 **아니다** — 계속
+영어를 사용한다(`CountryDatabase`, `CountryData`, `HudController`, `UpgradeTree` 등). 이
+정책은 **Player가 실제로 읽는 UI 문자열에만** 적용된다.
+
+### Localization 원칙
+
+UI 문자열은 향후 로컬라이제이션(다국어) 도입 가능성을 고려해 관리한다.
+
+- 하드코딩 문자열은 가능한 한 줄이고, 재사용되는 문구는 한 곳에서 관리한다.
+- **현재 이 프로젝트에는 로컬라이제이션 시스템(문자열 테이블 등)이 없다** — 이 원칙은 지금
+  당장의 구현 요구가 아니라 향후 도입을 어렵게 만들지 않기 위한 사전 방침이다.
+
+### 예외 등재 규칙
+
+영어가 플레이 경험을 명확히 개선하는 경우에만 예외를 허용하며, **이 표에 명시적으로 등재된
+것만** 유효한 예외다. 등재되지 않은 영어 UI 텍스트는 전부 정책 위반으로 간주한다.
+
+| 예외 | 사유 |
+|---|---|
+| `DNA` | 과학적 고유 명칭, 번역 시 의미 손실 |
+| `DNA Point` | DNA와 동일 — 자원 명칭에 고유 명사 유지 |
+| `DNA Mutation` | DNA와 동일 |
+
+### 발견된 기존 위반 후보(결정 보류)
+
+현재 코드베이스를 조사한 결과, Tactical Console 시각 언어(DEFCON/Frostpunk 참고)의 일부로
+아래 영어 대문자 캡션들이 이미 존재한다 — 이 문서의 예외 표에 아직 등재되지 않았으므로 현재는
+**정책 위반 상태**다. 판단은 보류하며, 다음 중 하나로 결정해야 한다: (a) Tactical Console
+미학의 의도된 요소로 보고 예외 표에 추가, (b) 한국어로 교체.
+
+| 위치 | 문자열 |
+|---|---|
+| `Hud.uxml` | `WORLD NEWS` |
+| `CountryStatusPanel.uxml` | `GLOBAL STATUS CENTER`, `GLOBAL STATUS`, `INFECTED`, `DEATHS`, `CURE`, `EXTINCT`, `WORLD OVERVIEW`, `ADVANCED DIAGNOSTICS`, `SAFE`, `WARNING`, `DANGER`, `COLLAPSE` |
+| `RankingPanel.uxml` | `LEADERBOARD TERMINAL` |
+| `UpgradeTreeView.cs`(`CategoryEnglishCaption()` + `" LAB"`) | `TRANSMISSION LAB`, `SYMPTOM LAB`, `ABILITY LAB` |
+
+이 목록은 이번 문서화 작업 중 발견된 것으로, **코드/UXML은 이번 작업에서 수정하지 않았다.**
