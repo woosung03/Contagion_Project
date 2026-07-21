@@ -61,7 +61,11 @@
 
 .pathogen-card__name {
     color: var(--color-text-primary);
-    font-size: 21px;
+    font-size: var(--font-size-lg); /* Master Design Integration, 2026-07-21 — 21px 하드코딩(Boundary
+        Analysis Legacy 잔재) 제거. 같은 화면의 country-row__name(리스트 항목 주요 이름)과 동일한
+        역할이라 그 컴포넌트가 이미 쓰던 --font-size-lg(20px)로 통일 — MASTER_DESIGN.md에는 아직
+        이 역할(×1.25, "리스트 항목 이름")에 대응하는 별도 Role 이름이 없어 크기 토큰을 그대로
+        사용했다(향후 MASTER_DESIGN.md에 Role 추가 검토 필요). */
     -unity-font-style: bold;
     overflow: hidden;
     text-overflow: ellipsis;
