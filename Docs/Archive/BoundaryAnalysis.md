@@ -1,5 +1,13 @@
 # Boundary Analysis
 
+> ### ⚠ Archive Notice
+> 이 문서는 **Legacy Master Commit(`cfcc0e4`) 기준의 역사적 분석 기록**이다. 이후 실제 구현은
+> 계속 진행돼(예: UpgradeTree의 Research Database v2 캔버스 마이그레이션으로 이 문서가 지목한
+> `detail-panel`류가 이미 삭제됨), **최신 구현과 이 문서의 내용이 다를 수 있다**. 최신 준수
+> 현황의 기준은 이 문서가 아니라 **Master Design Compliance Audit**(가장 최근 실행분)과
+> `MASTER_DESIGN.md`의 8절 Approved Exceptions/12절 Design Debt다. 아래 원래 분석 내용은
+> 수정하지 않고 역사적 기록으로 그대로 보존한다.
+
 > **역할**: Master Commit(`cfcc0e4`)의 8개 화면 중 어디가 Master Design을 대표하고 어디가 Legacy
 > 잔재인지 화면 단위로 분류한 기록. `MASTER_DESIGN.md` 9절 Legacy Exclusions의 직접 근거다 —
 > 규칙 자체는 항상 `MASTER_DESIGN.md`를 따른다.
