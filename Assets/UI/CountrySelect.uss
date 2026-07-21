@@ -21,3 +21,23 @@
 .country-row--dev-low {
     border-left-color: var(--color-status-danger);
 }
+
+/* [Master Design Migration, 2026-07-21] detail-panel__title/__desc는 MainMenu.uss가 정의하는
+   공유 클래스라 그 값(22px/17px, Boundary Analysis Legacy 잔재)을 MainMenu.uss 자체를 고치지
+   않고는 못 바꾼다 — MainMenu는 이번 작업 범위 밖이라 그 파일을 건드리지 않는다. 대신 로드
+   순서(Theme→Tactical→MainMenu→CountrySelect, 위 주석 참고)가 이 파일을 마지막에 적용하므로,
+   여기서 같은 셀렉터를 다시 선언하면 CountrySelect 화면에서만 값이 override된다 — MainMenu
+   화면은 이 파일을 아예 로드하지 않으므로(MainMenu.uxml에 Style 참조 없음) 전혀 영향받지
+   않는다. 클래스 이름 자체(country-detail-panel__title 등)로 분리하는 대신 이 방식을 택한
+   이유: 클래스명을 바꾸려면 CountrySelect.uxml의 class 속성도 함께 바꿔야 해서 변경 지점이
+   늘고, C#(CountrySelectController)이 이름 기반 대신 클래스 기반으로 뭔가를 찾고 있다면
+   깨질 위험도 생긴다 — 캐스케이드 override는 UXML/C# 변경이 전혀 없어 훨씬 안전하다. */
+.detail-panel__title {
+    font-size: var(--font-title); /* Title Role(24px) — 선택된 국가 이름을 강조하는 상세 패널
+        제목(MainMenu의 병원체 상세 제목과 동일 역할). */
+}
+
+.detail-panel__desc {
+    font-size: var(--font-body); /* Body Role(16px) — 문장형 설명 텍스트는 Body 미만 금지
+        (MASTER_DESIGN.md 3절). */
+}
