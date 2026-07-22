@@ -132,6 +132,12 @@
     font-size: var(--font-size-xl);
     -unity-font-style: bold;
     margin-top: 2px;
+    /* [Regression Fix, 2026-07-22] Tactical.uss .data-value와 동일한 오버플로우 보호(flex-shrink:1;
+       min-width:0;) 복원 — 이 화면의 인구 필드가 DevLog Step 76/77에서 이미 이 패턴(당시 .data-value
+       경로)으로 오버플로우를 해결했었으나, 오늘 Hero Tier 이식 과정에서 새 클래스로 옮겨오며 보호가
+       누락됐다. 값/레이아웃/비주얼은 무변경 — overflow 방어 2줄만 추가. */
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 /* Secondary tier — Tactical.uss .data-row/.data-label/.data-value(공용 판독행 문법) 재사용,

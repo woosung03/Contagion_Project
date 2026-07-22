@@ -91,8 +91,12 @@ namespace Contagion.UI
                 .Count(c => c.GetCollapseStage() >= CountryCollapseStage.FullCollapse) ?? 0;
 
             _statsRows?.Clear();
-            _statsRows?.Add(MakeStatRow("전 세계 감염자", $"{infected:N0}", "data-value--infected"));
-            _statsRows?.Add(MakeStatRow("전 세계 사망자", $"{dead:N0}", "data-value--dead"));
+            // [Number Formatting Policy v2] 이 두 필드는 data-row/data-value(전역 "Detail" 표기
+            // 컴포넌트)를 그대로 쓰지만, Role 기준으로는 "게임 결과를 빠르게 전달하는 Summary"라
+            // NumberFormatter.FormatSummary()로 축약 표기한다 — 컴포넌트 클래스와 표기 Role이
+            // 일치하지 않는 의도된 예외이니 이 주석 없이 "왜 data-value인데 축약돼 있지"로 오해하지 말 것.
+            _statsRows?.Add(MakeStatRow("전 세계 감염자", NumberFormatter.FormatSummary(infected), "data-value--infected"));
+            _statsRows?.Add(MakeStatRow("전 세계 사망자", NumberFormatter.FormatSummary(dead), "data-value--dead"));
             _statsRows?.Add(MakeStatRow("붕괴 국가 수", $"{collapsedNations}", "data-value--danger"));
             _statsRows?.Add(MakeStatRow("경과일", $"{day}일"));
 

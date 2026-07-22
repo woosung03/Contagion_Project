@@ -219,9 +219,9 @@ namespace Contagion.UI
                 ApplySeverityClass(_collapseStageValue, CollapseStageBadgeClass(collapseStage));
             }
 
-            if (_populationValue != null) _populationValue.text = $"{country.population:N0}";
-            if (_infectedValue != null) _infectedValue.text = $"{country.infectedCount:N0}";
-            if (_deadValue != null) _deadValue.text = $"{country.deadCount:N0}";
+            if (_populationValue != null) _populationValue.text = NumberFormatter.FormatSummary(country.population);
+            if (_infectedValue != null) _infectedValue.text = NumberFormatter.FormatSummary(country.infectedCount);
+            if (_deadValue != null) _deadValue.text = NumberFormatter.FormatSummary(country.deadCount);
             if (_infectionRateValue != null) _infectionRateValue.text = $"{infectionRatio * 100f:F1}%";
             if (_deathRateValue != null) _deathRateValue.text = $"{deathRatio * 100f:F2}%";
 

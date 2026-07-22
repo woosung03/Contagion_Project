@@ -420,8 +420,8 @@ namespace Contagion.UI
         /// 동일한 %표기 규약)와 ExtinctCountryCount() 헬퍼만 사용한다.</summary>
         private void PopulateHeroStats(WorldState state, IReadOnlyList<Country> countries)
         {
-            if (_heroInfectedValue != null) _heroInfectedValue.text = $"{state.infectedCount:N0}";
-            if (_heroDeathsValue != null) _heroDeathsValue.text = $"{state.deadCount:N0}";
+            if (_heroInfectedValue != null) _heroInfectedValue.text = NumberFormatter.FormatSummary(state.infectedCount);
+            if (_heroDeathsValue != null) _heroDeathsValue.text = NumberFormatter.FormatSummary(state.deadCount);
             if (_heroCureValue != null) _heroCureValue.text = $"{state.cureProgress * 100f:F1}%";
             if (_heroExtinctValue != null) _heroExtinctValue.text = ExtinctCountryCount(countries).ToString();
         }
