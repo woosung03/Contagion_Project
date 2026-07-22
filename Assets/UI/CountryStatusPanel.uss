@@ -5,14 +5,15 @@
    Tactical.uss가 담당하고, 이 파일은 이 화면 고유의 배치만 추가한다.
    로드 순서: Theme.uss -> Tactical.uss -> Hud.uss(population-bar 재사용) -> CountryStatusPanel.uss
 
-   [Layout Architecture Refactoring, 2026-07-21] 기존엔 top:3%/bottom:12.5%(해상도 의존 %)로
-   이 화면 자체가 자기 위치를 잡았으나, 이제 status-root는 순수 flex-column 컨테이너로
-   바뀌고(배경/패딩 없음), 실제 패널(.status-box, 아래)이 content-area-top/bottom-spacer
-   (Tactical.uss, Hud의 resource-strip/action-strip과 동일 높이) 사이에서 flex-grow:1로 남는
-   공간만 차지한다 — UpgradeTree.uss와 동일한 구조. */
+   [HUD Overlay Architecture, 2026-07-22] spacer 엘리먼트 대신 status-root에 padding-top/
+   padding-bottom을 직접 줘서 HUD의 TopHUD/BottomHUD에 status-box 콘텐츠가 깔리지 않게
+   한다 — HUD가 sortingOrder상 이 화면보다 항상 위라(GamePlay.unity) UpgradeTree.uss와
+   동일한 구조. */
 .status-root {
     flex-grow: 1;
     flex-direction: column;
+    padding-top: var(--hud-status-bar-height);
+    padding-bottom: var(--hud-bottom-nav-height);
 }
 
 /* status-box — 실제로 보이는 패널 표면. [가독성 재조정, 2026-07-10] "반투명 오버레이처럼

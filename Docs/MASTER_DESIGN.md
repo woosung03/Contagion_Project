@@ -11,7 +11,9 @@
 
 ## 1. Philosophy
 
-- **Atomic Grid 우선**: 모든 치수는 2px 배수다. 임의 px는 존재하지 않는다.
+- **Atomic Grid 우선**: Spacing·Layout 치수는 2px 배수다. 임의 px는 존재하지 않는다.
+  ([UI Scale Pass, 2026-07-21] Typography Role은 Base 재보정 이후 반올림 근사치를 허용한다 —
+  2절/3절 참고. 이 예외는 폰트 크기에만 적용되며 Spacing/Component 배치 치수는 그대로 엄격하다.)
 - **역할 기반 Typography**: 폰트 크기는 "몇 px인가"가 아니라 "무슨 역할인가"로 결정한다.
 - **정보 밀도 우선**: 장식보다 판독 가능한 수치·상태를 우선한다.
 - **작은 화면에서의 가독성**: 모든 컴포넌트는 최소 터치 타깃과 최소 글자 크기를 만족해야 한다.
@@ -28,10 +30,17 @@
 ### Base
 
 ```
-Base = 16
+Base = 19  (2026-07-21 UI Scale Pass 이전 값: 16)
 ```
 
 모든 Typography·Spacing·Component 치수는 Base의 배수로 정의한다.
+
+> **[UI Scale Pass, 2026-07-21]** 실플레이 가독성·터치성 개선을 위해 Base를 16→19(+18.75%)로
+> 재보정했다. 이 재보정 이후 §3 Typography Role 값은 "Base×배수"의 **반올림 근사치**다 —
+> 16이었던 시절에는 배수 공식이 정수로 정확히 맞아떨어졌지만, 완전한 정수 배수를 유지하는
+> Base 값이 15~20% 범위 안에 없어(다음 정수 배수 지점은 Base=32, 두 배) 이번부터는 근사치
+> 방식으로 전환한다. §4 Spacing System은 Atomic Grid(2px 배수) 규칙을 그대로 엄격히 지킨다 —
+> 근사치 전환은 Typography에만 적용된다.
 
 ### Atomic Grid
 
@@ -57,38 +66,42 @@ System이 전담한다. 새 레이아웃을 설계할 때는 항상 이 480×104
 Typography는 px 값이 아니라 **역할(Role)**로 지정한다. 새 텍스트를 추가할 때는 반드시 아래 6개
 역할 중 하나를 선택하고, 그 역할에 대응하는 크기만 사용한다.
 
-| Role | Base 배수 | 크기 | 정의 |
-|---|---|---|---|
-| **Hero** | ×2.5 | 40px | 화면을 대표하는 단 하나의 결과 문구(승/패 타이틀 등). 화면당 최대 1회. |
-| **Display** | ×2.0 | 32px | 화면의 대표 타이틀(Fullscreen 화면 최상단 제목). |
-| **Title** | ×1.5 | 24px | Section/Dialog 제목. Overlay Panel·Header의 기본 제목 크기. |
-| **Subtitle** | ×1.125 | 18px | 보조 제목, 리스트 행의 주요 값(라벨·이름). |
-| **Body** | ×1.0(Base) | 16px | 기본 읽기 텍스트. 모든 역할의 기준점. |
-| **Caption** | ×0.875 | 14px | 보조 정보, 부가 설명, 작은 라벨. |
+| Role | Base 배수(근사) | 크기 | 이전 값(~2026-07-21) | 정의 |
+|---|---|---|---|---|
+| **Hero** | ≈×2.5 | 48px | 40px(+20%) | 화면을 대표하는 단 하나의 결과 문구(승/패 타이틀 등). 화면당 최대 1회. |
+| **Display** | ≈×2.0 | 38px | 32px(+19%) | 화면의 대표 타이틀(Fullscreen 화면 최상단 제목). |
+| **Title** | ≈×1.5 | 28px | 24px(+17%) | Section/Dialog 제목. Overlay Panel·Header의 기본 제목 크기. |
+| **Subtitle** | ≈×1.125 | 21px | 18px(+17%) | 보조 제목, 리스트 행의 주요 값(라벨·이름). |
+| **Body** | ×1.0(Base) | 19px | 16px(+19%) | 기본 읽기 텍스트. 모든 역할의 기준점. |
+| **Caption** | ≈×0.875 | 17px | 14px(+21%) | 보조 정보, 부가 설명, 작은 라벨. |
+
+**[UI Scale Pass, 2026-07-21]** 위 표는 재보정 후 값이다 — Base가 더 이상 완전한 정수 배수를
+만들지 않아(2절 참고) "Base 배수" 열은 근사치(≈)로 표기한다.
 
 ### Panel Title 확장
 
-Bottom Sheet Content Area(6절)처럼 화면의 대부분을 차지하는 **전체 패널의 헤더**는 Title(24px)
-대신 한 단계 큰 **Panel Title(Base×1.625=26px)** 을 쓴다. Overlay Panel/Dialog급 제목(Title,
-24px)과 Fullscreen급 패널 제목(Panel Title, 26px)을 구분하는 것이 목적이다.
+Bottom Sheet Content Area(6절)처럼 화면의 대부분을 차지하는 **전체 패널의 헤더**는 Title(28px)
+대신 한 단계 큰 **Panel Title(≈Base×1.625=31px)** 을 쓴다. Overlay Panel/Dialog급 제목(Title,
+28px)과 Fullscreen급 패널 제목(Panel Title, 31px)을 구분하는 것이 목적이다. (이전 값: Title
+24px/Panel Title 26px)
 
 ### 밀도 전용 축소 캡션
 
-트리 캔버스처럼 반복 요소가 매우 많아 Caption(14px)도 과한 맥락에서는 **Base×0.8125(13px)** 를
+트리 캔버스처럼 반복 요소가 매우 많아 Caption(17px)도 과한 맥락에서는 **≈Base×0.8125(15px)** 를
 Caption의 하위 변형("Caption-Dense")으로 허용한다. 단, 이 크기는 반복 밀집 요소(노드 라벨 등)
-안에서만 쓰고, 문장형 설명 텍스트에는 쓰지 않는다.
+안에서만 쓰고, 문장형 설명 텍스트에는 쓰지 않는다. (이전 값: 13px)
 
 ### 사용 금지
 
-- Body(16px)보다 작은 크기를 문장형 설명 텍스트에 쓰지 않는다(Caption-Dense는 노드/칩 라벨 전용).
+- Body(19px)보다 작은 크기를 문장형 설명 텍스트에 쓰지 않는다(Caption-Dense는 노드/칩 라벨 전용).
 - 6개 역할(+Panel Title, +Caption-Dense) 밖의 임의 폰트 크기를 추가하지 않는다.
 - 같은 화면 안에서 같은 역할에 서로 다른 크기를 쓰지 않는다.
 
 ### Hierarchy
 
 ```
-Hero(2.5) > Display(2.0) > Panel Title(1.625) > Title(1.5) > Subtitle(1.125)
-> Body(1.0) > Caption(0.875) > Caption-Dense(0.8125)
+Hero(48px) > Display(38px) > Panel Title(31px) > Title(28px) > Subtitle(21px)
+> Body(19px) > Caption(17px) > Caption-Dense(15px)
 ```
 
 ---
@@ -103,14 +116,20 @@ Hero(2.5) > Display(2.0) > Panel Title(1.625) > Title(1.5) > Subtitle(1.125)
 
 ### Spacing Token
 
-| 토큰 | Base 배수 | 크기 |
+| 토큰 | 크기 | 이전 값(~2026-07-21) |
 |---|---|---|
-| xs | ×0.25 | 4px |
-| sm | ×0.5 | 8px |
-| md | ×0.75 | 12px |
-| lg | ×1.0 | 16px |
-| xl | ×1.25 | 20px |
-| xxl | ×1.5 | 24px |
+| xs | 4px | 4px(변경 없음) |
+| sm | 10px | 8px(+25%) |
+| md | 16px | 12px(+33%) |
+| lg | 20px | 16px(+25%) |
+| xl | 24px | 20px(+20%) |
+| xxl | 28px | 24px(+17%) |
+
+**[UI Scale Pass, 2026-07-21]** "UI가 빽빽해 보인다"는 문제의 핵심 원인을 여백 부족으로 보고
+Spacing Scale을 Typography보다 더 크게 상향했다. xs(4px)만 그대로 뒀다 — Atomic Grid 최소
+단위에 가까워 체감 밀도에 미치는 영향이 적고, 2px 배수 안에서 15~20%대 증분을 만들 정수가
+마땅치 않았기 때문이다. 이 표는 더 이상 Base의 단순 배수(×0.25/×0.5...)로 표현되지 않는다 —
+Atomic Grid(2px 배수) 규칙만 그대로 유지한다(아래 "허용 범위" 참고).
 
 ### 사용 규칙
 
@@ -335,14 +354,19 @@ Action(하단, 고정)**. Status/Bottom Action의 높이는 5절 Component Rule(
 
 ## 7. Button Hierarchy
 
-| Tier | 역할 | Base 배수 | 크기 | 사용 위치 |
-|---|---|---|---|---|
-| **Tier 1 — Primary Action** | 기본 액션/내비게이션 | ×3.0 | 48px | 탭 버튼, 확인/다음 버튼, 리스트 닫기, 주요 CTA 전반 — **기본값** |
-| **Tier 2 — Icon Button** | 아이콘 전용 소형 컨트롤 | ×2.25 | 36px | 다이얼로그 닫기(✕) 등 텍스트 없는 단일 아이콘 버튼 |
-| **Tier 3 — Confirm/Terminal Action** | 되돌릴 수 없는 최종 결정 | ×3.5 | 56px | 재시작/부활 등 화면당 극히 드문 1회성 확정 액션 |
+| Tier | 역할 | Base 배수(근사) | 크기 | 이전 값 | 사용 위치 |
+|---|---|---|---|---|---|
+| **Tier 1 — Primary Action** | 기본 액션/내비게이션 | ≈×3.0 | 56px | 48px(+17%) | 탭 버튼, 확인/다음 버튼, 리스트 닫기, 주요 CTA 전반 — **기본값** |
+| **Tier 2 — Icon Button** | 아이콘 전용 소형 컨트롤 | ≈×2.25 | 42px | 36px(+17%) | 다이얼로그 닫기(✕) 등 텍스트 없는 단일 아이콘 버튼 |
+| **Tier 3 — Confirm/Terminal Action** | 되돌릴 수 없는 최종 결정 | ≈×3.5 | 64px | 56px(+14%) | 재시작/부활 등 화면당 극히 드문 1회성 확정 액션 |
 
 **정의**: 새 버튼을 만들 때는 반드시 이 3개 Tier 중 하나를 먼저 선택한다. 최소 크기는 Tier
-2(36px)이며, 이보다 작은 버튼은 존재할 수 없다.
+2(42px)이며, 이보다 작은 버튼은 존재할 수 없다.
+
+**[UI Scale Pass, 2026-07-21]** 터치성 개선 목표로 3개 Tier 전부 상향(`--touch-target-min`도
+Tier 1과 동일하게 48→56px). "헤더 내장 Icon Button 32px" 등 8절 Approved Exception으로 등재된
+Tier 밖 버튼(예: `.popup-close` 32px)은 이번 조정 대상이 아니다 — Exception은 그 자체로 Tier
+체계 밖에 있다.
 
 ---
 

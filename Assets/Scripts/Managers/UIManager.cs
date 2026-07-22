@@ -6,6 +6,7 @@ using Contagion.Gameplay;
 using Contagion.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 namespace Contagion.Managers
 {
@@ -22,14 +23,15 @@ namespace Contagion.Managers
     {
         [SerializeField] private HudController hudController;
 
-        [Header("업그레이드 트리 — 카테고리별로 별개인 창 3개를 배열 순서(전파→증상→능력)로 페이징")]
-        [SerializeField] private UpgradeTreeView transmissionTreeView;
-        [SerializeField] private UpgradeTreeView symptomTreeView;
-        [SerializeField] private UpgradeTreeView abilityTreeView;
-
-        /// <summary>인덱스 0=전파, 1=증상, 2=능력 — HUD "업그레이드" 버튼 하나로 열고 좌우 화살표로 순환.</summary>
-        private UpgradeTreeView[] _upgradePages;
-        private int _currentUpgradePageIndex;
+        /// <summary>[UpgradeTree Architecture Refactor, 2026-07-22] CountryStatusPanel/RankingPanel과
+        /// 동일한 아키텍처(UIDocument 1개)로 통일 — 카테고리별 별도 창 3개(전파/증상/능력)를 Show/Hide로
+        /// 전환하던 예전 구조를 없앴다. 카테고리 전환은 이제 UpgradeTreeView 내부에서만 처리한다.
+        /// FormerlySerializedAs로 기존 인스펙터 배선(예전 "Transmission Tree View" 슬롯)을 그대로
+        /// 이어받는다 — 남은 SymptomTreeUI/AbilityTreeUI GameObject 삭제는 Unity 에디터에서 수동으로
+        /// 해야 한다(Docs/Archive/unity-editor-task.md 참고).</summary>
+        [Header("업그레이드 트리 — CountryStatusPanel과 동일하게 UIDocument 1개")]
+        [SerializeField, FormerlySerializedAs("transmissionTreeView")]
+        private UpgradeTreeView upgradeTreeView;
 
         /// <summary>
         /// AppScreen 상태 머신 — HUD 버튼 3개(업그레이드/국가현황/랭킹)가 여는 화면을
@@ -97,7 +99,6 @@ namespace Contagion.Managers
 
         private void OnEnable()
         {
-            _upgradePages = new[] { transmissionTreeView, symptomTreeView, abilityTreeView };
             BuildScreenMap();
 
             if (hudController != null)
@@ -110,15 +111,12 @@ namespace Contagion.Managers
                 hudController.OnRankingClicked += HandleRankingClicked;
             }
 
-            foreach (var page in _upgradePages)
+            if (upgradeTreeView != null)
             {
-                if (page == null) continue;
-                page.OnCategoryRequested -= HandleCategoryRequested;
-                page.OnCategoryRequested += HandleCategoryRequested;
-                page.OnResearchItemSelected -= HandleResearchItemSelected;
-                page.OnResearchItemSelected += HandleResearchItemSelected;
-                page.OnCloseRequested -= HandleScreenCloseRequested;
-                page.OnCloseRequested += HandleScreenCloseRequested;
+                upgradeTreeView.OnResearchItemSelected -= HandleResearchItemSelected;
+                upgradeTreeView.OnResearchItemSelected += HandleResearchItemSelected;
+                upgradeTreeView.OnCloseRequested -= HandleScreenCloseRequested;
+                upgradeTreeView.OnCloseRequested += HandleScreenCloseRequested;
             }
 
             if (countryStatusPanelController != null)
@@ -173,15 +171,10 @@ namespace Contagion.Managers
                 hudController.OnRankingClicked -= HandleRankingClicked;
             }
 
-            if (_upgradePages != null)
+            if (upgradeTreeView != null)
             {
-                foreach (var page in _upgradePages)
-                {
-                    if (page == null) continue;
-                    page.OnCategoryRequested -= HandleCategoryRequested;
-                    page.OnResearchItemSelected -= HandleResearchItemSelected;
-                    page.OnCloseRequested -= HandleScreenCloseRequested;
-                }
+                upgradeTreeView.OnResearchItemSelected -= HandleResearchItemSelected;
+                upgradeTreeView.OnCloseRequested -= HandleScreenCloseRequested;
             }
 
             if (countryStatusPanelController != null)
@@ -233,9 +226,9 @@ namespace Contagion.Managers
         }
 
         /// <summary>
-        /// AppScreen → 실제 화면(들)을 여닫는 IScreenController 매핑. OnEnable에서 _upgradePages가
-        /// 만들어진 뒤 1회 구성한다. Research는 컨트롤러 3개(전파/증상/능력)를 하나의 화면으로
-        /// 묶어야 해서, 진입 시 ShowUpgradePage(마지막 페이지)를 호출하고 퇴장 시 3개를 모두 닫는다.
+        /// AppScreen → 실제 화면(들)을 여닫는 IScreenController 매핑. OnEnable에서 1회 구성한다.
+        /// [UpgradeTree Architecture Refactor, 2026-07-22] Research는 이제 GlobalStatus/Leaderboard와
+        /// 동일한 패턴 — 컨트롤러 1개의 Show()/Hide()만 호출한다(예전엔 카테고리별 창 3개를 페이징했음).
         /// Gameplay는 "패널이 아무 것도 없는 기본 지도 화면"이라 Show/Hide 둘 다 아무 일도 하지 않는다.
         /// </summary>
         private void BuildScreenMap()
@@ -251,11 +244,11 @@ namespace Contagion.Managers
                     show: () =>
                     {
                         WorldMapInputLock.Lock(WorldMapLockReason.Research);
-                        ShowUpgradePage(_currentUpgradePageIndex);
+                        upgradeTreeView?.Show();
                     },
                     hide: () =>
                     {
-                        HideAllUpgradePages();
+                        upgradeTreeView?.Hide();
                         WorldMapInputLock.Unlock(WorldMapLockReason.Research);
                     }) },
                 { AppScreen.GlobalStatus, new ActionScreenController(
@@ -309,18 +302,7 @@ namespace Contagion.Managers
             _currentScreen = next;
         }
 
-        private void HideAllUpgradePages()
-        {
-            if (_upgradePages == null) return;
-            foreach (var page in _upgradePages)
-                page?.Hide();
-        }
-
         /// <summary>
-        /// 전파/증상/능력 탭 3개가 각각 다른 창을 열던 걸 버튼 하나로 통합 — 마지막으로 보고 있던
-        /// 페이지(_currentUpgradePageIndex)를 그대로 열어준다(항상 전파부터 시작하지 않고, 능력 탭을
-        /// 보다가 닫았으면 다음에 열 때도 능력 탭부터 보이는 게 자연스러움).
-        ///
         /// countryPopupController는 HUD 버튼으로 여는 AppScreen 상태 머신 밖의 모달(지도 클릭으로
         /// 열림)이라 _screens 매핑에 넣지 않고, 기존과 동일하게 여기서만 명시적으로 닫는다.
         /// </summary>
@@ -361,21 +343,6 @@ namespace Contagion.Managers
             countryStatusPanelController.FocusCountry(country);
         }
 
-        /// <summary>탭 클릭 — Research Database UI Shell(Commit 1)로 좌우 화살표를 대체한 상단 탭
-        /// 3개 중 하나가 눌리면 호출된다. 요청된 카테고리를 담당하는 UpgradeTreeView를 찾아 그
-        /// 화면만 보이고 나머지 둘은 닫는다(3-GameObject 구조는 그대로 유지 — 화면 표시 여부만
-        /// 토글, ResearchDatabase_MVP_ImplementationPlan.md §6-3).</summary>
-        private void HandleCategoryRequested(UpgradeCategory targetCategory)
-        {
-            int index = System.Array.FindIndex(_upgradePages, p => p != null && p.Category == targetCategory);
-            if (index < 0)
-            {
-                Debug.LogWarning($"[UIManager] {targetCategory} 카테고리를 담당하는 UpgradeTreeView를 찾지 못했습니다.");
-                return;
-            }
-            ShowUpgradePage(index);
-        }
-
         /// <summary>연구 항목 행 클릭 — UpgradeTreeView.OnResearchItemSelected 구독(V2 계획 커밋 7).
         /// node.id로 표시명/브랜치/설명을 조회해 ResearchPopupController.Show()를 호출한다.
         /// 실제 구매(TryUnlock)는 ResearchPopupController의 확인 버튼이 담당한다 — 이 메서드는
@@ -389,18 +356,6 @@ namespace Contagion.Managers
             string description = UpgradeTreeView.GetDescription(node.id);
 
             researchPopupController.Show(displayName, branch, description, node.id);
-        }
-
-        /// <summary>지정한 인덱스의 UpgradeTreeView만 보이고 나머지 둘은 닫는다.</summary>
-        private void ShowUpgradePage(int index)
-        {
-            _currentUpgradePageIndex = index;
-            for (int i = 0; i < _upgradePages.Length; i++)
-            {
-                if (_upgradePages[i] == null) continue;
-                if (i == index) _upgradePages[i].Show();
-                else _upgradePages[i].Hide();
-            }
         }
 
         private void HandleRankingClicked()

@@ -1,13 +1,17 @@
-/* [Layout Architecture Refactoring, 2026-07-21] upgrade-root는 이 UIDocument(보통 화면 전체
-   크기) 안에서 순수 flex-column 배치만 담당 — 배경/테두리/패딩 없음, 시각적으로 완전히
-   투명하다. 예전엔 top:3%/bottom:12.5%(해상도 의존 %)로 직접 자기 크기를 잡았는데, 이제는
-   자식 3개(top-spacer/upgrade-box/bottom-spacer)의 flex 계산에 전부 맡긴다. */
+/* [HUD Overlay Architecture, 2026-07-22] upgrade-root는 이 UIDocument(화면 전체 크기) 안에서
+   순수 flex-column 배치만 담당 — 배경/테두리 없음, 시각적으로 완전히 투명하다. spacer
+   엘리먼트 대신 padding-top/padding-bottom을 직접 줘서 HUD의 TopHUD(--hud-status-bar-height)/
+   BottomHUD(--hud-bottom-nav-height)에 upgrade-box 콘텐츠가 깔리지 않게 한다 — HUD가
+   sortingOrder상 이 화면보다 항상 위라(GamePlay.unity) 실제로 안 보이거나 안 눌리는 것만
+   막으면 되고, 예전 spacer처럼 픽셀 단위로 정확히 일치할 필요는 없다. */
 .upgrade-root {
     flex-grow: 1;
     flex-direction: column;
+    padding-top: var(--hud-status-bar-height);
+    padding-bottom: var(--hud-bottom-nav-height);
 }
 
-/* upgrade-box — 실제로 보이는 패널 표면. content-area-top/bottom-spacer(Tactical.uss) 사이에서
+/* upgrade-box — 실제로 보이는 패널 표면. upgrade-root의 padding-top/bottom 사이에서
    flex-grow:1 + flex-basis:0으로 남는 공간만 정확히 차지한다(§12.2 ScrollView 규칙과 동일한
    flex-basis:0 원칙을 컨테이너 자신에도 적용). overflow:hidden은 안의 node-scroll이 이 박스
    경계를 넘어 새어나가지 않도록 막는다(DESIGN.md §20 세로 오버플로우 버그 재발 방지 원칙). */
@@ -24,13 +28,12 @@
    기존엔 위 줄이 ◀ 제목 ▶ 내비게이션이었는데, 탭 3개 상시 노출로 교체(ScreenDesign.md §2). */
 .upgrade-header {
     flex-direction: column;
-    margin-bottom: var(--space-md); /* 2026-07-17 UI Polish Audit: 14px 하드코딩(DESIGN.md
-        4절이 Don't 예시로 직접 지목한 값) → 4px 그리드 토큰 정리, 12px(-2px, 시각적으로 무의미) */
+    margin-bottom: var(--space-md);
 }
 
 .upgrade-header__tabs {
     flex-direction: row;
-    margin-bottom: var(--space-sm); /* 2026-07-17 UI Polish Audit: 10px → 8px 토큰 정리(-2px) */
+    margin-bottom: var(--space-sm);
 }
 
 /* 탭 버튼 — 3개 고정, 터치 영역 48px 이상(--touch-target-min). 선택 강조는 새 색상 축을 만들지
@@ -45,7 +48,8 @@
     border-bottom-color: transparent;
     border-radius: 0;
     color: var(--color-text-tertiary);
-    font-size: var(--font-size-md);
+    font-size: var(--font-subtitle); /* [Tactical Design System Refactor Phase 1, 2026-07-21]
+        --font-size-md(18px) → 동일 값의 Typography Role(Subtitle)로 치환, 시각 변화 없음. */
     -unity-font-style: bold;
 }
 
@@ -62,14 +66,16 @@
 
 .upgrade-header__dna {
     color: var(--color-brand-dna);
-    font-size: var(--font-size-xl);
+    font-size: var(--font-title); /* [Tactical Design System Refactor Phase 1, 2026-07-21]
+        --font-size-xl(24px) → 동일 값의 Typography Role(Title)로 치환, 시각 변화 없음. */
     -unity-font-style: bold;
 }
 
 .upgrade-header__close {
     width: 80px;
     background-color: var(--color-bg-panel);
-    border-width: 1px;
+    border-width: var(--stroke-hairline); /* [Tactical Design System Refactor Phase 1,
+        2026-07-21] 1px 하드코딩 제거, 값 동일. */
     border-color: var(--color-accent-glow);
     border-radius: 0;
 }
@@ -78,7 +84,8 @@
     background-color: var(--color-brand-premium);
     color: var(--color-text-primary);
     width: 160px;
-    border-width: 1px;
+    border-width: var(--stroke-hairline); /* [Tactical Design System Refactor Phase 1,
+        2026-07-21] 1px 하드코딩 제거, 값 동일. */
     border-color: var(--color-brand-premium);
     border-radius: 0;
 }
@@ -96,6 +103,11 @@
     flex-grow: 1;
     flex-basis: 0; /* DESIGN.md §12.2/§20 ScrollView 규칙 — 누락 시 세로 오버플로우 위험(Audit 발견) */
     margin-bottom: var(--space-lg);
+    /* [BottomHUD 침범 조사, 2026-07-22] 트리 캔버스(BuildTreeCanvas)가 contentContainer에
+       position:absolute 자식 + 강제 height(canvasHeight, 수백~수천px 가능)를 직접 지정한다 —
+       지금까지는 upgrade-box의 overflow:hidden과 ScrollView 내부 content-viewport 클리핑에만
+       의존했다. node-scroll 자신에도 overflow:hidden을 명시해 이중 안전장치를 둔다. */
+    overflow: hidden;
 }
 
 /* ============================================================
@@ -126,14 +138,21 @@
     position: absolute;
     justify-content: center;
     align-items: center;
-    padding: 4px;
-    border-width: 2px;
-    border-radius: 24px;
+    padding: var(--space-xs); /* [Tactical Design System Refactor Phase 1, 2026-07-21]
+        4px 하드코딩 → 동일 값의 Spacing Token, 시각 변화 없음. */
+    border-width: var(--border-hairline); /* [Tactical Design System Refactor Phase 1,
+        2026-07-21] 2px 하드코딩 → MASTER_DESIGN.md 5절 Border Scale의 Card Border 토큰,
+        값 동일. */
+    border-radius: 24px; /* Master Design Radius Scale(3/6/8px)은 패널/카드 전용 — 원형
+        노드 모양은 그 범위 밖이라 토큰화하지 않음(남은 gap, 보고서 참고). */
     background-color: var(--color-bg-panel);
 }
 
 .tree-node__label {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-caption-dense); /* [Tactical Design System Refactor Phase 1,
+        2026-07-21] --font-size-xs(13px) → 동일 값의 Typography Role(Caption-Dense) —
+        MASTER_DESIGN.md 8절 Approved Exception이 이 라벨을 Caption-Dense 지정 사례로
+        직접 명시함. */
     color: var(--color-text-primary);
     -unity-text-align: middle-center;
     white-space: normal;
@@ -159,8 +178,10 @@
 }
 
 .tree-node--merge {
-    border-width: 3px;
-    border-radius: 12px;
+    border-width: var(--border-selected); /* [Tactical Design System Refactor Phase 1,
+        2026-07-21] 3px 하드코딩 → MASTER_DESIGN.md 5절 Border Scale의 선택 강조 토큰,
+        값 동일. */
+    border-radius: 12px; /* .tree-node와 동일 사유로 토큰화하지 않음(남은 gap). */
 }
 
 .tree-node--final {

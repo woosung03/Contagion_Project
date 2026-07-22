@@ -23,8 +23,11 @@
 .resource-strip {
     flex-direction: row;
     align-items: center;
-    height: var(--hud-status-bar-height); /* Theme.uss 참고 — Upgrade/CountryStatus/Ranking의
-        content-area-top-spacer가 이 값과 반드시 같아야 한다 */
+    /* [HUD Overlay Architecture, 2026-07-22] Top UI Vertical Offset(margin-top 40px) 제거 —
+       HUD는 이제 Upgrade/CountryStatus/Ranking보다 sortingOrder가 항상 높아(GamePlay.unity,
+       해당 UIDocument들 1→-1) 무슨 화면이 열리든 이 바가 그 위에 그대로 그려진다. spacer 높이와
+       "정확히 일치"해야 할 필요가 없어져 margin-top 보정 자체가 불필요해졌다. */
+    height: var(--hud-status-bar-height);
     padding: 0 var(--space-sm);
     background-color: var(--color-bg-panel);
     border-left-width: 1px;
@@ -409,15 +412,16 @@
 /* ============================================================
    action-strip — 하단 Action Strip(기존 tabs-row). 버튼 name/class
    그대로라 UIManager.cs/HudController.cs 변경 없음.
-   실제 렌더링 높이 = padding-top(--space-sm 8px) + 버튼(--touch-target-min 48px) +
-   padding-bottom(14px) = 70px — Theme.uss --hud-bottom-nav-height와 반드시 같아야 한다
-   (Upgrade/CountryStatus/Ranking의 content-area-bottom-spacer가 이 값을 그대로 참조).
-   ============================================================ */
+   실제 렌더링 높이 = padding-top(--space-sm 10px) + 버튼(--touch-target-min 56px) +
+   padding-bottom(16px) = 82px — Theme.uss --hud-bottom-nav-height와 값을 맞춰둔다
+   (Upgrade/CountryStatus/Ranking 각 root의 padding-bottom이 이 값을 그대로 참조,
+   HUD Overlay Architecture 2026-07-22 참고). 다만 이제 HUD가 sortingOrder상 항상 위라
+   1px만 어긋나도 화면이 깨지는 "정확히 일치해야 하는" 하드 요구사항은 아니다. */
 .action-strip {
     flex-direction: row;
     justify-content: space-between;
     background-color: var(--color-bg-panel);
-    padding: var(--space-sm) var(--space-lg) 14px;
+    padding: var(--space-sm) var(--space-lg) 16px;
     border-top-width: 1px;
     border-top-color: var(--color-grid-line);
     border-left-width: 1px;

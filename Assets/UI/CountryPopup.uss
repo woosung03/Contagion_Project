@@ -21,9 +21,12 @@
     right: 0;
     bottom: 0;
     width: 100%;
-    max-height: 60%; /* Docs/DESIGN.md 12.1절 규격 — "지도는 항상 보인다" 원칙의 안전판. 8칸
-                        그리드+헤더+버튼의 실제 콘텐츠 높이는 이보다 한참 작지만, 텍스트가
-                        길어지는 예외 상황에도 지도 영역이 40% 밑으로 줄지 않도록 상한을 건다. */
+    max-height: 68%; /* Docs/DESIGN.md 12.1절 규격 — "지도는 항상 보인다" 원칙의 안전판.
+                        [UI Visual Calibration Pass, 2026-07-22] 60→68% — hero-stat-tile 2행 +
+                        data-row 7행으로 재구성하면서 실제 콘텐츠 높이가 커져 60%로는 이 화면의
+                        overflow(패널 배경 밖으로 텍스트가 넘치는 문제, MainMenu detail-panel에서
+                        겪은 것과 동일 유형)가 재발할 여지가 있어 상향. 지도 영역은 여전히 32%
+                        이상 확보돼 "지도는 항상 보인다" 원칙은 유지된다. */
     background-color: var(--color-bg-panel-strong); /* 지도 위에 얹히므로 배경이 비쳐 보이면 안 됨 */
     padding: var(--space-lg);
     /* DESIGN.md §12.1 Safe Area 규정 — 하단은 제스처 내비게이션 바 회피를 위해
@@ -94,40 +97,51 @@
 }
 
 /* ============================================================
-   Body — quick-stat-grid: 8개 핵심 지표를 2열로 배치(5초 스캔용).
+   Body — quick-stat-grid: [UI Visual Calibration Pass, 2026-07-22] 11개 필드를 동일 비중
+   2열 그리드로 나열하던 방식(구 .quick-stat-cell, 전부 제거)이 "스프레드시트"처럼 보인다는
+   피드백으로 2단 위계로 교체 — 위 4개는 hero tile(큰 숫자), 나머지 7개는 data-row(보조 목록).
    ============================================================ */
 .quick-stat-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
     margin-top: var(--space-md);
 }
 
-.quick-stat-cell {
-    width: 50%;
-    padding: var(--space-xs) var(--space-sm);
-    border-width: 1px;
-    border-color: var(--color-grid-line);
+/* Hero tier — CountryStatusPanel.uss .hero-stat-tile와 동일한 시각 언어(큰 숫자 + 테두리 타일)를
+   이 화면 전용 클래스명으로 재현한다(두 화면이 스타일시트를 공유하지 않아 로컬 복제, 값은 동일 공식). */
+.popup-hero-stat-row {
+    flex-direction: row;
+    justify-content: space-between;
 }
 
-.quick-stat-cell__label {
+.popup-hero-stat-cell {
+    width: 48%;
+    align-items: center;
+    border-width: var(--stroke-hairline);
+    border-color: var(--color-accent-glow);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.popup-hero-stat-cell__label {
     color: var(--color-text-tertiary);
     font-size: var(--font-size-xs);
-    letter-spacing: var(--tracking-label);
+    letter-spacing: var(--tracking-caption);
 }
 
-.quick-stat-cell__value {
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+.popup-hero-stat-cell__value {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
     -unity-font-style: bold;
-    letter-spacing: var(--tracking-label);
     margin-top: 2px;
-    flex-shrink: 1;
-    min-width: 0;
-    white-space: normal;
+}
+
+/* Secondary tier — Tactical.uss .data-row/.data-label/.data-value(공용 판독행 문법) 재사용,
+   로컬 오버라이드는 위아래 여백뿐. */
+.secondary-stat-list {
+    margin-top: var(--space-sm);
 }
 
 /* badge-tag — 공항/항만/의료/정부대응처럼 값이 아니라 "등급"인 필드용 칩.
-   quick-stat-cell__value 위에 얹는 추가 클래스(UXML: class="quick-stat-cell__value badge-tag").
+   data-value 위에 얹는 추가 클래스(UXML: class="data-value badge-tag").
    정의/severity 모디파이어는 Tactical.uss 공용 정본을 그대로 사용한다(로컬 재정의 제거,
    2026-07-17 UI Polish Audit — 값이 100% 동일한 중복이었다). CountryPopupController가
    실제로 붙이는 4개 클래스명(--success/--warning/--danger/--info)은 Tactical.uss 쪽과

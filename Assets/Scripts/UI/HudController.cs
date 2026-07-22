@@ -199,7 +199,7 @@ namespace Contagion.UI
         public void SetGameplayContentVisible(bool visible)
         {
             if (_gameplayContent != null)
-                _gameplayContent.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+                _gameplayContent.style.visibility = visible ? Visibility.Visible : Visibility.Hidden;
         }
 
         private void HandlePhaseChanged(GamePhase phase)

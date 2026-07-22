@@ -11449,7 +11449,6 @@ GameObject:
   - component: {fileID: 1230783507}
   - component: {fileID: 1230783506}
   - component: {fileID: 1230783508}
-  - component: {fileID: 3400000401}
   m_Layer: 5
   m_Name: TransmissionTreeUI
   m_TagString: Untagged
@@ -12658,7 +12657,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass: hud-root
+  targetClass: resource-strip
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0
@@ -12699,26 +12698,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
   targetClass: mainmenu-root
-  navBarReserveTop: 48
-  showDebugOverlay: 0
-  previewInEditor: 0
-  previewSafeTop: 44
-  previewSafeBottom: 24
-  previewSafeLeft: 0
-  previewSafeRight: 0
---- !u!114 &3400000401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1230783505}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass: upgrade-root
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0

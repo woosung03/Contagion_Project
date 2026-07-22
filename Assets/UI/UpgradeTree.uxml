@@ -2,17 +2,13 @@
     <Style src="Theme.uss" />
     <Style src="Tactical.uss" />
     <Style src="UpgradeTree.uss" />
-    <!-- [Layout Architecture Refactoring, 2026-07-21] upgrade-root는 이제 이 UIDocument 전체를
-         채우는 순수 flex-column 컨테이너일 뿐, 시각적 패널이 아니다(배경/테두리 없음). 실제
-         보이는 패널은 안의 upgrade-box 하나뿐 — content-area-top/bottom-spacer(Tactical.uss,
-         Theme.uss hud-status-bar-height/hud-bottom-nav-height 토큰) 두 개가 Hud의 resource-strip/
-         action-strip과 정확히 같은 높이만큼 위아래를 비워두고, upgrade-box가 flex-grow:1로
-         그 사이 남는 공간만 차지한다 — %(해상도 의존) 없이 Flex만으로 계산된다.
-         UpgradeTreeView.cs는 여전히 "upgrade-root"만 이름으로 찾아 display를 토글하므로
-         이름/컨트롤러는 전혀 바뀌지 않는다. -->
-    <ui:VisualElement name="upgrade-root" class="upgrade-root">
-        <ui:VisualElement name="upgrade-top-spacer" class="content-area-top-spacer" picking-mode="Ignore" />
-
+    <!-- [HUD Overlay Architecture, 2026-07-22] spacer 엘리먼트(upgrade-top-spacer/
+         upgrade-bottom-spacer) 제거 — HUD가 이제 이 화면보다 sortingOrder가 항상 높아
+         (GamePlay.unity) TopHUD/BottomHUD가 이 패널 위에 그대로 그려진다. upgrade-root는
+         화면 전체를 채우고, padding-top/padding-bottom(UpgradeTree.uss)만으로 upgrade-box가
+         HUD 밑에 깔리지 않을 자리를 확보한다. UpgradeTreeView.cs는 여전히 "upgrade-root"만
+         이름으로 찾아 display를 토글하므로 컨트롤러는 전혀 바뀌지 않는다. -->
+    <ui:VisualElement name="upgrade-root" class="upgrade-root" picking-mode="Ignore">
         <ui:VisualElement name="upgrade-box" class="upgrade-box tactical-panel">
             <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
             <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
@@ -43,9 +39,7 @@
             <!-- 트리 캔버스(Painter2D 절대좌표) 컨테이너 — UpgradeTreeView.BuildTreeCanvas()가
                  contentContainer에 직접 채운다. detail-panel은 Commit 3B에서 제거됨 — 이 화면 안에는
                  이제 캔버스만 존재한다. 개별 노드 상세는 ResearchPopup(Commit 4 대상)의 역할이다. -->
-            <ui:ScrollView name="node-scroll" class="node-scroll" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
+            <ui:ScrollView name="node-scroll" class="node-scroll" mode="Vertical" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
         </ui:VisualElement>
-
-        <ui:VisualElement name="upgrade-bottom-spacer" class="content-area-bottom-spacer" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

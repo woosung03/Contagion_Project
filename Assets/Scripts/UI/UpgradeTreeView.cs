@@ -248,11 +248,14 @@ namespace Contagion.UI
         public static string GetBranch(string id) =>
             NodeBranch.TryGetValue(id, out var branch) ? branch : string.Empty;
 
-        [SerializeField, Tooltip("이 창이 담당할 업그레이드 카테고리 — 이 창은 이 카테고리 노드만 그린다.")]
+        /// <summary>[UpgradeTree Architecture Refactor, 2026-07-22] CountryStatusPanel/RankingPanel과
+        /// 동일하게 UIDocument 1개만 쓰도록 바꾸면서, 카테고리별 별도 창(Show/Hide로 전환하던 구조)을
+        /// 없애고 이 화면 하나가 세 카테고리를 전부 그린다 — 탭 클릭은 다른 UIDocument로 전환하는 대신
+        /// 이 필드를 바꾸고 캔버스만 다시 그린다(RequestCategory 참고). 처음 열릴 때의 기본값일 뿐,
+        /// 이후에는 탭 클릭으로 바뀐 값이 씬이 살아있는 동안 그대로 유지된다("마지막으로 보던 카테고리"
+        /// 기억 — 예전에 UIManager._currentUpgradePageIndex가 하던 역할을 이제 이 필드 하나가 겸한다).</summary>
+        [SerializeField, Tooltip("업그레이드 화면을 처음 열 때 보여줄 카테고리 (이후 탭 클릭으로 바뀜)")]
         private UpgradeCategory category = UpgradeCategory.Transmission;
-
-        /// <summary>UIManager가 탭 클릭 시 어느 카테고리 화면을 보여줘야 할지 판단하는 데 쓴다.</summary>
-        public UpgradeCategory Category => category;
 
         private VisualElement _upgradeRoot;
         private Label _dnaLabel;
@@ -271,10 +274,6 @@ namespace Contagion.UI
         // ================================================================
 
         private TreePathElement _treePathElement;
-
-        /// <summary>탭 클릭 — 다른 카테고리를 요청하면 발생. 실제 화면 전환(다른 UIDocument
-        /// Show/Hide)은 UIManager가 담당한다.</summary>
-        public event System.Action<UpgradeCategory> OnCategoryRequested;
 
         /// <summary>연구 항목 행 클릭 — 해당 <see cref="UpgradeNode"/>와 함께 발생(V2 계획 커밋 6).
         /// 상세 팝업(ResearchPopupController.Show())을 실제로 여는 구독은 UIManager가 담당한다
@@ -487,8 +486,7 @@ namespace Contagion.UI
             _dnaLabel.text = $"DNA: {dna:N0}";
         }
 
-        /// <summary>이 화면 자신의 탭에 강조 클래스를 준다 — 화면 하나가 카테고리 하나만 담당하므로
-        /// 항상 자기 카테고리 탭만 활성 표시하면 된다.</summary>
+        /// <summary>현재 <see cref="category"/>에 해당하는 탭에만 강조 클래스를 준다.</summary>
         private void UpdateTabHighlight()
         {
             _tabTransmissionButton?.RemoveFromClassList("tab-button--active");
@@ -505,10 +503,15 @@ namespace Contagion.UI
             activeTab?.AddToClassList("tab-button--active");
         }
 
+        /// <summary>탭 클릭 — 카테고리를 바꾸고 캔버스를 다시 그린다. [UpgradeTree Architecture
+        /// Refactor, 2026-07-22] 예전에는 다른 UIDocument(카테고리별 별도 창)로 전환했지만, 이제
+        /// CountryStatusPanel과 동일하게 UIDocument 1개뿐이라 이 화면 안에서 상태만 바꾼다.</summary>
         private void RequestCategory(UpgradeCategory target)
         {
-            if (target == category) return; // 이미 이 화면이 보여주는 카테고리 — 아무 일도 안 함
-            OnCategoryRequested?.Invoke(target);
+            if (target == category) return; // 이미 보고 있는 카테고리 — 아무 일도 안 함
+            category = target;
+            UpdateTabHighlight();
+            BuildTreeCanvas();
         }
 
         /// <summary>UpgradeNode 기반 상태 판정. isUnlocked==true면 이 노드를 선행조건으로 삼는

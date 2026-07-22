@@ -22,7 +22,10 @@
    position:relative는 코너컷(position:absolute 자식) 기준점 확보용. */
 .ending-stats-panel {
     position: relative;
-    width: 280px;
+    /* [UI Visual Calibration Pass, 2026-07-22] 280→360px — Hero 폰트가 40→64px로 커지면서
+       기존 280px 폭으로는 과거와 동일한 "점수 오른쪽 잘림" 버그가 재발할 위험이 커져 선제 확장.
+       참조 캔버스(480px 폭, 2절)에서 여전히 여유 있게 들어간다. */
+    width: 360px;
     background-color: var(--color-bg-panel);
     padding: var(--space-lg);
     margin-bottom: var(--space-md);
@@ -35,7 +38,9 @@
    생긴 문제라, 아래처럼 캡션(라벨)과 숫자(hero)를 분리해 각각 폭 안에 확실히 들어오게 했다. */
 .ending-score-panel {
     position: relative;
-    width: 280px;
+    /* [UI Visual Calibration Pass, 2026-07-22] 280→360px, ending-stats-panel과 동일 사유
+       (Hero 폰트 확대에 따른 잘림 방지). */
+    width: 360px;
     border-color: var(--color-brand-gold);
     background-color: var(--color-bg-panel);
     padding: var(--space-md) var(--space-xl);
@@ -74,8 +79,10 @@
    동일한 톤으로 맞춤 — 기본(다시 시작)은 중립 판독 패널 배경 + accent-glow 테두리,
    프리미엄(부활)은 브랜드 퍼플로 구분한다. */
 .ending-button {
-    width: 180px;
-    height: 56px;
+    width: 220px; /* [UI Visual Calibration Pass, 2026-07-22] 180→220px, 버튼 자체 확대 폭에 맞춰 동반 확장 */
+    height: var(--button-height-confirm); /* [UI Visual Calibration Pass, 2026-07-22] 56px 하드코딩 제거 —
+        "되돌릴 수 없는 최종 결정"(재시작/부활) 버튼이라 Tier 3 토큰과 정확히 일치하는 역할, 이전엔
+        같은 값을 리터럴로만 들고 있어 Tier 3가 커져도 이 버튼만 따로 놀았다. */
     margin: 0 var(--space-md);
     border-width: 1px;
     border-color: var(--color-accent-glow);

@@ -7,14 +7,15 @@
    모바일 팝업 패턴: 고정폭+음수 margin-left로 중앙 정렬하던 데스크톱 트릭 대신
    좌우 대칭 % 인셋으로 폭을 화면비에 맞춰 스케일한다.
 
-   [Layout Architecture Refactoring, 2026-07-21] 기존엔 top:3%/bottom:12.5%(해상도 의존 %)로
-   이 화면 자체가 자기 위치를 잡았으나, 이제 ranking-root는 순수 flex-column 컨테이너로
-   바뀌고(배경/패딩 없음), 실제 패널(.ranking-box, 아래)이 content-area-top/bottom-spacer
-   (Tactical.uss, Hud의 resource-strip/action-strip과 동일 높이) 사이에서 flex-grow:1로 남는
-   공간만 차지한다 — UpgradeTree.uss/CountryStatusPanel.uss와 동일한 구조. */
+   [HUD Overlay Architecture, 2026-07-22] spacer 엘리먼트 대신 ranking-root에 padding-top/
+   padding-bottom을 직접 줘서 HUD의 TopHUD/BottomHUD에 ranking-box 콘텐츠가 깔리지 않게
+   한다 — HUD가 sortingOrder상 이 화면보다 항상 위라(GamePlay.unity) UpgradeTree.uss/
+   CountryStatusPanel.uss와 동일한 구조. */
 .ranking-root {
     flex-grow: 1;
     flex-direction: column;
+    padding-top: var(--hud-status-bar-height);
+    padding-bottom: var(--hud-bottom-nav-height);
 }
 
 /* ranking-box — 실제로 보이는 패널 표면. flex-grow:1 + flex-basis:0은 §12.2 ScrollView 규칙과

@@ -13,25 +13,15 @@
     border-radius: 0; /* 코너컷의 각진 인상과 둥근 모서리가 충돌해 tactical-panel은 항상 각짐 */
 }
 
-/* content-area-*-spacer — HUD Content Area 아키텍처(Layout Architecture Refactoring,
-   2026-07-21). Upgrade/CountryStatus/Ranking처럼 Hud와 별도 UIDocument인 화면이 "Status Bar
-   아래 · Bottom Navigation 위" 영역만 차지하게 만드는 공용 부품. 각 화면 root(예: upgrade-root)
-   맨 위/맨 아래에 투명 스페이서로 하나씩 두면, root 자체는 그 화면의 전체 UIDocument(보통
-   화면 전체 크기)를 채우는 순수 flex-column이 되고, 실제 보이는 패널 박스는 두 스페이서
-   사이에서 flex-grow:1로 남는 공간만 차지한다 — %(해상도 의존) 없이 Hud.uss의 resource-strip/
-   action-strip과 동일한 높이(Theme.uss --hud-status-bar-height/--hud-bottom-nav-height)만큼만
-   비워두므로, Hud 쪽 실제 Status Bar/Bottom Navigation이 그 자리에서 그대로 비쳐 보인다.
-   SafeAreaApplier(targetClass=해당 root 클래스)가 root에 적용하는 상하 padding이 이 스페이서
-   영역을 안전영역만큼 자동으로 늘려준다(hud-root가 이미 쓰는 것과 동일한 방식). */
-.content-area-top-spacer {
-    height: var(--hud-status-bar-height);
-    flex-shrink: 0;
-}
-
-.content-area-bottom-spacer {
-    height: var(--hud-bottom-nav-height);
-    flex-shrink: 0;
-}
+/* [HUD Overlay Architecture, 2026-07-22] content-area-top-spacer/content-area-bottom-spacer
+   (Layout Architecture Refactoring, 2026-07-21 도입) 제거 — "패널이 HUD와 정확히 같은 높이의
+   투명 구멍을 남겨야만 HUD가 비쳐 보이는" 구조를 그만둔다. 이제 HUD(hud-root)가 Upgrade/
+   CountryStatus/Ranking보다 sortingOrder가 항상 높아(GamePlay.unity, 해당 UIDocument
+   1→-1) TopHUD/BottomHUD가 무슨 화면이 열리든 그 위에 항상 그려진다. 각 화면은 spacer
+   엘리먼트 대신 자기 root에 직접 padding-top/padding-bottom(HUD 바 높이와 같은 값)을 줘서
+   자기 콘텐츠가 HUD 밑에 깔려 안 보이거나 안 눌리는 것만 방지한다 — 정확히 안 맞아도(1px
+   오차) 화면이 깨지지 않는다는 게 이전과의 핵심 차이. 상세 구조는 UpgradeTree.uss/
+   CountryStatusPanel.uss/RankingPanel.uss의 root 규칙 참고. */
 
 .tactical-panel__header {
     padding-bottom: 3px;

@@ -70,15 +70,24 @@
     --color-node-symptom: rgba(255, 140, 100, 0.4);
     --color-node-ability: rgba(200, 140, 255, 0.4);
 
-    /* ---- 간격 스케일 ---- */
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 12px;
-    --space-lg: 16px;
-    --space-xl: 20px;
-    --space-xxl: 24px;
+    /* ---- 간격 스케일 ----
+       [PanelSettings Correction Pass, 2026-07-22] 직전 두 차례 Scale Pass(2026-07-21/22)가
+       PanelSettings 오설정(Reference Resolution 등)을 전제로 진행돼 값이 과도하게 커졌다는
+       확인 후 재조정 — 실제 기준(Scale With Screen Size / 480×1040 / Match Width=0)에 맞춰
+       직전 값에서 전체적으로 약 15~25% 축소한다(1차 Scale Pass 이전의 원래 값으로 되돌리는 것이
+       아니라, 직전 값보다 "약간 작은" 지점을 목표로 함). */
+    --space-xs: 4px;    /* 6 → 4 */
+    --space-sm: 10px;   /* 12 → 10 */
+    --space-md: 16px;   /* 20 → 16 */
+    --space-lg: 22px;   /* 28 → 22 */
+    --space-xl: 28px;   /* 36 → 28 */
+    --space-xxl: 36px;  /* 44 → 36 */
 
-    /* ---- 모서리 반경 ---- */
+    /* ---- 모서리 반경 ----
+       [UI Scale Pass, 2026-07-21] 검토 후 변경하지 않음 — tactical-panel 등 주요 패널/버튼은
+       "각짐 원칙"(border-radius:0, 코너컷과 둥근 모서리 충돌 방지)을 이미 전면 적용 중이라 Radius
+       Scale은 진행바 트랙/작은 칩 등 2차 요소에만 쓰인다. "패널이 답답해 보이는" 문제의 원인은
+       모서리가 아니라 내부 여백(위 Spacing Scale)이라 판단해 Radius는 그대로 둔다. */
     --radius-sm: 3px;
     --radius-md: 6px;
     --radius-lg: 8px;
@@ -86,8 +95,11 @@
     /* ---- Foundation(Docs/MASTER_DESIGN.md 2절) ----
        Base = 이 프로젝트 Typography/Spacing/Component 전 치수의 공통 분모. USS가 calc()를
        지원하지 않아(코드베이스 위키 css-to-uss-support.md) 다른 토큰이 이 값에서 실시간으로
-       연산되지는 않지만, 신규 토큰을 추가할 때 "Base × 배수"인지 반드시 검산하는 기준점이다. */
-    --scale-base: 16px;
+       연산되지는 않지만, 신규 토큰을 추가할 때 "Base × 배수"인지 반드시 검산하는 기준점이다.
+       [PanelSettings Correction Pass, 2026-07-22] 19 → 20 — 아래 Typography Role 값은 이제부터
+       Base×배수를 "반올림 근사치"로 취급한다(정확한 배수 공식은 §3 참고, 완전한 정수 배수는
+       더 이상 아님). */
+    --scale-base: 20px;
 
     /* ---- 폰트 크기 ---- */
     /* Docs/DESIGN.md 3절 Typography — 캡션 3단계(신규 등재, v2). 화면 여러 곳(tactical-caption/
@@ -97,19 +109,22 @@
        3절이 정의한 Typography Role(Hero/Display/Panel Title/Title/Subtitle/Body/Caption/
        Caption-Dense) 밖에 있다 — Master Commit(Legacy) 실측에도 없던, Tactical 시대에 별도로
        추가된 값이다. 기존 소비처(badge-tag 등)가 있어 삭제하지 않고 유지하되, 신규 화면에서는
-       쓰지 않는다(Role 밖 값 — MASTER_DESIGN.md 10절 체크리스트 위반). */
+       쓰지 않는다(Role 밖 값 — MASTER_DESIGN.md 10절 체크리스트 위반).
+       [UI Scale Pass/PanelSettings Correction Pass] 이 3개는 계속 건드리지 않는다 — 이미
+       Design Debt #2(Section Header 11px↔14px)로 등록된 미해결 이슈라 매번 섞으면 원인 추적이
+       어려워진다. 또한 badge-tag 등 고정폭 밀집 칩에 쓰여 확대 시 잘림 위험이 있다. */
     --font-size-caption-2xs: 9px;
     --font-size-caption-xs: 10px;
     --font-size-caption: 11px;
-    --font-size-xs: 13px;
-    --font-size-sm: 14px;
-    --font-size-body: 16px;
-    --font-size-md: 18px;
-    --font-size-lg: 20px;
-    --font-size-xl: 24px;
-    --font-size-xxl: 26px;
-    --font-size-display: 32px;
-    --font-size-hero: 40px;
+    --font-size-xs: 15px;      /* 18 → 15, Caption-Dense */
+    --font-size-sm: 17px;      /* 20 → 17, Caption */
+    --font-size-body: 20px;    /* 24 → 20, Body */
+    --font-size-md: 23px;      /* 28 → 23, Subtitle */
+    --font-size-lg: 25px;      /* 30 → 25, Role 밖 "리스트 항목 이름" 전용(pathogen-card__name 등) */
+    --font-size-xl: 32px;      /* 38 → 32, Title */
+    --font-size-xxl: 34px;     /* 42 → 34, Panel Title */
+    --font-size-display: 44px; /* 52 → 44, Display */
+    --font-size-hero: 52px;    /* 64 → 52, Hero */
 
     /* ---- Typography Role(Docs/MASTER_DESIGN.md 3절) ----
        위 --font-size-* 크기 토큰과 동일한 값을 역할(Role) 이름으로 다시 정의한다. 신규 코드는
@@ -118,39 +133,44 @@
        검증되지 않아(코드베이스 위키 css-to-uss-support.md는 "var() 함수 내 중첩 불가"만 명시하고
        변수 간 참조는 언급 없음) 리터럴로 중복 선언한다 — 아래 각 줄은 반드시 대응하는
        --font-size-* 값과 같아야 하며, 크기 토큰이 바뀌면 이 값도 함께 갱신해야 한다
-       (--hud-status-bar-height와 동일한 동기화 관례). */
-    --font-hero: 40px;           /* = --font-size-hero,    Base×2.5  — 화면 대표 결과 문구(승/패 등) */
-    --font-display: 32px;        /* = --font-size-display, Base×2.0  — Fullscreen 화면 대표 타이틀 */
-    --font-panel-title: 26px;    /* = --font-size-xxl,     Base×1.625 — Bottom Sheet 전체 패널 헤더 */
-    --font-title: 24px;          /* = --font-size-xl,      Base×1.5  — Section/Dialog 제목 */
-    --font-subtitle: 18px;       /* = --font-size-md,      Base×1.125 — 보조 제목, 리스트 행 주요 값 */
-    --font-body: 16px;           /* = --font-size-body,    Base×1.0  — 기본 읽기 텍스트 */
-    --font-caption: 14px;        /* = --font-size-sm,      Base×0.875 — 보조 정보, 작은 라벨 */
-    --font-caption-dense: 13px;  /* = --font-size-xs,      Base×0.8125 — 트리 노드 등 밀집 요소 전용 */
+       (--hud-status-bar-height와 동일한 동기화 관례).
+       [PanelSettings Correction Pass, 2026-07-22] 직전 Scale Pass가 잘못된 PanelSettings 전제로
+       과도하게 커진 것을 확인해 전체 약 15~25% 축소, 직전 값보다 "약간 작은" 지점을 목표로 함(1차
+       Scale Pass 이전 원래 값으로 되돌리는 것은 아님). Base/배수 표기는 참고용으로만 남긴다. */
+    --font-hero: 52px;           /* = --font-size-hero    — 화면 대표 결과 문구(승/패 등) */
+    --font-display: 44px;        /* = --font-size-display — Fullscreen 화면 대표 타이틀 */
+    --font-panel-title: 34px;    /* = --font-size-xxl     — Bottom Sheet 전체 패널 헤더 */
+    --font-title: 32px;          /* = --font-size-xl      — Section/Dialog 제목 */
+    --font-subtitle: 23px;       /* = --font-size-md      — 보조 제목, 리스트 행 주요 값 */
+    --font-body: 20px;           /* = --font-size-body    — 기본 읽기 텍스트 */
+    --font-caption: 17px;        /* = --font-size-sm      — 보조 정보, 작은 라벨 */
+    --font-caption-dense: 15px;  /* = --font-size-xs      — 트리 노드 등 밀집 요소 전용 */
 
-    /* ---- 모바일 터치 타겟 최소 높이 ---- */
-    --touch-target-min: 48px;
+    /* ---- 모바일 터치 타겟 최소 높이 ----
+       [PanelSettings Correction Pass, 2026-07-22] 68 → 56 — 잘못된 PanelSettings 전제로 과도하게
+       커졌던 값 재조정. */
+    --touch-target-min: 56px;
 
     /* ---- Button Tier(Docs/MASTER_DESIGN.md 7절) ----
        버튼 높이는 항상 이 3개 Tier 중 하나여야 한다. Tier 1은 값이 --touch-target-min과 반드시
-       같아야 한다(리터럴 중복 선언 이유는 위 Typography Role 주석과 동일 — 변수 체이닝 미검증). */
-    --button-height-primary: 48px;  /* = --touch-target-min, Tier 1, Base×3.0 — 기본 액션/내비게이션 */
-    --button-height-icon: 36px;     /* Tier 2, Base×2.25 — 아이콘 전용 소형 버튼 */
-    --button-height-confirm: 56px;  /* Tier 3, Base×3.5 — 되돌릴 수 없는 최종 결정 */
+       같아야 한다(리터럴 중복 선언 이유는 위 Typography Role 주석과 동일 — 변수 체이닝 미검증).
+       [PanelSettings Correction Pass, 2026-07-22] 전부 재조정(약 15~25% 축소). */
+    --button-height-primary: 56px;  /* = --touch-target-min, Tier 1 — 기본 액션/내비게이션 (68→56) */
+    --button-height-icon: 44px;     /* Tier 2 — 아이콘 전용 소형 버튼 (52→44) */
+    --button-height-confirm: 64px;  /* Tier 3 — 되돌릴 수 없는 최종 결정 (80→64) */
 
-    /* ---- HUD Content Area 아키텍처(Layout Architecture Refactoring, 2026-07-21) ----
-       Hud.uss의 resource-strip/action-strip 실제 높이를 그대로 옮겨온 단일 소스. Gameplay는
-       hud-root 안에서 이 두 값 사이(gameplay-content, flex-grow:1)로 자동 계산되지만, Upgrade/
-       CountryStatus/Ranking은 각자 별도 UIDocument라 같은 자리를 얻으려면 이 값과 동일한 높이의
-       투명 스페이서(Tactical.uss의 .content-area-top-spacer/.content-area-bottom-spacer)를
-       자기 root 맨 위/맨 아래에 똑같이 둬야 한다 — 그래야 %(해상도 의존적) 없이 순수 Flex로
-       "Status Bar 아래 · Bottom Navigation 위"만 정확히 차지한다.
-       --hud-status-bar-height는 resource-strip의 실제 height(34px)와 반드시 같아야 하고,
-       --hud-bottom-nav-height는 action-strip의 실측 높이(padding-top --space-sm 8px + 버튼
-       --touch-target-min 48px + padding-bottom 14px = 70px)와 반드시 같아야 한다 — 둘 중
-       하나라도 바뀌면 이 값도 같이 갱신해야 어긋나지 않는다. */
-    --hud-status-bar-height: 34px;
-    --hud-bottom-nav-height: 70px;
+    /* ---- HUD 바 높이(Hud.uss resource-strip/action-strip 실제 높이를 그대로 옮겨온 단일 소스) ----
+       [HUD Overlay Architecture, 2026-07-22] 이전엔 Upgrade/CountryStatus/Ranking이 이 값과
+       똑같은 높이의 투명 spacer를 둬야만 HUD가 그 틈으로 "비쳐 보이는" 구조였으나, 이제 HUD가
+       그 화면들보다 sortingOrder가 항상 높아(GamePlay.unity) 그럴 필요가 없다. 대신 각 화면의
+       root가 padding-top/padding-bottom으로 이 값을 참조해 자기 콘텐츠가 HUD 밑에 깔리지 않을
+       자리만 확보한다(UpgradeTree.uss/CountryStatusPanel.uss/RankingPanel.uss 참고) — 정확히
+       일치해야 하는 하드 요구사항은 아니지만, 갱신 시 함께 맞춰두는 게 안전하다.
+       --hud-status-bar-height는 resource-strip의 실제 height(40px)와 값을 맞춰두고,
+       --hud-bottom-nav-height는 action-strip의 실측 높이(padding-top --space-sm 10px + 버튼
+       --touch-target-min 56px + padding-bottom 16px = 82px)와 값을 맞춰둔다. */
+    --hud-status-bar-height: 40px;
+    --hud-bottom-nav-height: 82px;
 
     /* ---- 인터랙션 트랜지션 (box-shadow 미지원 — codebase 위키 css-to-uss-support.md 확인,
        대신 scale/색상 트랜지션으로 눌림感·선택感을 표현) ---- */

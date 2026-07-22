@@ -209,12 +209,11 @@
     padding: var(--space-lg);
     border-radius: 0; /* tactical-panel의 코너컷과 둥근 모서리가 충돌해 각짐으로 통일 */
     margin-bottom: var(--space-lg);
-    /* 제목(Title Role 24px) + desc 3줄(인구/기후/의료 수준, Body Role 16px) + 상하 패딩 32px을
-       담기에 70px는 부족해서 텍스트(특히 인구 줄)가 패널 박스 아래로 삐져나왔음 — 실측 필요
-       높이(~126px)에 여유를 더해 고정. [Master Design Migration Phase 2, 2026-07-21] 기존
-       22px/17px 하드코딩 기준으로 정한 값이지만 Title Role(24px)/Body Role(16px)과 합이 거의
-       동일해(24+16=40 vs 22+17=39) 이 min-height를 다시 계산할 필요는 없다. */
-    min-height: 140px;
+    /* 제목(Title Role) + desc 3줄(인구/기후/의료 수준, Body Role) + 상하 패딩을 담는 높이.
+       [UI Visual Calibration Pass, 2026-07-22] Title 28→38px, Body 19→24px(desc 3줄 누적),
+       padding도 --space-lg 20→28px로 커져 이전 160px로는 확실히 부족 — 220px로 상향(과거 이
+       자리에서 실제로 텍스트가 패널 밖으로 삐져나온 적 있어 여유를 넉넉히 둔다). */
+    min-height: 220px;
     flex-shrink: 0; /* mainmenu-list가 공간을 양보하는 동안 이 패널 자체는 줄어들지 않도록 */
 }
 
