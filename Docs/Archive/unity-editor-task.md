@@ -6,6 +6,12 @@
 `NewsFeedController.cs`(이벤트 심각도 점), `HudController.cs`(위협 상태 강조 클래스 1줄).
 코드 도구로는 여기까지만 가능하고, 아래는 **Unity 에디터에서 사람이 반드시 해야 하는 작업**이다.
 
+> **⚠ §1~§7 전체 obsolete (문서 무결성 감사, 2026-07-22)**: 이 섹션들이 다루는 **Country Dock은
+> 이후 완전히 제거되고 `CountryPopupController` 기반 Bottom Sheet로 대체됐다**(CLAUDE.md
+> "완료된 시스템" 목록, 커밋 2e4483e). 아래 미체크(`[ ]`) 항목들은 실행 대상이 아니다 —
+> Country Dock 자체가 더 이상 존재하지 않으므로 씬 배선/QA를 진행할 대상이 없다. 이 블록은
+> 삭제하지 않고 "왜 CountryPopup으로 대체됐는지" 역사 기록으로만 남겨둔다.
+
 ## 1. 최우선 — 씬 배선 (이거 안 하면 Country Dock이 절대 안 움직인다)
 
 - [ ] **`CountryDockController.cs`를 GamePlay 씬의 Hud UIDocument GameObject에 Add Component로

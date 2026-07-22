@@ -12,6 +12,15 @@
 > `DESIGN.md`로 이관하고 이 문서에서는 삭제했다(정보 자체는 소실되지 않았다 — DESIGN.md
 > Color System/Typography/Spacing/Component Library/Usage Rules 참고). 실행되지 않은
 > 채 남아있던 제안은 §15 Historical Notes로 분리했다.
+>
+> **⚠ 문서 전역 경고 (문서 무결성 감사, 2026-07-22)**: 이 문서 전체(§0/§2/§3/§4/§6/§9/§12/§14
+> 등)에서 반복 언급되는 **"Country Dock"은 이후 완전히 제거됐다** — `CountryPopupController`
+> 기반 Bottom Sheet(지도를 가리지 않는 하단 고정 팝업, `quick-stat-grid`/`badge-tag`)로
+> 대체됐다(CLAUDE.md "완료된 시스템" 목록, 커밋 2e4483e). "Country Dock 시각 언어를 다른
+> 화면에 재사용" 식의 서술이 나오면 현재는 **CountryPopup(Bottom Sheet)**을 그 대상으로
+> 읽을 것 — 컴포넌트 이름만 바뀌었을 뿐 "국가 데이터를 판독행으로 보여준다"는 설계 의도
+> 자체는 CountryPopup이 이어받았다. §7(UpgradeTree)도 별도로 이중 superseded — 해당 절
+> 상단 배너 참고.
 
 Step 57~61에서 HUD(Hud.uxml/uss)에 확립된 "감염병 통제센터 콘솔" 시각 언어를, 나머지 7개
 화면(MainMenu/CountrySelect/UpgradeTree/CountryPopup/EndingScreen/RankingPanel + 신규 필요
@@ -154,6 +163,10 @@ RankingPanel은 UpgradeTree를 제외하면 전부 **HUD 리디자인 이전의 
   유일한 화면이라 통일 효과가 가장 크고, 클래스 추가만으로 끝나 리스크도 낮음.
 
 ### 2.3 업그레이드 화면 (UpgradeTree)
+
+> **⚠ [문서 무결성 감사, 2026-07-22]** 아래 내용은 Step 62 시점 설계다 — 이후 캔버스 승격
+> (Commit 1~5)과 UIDocument 1개 통합(이번 세션)으로 이중 superseded됨. 상세 정정 내용은
+> **§7 상단 배너** 참고.
 
 - **Density Mode**: Tactical Readout Mode(`DESIGN.md` > UI Density Modes 참고)
 - **역할**: DNA 트리 노드 45개 — "무기고/연구 콘솔"에 해당. 이미 세 카테고리(전파/증상/
@@ -333,15 +346,19 @@ Assets/UI/
 
 **Density Mode**: Tactical Readout Mode(§0.0/`DESIGN.md` > UI Density Modes 참고)
 
-> **구현 완료 (Step 62)** — 아래 7.2~7.9 설계는 실제로 `UpgradeTree.uxml`/`UpgradeTree.uss`/
-> `UpgradeTreeView.cs`에 반영됐다(상세 근거: `Docs/DevLog.md` Step 62). 실제 구현은 설계와
-> 거의 동일하되 다음은 소폭 조정됐다 — `NodeHeight`는 제안(~72px) 대신 78px. 이 절을 처음
-> 쓸 당시엔 `tactical-panel`/`data-row`/`corner-cut`이 `Tactical.uss`가 아니라
-> `UpgradeTree.uss`에 로컬로 정의돼 있었다(당시 화면 1개뿐이라 공용 파일 분리가
-> 시기상조였음). **재검증 결과**: 현재 `Assets/UI/Tactical.uss`는 실제로 생성되어 있으나,
-> `UpgradeTree.uss`(84~145행)에는 여전히 동일 클래스의 로컬 정의가 남아있다 — `Tactical.uss`
-> 참조로 전환하고 로컬 중복을 제거하는 작업은 아직 실행되지 않았다(§15 Historical Notes,
-> §16 실행 계획 참고). 이 절의 내용은 향후 재조사용 기록으로 남겨둔다.
+> **⚠ 이중으로 superseded됨 (문서 무결성 감사, 2026-07-22)** — 아래 7.1~7.9는 Step 62 시점의
+> 설계(detail-panel + 단일 실선 연결 + 노드 상태 4클래스)를 서술한다. 이후 **두 번** 더
+> 뒤집혔다: (1) **UpgradeTree 캔버스 승격**(Commit 1~5, `Docs/Archive/unity-editor-task.md`
+> §11 참고)이 `detail-panel`/`branch-board`/`research-row`를 전부 제거하고 Painter2D 기반
+> 절대좌표 트리 캔버스(`TreePathElement` 연결선 + `tree-node`)로 교체, 노드 상세는
+> `ResearchPopupController`(별도 팝업)로 이관. (2) **HUD Overlay Architecture 리팩터**(이번
+> 세션, 2026-07-22)가 카테고리별 UIDocument 3개(TransmissionTreeUI/SymptomTreeUI/
+> AbilityTreeUI) 구조를 CountryStatusPanel과 동일한 **UIDocument 1개** 구조로 통합. 즉 아래
+> §7.1(현재 구조 분석)의 `detail-panel`/`node-scroll`(빈 채로 C#이 채움)/연결선 서술은
+> **현재 코드와 다르다.** 현재 구조의 정본은 `Assets/UI/UpgradeTree.uxml`/`UpgradeTree.uss`/
+> `UpgradeTreeView.cs` 코드 자체와 `Docs/DESIGN.md`(17/21절, "UpgradeTree 캔버스 복귀"로
+> 이미 갱신됨)다. 이 절은 "레이아웃을 어떻게 개선했었는가"의 역사 기록으로만 남겨둔다 —
+> 실행 참고용으로 쓰지 말 것.
 
 핵심 플레이 루프(지도 관찰 ↔ 업그레이드 선택 반복)상 HUD 다음으로 가장 오래 보는 화면인데도
 아직 일반 스킬트리 톤이라 통제센터(HUD=상황실) ↔ 연구실(UpgradeTree) 관계가 느껴지지 않는다.

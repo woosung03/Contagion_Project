@@ -1,7 +1,7 @@
 # UpgradeTree 재설계 — 최종 결정안 (구현 확정판)
 
-조사(`UpgradeTree_Redesign_Investigation.md`) / MVP 제안(`UpgradeTree_MVP_ChangeProposal.md`) /
-밸런스 검증(`UpgradeTree_MVP_BalanceReview.md`) 3개 문서를 종합한 **실제 구현용 최종안**이다.
+조사 → MVP 제안 → 밸런스 검증 3단계 과정을 거쳐 종합한 **실제 구현용 최종안**이다(중간 조사/
+제안/검증 문서는 결론이 이 문서로 전부 흡수된 뒤 Docs/Archive 정리 과정에서 삭제됨).
 이 문서 이후로는 더 조사·검토하지 않는다. 여기 적힌 것만 구현한다.
 
 **핵심 원칙 — "좋은 아이디어" ≠ "지금 넣을 것".**

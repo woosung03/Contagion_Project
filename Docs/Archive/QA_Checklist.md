@@ -53,8 +53,8 @@
         팝업만 닫히는지, 이때 CountryStatusPanel은 계속 열려 있는지 확인
   - [ ] 팝업을 닫은 뒤 다른 행을 연달아 클릭해도(같은 국가 재클릭 포함) 데이터가 매번 올바르게
         갱신되는지 확인
-  - [ ] 지도를 직접 클릭했을 때의 기존 동작(Country Dock 갱신 + CountryPopup 표시 + GlobalStatus가
-        열려 있었다면 자동으로 닫힘)이 이번 변경으로 깨지지 않았는지 함께 확인
+  - [ ] 지도를 직접 클릭했을 때의 기존 동작(CountryPopup 표시 + GlobalStatus가 열려 있었다면
+        자동으로 닫힘)이 이번 변경으로 깨지지 않았는지 함께 확인
 - [ ] Research Database UI Shell 검증 (근거: DevLog Step 82) — Unity 에디터 미접속으로 작성돼
       실기기/에디터 검증 전부 미완료.
   - [ ] 업그레이드 버튼 클릭 시 화면이 정상 표시되는지, 콘솔 에러/경고 0건인지 확인
@@ -131,19 +131,12 @@
 - [ ] CountryPopup 패널 총 길이 확인 — 도넛+범례+행 6개(생존자 수/감염률/치사율/의료 시스템 상태/
       순위 3행)+"이동 통제" 캡션까지 추가로 길어진 만큼 1440×3120 세로 화면 `top: 30%` 기준 하단이
       잘리지 않는지, 잘리면 `modal-rows`를 `ScrollView`로 교체하는 안전장치 검토 (근거: DevLog
-      Step 78/79, Docs/CountryStatus_Dashboard_Investigation.md 2.6절)
+      Step 78/79)
 - [ ] CountryPopup 오버플로우 수정 검증 — 중국(CHI)/인도(IND) 선택 시 인구수(N0 전체 숫자,
       Step 77로 축약 표기에서 되돌림)와 공항/항구/국경 3행이 340px 팝업 폭 안에서 잘리거나
       넘치지 않는지, 다른 46개국도 정상 표시되는지 확인. `country-row__meta`(MainMenu 48행
       리스트)도 인구 큰 국가(중국/인도) 행이 여전히 한 줄로 말줄임되는지(줄바꿈으로 행 높이가
       깨지지 않는지) 같이 확인 (근거: DevLog Step 76)
-- [ ] Country Dock 인구 축약 표기 검증 — 중국/인도 선택 시 우측 상단 Country Dock의 인구
-      값이 "14.1억"처럼 축약되어 140px 폭 안에 정상 표시되는지, CountryPopup(전체 숫자)과
-      값이 일치하는(단위만 다른) 같은 데이터인지 확인 (근거: DevLog Step 77)
-- [ ] (참고, 급하지 않음) Country Dock의 공항/항구 상태(`_transportValue`)도 CountryPopup이
-      Step 76에서 고친 것과 같은 "한 문자열로 이어붙이기" 패턴이라 140px 폭에서 넘칠 가능성 —
-      실측 후 필요하면 별도 조치 (근거: DevLog Step 77)
-
 - [ ] GamePlay.unity 정상 로드 + MainMenu→CountrySelect→게임 시작 플로우 확인 (근거: DevLog Step 56)
 - [ ] "시작 버튼 즉시 패배" 재현 여부 확인 — 재현 시 `[FLOW][GameDataBootstrapper] BeginGame`/
       `SeedStartingInfection` 로그로 `startingCountryId` 전달 확인 (근거: DevLog Step 54)
@@ -151,22 +144,11 @@
 - [ ] HUD 3줄 레이아웃에서 큰 숫자·위협 단계 텍스트 표시 시 옆 요소 안 밀리는지 확인 (근거: DevLog Step 58)
 - [ ] CountrySelect 48개국 국기 전부 표시, 콘솔 경고 없는지 확인 (근거: DevLog Step 59)
 - [ ] 신규 허브 16개 위치, 신규 항로 15개 육지 관통 여부, 신규 국가 교통 유닛 동작 확인 (근거: DevLog Step 60)
-- [ ] 국가현황 패널 연 상태로 감염 확산 중 프레임 드랍 해소 확인(프로파일러로 틱당 UI 재빌드 없는지),
-      Country Dock 신규 행(상태/항공·항구) 줄바꿈·색상 충돌 없는지 확인 (근거: DevLog Step 61)
-- [ ] UpgradeTree 노드 4줄(code/이름/상태/비용) 78px 높이 안에서 안 잘리는지, 특히 두 단어 한글
-      표시명("다발성 장기부전 II") 줄바꿈 시 확인 (근거: DevLog Step 62)
+- [ ] 국가현황 패널 연 상태로 감염 확산 중 프레임 드랍 해소 확인(프로파일러로 틱당 UI 재빌드 없는지)
+      확인 (근거: DevLog Step 61)
 - [ ] UpgradeTree LOCKED/AVAILABLE/ACTIVE/MAXED 4색 실제 데이터로 전부 나타나는지(특히 MAXED —
       갈래 끝 노드 해금 시) 확인 (근거: DevLog Step 62)
-- [ ] UpgradeTree detail-panel 코너컷이 모서리에 올바르게 붙는지(position:relative 적용 확인),
-      연결선 꺾은선/포트 마커가 3개 카테고리 전부에서 겹침 없이 그려지는지 확인 (근거: DevLog Step 62)
 - [ ] UpgradeTree 헤더 2줄(영문 LAB 캡션 + 한글 라벨)이 좁은 폭에서 안 잘리는지 확인 (근거: DevLog Step 62)
-- [ ] Country Dock이 국가 탭 시 정상적으로 데이터로 채워지는지 확인 — Step 70/72/73을 거쳐
-      콜라이더 관련 원인은 전부 특정·수정 완료(현재는 PolygonCollider2D 기반, 아래 "PolygonCollider2D
-      전환 검증" 섹션 참고). `_shownCountryId`가 클릭한 국가로 채워지는지가 성공 기준
-      (근거: DevLog Step 70/72/73)
-- [ ] 위 항목 확인 후, 국가 탭 시 Country Dock과 CountryPopup(모달)이 동시에 뜨는지 확인 —
-      클릭이 막혀있던 동안 가려져 있던 증상일 수 있음. 동시에 뜨면 어느 쪽을 남길지 결정 필요
-      (근거: DevLog Step 67, CLAUDE.md TODO)
 
 ## PolygonCollider2D 전환 검증 (근거: DevLog Step 73)
 
