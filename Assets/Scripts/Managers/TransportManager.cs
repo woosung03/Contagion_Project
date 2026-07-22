@@ -131,22 +131,6 @@ namespace Contagion.Managers
             _pool = new ObjectPool<TransportUnit>(templateUnit, _unitsParent, prewarmCount: 30);
         }
 
-        private void OnEnable() => Subscribe();
-        private void Start() => Subscribe();
-
-        private void Subscribe()
-        {
-            if (SimulationManager.Instance == null) return;
-            SimulationManager.Instance.OnTickCompleted -= HandleTick;
-            SimulationManager.Instance.OnTickCompleted += HandleTick;
-        }
-
-        private void OnDisable()
-        {
-            if (SimulationManager.Instance != null)
-                SimulationManager.Instance.OnTickCompleted -= HandleTick;
-        }
-
         /// <summary>
         /// 새 게임 시작(재시작 포함) 시 GameDataBootstrapper가 호출. 씬은 리로드되지만 이 매니저는
         /// DontDestroyOnLoad라 이전 판에 떠 있던 비행기/배가 그대로 남아있게 된다 — 전부 풀로 되돌린다.
@@ -161,7 +145,13 @@ namespace Contagion.Managers
             _remainingHops.Clear();
         }
 
-        private void HandleTick(WorldState state)
+        /// <summary>
+        /// SimulationManager.RunTick()이 매 틱 이후 직접 호출한다(고정 순서, EventManager 다음 —
+        /// Deterministic Tick Ordering #1: 예전엔 이 매니저도 OnTickCompleted를 독립 구독해서
+        /// EventManager가 국경을 여닫는 효과(ApplyPoliticalInstability/InternationalCooperation
+        /// 등)를 이 틱에 반영할지 다음 틱에 반영할지가 실행마다 달라질 수 있었다).
+        /// </summary>
+        public void ProcessTick(WorldState state)
         {
             if (!_hubPositionsResolved && !TryResolveHubPositions())
                 return; // WorldMap/CountryView가 아직 준비 안 됨 — 다음 틱에 재시도

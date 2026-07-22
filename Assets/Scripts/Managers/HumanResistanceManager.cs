@@ -9,7 +9,9 @@ namespace Contagion.Managers
     /// 인류 저항 AI. 설계 문서 5절.
     /// plagueVisibility 구간(ResistanceStage)에 따라 국가별 방역 조치(국경/항공/항구 봉쇄)와
     /// 치료제 연구 기여도(healthFunding)를 자동으로 갱신한다.
-    /// SimulationManager.OnTickCompleted를 구독해 매 틱 이후 실행된다.
+    /// SimulationManager.RunTick()이 매 틱 이후 ProcessTick()을 직접, 고정된 순서로 호출한다
+    /// (Deterministic Tick Ordering #1 — 예전엔 OnTickCompleted 구독 방식이라 EventManager 등
+    /// 다른 구독자와의 상대 순서가 보장되지 않았다).
     ///
     /// 국가 등급별 봉쇄 임계값(plagueVisibility 기준)과 세계 붕괴 시 안정성 감소율은
     /// 설계 문서에 정확한 수치가 없어 5절의 서술(선진국 빠른 봉쇄 / 개도국 느린 봉쇄 / 저개발국 봉쇄 없음)을
@@ -86,9 +88,8 @@ namespace Contagion.Managers
         public event Action<WorldMortalityStage> OnMortalityStageChanged;
 
         /// <summary>그 틱의 국가별 봉쇄/연구기여도 갱신(ApplyPolicy)이 전부 끝난 뒤 발행 —
-        /// BottleneckAnalyzer가 이 이벤트를 구독하면 SimulationManager.OnTickCompleted를 직접 구독할
-        /// 때 생기는 실행 순서 문제(HumanResistanceManager의 봉쇄 갱신보다 먼저 읽어버릴 위험,
-        /// Unity가 서로 다른 컴포넌트의 OnEnable/Start 순서를 보장하지 않음)를 코드로 원천 차단한다.</summary>
+        /// BottleneckAnalyzer가 구독한다. 이 이벤트는 구독자가 BottleneckAnalyzer 하나뿐이라
+        /// 순서 문제가 없다(ProcessTick() 안에서 동기적으로 발행되므로 항상 이 시점에 딱 맞춰 실행됨).</summary>
         public event Action<WorldState> OnPolicyApplied;
 
         private void Awake()
@@ -100,22 +101,6 @@ namespace Contagion.Managers
             }
             Instance = this;
             DontDestroyOnLoad(gameObject);
-        }
-
-        private void OnEnable() => Subscribe();
-        private void Start() => Subscribe();
-
-        private void Subscribe()
-        {
-            if (SimulationManager.Instance == null) return;
-            SimulationManager.Instance.OnTickCompleted -= HandleTick;
-            SimulationManager.Instance.OnTickCompleted += HandleTick;
-        }
-
-        private void OnDisable()
-        {
-            if (SimulationManager.Instance != null)
-                SimulationManager.Instance.OnTickCompleted -= HandleTick;
         }
 
         /// <summary>
@@ -133,7 +118,8 @@ namespace Contagion.Managers
             _firstFullAnarchyShown = false;
         }
 
-        private void HandleTick(WorldState state)
+        /// <summary>SimulationManager.RunTick()이 매 틱 이후 직접 호출한다(고정 순서, §1번째).</summary>
+        public void ProcessTick(WorldState state)
         {
             var stage = state.GetResistanceStage();
             if (stage != _lastStage)

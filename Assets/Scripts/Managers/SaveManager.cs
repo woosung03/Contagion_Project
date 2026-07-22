@@ -54,23 +54,11 @@ namespace Contagion.Managers
             DontDestroyOnLoad(gameObject);
         }
 
-        private void OnEnable() => Subscribe();
-        private void Start() => Subscribe();
-
-        private void Subscribe()
-        {
-            if (SimulationManager.Instance == null) return;
-            SimulationManager.Instance.OnTickCompleted -= HandleTick;
-            SimulationManager.Instance.OnTickCompleted += HandleTick;
-        }
-
-        private void OnDisable()
-        {
-            if (SimulationManager.Instance != null)
-                SimulationManager.Instance.OnTickCompleted -= HandleTick;
-        }
-
-        private void HandleTick(WorldState state)
+        /// <summary>
+        /// SimulationManager.RunTick()이 매 틱 이후 직접 호출한다(고정 순서, 파이프라인 맨 마지막 —
+        /// 그 틱에 봉쇄/이벤트/교통까지 전부 반영된 최종 상태를 저장하기 위함).
+        /// </summary>
+        public void ProcessTick(WorldState state)
         {
             if (state.currentDay - _lastAutoSaveDay < autoSaveIntervalDays) return;
             _lastAutoSaveDay = state.currentDay;

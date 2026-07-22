@@ -4423,3 +4423,110 @@ detail-panel(선택 브랜치 요약) 3단 구조로는 "이 연구가 어디로
   `UpgradeTree.uss`의 `.data-value--locked/available/active/maxed`(`AddDetailRow()` 삭제로
   소비처 0), `TacticalModalController.AddRow()`/`AddSectionCaption()`(전체 코드베이스에서
   호출부 0건 — Commit 4가 유일한 호출이던 "브랜치" 행을 제거하며 완전히 미사용 상태가 됨).
+
+## Step 90 — World Simulation Engine Phase 1: Deterministic Tick Ordering (2026-07-22)
+
+- **배경**: `Docs/Archive/WorldSimulationSystem_Design.md`(설계 조사 문서, Source of Truth)
+  §2/§5/§9.1이 이미 지적해둔 Tier 0 결함 — `HumanResistanceManager`/`EventManager`/
+  `TransportManager`/`SaveManager` 네 매니저가 전부 `SimulationManager.OnTickCompleted`를
+  독립적으로 구독하고 있었는데, Unity는 서로 다른 컴포넌트의 `OnEnable`/`Start` 호출 순서를
+  보장하지 않는다 — 같은 틱 안에서 봉쇄 판정(`HumanResistanceManager.ApplyPolicy`)과 뉴스
+  이벤트(`EventManager`, 국경을 강제로 열고 닫는 효과 포함)가 어느 순서로 실행되는지가
+  실행마다 달라질 수 있는 실제 비결정성 버그였다. World Simulation Engine 구현의 #1(Event
+  Queue는 #2로 별도 진행, 이번 범위 아님).
+- **수정 1 — 국가 순회 순서 고정**: `WorldDataManager.SetCountries()`에서 주입받은 리스트를
+  `id` 기준 `string.CompareOrdinal`로 1회 정렬(문화권 비의존 — `TransportManager.PairKey()`가
+  이미 같은 이유로 CompareOrdinal을 쓰던 전례를 따름). `CountryDatabase` 에셋의 인스펙터
+  리스트 순서에 우연히 의존하던 것을 명시적 기준으로 대체 — `SimulationManager`/
+  `EventManager`/`HumanResistanceManager` 등 `WorldDataManager.Countries`를 순회하는 모든
+  지점에 자동 적용됨(각 호출부 수정 불필요).
+- **수정 2 — 후처리 매니저 실행 순서 고정**: `HumanResistanceManager`/`EventManager`/
+  `TransportManager`/`SaveManager`의 `HandleTick(WorldState)`를 공개 `ProcessTick(WorldState)`로
+  전환하고, `OnTickCompleted` 구독 보일러플레이트(`OnEnable`/`Start`/`Subscribe`/`OnDisable`)를
+  전부 제거했다. 대신 `SimulationManager.RunTick()`이 기존 `GameManager.EvaluatePhase()` 직접
+  호출 패턴을 그대로 확장해 네 매니저를 고정 순서로 직접 호출한다: HumanResistanceManager →
+  EventManager → TransportManager → SaveManager. `HumanResistanceManager.OnPolicyApplied`
+  (구독자 `BottleneckAnalyzer` 1개뿐이라 원래도 순서 안전)는 그대로 유지. 새 이벤트/큐 인프라를
+  만들지 않았다 — 기존 구조 확장만으로 해결.
+- **검증(정적 분석)**: `Dictionary`/`HashSet`(`_lastInfectionMilestone`/`_lastCollapseStage`/
+  `_lastTriggeredDay`/`_firedOnce`/`_countryLookup`/`_hubLookup` 등)은 전부 `TryGetValue`/키
+  인덱서로만 접근하고 어디서도 순회(foreach)하지 않음을 코드 전수 확인 — 순서 의존성 없음.
+  `UnityEngine.Random` 호출은 이제 전부 고정된 단일 실행 경로(같은 틱 안에서 항상 같은 순서로
+  호출되는 코드)에서만 소비되므로, 동일 시드로 실행하면 소비 순서도 항상 동일하다.
+  `Country.neighborCountryIds` 등 국가별 그래프 데이터는 애초에 정적 `List<string>`이라
+  영향 없음. `CountryStatusPanelController`의 대륙 아코디언 내부 국가 나열 순서가 "에셋 선언
+  순서" → "id 알파벳 순"으로 바뀌는 시각적 부작용이 있으나 TOP10 랭킹 등은 별도 정렬 기준을
+  쓰므로 기능적 영향 없음(허용 가능한 부작용으로 판단, 별도 수정 안 함).
+- **범위 밖(다음 단계로 이연)**: `EventManager`가 `country.infectedCount` 등을 그 틱 안에서
+  직접 수정하는 것 자체(다음 틱 적용 큐로 지연하는 안, 설계 문서 §9.3)는 Event Queue(#2)
+  범위이므로 이번엔 손대지 않음.
+
+## Step 91 — World Simulation Engine Phase 1: Event Queue (2026-07-22)
+
+- **배경**: Step 90(#1 Deterministic Tick Ordering)에서 범위 밖으로 이연해둔 항목 — `EventManager`
+  의 7개 이벤트 중 5개(`ApplyNaturalDisaster`/`ApplyPoliticalInstability`/`ApplyMedicalStrike`/
+  `ApplyWhoEmergencyMeeting`/`ApplyInternationalCooperation`/`ApplyVaccineTrialSuccess`/
+  `ApplyExecutionOrBombing` — `ApplyFlavorEvent`만 State 변경이 없어 제외)가 `Country`/`WorldState`
+  필드를 발동 즉시(트리거 시점, 그 틱의 `EventManager.ProcessTick()` 안)에서 직접 수정하고
+  있었다. `Docs/Archive/WorldSimulationSystem_Design.md` §9.3/§10이 이미 "간접 수정 큐" 도입을
+  Tier 0 항목 2로 지정해뒀다 — 이번 세션은 그 최소 구현(MVP)만 진행.
+- **Queue 구조**: `EventManager`에 `private readonly Queue<Action> _pendingChanges` 신설.
+  Command 클래스 계층을 만들지 않고 `Queue<Action>` FIFO 하나로 최소 구현 — 각 `ApplyXXX`는
+  "무슨 일이 일어났는가"(대상 국가, 굴린 확률/배율)만 트리거 시점에 확정해 클로저로 캡처하고,
+  실제 필드 대입(`infectedCount`/`healthFundingCap`/`isBorderClosed`/`isAirportOpen`/
+  `isPortOpen`/`governmentStability`/`state.cureProgress`)은 클로저 안에서 적용 시점의 살아있는
+  값을 다시 읽어 계산한다 — 트리거 시점 스냅샷을 얼려서 쓰지 않는 이유는, 같은 틱에서 이
+  이벤트보다 나중에 실행되는 `TransportManager`(항공/해운 도착 감염)가 같은 국가의
+  `infectedCount`를 먼저 바꿔놓을 수 있어, 얼린 값을 그대로 쓰면 이미 낡은 수치가 되기
+  때문(원본 동기 코드도 항상 "그 순간의 현재 값"으로 계산했다 — 큐 방식에서 그 순간이
+  트리거가 아니라 적용으로 옮겨간 것뿐). `RaiseNews()`(뉴스피드 표시)는 State가 아니라 순수
+  UI 신호라 큐 대상에서 제외하고 기존처럼 트리거 시점에 즉시 발행 — 다른 시스템 계산에
+  피드백되지 않으므로 지연할 이유가 없고, 지연하면 오히려 "뉴스는 이번 틱에 떴는데 효과는
+  다음 틱에 반영"되는 새로운 어긋남만 생긴다.
+- **Apply 시점**: `SimulationManager.RunTick()` 맨 앞, 국가 루프가 시작되기 전에
+  `EventManager.Instance?.ApplyQueuedChanges()`를 직접 호출(Step 90에서 확립한 "SimulationManager가
+  소유한 틱 루프 안에서 직접 호출" 패턴을 그대로 확장) — 직전 틱에 쌓인 변경을 FIFO로 전부
+  비운 뒤에야 이번 틱의 사망/신규감염 계산이 시작되므로, 큐는 항상 그 틱이 끝나기 전에
+  비어 있다("Tick 종료 후 남기지 않는다" 요구사항).
+- **기존 코드와의 연결**: `EventManager.ProcessTick()`(조건 판정 + 큐 적재)과 `TryTrigger()`의
+  쿨다운/1회성 기록 로직은 그대로 유지 — `ApplyXXX`가 "적용 대상이 있었는가"(true/false)를
+  즉시 반환하는 계약이 안 바뀌었으므로 `TryTrigger()`는 수정 불필요. `ApplyInternationalCooperation`
+  만 예외적으로 대상국 목록을 트리거 시점에 스냅샷으로 확정(반환값 결정에 필요)하고, 실제
+  필드 대입만 적용 시점 클로저 안에서 수행.
+- **검증**: Queue는 `Queue<Action>`이라 FIFO가 언어 차원에서 보장되고, `ApplyQueuedChanges()`가
+  `Dequeue()`를 순서대로만 호출하므로 같은 틱에 여러 이벤트가 발동해도 발동 순서 그대로 적용된다.
+  `ApplyNaturalDisaster`/`ApplyExecutionOrBombing`은 적용 시점 재계산 특성상 클램프 대상이 0이 될
+  이론적 가능성에 대비해 `SusceptibleCount <= 0`/`infectedCount <= 0` 방어 가드를 추가(트리거~적용
+  사이에 값을 줄일 수 있는 코드가 현재 파이프라인엔 없어 실질적으로 발생하지 않지만, 방어적으로
+  남겨둠 — `Math.Clamp(x, 1, 0)`류 예외 방지). 큐 적용이 다음 틱으로 한 틱 지연되는 것은 설계
+  문서 §9.3이 명시적으로 의도한 동작("이번 틱 결과에 끼어들지 않고 다음 틱의 입력을 바꾼다")이라
+  "기존 플레이 결과가 달라지지 않는다"의 기준을 "같은 종류의 효과가 동일하게 발생하되, 정확히
+  언제 반영되는지가 실행 순서 우연이 아니라 고정된 규칙으로 결정된다"로 해석했다.
+- **범위 밖(다음 단계로 이연)**: 우선순위 큐, 비동기/스레드, Rollback/Replay, Save 연동, Undo,
+  이벤트별 Command 클래스화는 이번 MVP에서 의도적으로 제외(사용자 지시). `HumanResistanceManager`/
+  `TransportManager`의 직접 State 수정은 이번 PR 범위(#2)에 포함되지 않음 — #1에서도 다루지 않은
+  대상이라 이번에도 그대로 둠.
+
+## Step 92 — World Simulation Engine Phase 1: Event Queue 내부 표현 개선 (2026-07-22)
+
+- **배경**: Step 91에서 만든 `Queue<Action>` 기반 Event Queue는 정상 동작하지만, 큐 안의 각
+  항목이 클로저(익명 함수)로 캡처된 상태라 "지금 큐에 뭐가 쌓여 있는가"를 코드/디버거로 들여다볼
+  방법이 없었다(클로저 내부는 컴파일러가 생성한 클래스라 필드 이름이 사람이 읽을 수 있는 형태가
+  아님). 기능 변경 없이 유지보수성/디버깅 편의만 개선하는 순수 리팩터링 세션.
+- **핵심 변경**: `Queue<Action>` → `Queue<PendingChange>`. `PendingChange`는 `ChangeType`(이벤트
+  단위로 하나씩 정의한 enum) + `Country`(대상, null이면 WorldState 대상) + `Amount`/`ExtraAmount`
+  (적용에 필요한 값)만 담는 `readonly struct` — 다형성/가상 디스패치 없는 순수 데이터. `EventManager`
+  안에 `private` 중첩 타입으로 선언(외부에서 쓸 일이 없는 내부 구현 세부사항이라 `NewsEvent`처럼
+  네임스페이스 최상위에 공개하지 않음). `ApplyQueuedChanges()`는 `Dequeue()`한 `PendingChange` 하나를
+  `ApplyChange()`(신규, `static`)의 `switch (change.Type)` 한 곳으로 넘겨 처리 — Command 클래스
+  계층이나 Event Bus 없이 이벤트당 case 하나씩만 추가하면 되는 구조.
+- **동작 불변 검증**: `Random` 소비 순서(트리거 시점에만 굴림, 적용 시점엔 안 굴림), Queue 적용
+  시점(`SimulationManager.RunTick()` 국가 루프 이전), FIFO 순서, 값 재계산 시점(적용 시점의
+  살아있는 값 기준)까지 Step 91의 동작을 필드 하나하나 그대로 옮겨 담았을 뿐 계산식은 한 글자도
+  바꾸지 않았다. `ApplyInternationalCooperation`만 표현이 바뀌었다 — 기존엔 대상국 리스트 전체를
+  캡처한 클로저 하나를 큐에 넣었는데, 이제는 대상국마다 `PendingChange` 하나씩(FIFO상 원래
+  foreach와 동일한 순서로) 큐에 넣는다 — 적용 순서와 최종 결과는 동일, 큐 안의 표현 단위만
+  "국가 목록 하나"에서 "국가 하나"로 세분화됐다.
+- **범위 밖**: 신규 이벤트 추가, MED Ladder, `HumanResistanceManager`/`TransportManager`/
+  `SaveManager` Queue화, Rollback/Undo/Replay, Event Serialization, 범용 Event Framework는
+  전부 사용자 지시로 이번 세션 범위 밖.

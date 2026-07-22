@@ -54,10 +54,21 @@ namespace Contagion.Managers
             return _countryLookup.TryGetValue(id, out var c) ? c : null;
         }
 
-        /// <summary>초기 국가 목록을 주입한다 (테스트/씬 부트스트랩용). Step 9에서 ScriptableObject 로더로 대체 예정.</summary>
+        /// <summary>
+        /// 초기 국가 목록을 주입한다 (테스트/씬 부트스트랩용). Step 9에서 ScriptableObject 로더로 대체 예정.
+        ///
+        /// id 기준 정렬(서수 비교, 문화권 비의존)을 여기서 한 번만 강제한다 — CountryDatabase 에셋의
+        /// 인스펙터 리스트 순서를 그대로 쓰면 "지금은 우연히 항상 같은 순서"일 뿐 보장이 아니라서,
+        /// 에셋을 편집하다 리스트가 재배열되면 SimulationManager/EventManager/HumanResistanceManager
+        /// 등 이 컬렉션을 순회하는 모든 곳의 실행 순서가 조용히 바뀔 수 있었다(Deterministic Tick
+        /// Ordering #1). string.CompareOrdinal은 로케일에 따라 결과가 달라지는 string.Compare와
+        /// 달리 항상 코드 유닛 값으로만 비교해 플랫폼/문화권 무관하게 동일한 순서를 보장한다
+        /// (TransportManager.PairKey()가 이미 같은 이유로 CompareOrdinal을 쓰고 있음).
+        /// </summary>
         public void SetCountries(List<Country> newCountries)
         {
             countries = newCountries ?? new List<Country>();
+            countries.Sort((a, b) => string.CompareOrdinal(a?.id, b?.id));
             RebuildLookup();
             RecalculateWorldTotals();
         }

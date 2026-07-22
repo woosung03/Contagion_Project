@@ -191,6 +191,14 @@ namespace Contagion.Managers
             var pathogen = _data.CurrentPathogen;
             var state = _data.State;
 
+            // --- Event Queue 일괄 적용 (World Simulation Engine #2) ---
+            // 직전 틱에 EventManager.ProcessTick()이 큐에 쌓아둔 Country/WorldState 변경(자연재해
+            // 감염 급증, 국경 강제 개방/봉쇄, cureProgress 가감 등)을 국가 루프가 시작되기 "전"에
+            // FIFO 순서로 전부 반영한다 — 그래야 이번 틱의 사망/신규감염 계산이 "이번 틱에 새로
+            // 발동한 이벤트"가 아니라 "직전 틱까지 확정된 상태"만을 입력으로 사용한다(Docs/Archive/
+            // WorldSimulationSystem_Design.md §9.3, §10).
+            EventManager.Instance?.ApplyQueuedChanges();
+
             float totalInfectionRatio = 0f;
             int countryCount = 0;
 
@@ -296,6 +304,22 @@ namespace Contagion.Managers
             GameManager.Instance?.EvaluatePhase(state, averageInfectionRatio);
 
             OnTickCompleted?.Invoke(state);
+
+            // --- 결정론적 후처리 파이프라인 (Deterministic Tick Ordering #1) ---
+            // 예전엔 HumanResistanceManager/EventManager/TransportManager/SaveManager 네 매니저가
+            // 전부 독립적으로 OnTickCompleted를 구독했다. Unity는 서로 다른 컴포넌트의 OnEnable/Start
+            // 호출 순서를 보장하지 않으므로, 같은 틱 안에서 "봉쇄 판정이 먼저냐 뉴스 이벤트가
+            // 먼저냐"가 실행마다 달라질 수 있었다(Docs/Archive/WorldSimulationSystem_Design.md §2,
+            // §5, §9.1 — 이미 분석되고 승인된 결함). 예를 들어 EventManager.ApplyPoliticalInstability가
+            // 국경을 강제로 다시 여는 효과가 HumanResistanceManager.ApplyPolicy의 이번 틱 봉쇄
+            // 판정보다 먼저 실행되는지 나중에 실행되는지에 따라 그 틱의 최종 국경 상태가 달라졌다.
+            // SimulationManager가 이미 소유한 틱 루프 안에서 이 네 매니저를 직접, 고정된 순서로
+            // 호출하는 것으로 대체한다 — 새 이벤트/큐 인프라를 만들지 않고 GameManager.EvaluatePhase()
+            // 호출과 동일한 기존 "직접 호출" 패턴을 그대로 확장한 것뿐이다.
+            HumanResistanceManager.Instance?.ProcessTick(state); // Layer 4: 봉쇄/연구기여도 갱신 (내부에서 OnPolicyApplied 발행 → BottleneckAnalyzer)
+            EventManager.Instance?.ProcessTick(state);           // Layer 6: 뉴스 이벤트 판정 (봉쇄 갱신 이후 상태를 읽음)
+            TransportManager.Instance?.ProcessTick(state);       // 교통 유닛 스폰/도착 (이벤트로 바뀐 국경 상태를 반영)
+            SaveManager.Instance?.ProcessTick(state);             // 오토세이브 (그 틱의 최종 상태를 저장)
 
             EvaluateEndConditions(state);
         }
