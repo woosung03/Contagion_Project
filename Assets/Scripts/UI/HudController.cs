@@ -37,6 +37,11 @@ namespace Contagion.UI
         // 이것 하나만 토글한다(Hud.uxml gameplay-content 참고).
         private VisualElement _gameplayContent;
 
+        // [HUD Visibility, 2026-07-23] resource-strip+action-strip을 포함한 HUD 전체(Hud.uxml
+        // hud-root) — SetGameplayContentVisible()과 책임이 분리된 별도 축. MainMenu/CountrySelect/
+        // Ending 등 "게임 시작 전후 플로우"에서 HUD 자체를 완전히 숨길 때만 UIManager가 건드린다.
+        private VisualElement _hudRoot;
+
         // 감염자/사망자/치료제 — 텍스트 라벨만으론 가시성이 떨어진다는 피드백으로 추가한 인라인
         // 스파크라인 그래프 (HudSparkline.cs 참고).
         private HudSparkline _infectedGraph;
@@ -71,6 +76,7 @@ namespace Contagion.UI
             _rankingButton = root.Q<Button>("ranking-button");
 
             _gameplayContent = root.Q<VisualElement>("gameplay-content");
+            _hudRoot = root.Q<VisualElement>("hud-root");
 
             _infectedGraph = new HudSparkline(root.Q<VisualElement>("infected-graph"), new Color(1f, 0.67f, 0.35f));
             _deadGraph = new HudSparkline(root.Q<VisualElement>("dead-graph"), new Color(0.86f, 0.35f, 0.35f));
@@ -200,6 +206,19 @@ namespace Contagion.UI
         {
             if (_gameplayContent != null)
                 _gameplayContent.style.visibility = visible ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// [HUD Visibility, 2026-07-23] HUD 전체(resource-strip+action-strip+gameplay-content,
+        /// hud-root 전부)를 표시/숨김. SetGameplayContentVisible()과 다른 축이다 — 저건 Gameplay
+        /// 안에서 관리 화면(Research/GlobalStatus/Leaderboard) 전환 시 내부 콘텐츠만 토글하고,
+        /// 이건 MainMenu/CountrySelect/Ending처럼 HUD 자체가 아예 존재하면 안 되는 게임 시작
+        /// 전후 플로우에서 UIManager가 호출한다.
+        /// </summary>
+        public void SetHudVisible(bool visible)
+        {
+            if (_hudRoot != null)
+                _hudRoot.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         private void HandlePhaseChanged(GamePhase phase)

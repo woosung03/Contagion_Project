@@ -87,6 +87,10 @@ namespace Contagion.Managers
                 // 새 판을 시작하는 이 시점에 한 번 전부 해제하고 시작한다(WorldMapInputLock.ClearAll() 참고).
                 WorldMapInputLock.ClearAll();
                 GameManager.Instance?.SetPaused(true);
+                // [HUD Visibility, 2026-07-23] MainMenu(병원체 선택)/CountrySelect가 떠 있는 동안 HUD
+                // (resource-strip/action-strip)는 완전히 숨긴다 — Country 선택 완료(HandleCountryConfirmed)
+                // 시점에 다시 켠다.
+                hudController?.SetHudVisible(false);
                 countrySelectController?.Hide();
                 mainMenuController.Show();
             }
@@ -95,11 +99,14 @@ namespace Contagion.Managers
                 Debug.LogWarning("[FLOW][UIManager] mainMenuController가 NULL이라 MainMenu를 표시하지 않습니다 — " +
                     "UIManager 인스펙터의 Main Menu Controller 슬롯 연결을 확인하세요.");
             }
+
+            SubscribeGameEnded();
         }
 
         private void OnEnable()
         {
             BuildScreenMap();
+            SubscribeGameEnded();
 
             if (hudController != null)
             {
@@ -164,6 +171,9 @@ namespace Contagion.Managers
 
         private void OnDisable()
         {
+            if (SimulationManager.Instance != null)
+                SimulationManager.Instance.OnGameEnded -= HandleGameEndedForHud;
+
             if (hudController != null)
             {
                 hudController.OnUpgradeButtonClicked -= HandleUpgradeButtonClicked;
@@ -222,8 +232,24 @@ namespace Contagion.Managers
         private void HandleCountryConfirmed(string countryId)
         {
             countrySelectController.Hide();
+            // [HUD Visibility, 2026-07-23] 발원 국가 선택 완료 = 실제 게임 시작 시점 — 이때부터 HUD를 켠다.
+            hudController?.SetHudVisible(true);
             GameDataBootstrapper.Instance?.BeginGame(_pendingPathogen, countryId);
         }
+
+        /// <summary>
+        /// [HUD Visibility, 2026-07-23] EndingScreenController와 동일하게 SimulationManager.OnGameEnded를
+        /// 구독해 HUD를 숨긴다 — Instance가 OnEnable 시점엔 아직 없을 수 있어(DontDestroyOnLoad 매니저
+        /// 초기화 순서) Start()에서도 한 번 더 호출한다(EndingScreenController.Subscribe()와 동일 패턴).
+        /// </summary>
+        private void SubscribeGameEnded()
+        {
+            if (SimulationManager.Instance == null) return;
+            SimulationManager.Instance.OnGameEnded -= HandleGameEndedForHud;
+            SimulationManager.Instance.OnGameEnded += HandleGameEndedForHud;
+        }
+
+        private void HandleGameEndedForHud(bool isVictory) => hudController?.SetHudVisible(false);
 
         /// <summary>
         /// AppScreen → 실제 화면(들)을 여닫는 IScreenController 매핑. OnEnable에서 1회 구성한다.
@@ -417,6 +443,8 @@ namespace Contagion.Managers
                     SimulationManager.Instance?.ClearGameEndedFlag();
                     GameManager.Instance?.SetPaused(false);
                     endingScreenController?.Hide();
+                    // [HUD Visibility, 2026-07-23] 부활 = Gameplay 재개 — HandleGameEndedForHud로 숨겼던 HUD를 되돌린다.
+                    hudController?.SetHudVisible(true);
                 },
                 onFailed: () =>
                 {
