@@ -24,6 +24,15 @@ Unity 기반 전략 시뮬레이션 게임. 앱인토스(Apps in Toss) 플랫폼
 10. 필요 시 `C:\Game\codebase` (참조 전용 코딩 지식 위키, 별도 저장소, **수정 금지**) — Unity UI
    Toolkit / 앱인토스 SDK / LLM 에이전틱 패턴 문서. 앱인토스 연동(광고/랭킹/Safe Area/빌드)
    작업 시 `wiki/apps-in-toss-unity/_overview.md`부터 확인.
+   **Source of Truth가 아니다.**
+   우선순위는
+   (1) 현재 프로젝트 설계 문서
+   (2) 현재 프로젝트 코드
+   (3) Reference Codebase
+   이다.
+   구현 패턴·아키텍처·UI 패턴·최적화 사례를 참고하는 용도로 사용하며,
+   현재 프로젝트의 설계를 대체하거나 변경하는 근거로 사용하지 않는다.
+   Reference와 현재 프로젝트가 충돌하면 항상 현재 프로젝트를 우선한다.
 
 ---
 
