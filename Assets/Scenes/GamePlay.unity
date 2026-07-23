@@ -1286,7 +1286,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 715567c2258f4a04f8e123a3c0ac92c5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.CountryPopupController
 --- !u!114 &245050059
 MonoBehaviour:
@@ -1298,9 +1298,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass:
+  targetClass: 
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0
@@ -11458,7 +11458,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31041deb4145ce0459c3a39587af537f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.ImportantEventPopupController
 --- !u!114 &1190480003
 MonoBehaviour:
@@ -11470,9 +11470,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass:
+  targetClass: 
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0
@@ -12243,12 +12243,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3f8b15a6912f4d44d93459ec442b942e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.Managers.SimulationManager
-  tickIntervalSeconds: 0.1
+  tickIntervalSeconds: 1
   autoStart: 1
-  globalSpreadFactor: 0.5
-  visibilityGainRate: 0.02
+  globalSpreadFactor: 0.65
+  visibilityGainRate: 0.08
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0004
+  cureProgressCoefficient: 0.0013
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05
@@ -13061,7 +13061,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f566f6569d1dad6499a6348264a57c48, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.ResearchPopupController
 --- !u!114 &6900000005
 MonoBehaviour:
@@ -13073,9 +13073,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass:
+  targetClass: 
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0

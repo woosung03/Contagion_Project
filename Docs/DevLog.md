@@ -4530,3 +4530,92 @@ detail-panel(선택 브랜치 요약) 3단 구조로는 "이 연구가 어디로
 - **범위 밖**: 신규 이벤트 추가, MED Ladder, `HumanResistanceManager`/`TransportManager`/
   `SaveManager` Queue화, Rollback/Undo/Replay, Event Serialization, 범용 Event Framework는
   전부 사용자 지시로 이번 세션 범위 밖.
+
+## Step 93 — 5분 프로토타입 밸런스 1차 조정: Cure/Visibility/Infection 계수 (2026-07-23)
+
+- **배경**: 프로젝트 목표가 "UI 완성 → 신규 기능(Country Status 등) 착수 전 핵심 게임 루프 검증"으로
+  전환됨에 따라, 1판 평균 플레이 타임을 5분(4~6분) 내외로 맞추는 프로토타입 밸런스 작업을 시작했다.
+  선행 분석(코드 기준, 추측 없이 실측)에서 승패를 사실상 유일하게 결정하는 변수가 치료제 진행 속도
+  (`cureProgressCoefficient`)이며, 씬 오버라이드 값(0.0004)이 과거 캘리브레이션 목표(200~500일,
+  이 문서 상단 기록)보다도 5배 느리다는 것을 확인했다. 이번 세션은 그 분석에서 지목한 영향도 1~3위
+  항목(Cure Progress / plagueVisibility / Infection Growth)만 최소한으로 조정한다 — 신규 시스템,
+  구조 리팩토링, DNA/업그레이드 비용, Government Response 구조, Win Condition, 난이도 시스템은
+  전부 이번 범위 밖(사용자 지시). 최종 밸런싱이 아니라 "전체 루프가 5분 안에서 정상적으로
+  진행되는지" 검증용 1차 수치이며, 플레이테스트로 재조정될 것을 전제로 한다.
+
+- **완료 기준(사용자 정의)**: 아무 행동도 하지 않는 플레이어 기준 Day 240(4분) 전후 치료제 100% →
+  Game Over, 일반적인 플레이 기준 Day 300(5분) 전후 승패 결정.
+
+- **tickIntervalSeconds 사고 — 발견 및 재역산**: 이번 세션에서 GamePlay.unity 편집 도중 씬
+  오버라이드 값이 `0.1`인 것을 발견했다(코드 기본값 `SimulationManager.cs:22`는 `1f`로 정상,
+  이번 세션 내내 미변경). 추적 결과 오늘 세션 시작 시점 커밋(`4857fda`)부터 이미 0.1이 박혀
+  있었고, 사용자 확인 결과 **0.1은 테스트용 임시값**이며(Unity Editor가 이 세션 내내 3개 프로세스로
+  실행 중이던 것과 무관하지 않아 보임 — 정확한 경위는 불명), 이 프로젝트의 **원래 기본값은
+  5초**였다고 확인했다(`a04df98 tick 간격 1초로 조정` 커밋은 5초 상태에서 1초로 낮춘 과거의
+  부분적 개선이었던 것으로 보임 — 그 이후 다른 계수들이 같이 조정되지 않아 실질적인 플레이
+  타임 단축 효과는 제한적이었을 것). 사용자 지시에 따라 "1초가 정답"이라고 가정하지 않고,
+  이번에 정한 밸런스 목표에 맞춰 **처음부터 다시 역산**했다: `state.currentDay`는 매 틱 1회
+  증가하며 tickIntervalSeconds와 무관하다(즉 "치료제 완성까지 며칠 걸리는가"와 "하루가 실제
+  몇 초인가"는 독립된 별개의 다이얼) — 아래 `cureProgressCoefficient` 계산이 목표로 삼은
+  day-budget(240일, funding 억제 최악의 경우 기준)을 그대로 채택하고, `tickIntervalSeconds =
+  목표 실제 초(240초=4분) / 목표 일수(240일) = 1.0초/틱`로 역산했다. 일반 플레이 목표(300초=5분)도
+  같은 tickIntervalSeconds 하나로 `300일 × 1.0초 = 300초`로 동시에 성립한다 — day-budget을
+  240일로 잡았기 때문에 나온 결과이지 1초를 먼저 정해두고 끼워 맞춘 것이 아니다. 결과적으로 값 자체는
+  과거 "1초" 기록과 같지만, 도출 과정은 이번 밸런스 목표에서 독립적으로 다시 계산한 것이다.
+  `GamePlay.unity:12246`을 0.1 → 1로 수정.
+
+- **cureProgressCoefficient: 0.0004(씬 오버라이드) / 0.002(코드 기본값) → 0.0013(양쪽 통일)**
+  (`SimulationManager.cs:35`, `GamePlay.unity:12251`). 근거: `HumanResistanceManager.ApplyPolicy()`가
+  국가 감염 여부와 무관하게 48개국 전체의 `healthFunding × ResearchMultiplier`를 매 틱 합산한다
+  (`HumanResistanceManager.cs:168-178`, `Country.cs:65-71`) — `CountryDatabase.asset` 실측 분포
+  (High 13개국/Mid 14개국/Low 21개국)로 계산하면 전체 합계 Σ=25.31(PublicHealthEmergency 이상),
+  PublicHealthEmergency(visibility 0.4) 미만에서는 `×0.2` 감쇠로 Σ=5.062(`HumanResistanceManager.cs:178`).
+  "아무 행동도 안 해도 4분 안에 끝난다"를 **funding이 끝까지 억제 상태로 남는 최악의 경우에도**
+  성립하도록 보수적으로 역산했다: `240 × (5.062 × 1.1(평균 visibility 가중치 근사) × coef − drugResistance
+  페널티) = 1.0`. 기준 병원체는 Virus(`Pathogen_Virus.asset`, drugResistance=0.15 → 페널티
+  0.15×0.02=0.003/tick)로 잡아 coef ≈ 0.0013을 도출했다. 실제로는 봉쇄/전파로 visibility가
+  0.4를 넘어 funding이 풀리는 시점이 있을 것이므로, 이 값은 "최소 이 정도는 걸린다"는 하한이 아니라
+  "최악의 경우에도 이 안에는 끝난다"는 보수적 상한 성격 — 실측 시 목표보다 빨리 끝나면(과속) 이
+  값을 낮추는 방향으로, 안 끝나면 올리는 방향으로 재조정한다. **주의**: 치사율이 낮고 drugResistance가
+  0인 병원체(예: Bacteria)는 페널티가 없어 이 계수 기준으로 더 빨리 끝날 수 있다 — 병원체별 편차는
+  이번 1차 조정 범위 밖(플레이테스트로 확인 후 필요 시 별도 조정).
+
+- **visibilityGainRate: 0.02 → 0.08(4배, 코드/씬 동일)** (`SimulationManager.cs:29`,
+  `GamePlay.unity:12249`). 근거: `plagueVisibility`는 전 세계 인구(약 70.9억, `CountryDatabase.asset`
+  48개국 합산) 대비 감염 비율(`infectedCount/totalPopulation`)에 기반하는데(`SimulationManager.cs:298`),
+  발원국 하나를 100% 감염시켜도 전 세계 비율은 약 0.72%에 불과해 국경 대응(`HumanResistanceManager.cs:24-31`)과
+  연구 funding 가속(위 항목의 PublicHealthEmergency 게이트) 둘 다 다수 국가로 퍼지기 전까지 사실상
+  발동하지 않는 것이 선행 분석에서 확인한 병목이었다. `cureProgressCoefficient`를 이미 "funding이
+  끝까지 안 풀려도 목표를 만족"하도록 보수적으로 잡아뒀기 때문에, 이 값은 목표 달성의 필수 조건이
+  아니라 "국가 대응"/"치료제 압박"이 플레이어에게 더 이른 시점에 체감되도록 하는 보조 조정이다 —
+  임계값(0.2/0.4/0.6/0.8) 구조나 봉쇄 로직(`HumanResistanceManager` 구조) 자체는 건드리지 않았다
+  (범위 밖). 배율은 과도한 변경(예: 10배 이상)을 피하고 4배로 제한 — "최소 조정" 원칙.
+
+- **globalSpreadFactor: 0.5(씬 오버라이드) → 0.65(코드 기본값도 0.15→0.65로 동일하게 통일)**
+  (`SimulationManager.cs:27`, `GamePlay.unity:12248`). 근거: 선행 분석에서 선진국(HealthLevel 0.8)
+  발원 시 국내 감염 성장률이 일일 5%대로 느려 DNA/업그레이드 진입("2. DNA 획득 → 3. 업그레이드
+  선택" 루프)이 지연되는 것을 확인했다. 이미 씬에서 코드 기본값(0.15) 대비 3.3배 상향된 상태였고,
+  사용자가 "지나치게 느리지 않도록 최소 조정"만 요청했으므로 추가로 30%만 상향(0.5→0.65)했다 —
+  국가 선택/발원 조건, 국가 간 전파 확률(`landBorderSpreadChance`), 전파 경로(`TransportManager`)
+  등 다른 확산 관련 시스템은 건드리지 않음(범위 밖).
+
+- **변경하지 않음(사용자 지시로 범위 제외)**: DNA Economy(`SimulationManager.cs:73-87` 마일스톤,
+  `BubbleSpawner.cs`), Upgrade Cost(`UpgradeManager.cs`, `DefaultUpgradeTreeFactory.cs`),
+  Government Response 구조(`HumanResistanceManager.cs`의 봉쇄 임계값·순차 폐쇄 로직 자체),
+  Win Condition(`WorldState.cs:68` 전멸 조건), Endgame 구조(`GameManager.cs` 페이즈 전환 조건),
+  난이도 시스템(`GameManager.cs` 배율 자체는 미변경 — 씬에서 Normal 고정 상태 그대로).
+
+- **검증 안 됨 — 다음 세션에서 확인 필요**: 이 수치들은 정적 코드 분석 기반 역산이며 Unity
+  Editor에서 실제 플레이테스트로 검증하지 않았다(이번 세션은 코드/씬 수정까지만 수행, 실행 검증은
+  범위 밖). 다음에 플레이해서 "아무것도 안 하면 Day 240 전후 Game Over" / "일반 플레이 Day 300
+  전후 승패"가 맞는지 확인하고, 벗어나면 이 세 값(특히 `cureProgressCoefficient`)부터 재조정할 것.
+  발원국 개발 수준(High/Mid/Low)에 따라 초반 체감 속도 편차가 크므로(위 tickIntervalSeconds
+  단락 참고) 서로 다른 개발 수준 발원국으로 최소 2~3회 확인 권장.
+
+- **Unity Editor 동시 실행 관련 주의**: 이번 세션 중 `Assets/Scenes/GamePlay.unity`를 git
+  명령으로 편집하는 동안 Unity Editor 프로세스 3개가 동시에 실행 중이었고, 위 tickIntervalSeconds
+  사고처럼 씬 파일 값이 내 편집과 무관하게 바뀌는 현상이 관찰됐다(Editor가 자체 인메모리 상태를
+  주기적으로 다시 저장하면서 외부(git/CLI) 편집과 경합하는 것으로 추정). 이 세션에서 만든 커밋
+  (`77a57bd`~`a3bb7e3`, 이전 UI 정리 세션)에 tickIntervalSeconds=0.1이 의도치 않게 포함돼 있었던
+  것도 이 경합의 결과로 보인다. **씬 파일을 CLI로 편집할 때는 가능하면 Unity Editor를 닫아두거나,
+  편집 직후 값이 안정적인지(수 초 간격으로 재확인) 검증할 것.**

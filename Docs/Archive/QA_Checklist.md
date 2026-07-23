@@ -8,6 +8,16 @@
 
 ## 세션 시작 시 확인 (미해결)
 
+- [ ] 5분 프로토타입 밸런스 실측 검증 (근거: DevLog Step 93) — `cureProgressCoefficient`/
+      `visibilityGainRate`/`globalSpreadFactor` 조정이 정적 코드 분석 기반 역산이라 Unity
+      Editor 플레이테스트로 검증되지 않았다.
+  - [ ] 아무 행동도 하지 않는 플레이어 기준 Day 240(4분) 전후 치료제 100% → Game Over가
+        발생하는지 확인 (병원체는 Virus 기준으로 계산했음 — 다른 병원체도 확인 권장)
+  - [ ] 일반적인 플레이(DNA 수집 + 업그레이드 구매) 기준 Day 300(5분) 전후 승패가 결정되는지 확인
+  - [ ] 감염 시작 → DNA 획득 → 업그레이드 선택 → 국가 대응 시작 → 감염 확산 가속 → 치료제 개발
+        압박 → 승리/패배 전체 루프가 한 판 안에서 자연스럽게 발생하는지 확인
+  - [ ] 목표(4~6분)에서 벗어나면 `cureProgressCoefficient`부터 재조정(DevLog Step 93 계산 근거 참고)
+
 - [ ] CountryStatusPanel v5 Hero Stats/ADVANCED DIAGNOSTICS 검증 (근거: DevLog Step 89) — Unity
       에디터 미접속으로 작성돼 실기기/에디터 검증 전부 미완료.
   - [ ] GLOBAL STATUS 배너 바로 아래에 INFECTED/DEATHS/CURE/EXTINCT 2x2 Hero Stats 타일이
