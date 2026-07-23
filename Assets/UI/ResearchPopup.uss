@@ -11,26 +11,26 @@
                  설명 문단 + data-row 소수 구성이라 콘텐츠가 짧다 — CountryPopup 확장 이전
                  기본값(30%)을 그대로 채택. 내용이 늘어나면 CountryPopup Step 78 사례처럼
                  재조정한다. */
-    width: 320px;
-    margin-left: -160px;
+    /* [Text Wrap Fix, 2026-07-23] 320px에서는 특히 footer 버튼(폭 절반, 약 130px)에서 한국어가
+       너무 자주 줄바꿈됐다 — 사용자 승인 범위(10~20px) 안에서 +20px만 넓힌다. 폭 이외의 다른
+       치수/디자인은 그대로 유지. */
+    width: 340px;
+    margin-left: -170px;
     background-color: var(--color-bg-panel);
     padding: var(--space-lg);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
-    /* [P0 UI Fix, 2026-07-23] Height Overflow 대응 — DESIGN.md 12절 Bottom Sheet의 기존
-       max-height:60% 관행을 그대로 재사용(신규 수치 발명 아님). top:30%와 함께 16:9에서도
-       화면 하단을 넘지 않도록 상한을 준다. overflow:hidden은 아래 .popup-scroll의
-       flex-grow:1/flex-basis:0이 12.2절 Content Area 패턴과 동일하게 동작하기 위한 전제조건. */
-    max-height: 60%;
-    overflow: hidden;
-}
-
-/* Content ScrollView — 12.2절 Content Area ScrollView 규칙(flex-grow:1;flex-basis:0)을 Overlay
-   Panel에 동일 적용(§7.1 Overlay ScrollView 규칙). Header/Footer는 이 엘리먼트 밖에 있어 항상
-   고정, 초과분만 이 영역 내부에서 스크롤된다. */
-.popup-scroll {
-    flex-grow: 1;
-    flex-basis: 0;
+    /* [Regression Fix, 2026-07-23] P0 UI Fix(2026-07-23, 커밋 77a57bd)가 여기 max-height:60% +
+       overflow:hidden과 .popup-scroll(flex-grow:1;flex-basis:0) + ScrollView 래핑을 함께
+       넣으면서 본문이 통째로 사라지는 회귀를 냈다 — .popup-root는 position:absolute + top:30%뿐
+       (bottom 앵커 없음)이라 확정된 높이가 없는데, flex-grow:1;flex-basis:0는 부모가 확정된
+       높이를 가져야만 동작한다(CountryStatusPanel.status-root처럼 화면 전체 높이를 물려받는
+       normal-flow 자식이면 동작하지만, 이 화면의 독립 absolute 모달에는 그 전제가 없다). 결과적으로
+       ScrollView가 높이 0으로 수축하고 overflow:hidden이 그 안의 본문 전체를 잘라버렸다.
+       ScrollView/flex-grow/flex-basis/overflow:hidden을 전부 제거하고, CountryPopup.popup-root와
+       동일하게 max-height만 안전장치로 남긴다(스크롤 없이 콘텐츠 높이만큼 자연 확장, 값도
+       CountryPopup과 동일한 68%로 통일). */
+    max-height: 68%;
 }
 
 /* [UI Review Pass 1, 2026-07-22] 팝업 뒤 전체 화면을 어둡게 눌러 Focus를 팝업에 집중시키는

@@ -35,21 +35,20 @@ namespace Contagion.UI
         /// 분류 노드는 신규 이름으로 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은
         /// 1개도 바꾸지 않는다.
         /// </summary>
-        /// <summary>[UI Review Pass 2, 2026-07-23] 트리 노드(110px 폭)에서 어절 중간이 잘리는
-        /// 줄바꿈을 막기 위해, 110px 폭에서 한 줄에 담기 어려운(자모 제외 실질 글자수 8자 이상)
-        /// 항목만 어절 경계(공백)에 `\n`을 직접 삽입해 균형 잡힌 2줄로 강제한다. USS는
-        /// word-break/overflow-wrap을 지원하지 않아(참조 위키 codebase/wiki/unity-ui-toolkit/
-        /// css-to-uss-support.md 확인 — CSS 레이아웃만으로는 해결 불가) 데이터 쪽에서 처리한다.
-        /// `white-space: normal`(UpgradeTree.uss .tree-node__label)은 그대로 유지 — 혹시 실기기
-        /// 폰트에서 이 문자열도 넘치면 남은 공백에서 추가로 줄바꿈될 수 있는 안전망 역할.
-        /// 8자 미만 항목은 110px 폭에서 한 줄에 들어갈 것으로 판단해 원문 그대로 둔다.</summary>
+        /// <summary>node.id(영문 내부 식별자) → 한국어 표시명(줄바꿈 없는 원문). `GetDisplayName()`을
+        /// 통해 트리 노드 라벨뿐 아니라 ResearchPopup 제목(UIManager.cs:380)과 "다음 필요 연구"
+        /// 버튼 텍스트(ResearchPopupController.cs:209)에도 공유되는 공개 API이므로, 여기에는
+        /// 특정 렌더링 컨텍스트(예: 110px 트리 노드)에만 필요한 강제 줄바꿈을 절대 심지 않는다
+        /// — [Regression Fix, 2026-07-23] 한 번 여기 `\n`을 직접 심었다가 그 줄바꿈이 팝업
+        /// 제목/버튼까지 새어 들어가 한국어가 음절 단위로 끊기는 회귀를 낸 적이 있다. 트리 노드
+        /// 전용 줄바꿈은 <see cref="TreeNodeLineBreaks"/>로 분리했다.</summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
             // 감염 경로 — 공기 계열
             { "trans_air1", "비말 핵 잔류" },
-            { "trans_air2", "에어로졸\n광역 부유" },
-            { "trans_droplet1", "호흡기\n상재균 교란" },
-            { "trans_droplet2", "실내 공기\n재순환 감염" },
+            { "trans_air2", "에어로졸 광역 부유" },
+            { "trans_droplet1", "호흡기 상재균 교란" },
+            { "trans_droplet2", "실내 공기 재순환 감염" },
             // 감염 경로 — 수인성 계열
             { "trans_water1", "수인성 전파" },
             { "trans_water2", "해상 전파" },
@@ -61,8 +60,8 @@ namespace Contagion.UI
             { "trans_blood1", "수혈 전파" },
             { "trans_blood2", "오염 혈액 유통망" },
             // 감염 경로 — 통합 연구
-            { "trans_advanced1", "교차 매개\n네트워크" },
-            { "trans_advanced2", "혈액-매개체\n융합 전파" },
+            { "trans_advanced1", "교차 매개 네트워크" },
+            { "trans_advanced2", "혈액-매개체 융합 전파" },
             { "trans_global", "전지구적 전파망" },
             // 증상 — 표준형(기침 계열)
             { "sym_cough", "기침" },
@@ -80,13 +79,13 @@ namespace Contagion.UI
             { "sym_hemorrhage", "출혈" },
             { "sym_sepsis", "패혈증" },
             // 증상 — 통합 연구
-            { "sym_multiorgan1", "다발성\n장기부전 I" },
-            { "sym_multiorgan2", "다발성\n장기부전 II" },
+            { "sym_multiorgan1", "다발성 장기부전 I" },
+            { "sym_multiorgan2", "다발성 장기부전 II" },
             { "sym_organfailure", "전신 장기부전" },
             // 적응(구 "능력") — 변이 계열
             { "abl_mutation1", "항원 변이" },
             { "abl_mutation2", "잠복 변이" },
-            { "abl_resist1", "백신 회피\n항체 조작" },
+            { "abl_resist1", "백신 회피 항체 조작" },
             { "abl_resist3", "다중 변종 분화" },
             // 적응 — 은신 계열
             { "abl_stealth1", "면역 회피 단백질" },
@@ -242,6 +241,30 @@ namespace Contagion.UI
         /// <summary>node.id → 한국어 표시명.</summary>
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
+
+        /// <summary>[UI Review Pass 2, 2026-07-23 → Regression Fix, 2026-07-23] 트리 노드(110px 폭)
+        /// 전용 강제 줄바꿈 — 110px 폭에서 한 줄에 담기 어려운(자모 제외 실질 글자수 8자 이상) 항목만
+        /// 어절 경계(공백)에 `\n`을 직접 삽입해 균형 잡힌 2줄로 강제한다. USS는 word-break/
+        /// overflow-wrap을 지원하지 않아(참조 위키 codebase/wiki/unity-ui-toolkit/
+        /// css-to-uss-support.md 확인 — CSS 레이아웃만으로는 해결 불가) 데이터 쪽에서 처리한다.
+        /// <see cref="NodeDisplayNames"/>(공개 API, ResearchPopup 제목/버튼과 공유)와 분리된
+        /// 이 테이블만 <see cref="CreateTreeNode"/>가 소비한다 — 다른 컨텍스트로 새지 않는다.</summary>
+        private static readonly Dictionary<string, string> TreeNodeLineBreaks = new Dictionary<string, string>
+        {
+            { "trans_air2", "에어로졸\n광역 부유" },
+            { "trans_droplet1", "호흡기\n상재균 교란" },
+            { "trans_droplet2", "실내 공기\n재순환 감염" },
+            { "trans_advanced1", "교차 매개\n네트워크" },
+            { "trans_advanced2", "혈액-매개체\n융합 전파" },
+            { "sym_multiorgan1", "다발성\n장기부전 I" },
+            { "sym_multiorgan2", "다발성\n장기부전 II" },
+            { "abl_resist1", "백신 회피\n항체 조작" },
+        };
+
+        /// <summary>node.id → 트리 노드 라벨 전용 텍스트(필요 시 줄바꿈 포함). 오버라이드가 없으면
+        /// <see cref="DisplayName"/>(줄바꿈 없는 원문)을 그대로 반환.</summary>
+        private static string TreeNodeLabel(string id) =>
+            TreeNodeLineBreaks.TryGetValue(id, out var wrapped) ? wrapped : DisplayName(id);
 
         /// <summary>node.id → 한국어 표시명 (외부 공개용, V2 계획 커밋 7 — UIManager가
         /// ResearchPopupController.Show()를 채우는 데 사용). <see cref="DisplayName"/>의 얇은
@@ -468,7 +491,7 @@ namespace Contagion.UI
             el.style.width = width;
             el.style.height = height;
 
-            var label = new Label(DisplayName(node.id));
+            var label = new Label(TreeNodeLabel(node.id));
             label.AddToClassList("tree-node__label");
             el.Add(label);
 
