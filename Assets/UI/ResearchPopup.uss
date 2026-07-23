@@ -17,6 +17,32 @@
     padding: var(--space-lg);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
+    /* [P0 UI Fix, 2026-07-23] Height Overflow 대응 — DESIGN.md 12절 Bottom Sheet의 기존
+       max-height:60% 관행을 그대로 재사용(신규 수치 발명 아님). top:30%와 함께 16:9에서도
+       화면 하단을 넘지 않도록 상한을 준다. overflow:hidden은 아래 .popup-scroll의
+       flex-grow:1/flex-basis:0이 12.2절 Content Area 패턴과 동일하게 동작하기 위한 전제조건. */
+    max-height: 60%;
+    overflow: hidden;
+}
+
+/* Content ScrollView — 12.2절 Content Area ScrollView 규칙(flex-grow:1;flex-basis:0)을 Overlay
+   Panel에 동일 적용(§7.1 Overlay ScrollView 규칙). Header/Footer는 이 엘리먼트 밖에 있어 항상
+   고정, 초과분만 이 영역 내부에서 스크롤된다. */
+.popup-scroll {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+/* [UI Review Pass 1, 2026-07-22] 팝업 뒤 전체 화면을 어둡게 눌러 Focus를 팝업에 집중시키는
+   Scrim. --color-bg-scrim-strong(0.75 알파)은 DESIGN.md에 "정의만 있고 실사용 0건"으로
+   기록돼 있던 토큰 — 새 색상을 만들지 않고 이 기존 토큰을 처음으로 실사용한다. */
+.modal-scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--color-bg-scrim-strong);
 }
 
 /* modal-title(연구 항목명) + modal-close(닫기)를 한 줄에 배치 — CountryPopup.uss와 동일 패턴. */

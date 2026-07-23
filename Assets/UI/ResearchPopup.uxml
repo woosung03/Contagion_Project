@@ -6,6 +6,14 @@
          (Foldout, 기본 접힘). TacticalModalController 계약(modal-root/modal-title/modal-close/
          modal-rows/modal-footer)은 그대로 유지 — modal-rows는 더 이상 채워지지 않지만(구 "브랜치"
          행 제거) 베이스 클래스 계약 유지를 위해 엘리먼트 자체는 남겨둔다. -->
+    <!-- [UI Review Pass 1, 2026-07-22] modal-scrim — 팝업 뒤 화면 전체를 어둡게 눌러 Focus를
+         팝업에 집중시킨다(배경 지도/HUD가 그대로 다 보여 Popup이 묻힌다는 피드백). modal-root와
+         형제 관계(둘 다 이 UIDocument의 최상위 자식)로 둬야 320px로 제한된 modal-root의 폭에
+         갇히지 않고 화면 전체를 덮을 수 있다. picking-mode Ignore로 클릭을 가로채지 않음(기능
+         변경 아님, 순수 시각 요소) — 표시/숨김은 ResearchPopupController.Show()/Hide()가
+         modal-root와 함께 토글한다. 초기 상태는 숨김(컨트롤러가 필드를 바인딩하기 전에도
+         안전하도록 UXML에서 직접 지정). -->
+    <ui:VisualElement name="modal-scrim" class="modal-scrim" picking-mode="Ignore" style="display: none;" />
     <ui:VisualElement name="modal-root" class="popup-root tactical-panel">
         <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
@@ -16,36 +24,43 @@
             <ui:Button name="modal-close" text="✕" class="popup-close" />
         </ui:VisualElement>
 
-        <ui:Label name="popup-description" text="" class="popup-description" />
+        <!-- [P0 UI Fix, 2026-07-23] Content만 ScrollView로 감싼다(DESIGN.md §7.1 Overlay ScrollView
+             규칙). Header(위)/Footer(아래)는 ScrollView 밖에 둬 항상 고정 — Footer는 원래 Foldout보다
+             문서 순서상 앞이었으나(고정 의도였다면 우연히 안전했던 배치), 이제는 명시적으로 ScrollView
+             뒤로 옮겨 "Content만 스크롤"을 구조적으로 보장한다. 내부 정보 위계(비용→효과→주의→고급
+             정보)는 변경하지 않는다. -->
+        <ui:ScrollView name="popup-scroll" class="popup-scroll">
+            <ui:Label name="popup-description" text="" class="popup-description" />
 
-        <!-- DNA 비용 — 위계 2순위, 가장 먼저 눈에 들어오도록 설명 바로 아래 배치. -->
-        <ui:Label name="popup-cost" text="" class="popup-cost" />
+            <!-- DNA 비용 — 위계 2순위, 가장 먼저 눈에 들어오도록 설명 바로 아래 배치. -->
+            <ui:Label name="popup-cost" text="" class="popup-cost" />
 
-        <!-- 효과 — node.effects 중 0이 아닌 항목만 ResearchPopupController가 채운다. -->
-        <ui:VisualElement name="popup-effect-section" class="popup-section">
-            <ui:Label text="효과" class="popup-section__caption" />
-            <ui:VisualElement name="popup-effect-list" class="popup-bullet-list" />
-        </ui:VisualElement>
+            <!-- 효과 — node.effects 중 0이 아닌 항목만 ResearchPopupController가 채운다. -->
+            <ui:VisualElement name="popup-effect-section" class="popup-section">
+                <ui:Label text="효과" class="popup-section__caption" />
+                <ui:VisualElement name="popup-effect-list" class="popup-bullet-list" />
+            </ui:VisualElement>
 
-        <!-- 주의 — severity/lethality 증가 시에만 텍스트 태그로 표시, 없으면 섹션 자체 숨김. -->
-        <ui:VisualElement name="popup-warn-section" class="popup-section">
-            <ui:Label text="주의" class="popup-section__caption" />
-            <ui:VisualElement name="popup-warn-list" class="popup-bullet-list" />
-        </ui:VisualElement>
+            <!-- 주의 — severity/lethality 증가 시에만 텍스트 태그로 표시, 없으면 섹션 자체 숨김. -->
+            <ui:VisualElement name="popup-warn-section" class="popup-section">
+                <ui:Label text="주의" class="popup-section__caption" />
+                <ui:VisualElement name="popup-warn-list" class="popup-bullet-list" />
+            </ui:VisualElement>
 
-        <!-- modal-rows(detail-rows) — TacticalModalController 계약 유지용. Commit 4부터 아무도
-             채우지 않는다(구 "브랜치" AddRow 호출 제거). -->
-        <ui:VisualElement name="modal-rows" class="detail-rows" />
+            <!-- modal-rows(detail-rows) — TacticalModalController 계약 유지용. Commit 4부터 아무도
+                 채우지 않는다(구 "브랜치" AddRow 호출 제거). -->
+            <ui:VisualElement name="modal-rows" class="detail-rows" />
+
+            <!-- 고급 정보 — 기본 접힘(value=false). 감염성/심각성/치사율/약물저항 4종 현재값 vs
+                 적용 후 값 막대 비교, ResearchPopupController.BuildAdvancedBars()가 채운다. -->
+            <ui:Foldout name="popup-advanced" text="고급 정보 보기" value="false" class="popup-advanced">
+                <ui:VisualElement name="popup-advanced-bars" class="popup-advanced-bars" />
+            </ui:Foldout>
+        </ui:ScrollView>
 
         <ui:VisualElement name="modal-footer" class="modal-footer">
             <ui:Button name="research-popup-confirm-button" text="연구하기" class="popup-footer-button popup-footer-button--confirm" />
             <ui:Button name="research-popup-cancel-button" text="취소" class="popup-footer-button" />
         </ui:VisualElement>
-
-        <!-- 고급 정보 — 기본 접힘(value=false). 감염성/심각성/치사율/약물저항 4종 현재값 vs
-             적용 후 값 막대 비교, ResearchPopupController.BuildAdvancedBars()가 채운다. -->
-        <ui:Foldout name="popup-advanced" text="고급 정보 보기" value="false" class="popup-advanced">
-            <ui:VisualElement name="popup-advanced-bars" class="popup-advanced-bars" />
-        </ui:Foldout>
     </ui:VisualElement>
 </ui:UXML>

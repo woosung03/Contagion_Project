@@ -24,6 +24,12 @@ namespace Contagion.UI
     /// </summary>
     public class ResearchPopupController : TacticalModalController
     {
+        /// <summary>[UI Review Pass 1, 2026-07-22] 팝업 뒤 화면을 어둡게 눌러주는 Scrim.
+        /// TacticalModalController가 modal-root만 토글하므로(공용 베이스 클래스는 수정하지 않음),
+        /// 이 화면 전용으로 Show()/Hide() 오버라이드에서 함께 토글한다.</summary>
+        private VisualElement _modalScrim;
+        private ScrollView _popupScroll;
+
         private Label _popupDescription;
         private Label _popupCost;
         private VisualElement _effectSection;
@@ -46,6 +52,8 @@ namespace Contagion.UI
             base.OnEnable();
 
             var root = GetComponent<UIDocument>().rootVisualElement;
+            _modalScrim = root.Q<VisualElement>("modal-scrim");
+            _popupScroll = root.Q<ScrollView>("popup-scroll");
             _popupDescription = root.Q<Label>("popup-description");
             _popupCost = root.Q<Label>("popup-cost");
             _effectSection = root.Q<VisualElement>("popup-effect-section");
@@ -84,6 +92,8 @@ namespace Contagion.UI
             // 열리게 되더라도 스스로 잠그고 풀도록 방어적으로 별도 사유를 둔다.
             WorldMapInputLock.Lock(WorldMapLockReason.ResearchPopup);
             base.Show(title);
+            if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.Flex;
+            if (_popupScroll != null) _popupScroll.scrollOffset = Vector2.zero; // [P0 UI Fix, 2026-07-23] 이전 노드에서 스크롤한 위치가 남아있지 않도록 항상 최상단에서 시작
 
             _currentNodeId = nodeId;
             if (_popupDescription != null) _popupDescription.text = description;
@@ -95,6 +105,7 @@ namespace Contagion.UI
         public override void Hide()
         {
             WorldMapInputLock.Unlock(WorldMapLockReason.ResearchPopup);
+            if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.None;
             base.Hide();
         }
 

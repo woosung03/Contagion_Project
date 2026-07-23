@@ -1230,6 +1230,7 @@ GameObject:
   - component: {fileID: 245050057}
   - component: {fileID: 245050056}
   - component: {fileID: 245050058}
+  - component: {fileID: 245050059}
   m_Layer: 5
   m_Name: CountryPopupUI
   m_TagString: Untagged
@@ -1285,8 +1286,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 715567c2258f4a04f8e123a3c0ac92c5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.CountryPopupController
+--- !u!114 &245050059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 245050055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass:
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
 --- !u!212 &245124665
 SpriteRenderer:
   serializedVersion: 2
@@ -11381,6 +11402,7 @@ GameObject:
   - component: {fileID: 1190480001}
   - component: {fileID: 1190480000}
   - component: {fileID: 1190480002}
+  - component: {fileID: 1190480003}
   m_Layer: 0
   m_Name: ImportantEventPopupUI
   m_TagString: Untagged
@@ -11436,8 +11458,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31041deb4145ce0459c3a39587af537f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.ImportantEventPopupController
+--- !u!114 &1190480003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1190479999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass:
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
 --- !u!1 &1230783505
 GameObject:
   m_ObjectHideFlags: 0
@@ -12963,6 +13005,7 @@ GameObject:
   - component: {fileID: 6900000002}
   - component: {fileID: 6900000003}
   - component: {fileID: 6900000004}
+  - component: {fileID: 6900000005}
   m_Layer: 5
   m_Name: ResearchPopupUI
   m_TagString: Untagged
@@ -13018,8 +13061,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f566f6569d1dad6499a6348264a57c48, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.ResearchPopupController
+--- !u!114 &6900000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6900000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
+  targetClass:
+  navBarReserveTop: 48
+  showDebugOverlay: 0
+  previewInEditor: 0
+  previewSafeTop: 44
+  previewSafeBottom: 24
+  previewSafeLeft: 0
+  previewSafeRight: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
