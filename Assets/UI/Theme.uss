@@ -83,6 +83,13 @@
     --space-xl: 28px;   /* 36 → 28 */
     --space-xxl: 36px;  /* 44 → 36 */
 
+    /* [UI Review Pass 2, 2026-07-23] Corner Decoration Safe Zone — .corner-cut(13×2px, 45deg
+       회전, top/bottom:5px 오프셋)의 실제 시각적 도달 범위를 덮는 최소 안전 여백. Panel 자체의
+       외곽 padding(화면마다 --space-lg~xxl로 제각각)에 의존하지 않고, 코너컷을 쓰는 모든
+       tactical-panel의 헤더가 이 값 하나만 참조하도록 별도 토큰으로 분리했다 — 화면별 padding이
+       나중에 바뀌어도 Safe Zone 값 자체는 흔들리지 않는다. */
+    --space-corner-safe: 14px;
+
     /* ---- 모서리 반경 ----
        [UI Scale Pass, 2026-07-21] 검토 후 변경하지 않음 — tactical-panel 등 주요 패널/버튼은
        "각짐 원칙"(border-radius:0, 코너컷과 둥근 모서리 충돌 방지)을 이미 전면 적용 중이라 Radius

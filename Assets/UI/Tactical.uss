@@ -23,8 +23,14 @@
    오차) 화면이 깨지지 않는다는 게 이전과의 핵심 차이. 상세 구조는 UpgradeTree.uss/
    CountryStatusPanel.uss/RankingPanel.uss의 root 규칙 참고. */
 
+/* [UI Review Pass 2, 2026-07-23] Corner Decoration Safe Zone 적용 — 헤더는 corner-cut--tl/tr가
+   위치하는 코너와 가장 가까운 Content Layer 요소라, 화면별 외곽 padding에 기대지 않고 이
+   공용 클래스 자체에 좌우/상단 안전 여백을 준다. Badge/Label/Chip 등 헤더 안에 무엇이 들어와도
+   이 여백 덕분에 코너컷과 겹치지 않는다 — 특정 화면 하나만 고치는 방식이 아니라 corner-cut을
+   쓰는 모든 tactical-panel(CountryStatusPanel/CountryPopup/UpgradeTree/RankingPanel/
+   ResearchPopup/ImportantEventPopup/MainMenu/CountrySelect/EndingScreen)에 일괄 적용된다. */
 .tactical-panel__header {
-    padding-bottom: 3px;
+    padding: var(--space-xs) var(--space-corner-safe) 3px;
     margin-bottom: var(--space-xs);
     border-bottom-width: var(--stroke-hairline);
     border-bottom-color: var(--color-grid-line);
@@ -46,10 +52,16 @@
     background-color: var(--color-accent-glow);
 }
 
-.corner-cut--tl { top: 5px; left: -4px; rotate: 45deg; }
-.corner-cut--tr { top: 5px; right: -4px; rotate: -45deg; }
-.corner-cut--bl { bottom: 5px; left: -4px; rotate: -45deg; }
-.corner-cut--br { bottom: 5px; right: -4px; rotate: 45deg; }
+/* [UI Review Pass 1, 2026-07-22] left/right 오프셋을 -4px(패널 자기 테두리보다 4px 더 밖으로
+   튀어나옴) → 0px로 조정. 패널 자체는 화면 가장자리에 그대로 붙어있는 화면(status-box/
+   upgrade-box/ranking-box 등, margin 없음)이 많아, 음수 오프셋이 그대로 물리적 화면 경계(노치/
+   라운드 코너 영역)를 넘어가고 있었다 — Panel 크기·Content Width는 전혀 건드리지 않고, 코너
+   장식이 패널 자기 테두리를 넘어서지 않도록만 조정한다(top/bottom 위치·회전은 기존 시각
+   디자인 그대로 유지). */
+.corner-cut--tl { top: 5px; left: 0px; rotate: 45deg; }
+.corner-cut--tr { top: 5px; right: 0px; rotate: -45deg; }
+.corner-cut--bl { bottom: 5px; left: 0px; rotate: -45deg; }
+.corner-cut--br { bottom: 5px; right: 0px; rotate: 45deg; }
 
 /* data-row/data-label/data-value — country-dock__row와 동일 계약(Hud.uss 참고).
    화면 어디서나 "판독 행"으로 재사용. */
