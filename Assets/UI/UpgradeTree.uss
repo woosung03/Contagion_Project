@@ -71,13 +71,20 @@
     -unity-font-style: bold;
 }
 
+/* [UI Review Pass 1, 2026-07-22] "닫기" 텍스트 버튼(80px 사각형)이 CountryPopup/CountryStatusPanel/
+   ResearchPopup의 "✕" 32×32px 아이콘 버튼(DESIGN.md §9 공식 규격)과 스타일이 달라 이 화면만
+   닫기 버튼이라는 것이 즉시 눈에 안 띄었다 — 동일한 아이콘 버튼 규격으로 통일(UXML 텍스트도
+   "닫기"→"✕"로 변경). */
 .upgrade-header__close {
-    width: 80px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    flex-shrink: 0;
     background-color: var(--color-bg-panel);
-    border-width: var(--stroke-hairline); /* [Tactical Design System Refactor Phase 1,
-        2026-07-21] 1px 하드코딩 제거, 값 동일. */
+    border-width: var(--stroke-hairline);
     border-color: var(--color-accent-glow);
     border-radius: 0;
+    color: var(--color-text-primary);
 }
 
 .upgrade-header__ad-bonus {

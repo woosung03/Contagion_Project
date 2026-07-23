@@ -35,13 +35,21 @@ namespace Contagion.UI
         /// 분류 노드는 신규 이름으로 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은
         /// 1개도 바꾸지 않는다.
         /// </summary>
+        /// <summary>[UI Review Pass 2, 2026-07-23] 트리 노드(110px 폭)에서 어절 중간이 잘리는
+        /// 줄바꿈을 막기 위해, 110px 폭에서 한 줄에 담기 어려운(자모 제외 실질 글자수 8자 이상)
+        /// 항목만 어절 경계(공백)에 `\n`을 직접 삽입해 균형 잡힌 2줄로 강제한다. USS는
+        /// word-break/overflow-wrap을 지원하지 않아(참조 위키 codebase/wiki/unity-ui-toolkit/
+        /// css-to-uss-support.md 확인 — CSS 레이아웃만으로는 해결 불가) 데이터 쪽에서 처리한다.
+        /// `white-space: normal`(UpgradeTree.uss .tree-node__label)은 그대로 유지 — 혹시 실기기
+        /// 폰트에서 이 문자열도 넘치면 남은 공백에서 추가로 줄바꿈될 수 있는 안전망 역할.
+        /// 8자 미만 항목은 110px 폭에서 한 줄에 들어갈 것으로 판단해 원문 그대로 둔다.</summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
             // 감염 경로 — 공기 계열
             { "trans_air1", "비말 핵 잔류" },
-            { "trans_air2", "에어로졸 광역 부유" },
-            { "trans_droplet1", "호흡기 상재균 교란" },
-            { "trans_droplet2", "실내 공기 재순환 감염" },
+            { "trans_air2", "에어로졸\n광역 부유" },
+            { "trans_droplet1", "호흡기\n상재균 교란" },
+            { "trans_droplet2", "실내 공기\n재순환 감염" },
             // 감염 경로 — 수인성 계열
             { "trans_water1", "수인성 전파" },
             { "trans_water2", "해상 전파" },
@@ -53,8 +61,8 @@ namespace Contagion.UI
             { "trans_blood1", "수혈 전파" },
             { "trans_blood2", "오염 혈액 유통망" },
             // 감염 경로 — 통합 연구
-            { "trans_advanced1", "교차 매개 네트워크" },
-            { "trans_advanced2", "혈액-매개체 융합 전파" },
+            { "trans_advanced1", "교차 매개\n네트워크" },
+            { "trans_advanced2", "혈액-매개체\n융합 전파" },
             { "trans_global", "전지구적 전파망" },
             // 증상 — 표준형(기침 계열)
             { "sym_cough", "기침" },
@@ -72,13 +80,13 @@ namespace Contagion.UI
             { "sym_hemorrhage", "출혈" },
             { "sym_sepsis", "패혈증" },
             // 증상 — 통합 연구
-            { "sym_multiorgan1", "다발성 장기부전 I" },
-            { "sym_multiorgan2", "다발성 장기부전 II" },
+            { "sym_multiorgan1", "다발성\n장기부전 I" },
+            { "sym_multiorgan2", "다발성\n장기부전 II" },
             { "sym_organfailure", "전신 장기부전" },
             // 적응(구 "능력") — 변이 계열
             { "abl_mutation1", "항원 변이" },
             { "abl_mutation2", "잠복 변이" },
-            { "abl_resist1", "백신 회피 항체 조작" },
+            { "abl_resist1", "백신 회피\n항체 조작" },
             { "abl_resist3", "다중 변종 분화" },
             // 적응 — 은신 계열
             { "abl_stealth1", "면역 회피 단백질" },
