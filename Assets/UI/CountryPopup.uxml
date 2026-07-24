@@ -13,9 +13,9 @@
              전담 덮어쓴다 — 인라인 스타일은 USS보다 항상 우선하므로 popup-root에 Content Padding을
              선언해도 절대 반영되지 않는다(대부분의 기기에서 좌우 safe-area inset이 0이라 콘텐츠가
              화면 가장자리에 붙어 보였던 실제 원인). SafeAreaApplier가 건드리지 않는 이 내부
-             wrapper(popup-content)가 DESIGN.md §11.2 Content Safe Area(--space-xl)를 대신
-             전담한다 — corner-cut 4개는 패널 테두리 자체에 붙는 장식이라 이 wrapper 밖(popup-root
-             직계)에 그대로 둔다. -->
+             wrapper(popup-content)가 DESIGN.md §11.2 Content Safe Area(space-xl 토큰, 28px)를
+             대신 전담한다. corner-cut 4개는 패널 테두리 자체에 붙는 장식이라 이 wrapper 밖
+             (popup-root 직계)에 그대로 둔다. -->
         <ui:VisualElement name="popup-content" class="popup-content">
 
             <!-- Header: 국기 + 국가명 + (대륙 + 붕괴 단계 배지) + 닫기 버튼.
