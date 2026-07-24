@@ -168,9 +168,20 @@
     white-space: normal;
 }
 
+/* [Locked Node Occlusion Fix, 2026-07-24] 원인: .tree-node의 기본 background-color가
+   --color-bg-panel(alpha 0.95)인데, 여기 opacity:0.5가 엘리먼트 전체(배경+테두리+라벨)에 곱연산으로
+   더 걸려 실질 알파가 0.95*0.5≈0.475까지 떨어졌다 — 그 틈으로 뒤쪽 초록 연결선(TreePathElement,
+   해금된 경로)이 노드를 관통해 비쳐 보였다. opacity를 걷어내고 완전히 불투명한 배경(alpha 1,
+   --color-bg-panel-strong — CountryStatusPanel에서 쓰던 토큰을 재사용, 새 색상 추가 없음)으로
+   직접 대체한다. "잠김" 느낌(톤 다운)은 알파 블렌딩 대신 라벨 색 자체를 낮춰서 표현 — 이러면
+   opacity로 인한 반투명 부작용 없이 시각적으로 동일한 "비활성" 인상을 준다. */
 .tree-node--locked {
+    background-color: var(--color-bg-panel-strong);
     border-color: var(--color-text-tertiary);
-    opacity: 0.5;
+}
+
+.tree-node--locked .tree-node__label {
+    color: var(--color-text-tertiary);
 }
 
 .tree-node--available {
