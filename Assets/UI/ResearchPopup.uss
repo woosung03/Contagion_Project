@@ -17,9 +17,13 @@
     width: 340px;
     margin-left: -170px;
     background-color: var(--color-bg-panel);
-    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 기존 --space-lg(22px)는 권장 Padding 범위
-       (24~32px) 미달이라 답답한 인상의 원인 중 하나였다. --space-xl(28px)로 확대. */
-    padding: var(--space-xl);
+    /* [Content Safe Area Fix, 2026-07-25] 이 요소(.popup-root)는 SafeAreaApplier(targetClass
+       popup-root, GamePlay.unity ResearchPopupUI GameObject)가 매 프레임 실제 safe-area 인셋을
+       계산해 padding을 인라인 스타일로 덮어쓴다. 인라인 스타일은 어떤 USS 규칙보다도 항상
+       우선하므로, 여기서 padding을 선언해도 반영되지 않는다(CountryPopup에서 확인된 것과 동일한
+       원인 — DevLog/DESIGN.md 11.2절 Content Safe Area 참고). 디자인 시스템 Content Padding은
+       이제 SafeAreaApplier가 건드리지 않는 내부 wrapper `.popup-content`(아래)가 전담한다 — 이
+       요소는 의도적으로 padding을 선언하지 않는다. */
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
     /* [Regression Fix, 2026-07-23] P0 UI Fix(2026-07-23, 커밋 77a57bd)가 여기 max-height:60% +
@@ -33,6 +37,14 @@
        동일하게 max-height만 안전장치로 남긴다(스크롤 없이 콘텐츠 높이만큼 자연 확장, 값도
        CountryPopup과 동일한 68%로 통일). */
     max-height: 68%;
+}
+
+/* [Content Safe Area Fix, 2026-07-25] popup-root가 SafeAreaApplier 전용이 되면서, 디자인
+   시스템 Content Padding(DESIGN.md 11.2절)은 이 내부 wrapper가 전담한다. corner-cut 4개는
+   패널 테두리 장식이라 이 wrapper 밖(popup-root 직계)에 남아있고, absolute 위치 기준(padding
+   box 원점)은 padding 값과 무관하게 border-width로만 결정되므로 이 변경으로 흔들리지 않는다. */
+.popup-content {
+    padding: var(--space-xl);
 }
 
 /* [UI Review Pass 1, 2026-07-22] 팝업 뒤 전체 화면을 어둡게 눌러 Focus를 팝업에 집중시키는

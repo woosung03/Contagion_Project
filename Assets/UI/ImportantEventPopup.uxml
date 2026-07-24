@@ -15,14 +15,24 @@
         <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
 
-        <ui:VisualElement class="tactical-panel__header">
-            <ui:Label name="modal-title" text="" class="tactical-panel__title" />
-        </ui:VisualElement>
+        <!-- [Content Safe Area Fix, 2026-07-25] popup-root 자신은 SafeAreaApplier(targetClass
+             popup-root, GamePlay.unity ImportantEventPopupUI GameObject)가 런타임에 padding을
+             인라인 스타일로 전담 덮어쓴다. 인라인 스타일은 USS보다 항상 우선하므로 popup-root에
+             Content Padding을 선언해도 반영되지 않는다 — CountryPopup에서 확인된 것과 동일한
+             구조적 원인. SafeAreaApplier가 건드리지 않는 이 내부 wrapper(popup-content)가 Content
+             Safe Area를 대신 전담한다. corner-cut 4개는 패널 테두리 장식이라 이 wrapper 밖
+             (popup-root 직계)에 그대로 둔다. -->
+        <ui:VisualElement name="popup-content" class="popup-content">
 
-        <ui:Label name="popup-description" text="" class="popup-description" />
+            <ui:VisualElement class="tactical-panel__header">
+                <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+            </ui:VisualElement>
 
-        <ui:VisualElement name="modal-footer" class="modal-footer">
-            <ui:Button name="important-event-confirm-button" text="확인" class="popup-footer-button popup-footer-button--confirm" />
+            <ui:Label name="popup-description" text="" class="popup-description" />
+
+            <ui:VisualElement name="modal-footer" class="modal-footer">
+                <ui:Button name="important-event-confirm-button" text="확인" class="popup-footer-button popup-footer-button--confirm" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -12,9 +12,24 @@
     width: 320px;
     margin-left: -160px;
     background-color: var(--color-bg-panel);
-    padding: var(--space-lg);
+    /* [Content Safe Area Fix, 2026-07-25] 이 요소(.popup-root)는 SafeAreaApplier(targetClass
+       popup-root, GamePlay.unity ImportantEventPopupUI GameObject)가 매 프레임 실제 safe-area
+       인셋을 계산해 padding을 인라인 스타일로 덮어쓴다. 인라인 스타일은 어떤 USS 규칙보다도 항상
+       우선하므로, 여기서 padding을 선언해도 반영되지 않는다(CountryPopup에서 확인된 것과 동일한
+       원인 — DESIGN.md 11.2절 Content Safe Area 참고). 디자인 시스템 Content Padding은 이제
+       SafeAreaApplier가 건드리지 않는 내부 wrapper `.popup-content`(아래)가 전담한다 — 이 요소는
+       의도적으로 padding을 선언하지 않는다. 기존 padding 값(space-lg 토큰) 자체는 바꾸지 않고
+       그대로 이전만 했다 — 값 정렬(DESIGN.md 11.2절 space-xl)은 이 작업 범위 밖(부록 A TODO). */
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지 않는다
        (CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지, 기존 규칙 유지). */
+}
+
+/* [Content Safe Area Fix, 2026-07-25] popup-root가 SafeAreaApplier 전용이 되면서, Content
+   Padding은 이 내부 wrapper가 전담한다. corner-cut 4개는 패널 테두리 장식이라 이 wrapper 밖
+   (popup-root 직계)에 남아있고, absolute 위치 기준(padding box 원점)은 padding 값과 무관하게
+   border-width로만 결정되므로 이 변경으로 흔들리지 않는다. */
+.popup-content {
+    padding: var(--space-lg);
 }
 
 .popup-description {
