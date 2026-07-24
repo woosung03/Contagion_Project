@@ -1300,7 +1300,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass: 
+  targetClass: popup-root
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0
@@ -11472,7 +11472,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass: 
+  targetClass: popup-root
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0
@@ -12248,7 +12248,7 @@ MonoBehaviour:
   globalSpreadFactor: 0.65
   visibilityGainRate: 0.08
   drugResistanceCoefficient: 0.02
-  cureProgressCoefficient: 0.0013
+  cureProgressCoefficient: 0.000975
   cureStartChancePerInfected: 0.0005
   cureStartChancePerDeath: 0.0025
   airRouteSpreadChance: 0.05
@@ -13075,7 +13075,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d4f5dd2123461380b5655707e3f472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Contagion.UI.SafeAreaApplier
-  targetClass: 
+  targetClass: popup-root
   navBarReserveTop: 48
   showDebugOverlay: 0
   previewInEditor: 0

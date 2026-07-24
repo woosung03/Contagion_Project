@@ -26,6 +26,7 @@ namespace Contagion.UI
             public string description;
         }
 
+        private VisualElement _modalScrim;
         private Label _description;
         private Button _confirmButton;
 
@@ -42,6 +43,7 @@ namespace Contagion.UI
             _isShowing = false;
 
             var root = GetComponent<UIDocument>().rootVisualElement;
+            _modalScrim = root.Q<VisualElement>("modal-scrim");
             _description = root.Q<Label>("popup-description");
             _confirmButton = root.Q<Button>("important-event-confirm-button");
 
@@ -67,6 +69,16 @@ namespace Contagion.UI
                 SimulationManager.Instance.OnCureResearchStarted -= HandleCureResearchStarted;
                 SimulationManager.Instance.OnCureResearchStarted += HandleCureResearchStarted;
             }
+
+            // [Modal Exclusivity, 2026-07-24] ResearchPopup이 열려 있는 동안엔 이 팝업을 즉시 띄우지
+            // 않고 큐에만 쌓아둔다(Enqueue/TryShowNext 참고) — ResearchPopup이 닫히는 순간 이 이벤트로
+            // 이어서 표시한다. OnEnable/Start 양쪽에서 호출되는 기존 방어적 재구독 패턴과 동일하게
+            // ResearchPopupController.Instance가 아직 null일 수 있는 초기화 순서 문제를 흡수한다.
+            if (ResearchPopupController.Instance != null)
+            {
+                ResearchPopupController.Instance.OnClosed -= HandleResearchPopupClosed;
+                ResearchPopupController.Instance.OnClosed += HandleResearchPopupClosed;
+            }
         }
 
         private void OnDisable()
@@ -79,6 +91,17 @@ namespace Contagion.UI
 
             if (SimulationManager.Instance != null)
                 SimulationManager.Instance.OnCureResearchStarted -= HandleCureResearchStarted;
+
+            if (ResearchPopupController.Instance != null)
+                ResearchPopupController.Instance.OnClosed -= HandleResearchPopupClosed;
+        }
+
+        /// <summary>ResearchPopup이 닫히는 시점에만 호출 — 이미 표시 중이면 아무것도 하지 않는다
+        /// (원칙적으로 ResearchPopup이 열려 있는 동안엔 Scrim이 입력을 막아 이 팝업이 동시에 표시될
+        /// 수 없으므로 항상 !_isShowing이지만, 방어적으로 한 번 더 확인한다).</summary>
+        private void HandleResearchPopupClosed()
+        {
+            if (!_isShowing) ShowNext();
         }
 
         private void HandleFirstCollapse(Country country) =>
@@ -97,9 +120,13 @@ namespace Contagion.UI
             if (!_isShowing) ShowNext();
         }
 
+        /// <summary>[Modal Exclusivity, 2026-07-24] ResearchPopup이 열려 있으면 큐를 비우지 않고
+        /// 그대로 둔다(_isShowing은 false로 유지) — ResearchPopupController.OnClosed 발행 시
+        /// HandleResearchPopupClosed()가 이 메서드를 다시 호출해 이어서 표시한다.</summary>
         private void ShowNext()
         {
-            if (_eventQueue.Count == 0)
+            if (_eventQueue.Count == 0 ||
+                (ResearchPopupController.Instance != null && ResearchPopupController.Instance.IsOpen))
             {
                 _isShowing = false;
                 return;
@@ -110,6 +137,7 @@ namespace Contagion.UI
 
             WorldMapInputLock.Lock(WorldMapLockReason.ImportantEvent);
             base.Show(evt.title);
+            if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.Flex;
             if (_description != null) _description.text = evt.description;
         }
 
@@ -117,6 +145,7 @@ namespace Contagion.UI
         public override void Hide()
         {
             WorldMapInputLock.Unlock(WorldMapLockReason.ImportantEvent);
+            if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.None;
             base.Hide();
             ShowNext();
         }

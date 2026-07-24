@@ -4619,3 +4619,42 @@ detail-panel(선택 브랜치 요약) 3단 구조로는 "이 연구가 어디로
   (`77a57bd`~`a3bb7e3`, 이전 UI 정리 세션)에 tickIntervalSeconds=0.1이 의도치 않게 포함돼 있었던
   것도 이 경합의 결과로 보인다. **씬 파일을 CLI로 편집할 때는 가능하면 Unity Editor를 닫아두거나,
   편집 직후 값이 안정적인지(수 초 간격으로 재확인) 검증할 것.**
+
+## Step 94 — 5분 프로토타입 밸런스 2차 조정: 실측 기반 cureProgressCoefficient 보정 (2026-07-24)
+
+- **배경**: Step 93에서 정적 코드 분석(48개국 funding 합계 역산, "funding이 끝까지 억제된
+  최악의 경우"를 가정한 보수적 상한)으로 `cureProgressCoefficient=0.0013`을 도출했으나 실기 검증은
+  못 했었다. 이번 세션에서 실제 플레이테스트 결과가 나왔다: **인도 발원, 방치 플레이(아무 행동 없음)
+  2회 모두 약 3분(180초) 전후 Game Over** — 목표(4분=240초, ±15초) 대비 약 25% 빠르다. 사용자
+  지시로 이번엔 `cureProgressCoefficient` 단 하나만 조정한다(`globalSpreadFactor`/
+  `visibilityGainRate`/DNA Economy/Upgrade Cost/Government Response/Win Condition/Tick Speed는
+  전부 범위 밖 — 변수 하나씩만 바꿔 영향도를 명확히 추적하기 위함).
+
+- **왜 Step 93 추정보다 빨랐는가(정성적 설명, 재조정의 근거)**: Step 93의 0.0013은 "visibility가
+  PublicHealthEmergency(0.4) 임계값을 못 넘어 funding이 계속 `×0.2`로 억제된다"는 최악의 시나리오
+  기준이었다. 실제로는 발원국(인도, HealthLevel이 한국 같은 High-dev보다 낮은 Mid-dev 추정)에서
+  국내 확산이 예상보다 빨라 visibility 임계값을 상당히 이른 시점에 넘겼고, funding 억제가 게임
+  중반부터 풀리면서 치료제 진행이 가속됐다 — Step 93이 의도적으로 보수적(안전 마진 확보) 상한으로
+  잡았던 값이라는 걸 이번 실측이 확인해준 것.
+
+- **cureProgressCoefficient: 0.0013 → 0.000975** (`SimulationManager.cs:35`, `GamePlay.unity:12251`).
+  계산 근거: `cureProgress`는 매 틱 `cureIncrease × coefficient − 상수 페널티`만큼 증가하는데,
+  coefficient에 선형으로 곱해지는 항이 유일하게 coefficient에 의존하는 항이라 실측값 1개를 기준으로
+  한 비례 보정이 가장 직접적이고 근거가 명확하다(상수 페널티 항 때문에 완벽한 반비례는 아니지만,
+  ±15초 허용 오차 안에서는 1차 근사로 충분하다고 판단):
+  ```
+  new_coefficient = 0.0013 × (실측 180초 / 목표 240초) = 0.0013 × 0.75 = 0.000975
+  ```
+  이 값이 정확히 맞다면 동일 조건(인도, 방치)에서 240초(4분) 근처에 도달해야 한다 — 이 예측 자체가
+  다음 검증 라운드의 가설이다.
+
+- **변경하지 않음(사용자 지시)**: `globalSpreadFactor`(0.65), `visibilityGainRate`(0.08),
+  `tickIntervalSeconds`(1) — Step 93 값 그대로 유지, 이번 세션에 값 변동 없음을 재확인 완료.
+
+- **검증 안 됨 — 다음 세션에서 반드시 확인**: 이 조정은 아직 플레이테스트로 검증되지 않았다.
+  동일 조건(인도 발원, 방치, 최소 3회 반복)으로 재측정해서 (1) Game Over 시간 평균이 240초
+  ±15초 안에 드는지, (2) 치료제 25%/50%/75%/100% 도달 시점을 함께 기록해서 진행 곡선이 선형에
+  가까운지 S자형인지 확인할 것 — 만약 오차가 크면(예: 여전히 ±15초 밖) 이번에 쓴 "단순 비례
+  보정"이 상수 페널티 항의 비중을 과소평가한 것일 수 있으므로, 그때는 페널티 항을 명시적으로
+  분리한 2점(0.0013→180초, 0.000975→실측N초) 보간으로 재조정한다. 목표 달성 후에는 업그레이드
+  포함 "일반 플레이"가 5분 내외인지 별도로 검증(Docs/Archive/QA_Checklist.md 참고).

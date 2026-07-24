@@ -24,3 +24,14 @@
     margin-top: var(--space-md);
     margin-bottom: var(--space-lg);
 }
+
+/* [Modal Consistency Fix, 2026-07-24] ResearchPopup.uss(.modal-scrim)와 동일 정의 — 배경 전체를
+   눌러 Focus를 팝업에 집중시킨다. */
+.modal-scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--color-bg-scrim-strong);
+}

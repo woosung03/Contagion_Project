@@ -40,9 +40,16 @@
 /* ============================================================
    Header — 국기 + (국가명/대륙) + 닫기 버튼, 한 줄 가로 배치.
    ============================================================ */
+/* [QA Regression Fix, 2026-07-24] Task 2에서 .popup-root의 padding을 SafeAreaApplier가 전담하게
+   되면서(targetClass=popup-root), 실기기(특히 Android — SafeAreaApplier.cs의 navBarReserveTop은
+   #if !UNITY_ANDROID라 Android에서는 적용되지 않는다)에서 실제 계산되는 top padding 값을 코드
+   검토만으로는 확정할 수 없다. 콘텐츠가 노치에 가려지는 쪽이 여백 과다보다 훨씬 위험하므로,
+   SafeAreaApplier가 건드리지 않는(타겟은 .popup-root 자신뿐) 이 헤더에 최소한의 정적 버퍼만 추가한다.
+   실기기 확인 후 불필요하면 제거해도 되는 보수적 안전값. */
 .popup-header {
     flex-direction: row;
     align-items: center;
+    padding-top: var(--space-sm);
 }
 
 .popup-flag {

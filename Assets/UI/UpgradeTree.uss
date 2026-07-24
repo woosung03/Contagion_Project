@@ -87,10 +87,13 @@
     color: var(--color-text-primary);
 }
 
+/* [QA Regression Fix, 2026-07-24] height 지정이 없어 콘텐츠 기준 높이(터치 타겟 최소 기준 미달)로
+   렌더링되던 문제 — 같은 헤더의 다른 버튼들과 동일하게 touch-target-min을 명시한다. */
 .upgrade-header__ad-bonus {
     background-color: var(--color-brand-premium);
     color: var(--color-text-primary);
     width: 160px;
+    height: var(--touch-target-min);
     border-width: var(--stroke-hairline); /* [Tactical Design System Refactor Phase 1,
         2026-07-21] 1px 하드코딩 제거, 값 동일. */
     border-color: var(--color-brand-premium);

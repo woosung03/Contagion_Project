@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Contagion.Data;
 using Contagion.Gameplay;
@@ -24,6 +25,19 @@ namespace Contagion.UI
     /// </summary>
     public class ResearchPopupController : TacticalModalController
     {
+        /// <summary>[Modal Exclusivity, 2026-07-24] ImportantEventPopupController가 "지금 ResearchPopup이
+        /// 열려 있는가"를 확인하고 닫힘 시점을 구독하기 위한 최소 노출 — 이 GameObject는 항상
+        /// SetActive(true) 상태를 유지하고 Show()/Hide()만 display를 토글하므로(TacticalModalController
+        /// 참고) OnEnable에서 인스턴스를 등록하면 게임 전체에서 안전하게 1회만 설정된다.</summary>
+        public static ResearchPopupController Instance { get; private set; }
+
+        /// <summary>지금 이 팝업이 화면에 표시 중인지. Show()/Hide()에서만 갱신.</summary>
+        public bool IsOpen { get; private set; }
+
+        /// <summary>Hide() 완료 시점에 발행 — 다른 모달(ImportantEventPopup 등)이 이 팝업이 닫히길
+        /// 기다렸다가 자기 표시를 이어가는 데 쓴다.</summary>
+        public event Action OnClosed;
+
         /// <summary>[UI Review Pass 1, 2026-07-22] 팝업 뒤 화면을 어둡게 눌러주는 Scrim.
         /// TacticalModalController가 modal-root만 토글하므로(공용 베이스 클래스는 수정하지 않음),
         /// 이 화면 전용으로 Show()/Hide() 오버라이드에서 함께 토글한다.</summary>
@@ -50,6 +64,7 @@ namespace Contagion.UI
             // modal-root/modal-title/modal-close/modal-rows/modal-footer 바인딩,
             // modal-close 클릭 -> Hide() 등록, 초기 Hide() 호출까지 여기서 모두 끝난다.
             base.OnEnable();
+            Instance = this;
 
             var root = GetComponent<UIDocument>().rootVisualElement;
             _modalScrim = root.Q<VisualElement>("modal-scrim");
@@ -92,6 +107,7 @@ namespace Contagion.UI
             // 열리게 되더라도 스스로 잠그고 풀도록 방어적으로 별도 사유를 둔다.
             WorldMapInputLock.Lock(WorldMapLockReason.ResearchPopup);
             base.Show(title);
+            IsOpen = true;
             if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.Flex;
             if (_popupScroll != null) _popupScroll.scrollOffset = Vector2.zero; // [P0 UI Fix, 2026-07-23] 이전 노드에서 스크롤한 위치가 남아있지 않도록 항상 최상단에서 시작
 
@@ -107,6 +123,8 @@ namespace Contagion.UI
             WorldMapInputLock.Unlock(WorldMapLockReason.ResearchPopup);
             if (_modalScrim != null) _modalScrim.style.display = DisplayStyle.None;
             base.Hide();
+            IsOpen = false;
+            OnClosed?.Invoke();
         }
 
         /// <summary>비용/효과/주의/버튼 상태/고급 정보를 전부 다시 계산해서 채운다.</summary>

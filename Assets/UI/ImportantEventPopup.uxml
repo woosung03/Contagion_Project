@@ -5,6 +5,10 @@
     <!-- Important Event Popup System — 최소 구조(제목/설명/확인 버튼 1개). ResearchPopup의
          비용/효과/주의/고급정보 콘텐츠 위계는 가져오지 않는다. modal-close(X)/modal-rows는
          이 화면에 없다 — 확인 버튼이 유일한 닫기 경로다(TacticalModalController 계약, 11절). -->
+    <!-- [Modal Consistency Fix, 2026-07-24] modal-scrim — ResearchPopup.uxml과 동일한 패턴(배경을
+         눌러 Focus를 팝업에 집중). modal-root와 형제 관계로 둬야 화면 전체를 덮는다. 표시/숨김은
+         ImportantEventPopupController.ShowNext()/Hide()가 modal-root와 함께 토글한다. -->
+    <ui:VisualElement name="modal-scrim" class="modal-scrim" picking-mode="Ignore" style="display: none;" />
     <ui:VisualElement name="modal-root" class="popup-root tactical-panel">
         <ui:VisualElement class="corner-cut corner-cut--tl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--tr" picking-mode="Ignore" />
