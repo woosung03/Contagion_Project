@@ -17,6 +17,30 @@ namespace Contagion.Managers
     /// </summary>
     public class GameDataBootstrapper : MonoBehaviour
     {
+#if UNITY_EDITOR
+        /// <summary>
+        /// Debug Auto Unlock — 밸런스 반복 테스트용 개발 전용 목록. UNITY_EDITOR 빌드에만 존재하는
+        /// 필드라(클래스 자체가 #if UNITY_EDITOR 블록 안) Android/Release 빌드에는 이 필드도,
+        /// 이걸 읽는 <see cref="ApplyDebugAutoUnlock"/>도 컴파일 결과물에 전혀 포함되지 않는다.
+        /// 새 노드를 추가/제거하고 싶으면 이 배열만 수정하면 된다(다른 파일에 흩어져 있지 않음).
+        /// 값은 UpgradeNode.id(DefaultUpgradeTreeFactory.cs 참고, 예: "trans_air1") — 선행 연구가
+        /// 있는 노드는 그 선행 노드를 먼저 나열해야 한다(ApplyDebugAutoUnlock이 순서대로 처리하며,
+        /// 기존 UpgradeManager.TryUnlock()이 선행조건 미충족 시 그대로 실패시키기 때문).
+        /// </summary>
+        // Debug Auto Unlock
+        // 선행 연구 → 후속 연구 순으로 작성한다.
+        // UpgradeNode.id 값을 사용한다(DefaultUpgradeTreeFactory.cs 참고).
+        // UNITY_EDITOR에서만 적용된다 — 테스트할 노드만 이 배열에 추가/제거하면 된다.
+        private static readonly string[] DebugAutoUnlockNodeIds =
+        {
+            "trans_air1",
+            "trans_air2",
+            "trans_droplet1",
+            "sym_cough",
+            "abl_mutation1",
+        };
+#endif
+
         public static GameDataBootstrapper Instance { get; private set; }
 
         [SerializeField] private CountryDatabase countryDatabase;
@@ -128,8 +152,48 @@ namespace Contagion.Managers
 
             startingCountryId = countryId;
             SeedStartingInfection();
+#if UNITY_EDITOR
+            ApplyDebugAutoUnlock();
+#endif
             GameManager.Instance?.SetPaused(false);
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Debug Auto Unlock — 반복적인 밸런스 테스트에서 매번 같은 초반 연구를 수동으로 찍는 수고를
+        /// 덜기 위한 에디터 전용 기능. 새 치트/내부 데이터 조작이 아니라 기존
+        /// UpgradeManager.AddDna()/TryUnlock()을 순서대로 호출할 뿐이다 — TryUnlock()이 요구하는
+        /// DNA를 AddDna()로 그때그때 정확히 지급한 뒤 TryUnlock()을 부르므로, 선행조건/비용 판정
+        /// (CanUnlock) 등 기존 해금 로직이 실제 플레이와 동일하게 그대로 적용된다(node.isUnlocked를
+        /// 직접 대입하지 않음). SetPaused(false) 직전, 즉 발원 감염을 심은 직후·플레이어가 실제로
+        /// 조작을 시작하기 전에 호출해 자동 해금 화면이 보이지 않는다.
+        /// </summary>
+        private void ApplyDebugAutoUnlock()
+        {
+            var upgrades = UpgradeManager.Instance;
+            if (upgrades == null || DebugAutoUnlockNodeIds.Length == 0) return;
+
+            foreach (var nodeId in DebugAutoUnlockNodeIds)
+            {
+                if (upgrades.IsUnlocked(nodeId)) continue;
+
+                int cost = upgrades.GetEffectiveCost(nodeId);
+                upgrades.AddDna(cost);
+
+                if (!upgrades.TryUnlock(nodeId))
+                {
+                    // TryUnlock()이 실패하면(CanUnlock()이 막아 SpendDna() 자체가 호출되지 않는
+                    // 경로 — id 오타/선행 연구 미해금) 방금 지급한 DNA가 그대로 남는다. TryUnlock()/
+                    // CanUnlock()은 건드리지 않고, 이미 쓰던 AddDna()로 같은 양만큼 되돌려서 테스트용
+                    // DNA가 플레이어에게 남지 않도록 한다.
+                    upgrades.AddDna(-cost);
+                    Debug.LogWarning($"[GameDataBootstrapper] Debug Auto Unlock 실패: '{nodeId}' " +
+                        "(id 오타 또는 선행 연구가 목록에서 먼저 나오지 않음 — DebugAutoUnlockNodeIds 순서 확인). " +
+                        "지급했던 DNA는 환수함.");
+                }
+            }
+        }
+#endif
 
         /// <summary>발원 국가에 초기 감염자를 심는다. 설계 문서 2절 "발원 국가 선택".</summary>
         private void SeedStartingInfection()
