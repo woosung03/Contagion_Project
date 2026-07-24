@@ -32,7 +32,7 @@ namespace Contagion.Managers
         [SerializeField, Tooltip("4.3 cureIncreasePerTick 전체에 곱하는 감쇠 계수 — 국가 수만큼 healthFunding을 " +
             "그냥 합산(Σ)하면 국가가 몇 개만 있어도 첫 틱에 치료제가 100%를 찍어버려서 추가함. 이 값을 낮출수록 " +
             "치료제 완성까지 걸리는 일수(틱 수)가 길어진다 — 원하는 게임 길이에 맞춰 플레이테스트로 조정할 것.")]
-        private float cureProgressCoefficient = 0.0013f;
+        private float cureProgressCoefficient = 0.000975f;
 
         [Header("치료제 연구 '시작' 판정 (절대 임계값 대신 매 틱 확률)")]
         [SerializeField, Tooltip("아직 연구가 시작되지 않은 상태에서, 전 세계 감염자 수(명 단위 아님 — population과 " +
