@@ -17,7 +17,9 @@
     width: 340px;
     margin-left: -170px;
     background-color: var(--color-bg-panel);
-    padding: var(--space-lg);
+    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 기존 --space-lg(22px)는 권장 Padding 범위
+       (24~32px) 미달이라 답답한 인상의 원인 중 하나였다. --space-xl(28px)로 확대. */
+    padding: var(--space-xl);
     /* border-width/color/radius는 tactical-panel(Tactical.uss)이 담당 — 여기서 재정의하지
        않는다(CountrySelect country-row에서 겪은 크로스파일 캐스케이드 충돌 재발 방지). */
     /* [Regression Fix, 2026-07-23] P0 UI Fix(2026-07-23, 커밋 77a57bd)가 여기 max-height:60% +
@@ -45,11 +47,18 @@
     background-color: var(--color-bg-scrim-strong);
 }
 
-/* modal-title(연구 항목명) + modal-close(닫기)를 한 줄에 배치 — CountryPopup.uss와 동일 패턴. */
+/* modal-title(연구 항목명) + modal-close(닫기)를 한 줄에 배치 — CountryPopup.uss와 동일 패턴.
+   [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 공용 tactical-panel__header(Tactical.uss)의
+   padding-bottom(3px)/margin-bottom(4px)은 다른 화면(CountryStatus/CountryPopup/UpgradeTree/
+   Ranking 등)과 공유하는 값이라 그대로 두고, 이 화면(.popup-header)에서만 값을 키운다 —
+   Tactical.uss 로드 순서상 이 파일이 나중에 로드되므로(로드 순서 주석 참고) 이 override만
+   적용되고 다른 화면은 영향받지 않는다. */
 .popup-header {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
 }
 
 /* Button System: Secondary(Docs/DESIGN.md) — background/border/radius를 명시하지 않으면
@@ -74,7 +83,9 @@
     color: var(--color-text-secondary);
     font-size: var(--font-size-sm);
     white-space: normal;
-    margin-bottom: var(--space-sm);
+    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 설명과 비용(popup-cost) 사이 간격을
+       --space-sm(10px)에서 --space-lg(22px)로 확대해 위계 구분을 강화한다. */
+    margin-bottom: var(--space-lg);
     padding-bottom: var(--space-sm);
     border-bottom-width: 1px;
     border-bottom-color: var(--color-grid-line);
@@ -82,10 +93,20 @@
 
 /* 확인/취소 액션 버튼 슬롯 — CountryPopup의 modal-footer는 비어있었지만(닫기가 헤더로
    이동), Research Popup은 "연구하기"라는 확정 액션이 있어 버튼 2개를 가로로 균등폭
-   배치한다. .modal-footer/.popup-footer-button/.popup-footer-button--confirm은 Tactical.uss
-   공용 정의 사용(로컬 재정의 제거, UI Audit 1차 작업). "연구하기"는 --confirm 변형으로
+   배치한다. .popup-footer-button/.popup-footer-button--confirm은 Tactical.uss 공용 정의를
+   그대로 사용(UI Audit 1차 작업) — modal-footer의 margin-top만 아래에서 로컬 override한다
+   (2026-07-24 Layout Audit, DESIGN.md 11.2절). "연구하기"는 --confirm 변형으로
    "취소"와 시각적으로 구분한다. 버튼 텍스트/활성화는 이제 ResearchPopupController가 상태별로
    동적으로 채운다(Commit 4) — UXML의 "연구하기"는 초기값일 뿐. */
+
+/* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — modal-footer(Tactical.uss 공용, 11.1절)의
+   margin-top 기본값(--space-sm, 10px)은 RankingPanel처럼 본문이 짧은 화면 기준이라, 본문
+   섹션(설명/비용/효과/주의)이 많은 이 화면에서는 Footer가 본문에 바짝 붙어 보였다. name
+   선택자(#modal-footer)로 이 화면에서만 override — Tactical.uss 자체는 건드리지 않으므로
+   RankingPanel은 영향받지 않는다. */
+#modal-footer {
+    margin-top: var(--space-lg);
+}
 
 /* ================================================================
    Commit 4 — 정보 위계: DNA 비용 / 효과 / 주의 / 고급 정보(Foldout).
@@ -96,12 +117,16 @@
     color: var(--color-brand-gold);
     font-size: var(--font-size-lg);
     -unity-font-style: bold;
-    margin-bottom: var(--space-sm);
+    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 비용이 독립된 정보 블록으로 보이도록
+       다음 섹션(효과)과의 간격을 --space-sm(10px)에서 --space-md(16px)로 확대. */
+    margin-bottom: var(--space-md);
 }
 
-/* 효과/주의 공용 섹션 — 컨트롤러가 내용이 없으면 이 컨테이너 자체를 display:none 처리한다. */
+/* 효과/주의 공용 섹션 — 컨트롤러가 내용이 없으면 이 컨테이너 자체를 display:none 처리한다.
+   [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 섹션 간 간격을 --space-sm(10px)에서
+   --space-md(16px)로 확대해 효과/주의 섹션이 서로 뭉쳐 보이지 않게 한다. */
 .popup-section {
-    margin-bottom: var(--space-sm);
+    margin-bottom: var(--space-md);
 }
 
 .popup-section__caption {
@@ -109,14 +134,18 @@
     font-size: var(--font-size-caption);
     letter-spacing: var(--tracking-caption);
     -unity-font-style: bold;
-    margin-bottom: var(--space-xs);
+    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 제목과 내용(불릿) 사이 간격을
+       --space-xs(4px)에서 --space-sm(10px)로 확대. */
+    margin-bottom: var(--space-sm);
 }
 
 .popup-bullet {
     color: var(--color-text-secondary);
     font-size: var(--font-size-sm);
     white-space: normal;
-    margin-bottom: 2px;
+    /* [Layout Audit, 2026-07-24] DESIGN.md 11.2절 — 하드코딩 2px를 토큰(--space-xs, 4px)으로
+       교체해 다른 간격 값과 동일한 체계를 따르도록 통일. */
+    margin-bottom: var(--space-xs);
 }
 
 /* 주의 불릿 — severity 축(4색) 재사용 금지(DESIGN.md 2.2절 Don't) 원칙에 따라 severity 색이

@@ -8,87 +8,98 @@
         <ui:VisualElement class="corner-cut corner-cut--bl" picking-mode="Ignore" />
         <ui:VisualElement class="corner-cut corner-cut--br" picking-mode="Ignore" />
 
-        <!-- Header: 국기 + 국가명 + (대륙 + 붕괴 단계 배지) + 닫기 버튼.
-             붕괴 단계는 CountryPopup Expansion Phase 1(2026-07-17) — Country.GetCollapseStage()
-             기존 계산식 재사용, 새 섹션이 아니라 대륙 라벨과 같은 줄(popup-subtitle-row)에 배치해
-             헤더 높이를 늘리지 않는다. -->
-        <ui:VisualElement class="tactical-panel__header popup-header">
-            <ui:Label name="popup-flag" text="" class="popup-flag" />
-            <ui:VisualElement class="popup-header__titles">
-                <ui:Label name="modal-title" text="" class="tactical-panel__title" />
-                <ui:VisualElement class="popup-subtitle-row">
-                    <ui:Label name="popup-continent" text="" class="popup-continent" />
-                    <ui:Label name="popup-collapse-stage" text="-" class="popup-collapse-stage badge-tag" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:Button name="modal-close" text="✕" class="popup-close" />
-        </ui:VisualElement>
+        <!-- [Content Safe Area Fix, 2026-07-24] popup-root 자신은 SafeAreaApplier(targetClass=
+             popup-root, GamePlay.unity)가 런타임에 paddingLeft/Right/Top/Bottom을 인라인 스타일로
+             전담 덮어쓴다 — 인라인 스타일은 USS보다 항상 우선하므로 popup-root에 Content Padding을
+             선언해도 절대 반영되지 않는다(대부분의 기기에서 좌우 safe-area inset이 0이라 콘텐츠가
+             화면 가장자리에 붙어 보였던 실제 원인). SafeAreaApplier가 건드리지 않는 이 내부
+             wrapper(popup-content)가 DESIGN.md §11.2 Content Safe Area(--space-xl)를 대신
+             전담한다 — corner-cut 4개는 패널 테두리 자체에 붙는 장식이라 이 wrapper 밖(popup-root
+             직계)에 그대로 둔다. -->
+        <ui:VisualElement name="popup-content" class="popup-content">
 
-        <!-- Body: quick-stat-grid — [UI Visual Calibration Pass, 2026-07-22] 11개 필드를 2열 그리드에
-             동일 비중으로 나열하면 "데스크톱 관리 프로그램" 스프레드시트처럼 보인다는 피드백(Docs/UI_Image
-             레퍼런스 대비) 반영, CountryStatusPanel의 검증된 hero-stat-tile(2x2 큰 숫자) + data-row(보조
-             목록) 2단 위계를 이 화면에도 이식했다. 이름/구조 변경은 여기까지 — 각 Label의 name= 속성과
-             badge-tag 클래스는 CountryPopupController.cs가 그대로 참조하므로 전부 유지했다(로직/데이터 불변). -->
-        <ui:VisualElement name="quick-stat-grid" class="quick-stat-grid">
-            <!-- Hero tier — 5초 스캔 시 가장 먼저 보는 4개 핵심 숫자, 큰 폰트로 강조 -->
-            <ui:VisualElement class="popup-hero-stat-row">
-                <ui:VisualElement class="popup-hero-stat-cell">
-                    <ui:Label text="인구" class="popup-hero-stat-cell__label" />
-                    <ui:Label name="population" text="-" class="popup-hero-stat-cell__value" />
+            <!-- Header: 국기 + 국가명 + (대륙 + 붕괴 단계 배지) + 닫기 버튼.
+                 붕괴 단계는 CountryPopup Expansion Phase 1(2026-07-17) — Country.GetCollapseStage()
+                 기존 계산식 재사용, 새 섹션이 아니라 대륙 라벨과 같은 줄(popup-subtitle-row)에 배치해
+                 헤더 높이를 늘리지 않는다. -->
+            <ui:VisualElement class="tactical-panel__header popup-header">
+                <ui:Label name="popup-flag" text="" class="popup-flag" />
+                <ui:VisualElement class="popup-header__titles">
+                    <ui:Label name="modal-title" text="" class="tactical-panel__title" />
+                    <ui:VisualElement class="popup-subtitle-row">
+                        <ui:Label name="popup-continent" text="" class="popup-continent" />
+                        <ui:Label name="popup-collapse-stage" text="-" class="popup-collapse-stage badge-tag" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="popup-hero-stat-cell">
-                    <ui:Label text="감염자" class="popup-hero-stat-cell__label" />
-                    <ui:Label name="infected" text="-" class="popup-hero-stat-cell__value" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement class="popup-hero-stat-row">
-                <ui:VisualElement class="popup-hero-stat-cell">
-                    <ui:Label text="사망자" class="popup-hero-stat-cell__label" />
-                    <ui:Label name="dead" text="-" class="popup-hero-stat-cell__value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="popup-hero-stat-cell">
-                    <ui:Label text="감염률" class="popup-hero-stat-cell__label" />
-                    <ui:Label name="infection-rate" text="-" class="popup-hero-stat-cell__value" />
-                </ui:VisualElement>
+                <ui:Button name="modal-close" text="✕" class="popup-close" />
             </ui:VisualElement>
 
-            <!-- Secondary tier — 나머지 7개, Tactical.uss data-row/data-label/data-value(공용 판독행
-                 문법) 재사용. badge-tag 값은 severity 색상 클래스가 그대로 얹힌다(변경 없음). -->
-            <ui:VisualElement name="secondary-stat-list" class="secondary-stat-list">
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="사망률" class="data-label" />
-                    <ui:Label name="death-rate" text="-" class="data-value" />
+            <!-- Body: quick-stat-grid — [UI Visual Calibration Pass, 2026-07-22] 11개 필드를 2열 그리드에
+                 동일 비중으로 나열하면 "데스크톱 관리 프로그램" 스프레드시트처럼 보인다는 피드백(Docs/UI_Image
+                 레퍼런스 대비) 반영, CountryStatusPanel의 검증된 hero-stat-tile(2x2 큰 숫자) + data-row(보조
+                 목록) 2단 위계를 이 화면에도 이식했다. 이름/구조 변경은 여기까지 — 각 Label의 name= 속성과
+                 badge-tag 클래스는 CountryPopupController.cs가 그대로 참조하므로 전부 유지했다(로직/데이터 불변). -->
+            <ui:VisualElement name="quick-stat-grid" class="quick-stat-grid">
+                <!-- Hero tier — 5초 스캔 시 가장 먼저 보는 4개 핵심 숫자, 큰 폰트로 강조 -->
+                <ui:VisualElement class="popup-hero-stat-row">
+                    <ui:VisualElement class="popup-hero-stat-cell">
+                        <ui:Label text="인구" class="popup-hero-stat-cell__label" />
+                        <ui:Label name="population" text="-" class="popup-hero-stat-cell__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="popup-hero-stat-cell">
+                        <ui:Label text="감염자" class="popup-hero-stat-cell__label" />
+                        <ui:Label name="infected" text="-" class="popup-hero-stat-cell__value" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="의료 수준" class="data-label" />
-                    <ui:Label name="medical" text="-" class="data-value badge-tag" />
+                <ui:VisualElement class="popup-hero-stat-row">
+                    <ui:VisualElement class="popup-hero-stat-cell">
+                        <ui:Label text="사망자" class="popup-hero-stat-cell__label" />
+                        <ui:Label name="dead" text="-" class="popup-hero-stat-cell__value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="popup-hero-stat-cell">
+                        <ui:Label text="감염률" class="popup-hero-stat-cell__label" />
+                        <ui:Label name="infection-rate" text="-" class="popup-hero-stat-cell__value" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="의료 부하" class="data-label" />
-                    <ui:Label name="medical-load" text="-" class="data-value badge-tag" />
-                </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="세계 순위" class="data-label" />
-                    <ui:Label name="world-rank" text="-" class="data-value" />
-                </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="공항 상태" class="data-label" />
-                    <ui:Label name="airport" text="-" class="data-value badge-tag" />
-                </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="항만 상태" class="data-label" />
-                    <ui:Label name="seaport" text="-" class="data-value badge-tag" />
-                </ui:VisualElement>
-                <ui:VisualElement class="data-row">
-                    <ui:Label text="국경 상태" class="data-label" />
-                    <ui:Label name="border-status" text="-" class="data-value badge-tag" />
+
+                <!-- Secondary tier — 나머지 7개, Tactical.uss data-row/data-label/data-value(공용 판독행
+                     문법) 재사용. badge-tag 값은 severity 색상 클래스가 그대로 얹힌다(변경 없음). -->
+                <ui:VisualElement name="secondary-stat-list" class="secondary-stat-list">
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="사망률" class="data-label" />
+                        <ui:Label name="death-rate" text="-" class="data-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="의료 수준" class="data-label" />
+                        <ui:Label name="medical" text="-" class="data-value badge-tag" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="의료 부하" class="data-label" />
+                        <ui:Label name="medical-load" text="-" class="data-value badge-tag" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="세계 순위" class="data-label" />
+                        <ui:Label name="world-rank" text="-" class="data-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="공항 상태" class="data-label" />
+                        <ui:Label name="airport" text="-" class="data-value badge-tag" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="항만 상태" class="data-label" />
+                        <ui:Label name="seaport" text="-" class="data-value badge-tag" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="data-row">
+                        <ui:Label text="국경 상태" class="data-label" />
+                        <ui:Label name="border-status" text="-" class="data-value badge-tag" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
 
-        <!-- Footer: 상세보기 버튼 -->
-        <ui:VisualElement name="modal-footer" class="modal-footer">
-            <ui:Button name="modal-detail" text="상세 보기" class="popup-detail-button" />
+            <!-- Footer: 상세보기 버튼 -->
+            <ui:VisualElement name="modal-footer" class="modal-footer">
+                <ui:Button name="modal-detail" text="상세 보기" class="popup-detail-button" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
