@@ -29,19 +29,19 @@ namespace Contagion.UI
     public class UpgradeTreeView : MonoBehaviour
     {
         /// <summary>
-        /// node.id(영문 내부 식별자) → 한국어 표시명. 이번 커밋부터 <see cref="DisplayName"/>을 통해
-        /// 실제 연구 항목 행 렌더링에 쓰인다. 값은 Docs/UpgradeTree_ResearchDatabase_NodeMapping.md의
-        /// "신규 이름" 열을 그대로 반영했다 — "유지" 분류 노드는 기존 이름 그대로, "수정"/"대체"
-        /// 분류 노드는 신규 이름으로 교체했을 뿐, 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은
-        /// 1개도 바꾸지 않는다.
-        /// </summary>
-        /// <summary>node.id(영문 내부 식별자) → 한국어 표시명(줄바꿈 없는 원문). `GetDisplayName()`을
-        /// 통해 트리 노드 라벨뿐 아니라 ResearchPopup 제목(UIManager.cs:380)과 "다음 필요 연구"
-        /// 버튼 텍스트(ResearchPopupController.cs:209)에도 공유되는 공개 API이므로, 여기에는
-        /// 특정 렌더링 컨텍스트(예: 110px 트리 노드)에만 필요한 강제 줄바꿈을 절대 심지 않는다
-        /// — [Regression Fix, 2026-07-23] 한 번 여기 `\n`을 직접 심었다가 그 줄바꿈이 팝업
-        /// 제목/버튼까지 새어 들어가 한국어가 음절 단위로 끊기는 회귀를 낸 적이 있다. 트리 노드
-        /// 전용 줄바꿈은 <see cref="TreeNodeLineBreaks"/>로 분리했다.</summary>
+        /// node.id(영문 내부 식별자) → 한국어 표시명(줄바꿈 문자를 포함하지 않는 원문). 값은
+        /// Docs/UpgradeTree_ResearchDatabase_NodeMapping.md의 "신규 이름" 열을 그대로 반영했다 —
+        /// 효과·비용·선행조건(DefaultUpgradeTreeFactory.cs)은 1개도 바꾸지 않는다. `GetDisplayName()`을
+        /// 통해 트리 노드 라벨(<see cref="CreateTreeNode"/>)뿐 아니라 ResearchPopup 제목
+        /// (UIManager.cs:380)과 "다음 필요 연구" 버튼 텍스트(ResearchPopupController.cs:209)에도
+        /// 공유되는 공개 API이므로, 여기에는 특정 렌더링 컨텍스트(예: 110px 트리 노드)에만 필요한
+        /// 강제 줄바꿈을 절대 심지 않는다 — [Korean Word-Wrap Fix, 2026-07-24] 한 번 여기(또는 트리
+        /// 전용 분리 테이블에) `\n`을 직접 심었다가 그 줄바꿈이 다른 컨텍스트로 새어 들어가는 회귀를
+        /// 두 번 낸 적이 있다. USS가 word-break/overflow-wrap을 지원하지 않는 것은 맞지만(참조 위키
+        /// codebase/wiki/unity-ui-toolkit/css-to-uss-support.md), 현재 노드명은 전부 공백으로 구분된
+        /// 단어 조각이 트리 노드 폭(110px, 실질 텍스트 영역 약 100px) 안에서 한 줄에 들어가는 길이라
+        /// `white-space: normal`(UpgradeTree.uss .tree-node__label)만으로 공백 경계 줄바꿈이 정상
+        /// 동작한다 — 수동 개입 자체가 필요 없다.</summary>
         private static readonly Dictionary<string, string> NodeDisplayNames = new Dictionary<string, string>
         {
             // 감염 경로 — 공기 계열
@@ -242,29 +242,61 @@ namespace Contagion.UI
         private static string DisplayName(string id) =>
             NodeDisplayNames.TryGetValue(id, out var name) ? name : id;
 
-        /// <summary>[UI Review Pass 2, 2026-07-23 → Regression Fix, 2026-07-23] 트리 노드(110px 폭)
-        /// 전용 강제 줄바꿈 — 110px 폭에서 한 줄에 담기 어려운(자모 제외 실질 글자수 8자 이상) 항목만
-        /// 어절 경계(공백)에 `\n`을 직접 삽입해 균형 잡힌 2줄로 강제한다. USS는 word-break/
-        /// overflow-wrap을 지원하지 않아(참조 위키 codebase/wiki/unity-ui-toolkit/
-        /// css-to-uss-support.md 확인 — CSS 레이아웃만으로는 해결 불가) 데이터 쪽에서 처리한다.
-        /// <see cref="NodeDisplayNames"/>(공개 API, ResearchPopup 제목/버튼과 공유)와 분리된
-        /// 이 테이블만 <see cref="CreateTreeNode"/>가 소비한다 — 다른 컨텍스트로 새지 않는다.</summary>
-        private static readonly Dictionary<string, string> TreeNodeLineBreaks = new Dictionary<string, string>
+        // Tree Node Display Name (Presentation Only)
+        // [Korean Line-Break Design, 2026-07-24] Research Tree 노드 카드(고정 110px 폭, 한국어만
+        // 지원)에서만 쓰는 디자이너 지정 줄바꿈 — 자동 줄바꿈(white-space:normal)에 맡기지 않고
+        // 의미 단위 경계에 `\n`을 직접 심는다. 이 테이블은 CreateTreeNode()만 읽는다 — 위
+        // NodeDisplayNames(공개 API, GetDisplayName()을 통해 ResearchPopup 제목/"다음 필요 연구"
+        // 버튼 텍스트와도 공유됨)는 절대 건드리지 않는다. 두 번의 회귀(줄바꿈이 팝업/버튼으로
+        // 새어 들어가 한국어가 이상하게 끊긴 사례)가 전부 이 분리를 어겨서 생겼었다 — Save/Unlock
+        // 로직/UpgradeNode/Node Description/Tooltip/Popup에는 영향이 없다(전부 다른 경로로 조회됨).
+        // 공백이 없는 단일어 노드(기침/발열/폐렴 등, NodeDisplayNames에서 확인)는 의미상 나눌 지점이
+        // 없어 이 표에 없다 — CreateTreeNode()가 없는 항목은 DisplayName()으로 그대로 표시한다.
+        private static readonly Dictionary<string, string> TreeNodeDisplayNames = new Dictionary<string, string>
         {
+            { "trans_air1", "비말 핵\n잔류" },
             { "trans_air2", "에어로졸\n광역 부유" },
             { "trans_droplet1", "호흡기\n상재균 교란" },
             { "trans_droplet2", "실내 공기\n재순환 감염" },
+            { "trans_water1", "수인성\n전파" },
+            { "trans_water2", "해상\n전파" },
+            { "trans_animal1", "인수공통\n전파" },
+            { "trans_animal2", "숙주 전이\n가속" },
+            { "trans_contact1", "조류 매개\n전파" },
+            { "trans_insect1", "설치류\n매개 확산" },
+            { "trans_blood1", "수혈\n전파" },
+            { "trans_blood2", "오염 혈액\n유통망" },
             { "trans_advanced1", "교차 매개\n네트워크" },
             { "trans_advanced2", "혈액-매개체\n융합 전파" },
+            { "trans_global", "전지구적\n전파망" },
+            { "sym_respfailure", "호흡\n부전" },
+            { "sym_lesion", "피부\n병변" },
+            { "sym_necrosis", "만성\n병변" },
             { "sym_multiorgan1", "다발성\n장기부전 I" },
             { "sym_multiorgan2", "다발성\n장기부전 II" },
+            { "sym_organfailure", "전신\n장기부전" },
+            { "abl_mutation1", "항원\n변이" },
+            { "abl_mutation2", "잠복\n변이" },
             { "abl_resist1", "백신 회피\n항체 조작" },
+            { "abl_resist3", "다중 변종\n분화" },
+            { "abl_stealth1", "면역 회피\n단백질" },
+            { "abl_stealth2", "검사\n회피" },
+            { "abl_camouflage1", "숙주 내\n잠행" },
+            { "abl_camouflage2", "면역계\n잠입" },
+            { "abl_hardening1", "약물\n내성" },
+            { "abl_hardening2", "세포벽\n강화" },
+            { "abl_resist2", "격리\n내성" },
+            { "abl_superbug1", "다제내성\n병원체" },
+            { "abl_superbug2", "전천후\n적응" },
+            { "abl_finalevo", "최종\n진화" },
         };
 
-        /// <summary>node.id → 트리 노드 라벨 전용 텍스트(필요 시 줄바꿈 포함). 오버라이드가 없으면
-        /// <see cref="DisplayName"/>(줄바꿈 없는 원문)을 그대로 반환.</summary>
+        /// <summary>node.id → 트리 노드 카드 표시 전용 텍스트(Presentation Only). 위
+        /// <see cref="TreeNodeDisplayNames"/>에 디자이너 지정 줄바꿈이 있으면 그것을, 없으면(공백 없는
+        /// 단일어 등) <see cref="DisplayName"/> 원문을 그대로 반환한다. <see cref="CreateTreeNode"/>
+        /// 전용 — 다른 어떤 호출부에서도 참조하지 않는다.</summary>
         private static string TreeNodeLabel(string id) =>
-            TreeNodeLineBreaks.TryGetValue(id, out var wrapped) ? wrapped : DisplayName(id);
+            TreeNodeDisplayNames.TryGetValue(id, out var wrapped) ? wrapped : DisplayName(id);
 
         /// <summary>node.id → 한국어 표시명 (외부 공개용, V2 계획 커밋 7 — UIManager가
         /// ResearchPopupController.Show()를 채우는 데 사용). <see cref="DisplayName"/>의 얇은

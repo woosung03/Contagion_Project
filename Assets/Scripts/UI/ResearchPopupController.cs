@@ -290,12 +290,23 @@ namespace Contagion.UI
             return track;
         }
 
+        /// <summary>[Korean Text Audit, 2026-07-24] TransmissionRoute Phase 2(airRouteEfficiency/
+        /// waterRouteEfficiency/contactRouteEfficiency/unlockAnimal/unlockInsect/unlockBlood)
+        /// 효과를 가진 노드를 열면 이 switch의 `_ => statName` 폴백에 걸려 영문 필드명이 그대로
+        /// 효과 목록에 노출되고 있었다 — DefaultUpgradeTreeFactory.cs 전체 effect statName을
+        /// 재조사해 누락된 6개를 추가했다(로직/데이터는 그대로, 표시 문자열만 추가).</summary>
         private static string StatLabel(string statName) => statName switch
         {
             "infectivity" => "감염성",
             "severity" => "심각성",
             "lethality" => "치사율",
             "drugResistance" => "약물저항",
+            "airRouteEfficiency" => "항공 전파 효율",
+            "waterRouteEfficiency" => "수인성 전파 효율",
+            "contactRouteEfficiency" => "접촉 전파 효율",
+            "unlockAnimal" => "동물 매개 경로",
+            "unlockInsect" => "곤충 매개 경로",
+            "unlockBlood" => "혈액 매개 경로",
             _ => statName
         };
 
