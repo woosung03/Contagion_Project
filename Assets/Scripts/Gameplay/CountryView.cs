@@ -57,6 +57,13 @@ namespace Contagion.Gameplay
             "걸려 잘려나가고 있었으므로 상한도 450→900으로 같이 올렸다.")]
         private int maxInfectionDots = 900;
         [SerializeField] private Color infectionDotColor = new Color(0.85f, 0.05f, 0.05f, 0.95f);
+        [SerializeField, Tooltip("[Infection Point Death State, 2026-07-24 → Proportional Fix, 2026-07-24] " +
+            "활성 감염점 중 deadRatio(deadCount/population) 비율만큼(앞쪽 인덱스부터)을 이 색(검정)으로, " +
+            "나머지는 위 infectionDotColor(빨강)로 표시한다 — 임계값 기반 전원 전환(on/off) 방식은 " +
+            "'사망률 2%에 점 전체가 새까매져 마치 전멸한 것처럼 보인다'는 문제로 폐기됐다. " +
+            "UpdateVisual()이 매 갱신 시 이미 계산돼 있는 deadRatio를 그대로 사용해 검은 점 개수를 " +
+            "다시 산출한다.")]
+        private Color infectionDotDeadColor = new Color(0.05f, 0.05f, 0.05f, 0.95f);
         [SerializeField, Tooltip("InfectionDotDatabase가 국가별로 계산해둔 점 지름(전체 활성화 시 국가 " +
             "면적의 약 70%를 덮도록 역산한 값)에 곱하는 배율. [Step 42] 1→0.35(Step41의 1→0.5를 거쳐 " +
             "재조정한 최종값). [Step 51] '크기 2배로 늘려줘' 요청으로 0.35→0.7. " +
@@ -162,6 +169,10 @@ namespace Contagion.Gameplay
         private float[] _hotspotCurrentScale;
         private float _hotspotDiameter;
         private Transform[] _dotTransforms;
+        private SpriteRenderer[] _dotRenderers; // [Infection Point Death State, 2026-07-24] _dotTransforms와
+            // 1:1 대응하는 렌더러 캐시 — SetupInfectionDots()에서 이미 만든 dotRenderer를 그대로 저장해두는
+            // 것뿐이라(새 GameObject/컴포넌트 생성 없음), UpdateVisual()이 매번 GetComponent를 호출하지
+            // 않고 색만 바로 바꿀 수 있게 한다.
         private float[] _dotCurrentScale;
         private int _targetActiveDotCount;
         private float _resolvedDotDiameter;
@@ -272,6 +283,7 @@ namespace Contagion.Gameplay
             _resolvedDotDiameter = _baseDotDiameter * infectionDotDiameterScale;
 
             _dotTransforms = new Transform[count];
+            _dotRenderers = new SpriteRenderer[count];
             _dotCurrentScale = new float[count];
 
             if (count == 0) return; // 좌표 없음 — LoadDotData()에서 이미 경고 로그를 남겼으니 조용히 스킵.
@@ -288,6 +300,7 @@ namespace Contagion.Gameplay
                 var dotRenderer = dotObject.AddComponent<SpriteRenderer>();
                 dotRenderer.sprite = dotSprite;
                 dotRenderer.color = infectionDotColor;
+                _dotRenderers[i] = dotRenderer;
                 dotRenderer.sortingOrder = dotSortingOrder;
 
                 _dotTransforms[i] = dotObject.transform;
@@ -601,6 +614,26 @@ namespace Contagion.Gameplay
                 _targetActiveDotCount = infectionRatio <= 0f
                     ? 0
                     : Mathf.Clamp(Mathf.CeilToInt(infectionRatio * _dotTransforms.Length), 1, _dotTransforms.Length);
+            }
+
+            // [Proportional Fix, 2026-07-24] "사망률 2% 이상이면 감염점 전부가 검정"(All-or-Nothing) 방식은
+            // 실제로는 인구의 2%만 죽었는데도 화면엔 표시된 감염점 전원이 죽은 것처럼 보이는 과장이 있었다.
+            // 대신 "활성 감염점 중 deadRatio 비율만큼만" 검게 칠한다 — 감염점 하나하나가 "감염자 개인"이
+            // 아니라 "국가 상태를 나타내는 인디케이터"라는 관점으로, 검정 점 비율 자체가 사망률을 그대로
+            // 반영한다. FloorToInt를 쓰는 이유: RoundToInt/CeilToInt는 사망률이 아주 낮아도(예: 0.4명분)
+            // 최소 1개를 검게 만들어 다시 과장 문제를 재현한다 — Floor는 실제 비율에 못 미치게(과소평가)만
+            // 반올림되므로 "과장되어 보이면 안 된다"는 원래 목적에 부합한다. 활성 개수(_targetActiveDotCount)
+            // 기준으로 계산 — 비활성(아직 안 켜진) 점은 어차피 스케일 0이라 색이 안 보이지만, 다음에 켜질
+            // 때 이미 올바른 색이 입혀져 있도록 전체 배열에 색을 반영해둔다.
+            if (_dotRenderers != null && _dotRenderers.Length > 0)
+            {
+                int activeDotCount = _targetActiveDotCount;
+                int blackDotCount = activeDotCount > 0
+                    ? Mathf.Clamp(Mathf.FloorToInt(deadRatio * activeDotCount), 0, activeDotCount)
+                    : 0;
+
+                for (int i = 0; i < _dotRenderers.Length; i++)
+                    _dotRenderers[i].color = i < blackDotCount ? infectionDotDeadColor : infectionDotColor;
             }
 
             // [Step 54] "이 부류 디버그 로그 지워줘" 요청으로 국가별 목표색 갱신 로그를 제거했다 — 48개국이
