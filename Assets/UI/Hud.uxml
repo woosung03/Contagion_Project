@@ -7,27 +7,35 @@
         <!-- resource-strip: HTML 프로토타입 v2의 상단 Resource Strip. 기존 meta-row(dna-label/
              day-label/phase-label/world-status-label)를 여기로 옮겼다 — 엘리먼트 이름이 그대로라
              HudController.cs는 변경 없이 계속 동작한다. -->
+        <!-- [HUD Content Safe Area Fix, 2026-07-25] resource-strip 자신은 SafeAreaApplier
+             (targetClass resource-strip, GamePlay.unity HUD GameObject)가 런타임에 좌우 padding을
+             인라인 스타일로 전담 덮어쓴다. 인라인 스타일은 USS보다 항상 우선하므로 resource-strip에
+             선언된 Content Padding은 반영되지 않는다 — Information Popup에서 확인된 것과 동일한
+             구조적 원인. SafeAreaApplier가 건드리지 않는 이 내부 wrapper(resource-strip-content)가
+             좌우 Content Safe Area를 대신 전담한다. -->
         <ui:VisualElement name="resource-strip" class="resource-strip">
-            <ui:Label name="day-label" text="0일차" class="stat-label stat-label--day" />
-            <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
-            <!-- [숫자/아이콘 중심 표현] dna-label/phase-label 앞에 색상 칩을 붙이려 Label을
-                 row 컨테이너로 감쌌다 — root.Q<Label>("dna-label")은 트리 깊이와 무관하게
-                 재귀 탐색하므로 HudController.cs는 변경 없음. -->
-            <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
-                <ui:VisualElement class="stat-chip" picking-mode="Ignore" />
-                <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
-            </ui:VisualElement>
-            <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
-            <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
-                <ui:VisualElement class="stat-chip stat-chip--phase" picking-mode="Ignore" />
-                <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />
-            </ui:VisualElement>
-            <ui:VisualElement name="resource-strip-spacer" class="resource-strip__spacer" picking-mode="Ignore" />
-            <!-- [WORLD STATUS 강조] 상시 노출되는 얇은 프레임으로 감싸 "판독창"처럼 보이게
-                 한다. world-status-label 자체의 name/class는 그대로라 HudController.cs 변경 없음. -->
-            <ui:VisualElement name="world-status-frame" class="world-status-frame">
-                <ui:Label text="상태" class="world-status-frame__caption" />
-                <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
+            <ui:VisualElement name="resource-strip-content" class="resource-strip-content">
+                <ui:Label name="day-label" text="0일차" class="stat-label stat-label--day" />
+                <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
+                <!-- [숫자/아이콘 중심 표현] dna-label/phase-label 앞에 색상 칩을 붙이려 Label을
+                     row 컨테이너로 감쌌다 — root.Q<Label>("dna-label")은 트리 깊이와 무관하게
+                     재귀 탐색하므로 HudController.cs는 변경 없음. -->
+                <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
+                    <ui:VisualElement class="stat-chip" picking-mode="Ignore" />
+                    <ui:Label name="dna-label" text="DNA: 0" class="stat-label stat-label--dna" />
+                </ui:VisualElement>
+                <ui:VisualElement class="resource-strip__sep" picking-mode="Ignore" />
+                <ui:VisualElement class="stat-chip-row" picking-mode="Ignore">
+                    <ui:VisualElement class="stat-chip stat-chip--phase" picking-mode="Ignore" />
+                    <ui:Label name="phase-label" text="잠복기" class="stat-label stat-label--phase" />
+                </ui:VisualElement>
+                <ui:VisualElement name="resource-strip-spacer" class="resource-strip__spacer" picking-mode="Ignore" />
+                <!-- [WORLD STATUS 강조] 상시 노출되는 얇은 프레임으로 감싸 "판독창"처럼 보이게
+                     한다. world-status-label 자체의 name/class는 그대로라 HudController.cs 변경 없음. -->
+                <ui:VisualElement name="world-status-frame" class="world-status-frame">
+                    <ui:Label text="상태" class="world-status-frame__caption" />
+                    <ui:Label name="world-status-label" text="" class="stat-label stat-label--mortality" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

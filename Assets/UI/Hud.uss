@@ -28,12 +28,33 @@
        해당 UIDocument들 1→-1) 무슨 화면이 열리든 이 바가 그 위에 그대로 그려진다. spacer 높이와
        "정확히 일치"해야 할 필요가 없어져 margin-top 보정 자체가 불필요해졌다. */
     height: var(--hud-status-bar-height);
-    padding: 0 var(--space-sm);
+    /* [HUD Content Safe Area Fix, 2026-07-25] 이 요소(.resource-strip)는 SafeAreaApplier
+       (targetClass resource-strip, GamePlay.unity HUD GameObject)가 매 프레임 실제 safe-area
+       인셋을 계산해 padding을 인라인 스타일로 덮어쓴다. 인라인 스타일은 어떤 USS 규칙보다도
+       항상 우선하므로, 여기서 좌우 padding을 선언해도 반영되지 않는다 — Information Popup
+       (CountryPopup/ResearchPopup/ImportantEventPopup)에서 확인된 것과 동일한 구조적 원인이라
+       국가명/날짜/DNA/감염자 수 등 상단 HUD 요소가 화면 좌우 가장자리에 붙어 보였다. 기존에
+       여기 있던 `padding: 0 var(--space-sm)` 선언은 죽은 코드였다 — 제거하고, SafeAreaApplier가
+       건드리지 않는 내부 wrapper `.resource-strip-content`(아래)가 좌우 Content Safe Area를
+       전담한다. 높이(height)는 이 변경과 무관하게 그대로 유지 — 12.2절 spacer 정합성에 영향 없음. */
     background-color: var(--color-bg-panel);
     border-left-width: 1px;
     border-right-width: 1px;
     border-bottom-width: 1px;
     border-color: var(--color-accent-glow-soft);
+}
+
+/* [HUD Content Safe Area Fix, 2026-07-25] resource-strip이 SafeAreaApplier 전용이 되면서,
+   좌우 Content Padding은 이 내부 wrapper가 전담한다. 기존 값(space-sm, 10px)은 그대로 이전만
+   했다 — HUD Chrome(7절)은 Information Popup보다 훨씬 밀도 높은 상시 표시 바라, Popup의
+   space-xl(28px)을 그대로 복제하지 않는다(동일한 "철학" 적용이지 동일한 수치 적용이 아님).
+   flex-grow:1로 resource-strip 안에서 남는 폭을 전부 차지해야 resource-strip__spacer의
+   flex-grow:1이 기존과 동일하게 world-status-frame을 오른쪽 끝으로 밀어낸다. */
+.resource-strip-content {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    padding: 0 var(--space-sm);
 }
 
 .resource-strip__sep {
